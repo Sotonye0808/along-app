@@ -15,7 +15,9 @@ const MainPanel = () => {
 				<div className="pl-12">
 					<p className="text-gray-700 mb-4">
 						Lorem ipsum dolor sit amet consectetur. Adipiscing donec turpis eu
-						mattis nisl a placerat.
+						mattis nisl a placerat. Quam vel pellentesque amet ultrices. Dapibus
+						malesuada magna venenatis volutpat nisi risus nec. Elit mi sodales
+						iaculis pellentesque posuere at et.
 					</p>
 					<div className="mb-4">
 						<img
