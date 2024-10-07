@@ -21,10 +21,10 @@ const App = () => {
 
 				{/* Main Panel */}
 				<div className="flex">
-					<div className="w-3/4 mr-4">
+					<div className="w-4/6 mr-4">
 						<MainPanel />
 					</div>
-					<div className="w-1/4">
+					<div className="w-2/6">
 						<SuggestionsPanel />
 					</div>
 				</div>
