@@ -2,7 +2,7 @@ import React from "react";
 
 const Form = () => {
 	return (
-		<div className="p-12 bg-white rounded-md shadow-md flex flex-col items-start space-y-6">
+		<div className="m-12 p-4 bg-gray-100 flex flex-col items-start space-y-6">
 			{/* info text */}
 			<p className="text-sm text-gray-600 mb-6">
 				By signing up, you are consenting to receive product, service and events
@@ -15,7 +15,7 @@ const Form = () => {
 				<input
 					type="text"
 					placeholder="Zion Ayokanmi Alasa"
-					className="mt-2 w-full border rounded-full px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
+					className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
 				/>
 				{/* include the verification icon -- don't have that */}
 			</div>
@@ -26,7 +26,7 @@ const Form = () => {
 				<input
 					type="email"
 					placeholder="zionalasa@gmail.com"
-					className="mt-2 w-full border rounded-full px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
+					className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
 				/>
 			</div>
 
@@ -36,7 +36,7 @@ const Form = () => {
 				<input
 					type="tel"
 					placeholder="+234 8478374980"
-					className="mt-2 w-full border rounded-full px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
+					className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
 				/>
 			</div>
 
@@ -46,20 +46,19 @@ const Form = () => {
 				<input
 					type="password"
 					placeholder="Enter your password"
-					className="mt-2 w-full border rounded-full px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
+					className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
 				/>
 			</div>
+			<div className="w-full pt-8 flex justify-between items-center">
+				{/* create account button */}
+				<button className="w-4/6 bg-black text-white py-2 rounded-full hover:bg-gray-800">
+					Create account
+				</button>
 
-			{/* create account button */}
-			<button className="w-full bg-black text-white py-3 rounded-full hover:bg-gray-800">
-				Create account
-			</button>
-
-			{/* sign up with google */}
-			<div className="text-center w-full">
-				<span className="text-gray-600">Or</span>
-				<button className="ml-2 bg-white border border-gray-300 rounded-full px-6 py-2 hover:bg-gray-100">
-					<span className="text-gray-600">Sign up with Google</span>
+				{/* sign up with google */}
+				<span className="text-gray-600 mx-4">Or</span>
+				<button className="bg-white border border-gray-300 shadow-md rounded-full py-2 px-4 hover:bg-gray-100">
+					<span className="text-gray-600">G</span>
 				</button>
 			</div>
 		</div>
