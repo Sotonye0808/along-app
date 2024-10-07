@@ -2,10 +2,10 @@ import React from "react";
 
 const Navbar = () => {
 	return (
-		<nav className="flex justify-between items-center p-6 bg-white shadow-md">
+		<nav className="flex justify-between items-center py-4 px-20 bg-white shadow-md">
 			{/* along logo */}
 			<div className="text-xl font-semibold">
-				along<span className="text-sm">TM</span>
+				along<sub className="text-sm font-medium">TM</sub>
 			</div>
 
 			{/* nav links */}
@@ -26,7 +26,7 @@ const Navbar = () => {
 				<a href="#" className="text-gray-600 hover:text-black">
 					Contact
 				</a>
-				<button className="bg-black text-white py-2 px-4 rounded-full hover:bg-gray-800">
+				<button className="bg-black text-white p-1 px-4 rounded-full hover:bg-gray-800">
 					Book a demo
 				</button>
 				<div className="text-gray-950">🌐</div>{" "}
