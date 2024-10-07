@@ -9,7 +9,7 @@ const SuggestionsPanel = () => {
 	];
 
 	return (
-		<div className="p-4 bg-white rounded-md shadow-md">
+		<div className="p-4 bg-white rounded-md shadow-md w-full">
 			<h2 className="font-semibold mb-4">Suggestions</h2>
 			<ul className="space-y-4">
 				{suggestions.map((item) => (
