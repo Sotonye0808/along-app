@@ -11,14 +11,15 @@ const SuggestionsPanel = () => {
 	return (
 		<div className="p-4 bg-transparent rounded-md w-full">
 			<h2 className="font-semibold mb-4 text-2xl">Suggestions</h2>
-			<ul className="space-y-4">
+			<ul className="space-y-4 py-2">
 				{suggestions.map((item) => (
 					<li
 						key={item.name}
 						className="flex justify-between text-gray-700 flex-col"
 					>
-						<span className="font-bold text-gray-950">{item.name}</span>
-						<span className="text-gray-500">{item.posts}</span>
+						<span className="text-gray-950">{item.name}</span>
+						<span className="text-gray-500 mb-4">{item.posts}</span>
+						<hr className="border-gray-300" />
 					</li>
 				))}
 			</ul>

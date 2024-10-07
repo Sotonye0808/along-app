@@ -4,7 +4,7 @@ const MainPanel = () => {
 	return (
 		<div className="flex flex-col space-y-6">
 			{/* sample post */}
-			<div className="p-4 bg-white rounded-md shadow-md">
+			<div className="p-4 bg-white rounded-md border">
 				<div className="flex items-center mb-4">
 					<div className="w-8 h-8 rounded-full bg-gray-300 mr-4"></div>
 					<div className="flex items-center">
@@ -22,7 +22,7 @@ const MainPanel = () => {
 					<div className="mb-4">
 						<img
 							src="https://via.placeholder.com/400x200"
-							alt="Post content"
+							alt="post content"
 							className="rounded-md"
 						/>
 					</div>
