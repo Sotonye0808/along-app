@@ -46,13 +46,13 @@ const Navbar = () => {
 					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black">
 						About
 					</a>
-					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black">
+					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black md:hover:text-black">
 						Documentation
 					</a>
 				</div>
 				{/*right wing */}
                 <div className="flex flex-col w-full md:gap-4 md:flex-row md:items-center md:justify-around lg:gap-6">
-					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black md:p-0 w-fit">
+					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black md:p-0 md:w-fit">
 						Contact
 					</a>
 					<button type="button" className="m-3 bg-black text-white p-1 px-4 w-full flex rounded-full hover:bg-gray-800 md:m-0">
