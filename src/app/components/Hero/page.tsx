@@ -10,12 +10,14 @@ const page = () => {
 			<HeroNavbar />
 
 			{/* Main Content */}
-			<div className="flex bg-gray-100 h-screen">
-				{/* Main Section */}
-				<Main />
+			<div className="md:grid grid-cols-2 gap-6 bg-gray-100 px-2">
+				<div className="w-full hidden md:flex">
+					{/* Main Section */}
+					<Main />
+				</div>
 
 				{/* Form Section */}
-				<div className="flex-1 flex items-center justify-center p-12">
+				<div className="w-full flex justify-center md:px-12 md:items-center">
 					<Form />
 				</div>
 			</div>
