@@ -40,19 +40,19 @@ const Navbar = () => {
             <div className={`absolute top-12 left-0 flex-col bg-white w-full py-4 justify-center text-gray-600 text-xs font-semibold md:static md:w-full md:bg-transparent md:flex-row md:flex md:gap-4 md:justify-around md:items-center ${isOpen ? 'flex' : 'hidden'}`}>
 				{/* left wing */}
                 <div className="flex flex-col md:gap-4 md:flex-row md:justify-around lg:gap-6">
-					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black">
+					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black md:hover:bg-transparent">
 						Products
 					</a>
-					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black">
+					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black md:hover:bg-transparent">
 						About
 					</a>
-					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black md:hover:text-black">
+					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black md:hover:bg-transparent">
 						Documentation
 					</a>
 				</div>
 				{/*right wing */}
                 <div className="flex flex-col md:gap-4 md:flex-row md:items-center md:justify-around lg:gap-6">
-					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black md:p-0 md:w-fit">
+					<a href="#" className="hover:text-white py-4 px-2 hover:bg-black w-full md:hover:text-black md:hover:bg-transparent md:p-0 md:w-fit">
 						Contact
 					</a>
 					<button type="button" className="m-3 bg-black text-white p-1 px-4 rounded-full hover:bg-gray-800 md:m-0">
