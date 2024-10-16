@@ -71,58 +71,69 @@ const Form = () => {
             </p>
             <form className="w-full flex flex-col gap-4 md:text-sm" onSubmit={handleSubmit}>
                 <div className="w-full">
-                    <label className="text-gray-700 font-semibold">Username</label>
+                    <label htmlFor="register-email" className="text-gray-700 font-semibold">Username</label>
                     <input
+                        id="register-email"
                         type="text"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                         placeholder="Enter your Username"
+                        autoComplete="username"
                         className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
                     />
                 </div>
                 <div className="w-full">
-                    <label className="text-gray-700 font-semibold">First name</label>
+                    <label htmlFor="register-firstname" className="text-gray-700 font-semibold">First name</label>
                     <input
+                        id="register-firstname"
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         placeholder="Enter your First name"
+                        autoComplete="on"
                         className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
                     />
                 </div>
                 <div className="w-full">
-                    <label className="text-gray-700 font-semibold">Last name</label>
+                    <label htmlFor="register-lastname" className="text-gray-700 font-semibold">Last name</label>
                     <input
+                        id="register-lastname"
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Enter your Last name"
+                        autoComplete="on"
                         className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
                     />
                 </div>
                 <div className="w-full">
-                    <label className="text-gray-700 font-semibold">Email address</label>
+                    <label htmlFor="register-email" className="text-gray-700 font-semibold">Email address</label>
                     <input
+                        id="register-email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your Email address"
+                        autoComplete="email"
                         className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
                     />
                 </div>
                 <div className="w-full">
-                    <label className="text-gray-700 font-semibold">Password</label>
+                    <label htmlFor="register-password" className="text-gray-700 font-semibold">Password</label>
                     <input
+                        id="register-password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your Password"
+                        autoComplete="new-password"
                         className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
                     />
                 </div>
                 <div className="w-full">
-                    <label className="text-gray-700 font-semibold">Confirm Password</label>
+                    <label htmlFor="register-confirmpass" className="text-gray-700 font-semibold">Confirm Password</label>
                     <input
+                        id="register-confirmpass"
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}

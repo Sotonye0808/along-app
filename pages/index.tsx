@@ -15,7 +15,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-1">
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-6">
           <ShareRoute />
@@ -24,9 +24,20 @@ const Dashboard = () => {
 
         {/* Main Panel */}
         <div className="flex">
-          <div className="w-4/6 mr-4">
-            <MainPanel />
-          </div>
+            <div className="md:w-4/6 flex flex-col gap-4 h-almost overflow-y-auto">
+              <div className="md:mr-4">
+              <MainPanel />
+              </div>
+              <div className="md:mr-4">
+              <MainPanel />
+              </div>
+              <div className="md:mr-4">
+              <MainPanel />
+              </div>
+              <div className="md:mr-4">
+              <MainPanel />
+              </div>
+            </div>
           <div className="w-2/6">
             <SuggestionsPanel />
           </div>

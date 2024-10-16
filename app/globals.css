@@ -6,3 +6,17 @@ body {
 	background-color: #f3f4f6;
 }
 
+/* Helper class for suitable value as max-height, used in the index.tsx for main-panel scrollability, and reusable elsewhere as needed */
+.h-almost {
+	max-height: 85vh;
+}
+
+@media (max-width: 767px) {
+	.h-almost {
+		max-height: 90vh;
+	}
+}
+
+
+
+

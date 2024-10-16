@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +13,7 @@ const Navbar = () => {
         <nav className="z-40 flex justify-between items-center py-4 px-6 bg-white shadow-md relative">
             {/* along logo */}
             <div className="text-xl font-bold">
-                along<sub className="text-sm font-medium">TM</sub>
+                <Link href="/">along<sub className="text-sm font-medium">TM</sub></Link>
             </div>
 
             {/* hamburger menu button */}
