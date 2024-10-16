@@ -71,9 +71,9 @@ const Form = () => {
             </p>
             <form className="w-full flex flex-col gap-4 md:text-sm" onSubmit={handleSubmit}>
                 <div className="w-full">
-                    <label htmlFor="register-email" className="text-gray-700 font-semibold">Username</label>
+                    <label htmlFor="register-username" className="text-gray-700 font-semibold">Username</label>
                     <input
-                        id="register-email"
+                        id="register-username"
                         type="text"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
