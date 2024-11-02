@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Cookies from "js-cookie";
-
-const loginEndpoint = "https://along-backend.onrender.com/login";
+import { setTokens } from "../../utils/auth";
+import { useAuth } from "../../contexts/AuthContext";
+import axiosInstance from "../../utils/axiosConfig";
 
 const SignIn = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const { setAuthState } = useAuth();
+
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -25,32 +27,27 @@ const SignIn = () => {
         try {
             const start = performance.now();
 
-            const response = await fetch(loginEndpoint, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(requestBody),
-            });
+            const response = await axiosInstance.post('/login', requestBody);
 
-            const data = await response.json();
             const finish = performance.now();
 
             console.log(`response time = , ${finish-start} ms`) // performance measurement
-            console.log(data) //debugging log
-
-            if (response.ok) {
+            const { data } = response;
+            
+            if (response.status === 200) {
                 setMessage("Login successful! Redirecting...");
-                // Store response values in local storage
+                
+                // Store tokens and user data
+                setTokens(data.accessToken, data.refreshToken);
                 localStorage.setItem("userID", data.id);
                 localStorage.setItem("name", data.name);
-                // Store tokens in cookies
-                Cookies.set("accessToken", data.accessToken, { expires: 1 / 24 }); // 1 hour
-                Cookies.set("refreshToken", data.refreshToken, { expires: 1 }); // 24 hours
+                
+                // Update auth context
+                setAuthState({ id: data.id, name: data.name });
 
                 setTimeout(() => {
                     router.push("/");
-                }, 5000);
+                }, 2000);
             } else {
                 setMessage(data.message || "Login failed. Please try again.");
             }
