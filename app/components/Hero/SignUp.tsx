@@ -50,7 +50,7 @@ const Form = () => {
             if (response.ok) {
                 setMessage(data.message || "Registration successful! Redirecting...");
                 setTimeout(() => {
-                    router.push("/");
+                    router.push("/otp");
                 }, 5000);
             } else {
                 setMessage(data.error || "Registration failed. Please try again.");
@@ -64,7 +64,8 @@ const Form = () => {
     };
 
     return (
-        <div className="m-4 p-1 bg-gray-100 flex flex-col gap-8 items-start">
+        <div className="m-4 p-1 bg-gray-100 flex flex-col gap-2 items-start">
+            <h2 className="text-3xl font-semibold">Sign up</h2>
             <p className="text-sm text-gray-600 my-8 md:text-xs">
                 By signing up, you are consenting to receive product, service and events
                 updates from us. You can unsubscribe at any time.

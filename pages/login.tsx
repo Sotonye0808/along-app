@@ -9,13 +9,13 @@ import { AuthProvider } from '../app/contexts/AuthContext';
 const LoginPage = () => {
   return (
     <AuthProvider>
-    <div>
+    <div className="h-screen overflow-y-hidden p-1 flex flex-col justify-center items-center">
       <HeroNavbar />
-      <div className="md:grid grid-cols-2 gap-2 justify-center items-center h-full bg-gray-100 px-8">
-        <div className="w-full h-full hidden md:flex">
+      <div className="grid grid-rows-3 md:grid-rows-none md:grid-cols-2 gap-2 justify-center items-center h-full w-full bg-gray-100 px-8">
+        <div className="w-full md:h-full flex items-center">
           <Main />
         </div>
-        <div className="w-full flex justify-center md:px-8 md:items-center">
+        <div className="row-span-2 w-full h-full flex justify-start md:justify-center md:px-12 items-center">
           <SignIn />
         </div>
       </div>

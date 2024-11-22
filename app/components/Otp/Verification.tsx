@@ -11,9 +11,9 @@ const VerificationForm = () => {
             <h2 className="font-semibold text-lg">Enter Verification Code</h2>
             <p className="text-sm text-gray-700">We have just sent a verification code to {recepientEmail} and {recepientNumber}.</p>
 
-            <div className="w-full flex justify-between">
+            <div className="w-full flex justify-between " >
                 {code.map((_, index) => (
-                    <input key={index} value={code[index]} type="text" placeholder="0" className="bg-gray-200 rounded-lg py-6 px-2 w-12 text-xl font-semibold text-center" maxLength={1} onChange={(e) => {
+                    <input key={index} value={code[index]} type="text" placeholder="0" autoComplete="one-time-code" className="bg-gray-200 rounded-lg py-6 px-2 w-12 text-xl font-semibold text-center" maxLength={1} onChange={(e) => {
                         const newCode = [...code];
                         const value = e.target.value;
                         if (/^\d?$/.test(value)) {

@@ -5,26 +5,30 @@ import SearchBar from "../app/components/Dashboard/SearchBar";
 import Navbar from "../app/components/Dashboard/Navbar";
 import MainPanel from "../app/components/Dashboard/MainPanel";
 import SuggestionsPanel from "../app/components/Dashboard/SuggestionsPanel";
+import Topbar from "../app/components/Dashboard/MobileTopBar";
 
 const Dashboard = () => {
   return (
     <div className="flex bg-gray-100">
       {/* Sidebar Navigation */}
-      <div className="bg-transparent">
+      <div >
         <Navbar />
       </div>
 
       {/* Main Content */}
       <div className="flex-1 p-1">
         {/* Top Bar */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex md:hidden">
+          <Topbar />
+        </div>
+        <div className="hidden md:flex justify-between items-center mb-6">
           <ShareRoute />
           <SearchBar />
         </div>
 
         {/* Main Panel */}
         <div className="flex">
-            <div className="md:w-4/6 flex flex-col gap-4 h-almost overflow-y-auto">
+            <div className="md:w-4/6 py-2 pb-16 md:pb-2 flex flex-col  h-almost overflow-y-auto">
               <div className="md:mr-4">
               <MainPanel />
               </div>
@@ -38,7 +42,7 @@ const Dashboard = () => {
               <MainPanel />
               </div>
             </div>
-          <div className="w-2/6">
+          <div className="hidden md:flex w-2/6">
             <SuggestionsPanel />
           </div>
         </div>

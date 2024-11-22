@@ -12,7 +12,7 @@ const MainPanel = () => {
 						<span className="text-gray-500 text-sm">3h</span>
 					</div>
 				</div>
-				<div className="pl-12">
+				<div className="md:pl-12">
 					<p className="text-gray-700 mb-4">
 						Lorem ipsum dolor sit amet consectetur. Adipiscing donec turpis eu
 						mattis nisl a placerat. Quam vel pellentesque amet ultrices. Dapibus
@@ -26,19 +26,24 @@ const MainPanel = () => {
 							className="rounded-md"
 						/>
 					</div>
-					<div className="flex space-x-8 text-gray-500">
-						<div className="flex items-center space-x-2">
+					<div className="text-xs md:flex gap-4 grid grid-cols-6 text-gray-500">
+						<div className="flex items-center gap-0.5">
 							<span>
 								👍
 								{/* i don't know what ui kini we're using */}
 							</span>
 							<span>417</span>
 						</div>
-						<div className="flex items-center space-x-2">
+						<div className="flex items-center gap-0.5">
+							<span>👎</span>
+							<span>117</span>
+						</div>
+						
+						<div className="flex items-center gap-0.5">
 							<span>💬</span>
 							<span>417</span>
 						</div>
-						<div className="flex items-center space-x-2">
+						<div className="col-span-3 place-self-end flex items-center gap-0.5">
 							<span>🔗</span>
 							<span>Share</span>
 						</div>

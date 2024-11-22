@@ -60,13 +60,13 @@ const SignIn = () => {
     };
 
     return (
-        <div className="m-4 p-1 bg-gray-100 flex flex-col gap-8 items-start">
-            <p className="text-sm text-gray-600 my-8 md:text-xs">
-                Sign in with an opened account.
+        <div className="w-full h-full p-1 bg-gray-100 flex flex-col gap-2 justify-start md:justify-center items-start">
+            <p className="text-3xl font-semibold my-3">
+                Sign in 
             </p>
-            <form className="w-full flex flex-col gap-4 md:text-sm" onSubmit={handleSubmit}>
-                <div className="w-full">
-                    <label htmlFor="login-email" className="text-gray-700 font-semibold">Email address</label>
+            <form className="w-full flex flex-col gap-3 md:text-sm" onSubmit={handleSubmit}>
+                <div className="w-full relative flex justify-center border rounded-md shadow-md px-4 py-2 text-gray-600 focus-within:outline-none focus-within:border-black">
+                    <label htmlFor="login-email" className="absolute left-2 text-sm text-gray-700 font-semibold">✉</label>
                     <input
                         id="login-email"
                         type="email"
@@ -74,11 +74,11 @@ const SignIn = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="youremail@example.com"
                         autoComplete="email"
-                        className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
+                        className="ml-6 w-full border-none focus:outline-none focus:border-none bg-transparent"
                     />
                 </div>
-                <div className="w-full">
-                    <label htmlFor="login-password" className="text-gray-700 font-semibold">Password</label>
+                <div className="w-full relative flex justify-center border rounded-md shadow-md px-4 py-2 text-gray-600 focus-within:outline-none focus-within:border-black">
+                    <label htmlFor="login-password" className="absolute left-2 text-sm text-gray-700 font-semibold">🔑</label>
                     <input
                         id="login-password"
                         type="password"
@@ -86,17 +86,27 @@ const SignIn = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
                         autoComplete="current-password"
-                        className="mt-2 w-full border rounded-full shadow-md px-4 py-2 text-gray-600 focus:outline-none focus:border-black"
+                        className="ml-6 w-full border-none focus:outline-none focus:border-none bg-transparent"
                     />
                 </div>
-                <div className="w-full pt-8 flex justify-between items-center">
-                    <button type="submit" className="w-4/6 bg-black text-white py-2 rounded-full hover:bg-gray-800" disabled={loading}>
+                <div className="w-1/2 md:w-full my-1 flex justify-between items-center">
+                    <button type="submit" className="w-full bg-green-700 text-white py-2 rounded-lg hover:bg-gray-800" disabled={loading}>
                         {loading ? "Signing in..." : "Sign In"}
                     </button>
-                    <span className="text-gray-600 mx-4">Or</span>
-                    <button type="button" className="bg-white border border-gray-300 shadow-md rounded-full py-2 px-4 hover:bg-gray-100">
-                        <span className="text-gray-600">G</span>
-                    </button>
+                </div>
+                <div className="w-full my-2 flex justify-evenly items-center gap-1 px-4 text-sm">
+                    <hr className="w-full border border-gray-400" />
+                    <span>OR</span>
+                    <hr className="w-full border border-gray-400" />
+                </div>
+                <div id="providers" className="w-full flex justify-between gap-5">
+                        <button type="button" className="w-4/6 bg-white border border-gray-300 shadow-md rounded-lg py-2 px-4 hover:bg-opacity-85">
+                            <span className="text-gray-600">Google</span>
+                        </button>
+                        
+                        <button type="button" className="w-4/6 bg-white border border-gray-300 shadow-md rounded-lg py-2 px-4 hover:bg-opacity-85">
+                            <span className="text-gray-600">Apple</span>
+                        </button>
                 </div>
                 {message && <p className={`mt-4 ${message.toLowerCase().includes('successful') ? 'text-green-600': 'text-red-600'} `}>{message}</p>}
                 <p className="text-gray-600 mt-4">

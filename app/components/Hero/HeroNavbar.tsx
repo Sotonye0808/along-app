@@ -10,7 +10,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="z-40 flex justify-between items-center py-4 px-6 bg-white shadow-md relative">
+        <nav className="w-full z-40 flex justify-between items-center py-4 px-6 bg-white shadow-md relative">
             {/* along logo */}
             <div className="text-xl font-bold">
                 <Link href="/">along<sub className="text-sm font-medium">TM</sub></Link>
