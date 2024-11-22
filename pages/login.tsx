@@ -11,11 +11,11 @@ const LoginPage = () => {
     <AuthProvider>
     <div>
       <HeroNavbar />
-      <div className="md:grid grid-cols-2 gap-6 bg-gray-100 px-2">
-        <div className="w-full hidden md:flex">
+      <div className="md:grid grid-cols-2 gap-2 justify-center items-center h-full bg-gray-100 px-8">
+        <div className="w-full h-full hidden md:flex">
           <Main />
         </div>
-        <div className="w-full flex justify-center md:px-12 md:items-center">
+        <div className="w-full flex justify-center md:px-8 md:items-center">
           <SignIn />
         </div>
       </div>
