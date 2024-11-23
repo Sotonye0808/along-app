@@ -99,7 +99,7 @@ const ShareRoute = () => {
             <div id="route-entries" className="flex flex-col gap-8 max-h-[40vh] md:max-h-[50vh] overflow-y-auto px-2">
               {visibleRoutes.map((route, index) => (
                 <div key={route.id} className="route-entry flex items-center">
-                  <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-600 ml-2 shrink-0"></div>
+                  <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
                   <input
                     type="text"
                     placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
