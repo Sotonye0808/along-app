@@ -25,11 +25,11 @@ body {
 .route-entry:not(:last-child)::before {
   content: '';
   position: absolute;
-  left: 25px;
-  top: 40px;
+  left: 1.6rem;
+  top: 2.4rem;
   width: 1px;
-  height: calc(50% + 1rem);
-  background-color: gray;
+  height: calc(53% + 1rem);
+  background-color: rgb(155, 155, 155);
 }
 
 
