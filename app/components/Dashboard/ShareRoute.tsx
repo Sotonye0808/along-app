@@ -58,11 +58,11 @@ const ShareRoute = () => {
               />
             </div>
             <div className="flex items-center">
-              <div className="w-9 h-8 rounded-full bg-gray-800 ml-2"></div>
+              <div className="w-7 h-6 rounded-full bg-gray-800 ml-3"></div>
               <input
                 type="text"
                 placeholder="Where next?"
-                className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500"
+                className="rounded-lg py-1 px-2 text-sm w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500"
               />
             </div>
           </form>
