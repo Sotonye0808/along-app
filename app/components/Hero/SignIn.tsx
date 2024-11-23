@@ -89,8 +89,8 @@ const SignIn = () => {
                         className="ml-6 w-full border-none focus:outline-none focus:border-none bg-transparent"
                     />
                 </div>
-                <div className="w-1/2 md:w-full my-1 flex justify-between items-center">
-                    <button type="submit" className="w-full bg-green-700 text-white py-2 rounded-lg hover:bg-gray-800" disabled={loading}>
+                <div className="w-full my-1 flex md:justify-between justify-center items-center">
+                    <button type="submit" className="w-1/2 md:w-full bg-green-700 text-white py-2 rounded-lg hover:bg-gray-800" disabled={loading}>
                         {loading ? "Signing in..." : "Sign In"}
                     </button>
                 </div>
