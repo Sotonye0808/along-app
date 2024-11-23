@@ -17,6 +17,21 @@ body {
 	}
 }
 
+/* Route entry connector line */
+.route-entry {
+  position: relative;
+}
+
+.route-entry:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 25px;
+  top: 40px;
+  width: 1px;
+  height: calc(50% + 1rem);
+  background-color: gray;
+}
+
 
 
 

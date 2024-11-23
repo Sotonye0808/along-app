@@ -19,6 +19,7 @@ const Dashboard = () => {
       <div className="flex-1 p-1">
         {/* Top Bar */}
         <div className="flex md:hidden">
+          <ShareRoute />
           <Topbar />
         </div>
         <div className="hidden md:flex justify-between items-center mb-6">
