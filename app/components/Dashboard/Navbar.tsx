@@ -15,21 +15,46 @@ const Navbar = () => {
 						height={32}
 					/>
 				</Link>
-				<Link href="/login" >
-				🗺
+				<Link href="/login" className="">
+					<Image
+						src="/icons/explore.svg"
+						alt="explore icon"
+						width={32}
+						height={32}
+					/>
 				</Link>
 				<Link href="/register" className="hidden md:inline">
-				🔔
+					<Image
+						src="/icons/notifications.svg"
+						alt="notifications icon"
+						width={32}
+						height={32}
+					/>
 				</Link>
-				
-				<Link href="/otp" >
-				📑
+
+				<Link href="/otp" className="">
+					<Image
+						src="/icons/bookmarks.svg"
+						alt="bookmarks icon"
+						width={32}
+						height={32}
+					/>
 				</Link>
-				<Link href="/otp" >
-				🛍
+				<Link href="/otp" className="">
+					<Image
+						src="/icons/marketplace.svg"
+						alt="marketplace icon"
+						width={32}
+						height={32}
+					/>
 				</Link>
 				<Link href="/otp" className="hidden md:inline">
-					👤
+					<Image
+						src="/icons/profile.svg"
+						alt="profile icon"
+						width={32}
+						height={32}
+					/>
 				</Link>
 			</nav>
 		</div>
