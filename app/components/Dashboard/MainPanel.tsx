@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 const MainPanel = () => {
 	return (
@@ -13,7 +14,7 @@ const MainPanel = () => {
 					</div>
 				</div>
 				<div className="md:pl-12">
-					<p className="text-gray-700 mb-4">
+					<p className="text-gray-700 mb-4 text-[16px]">
 						Lorem ipsum dolor sit amet consectetur. Adipiscing donec turpis eu
 						mattis nisl a placerat. Quam vel pellentesque amet ultrices. Dapibus
 						malesuada magna venenatis volutpat nisi risus nec. Elit mi sodales
@@ -21,31 +22,60 @@ const MainPanel = () => {
 					</p>
 					<div className="mb-4">
 						<img
-							src="https://via.placeholder.com/400x200"
+							src="https://via.placeholder.com/400x160"
 							alt="post content"
 							className="rounded-md"
 						/>
 					</div>
 					<div className="text-xs md:flex gap-4 grid grid-cols-6 text-gray-500">
 						<div className="flex items-center gap-0.5">
-							<span>
-								👍
-								{/* i don't know what ui kini we're using */}
+							<span className="text-[12px]">
+								<Image
+									className="mr-0.5"
+									src="/icons/thumbs-up.svg"
+									alt="thumbs-up icon"
+									width={16}
+									height={16}
+								/>
 							</span>
-							<span>417</span>
+							<span className="text-[12px]">417</span>
 						</div>
 						<div className="flex items-center gap-0.5">
-							<span>👎</span>
-							<span>117</span>
+							<span className="text-[12px]">
+								<Image
+									className="mr-0.5"
+									src="/icons/thumbs-down.svg"
+									alt="thumbs-down icon"
+									width={16}
+									height={16}
+								/>
+							</span>
+							<span className="text-[12px]">117</span>
 						</div>
-						
+
 						<div className="flex items-center gap-0.5">
-							<span>💬</span>
-							<span>417</span>
+							<span className="text-[12px]">
+								<Image
+									className="mr-0.5"
+									src="/icons/comments.svg"
+									alt="comments icon"
+									width={16}
+									height={16}
+								/>
+							</span>
+							<span className="text-[12px]">417</span>
 						</div>
 						<div className="col-span-3 place-self-end flex items-center gap-0.5">
-							<span>🔗</span>
-							<span>Share</span>
+							<span className="text-[12px]">
+								<Image
+									className="mr-0.5"
+									src="/icons/share.svg"
+									alt="share icon"
+									width={16}
+									height={16}
+								/>
+							</span>
+							<span className="text-[12px]">Share</span>
 						</div>
 					</div>
 				</div>
