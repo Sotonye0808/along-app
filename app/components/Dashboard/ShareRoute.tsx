@@ -17,7 +17,7 @@ const ShareRoute = () => {
   ]);
 
   // New state for text formatting
-  const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
+  const [activeFormats] = useState<Set<string>>(new Set());
   const [selectedImages, setSelectedImages] = useState<{ file: File; preview: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,7 +93,7 @@ const ShareRoute = () => {
   };
 
   const renderFormattedText = (text: string) => {
-    let formattedText = text
+    const formattedText = text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/_(.*?)_/g, '<em>$1</em>')
       .replace(/__(.*?)__/g, '<u>$1</u>')
@@ -259,6 +259,7 @@ const ShareRoute = () => {
                 <div
                   id="text-editor"
                   className="text-xs text-gray-400 flex justify-center items-center gap-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
                   {visibleRoutes.map((route, index) => (
                     route.selectionStart !== route.selectionEnd && (
                       <div key={`format-${route.id}`} className="flex gap-3">
