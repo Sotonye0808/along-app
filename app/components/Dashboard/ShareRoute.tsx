@@ -22,6 +22,39 @@ const ShareRoute = () => {
     setCreatingPost(!creatingPost);
   };
 
+  const getSelection = () => {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return null;
+    return selection.getRangeAt(0);
+  };
+
+  const applyFormatToSelection = (format: string) => {
+    const selection = getSelection();
+    if (!selection) return;
+
+    const element = selection.commonAncestorContainer.parentElement;
+    if (!element) return;
+
+    const routeId = parseInt(element.getAttribute('data-route-id') || '0');
+    const range = selection.cloneRange();
+    
+    let tag = '';
+    switch (format) {
+      case 'bold': tag = 'strong'; break;
+      case 'italic': tag = 'em'; break;
+      case 'underline': tag = 'u'; break;
+      case 'strikeThrough': tag = 's'; break;
+    }
+
+    const wrapper = document.createElement(tag);
+    range.surroundContents(wrapper);
+    
+    // Update content in state
+    const updatedContent = element.innerHTML;
+    setRawContent(prev => ({ ...prev, [routeId]: updatedContent }));
+    handleRouteChange(routeId, updatedContent, element);
+  };
+
   const handleTextFormat = useCallback((format: string) => {
     setActiveFormats(prev => {
       const newFormats = new Set(prev);
@@ -32,64 +65,18 @@ const ShareRoute = () => {
       }
       return newFormats;
     });
+    applyFormatToSelection(format);
   }, []);
 
-  const applyFormatting = (text: string) => {
-    let formattedText = text;
-    if (activeFormats.has('bold')) formattedText = `**${formattedText}**`;
-    if (activeFormats.has('italic')) formattedText = `*${formattedText}*`;
-    if (activeFormats.has('underline')) formattedText = `__${formattedText}__`;
-    if (activeFormats.has('strikeThrough')) formattedText = `~~${formattedText}~~`;
-    return formattedText;
-  };
-
-  const getCaretPosition = (element: HTMLElement) => {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      return { range, selection };
-    }
-    return null;
-  };
-
-  const setCaretPosition = (element: HTMLElement, savedSelection: { range: Range; selection: Selection } | null) => {
-    if (savedSelection) {
-      const { range, selection } = savedSelection;
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-  };
-
-  const formatText = (text: string): string => {
-    let html = text;
-    if (activeFormats.has('bold')) html = `<strong>${html}</strong>`;
-    if (activeFormats.has('italic')) html = `<em>${html}</em>`;
-    if (activeFormats.has('underline')) html = `<u>${html}</u>`;
-    if (activeFormats.has('strikeThrough')) html = `<s>${html}</s>`;
-    return html;
-  };
-
-  const convertToMarkdown = (html: string): string => {
-    let markdown = html;
-    markdown = markdown.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
-    markdown = markdown.replace(/<em>(.*?)<\/em>/g, '*$1*');
-    markdown = markdown.replace(/<u>(.*?)<\/u>/g, '__$1__');
-    markdown = markdown.replace(/<s>(.*?)<\/s>/g, '~~$1~~');
-    return markdown;
-  };
-
   const handleRouteChange = (id: number, value: string, element: HTMLElement) => {
-    const savedSelection = getCaretPosition(element);
+    const selection = window.getSelection();
+    const range = selection?.getRangeAt(0);
+    const offset = range?.startOffset || 0;
     
-    // Store raw content
     setRawContent(prev => ({ ...prev, [id]: value }));
     
-    // Convert to markdown for storage
-    const markdownValue = convertToMarkdown(value);
-    
-    // Update routes with markdown
     const updatedRoutes = routes.map((route) =>
-      route.id === id ? { ...route, value: markdownValue } : route
+      route.id === id ? { ...route, value } : route
     );
 
     // If a route is emptied, remove all subsequent routes
@@ -120,8 +107,16 @@ const ShareRoute = () => {
       }
     }
 
-    // Restore cursor position after state update
-    setTimeout(() => setCaretPosition(element, savedSelection), 0);
+    // Restore cursor position
+    requestAnimationFrame(() => {
+      if (selection && range) {
+        const newRange = document.createRange();
+        newRange.setStart(element.firstChild || element, offset);
+        newRange.setEnd(element.firstChild || element, offset);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
+    });
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,6 +209,7 @@ const ShareRoute = () => {
                       <div
                         contentEditable
                         suppressContentEditableWarning
+                        data-route-id={route.id}
                         onInput={(e) => handleRouteChange(route.id, e.currentTarget.innerHTML, e.currentTarget)}
                         className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500 min-h-[2.5rem]"
                         data-placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
