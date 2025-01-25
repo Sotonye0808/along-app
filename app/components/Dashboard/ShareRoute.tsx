@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 
@@ -13,6 +14,9 @@ const ShareRoute = () => {
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Add new state for storing raw text content
+  const [rawContent, setRawContent] = useState<{ [key: number]: string }>({});
 
   const toggleCreatingPost = () => {
     setCreatingPost(!creatingPost);
@@ -39,10 +43,53 @@ const ShareRoute = () => {
     return formattedText;
   };
 
-  const handleRouteChange = (id: number, value: string) => {
-    const formattedValue = applyFormatting(value);
+  const getCaretPosition = (element: HTMLElement) => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      return { range, selection };
+    }
+    return null;
+  };
+
+  const setCaretPosition = (element: HTMLElement, savedSelection: { range: Range; selection: Selection } | null) => {
+    if (savedSelection) {
+      const { range, selection } = savedSelection;
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  };
+
+  const formatText = (text: string): string => {
+    let html = text;
+    if (activeFormats.has('bold')) html = `<strong>${html}</strong>`;
+    if (activeFormats.has('italic')) html = `<em>${html}</em>`;
+    if (activeFormats.has('underline')) html = `<u>${html}</u>`;
+    if (activeFormats.has('strikeThrough')) html = `<s>${html}</s>`;
+    return html;
+  };
+
+  const convertToMarkdown = (html: string): string => {
+    let markdown = html;
+    markdown = markdown.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
+    markdown = markdown.replace(/<em>(.*?)<\/em>/g, '*$1*');
+    markdown = markdown.replace(/<u>(.*?)<\/u>/g, '__$1__');
+    markdown = markdown.replace(/<s>(.*?)<\/s>/g, '~~$1~~');
+    return markdown;
+  };
+
+  const handleRouteChange = (id: number, value: string, element: HTMLElement) => {
+    const savedSelection = getCaretPosition(element);
+    
+    // Store raw content
+    setRawContent(prev => ({ ...prev, [id]: value }));
+    
+    // Convert to markdown for storage
+    const markdownValue = convertToMarkdown(value);
+    
+    // Update routes with markdown
     const updatedRoutes = routes.map((route) =>
-      route.id === id ? { ...route, value: formattedValue } : route
+      route.id === id ? { ...route, value: markdownValue } : route
     );
 
     // If a route is emptied, remove all subsequent routes
@@ -72,6 +119,9 @@ const ShareRoute = () => {
         nextIdRef.current += 1;
       }
     }
+
+    // Restore cursor position after state update
+    setTimeout(() => setCaretPosition(element, savedSelection), 0);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +144,7 @@ const ShareRoute = () => {
       const linkMd = `[${text}](${url})`;
       // Insert at current route's cursor position or append to last route
       const lastRoute = routes[routes.length - 1];
-      handleRouteChange(lastRoute.id, lastRoute.value + ' ' + linkMd);
+      handleRouteChange(lastRoute.id, lastRoute.value + ' ' + linkMd, document.createElement('div'));
     }
   };
 
@@ -160,14 +210,22 @@ const ShareRoute = () => {
                 <div key={route.id} className="route-entry flex flex-col">
                   <div className="flex items-center">
                     <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
-                    <div className="w-full">
+                    <div className="w-full relative">
                       <div
                         contentEditable
                         suppressContentEditableWarning
-                        onInput={(e) => handleRouteChange(route.id, e.currentTarget.textContent || '')}
-                        className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500"
-                        dangerouslySetInnerHTML={{ __html: route.value }}
+                        onInput={(e) => handleRouteChange(route.id, e.currentTarget.innerHTML, e.currentTarget)}
+                        className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500 min-h-[2.5rem]"
+                        data-placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
+                        dangerouslySetInnerHTML={{ 
+                          __html: rawContent[route.id] || ''
+                        }}
                       />
+                      {(!rawContent[route.id] || rawContent[route.id].length === 0) && (
+                        <div className="absolute top-2 left-4 text-gray-400 pointer-events-none">
+                          {index === 0 ? "Where we dey go?" : "Where next?"}
+                        </div>
+                      )}
                     </div>
                   </div>
                   {index === routes.length - 1 && images.length > 0 && (
