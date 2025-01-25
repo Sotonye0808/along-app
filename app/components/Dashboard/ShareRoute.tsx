@@ -1,12 +1,19 @@
 import React, { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 
+interface RouteEntry {
+  id: number;
+  value: string;
+  selectionStart: number;
+  selectionEnd: number;
+}
+
 const ShareRoute = () => {
   const [creatingPost, setCreatingPost] = useState(false);
   const nextIdRef = useRef(3); // Start from 3 since we initialize with 1 and 2
-  const [routes, setRoutes] = useState([
-    { id: 1, value: "" },
-    { id: 2, value: "" },
+  const [routes, setRoutes] = useState<RouteEntry[]>([
+    { id: 1, value: "", selectionStart: 0, selectionEnd: 0 },
+    { id: 2, value: "", selectionStart: 0, selectionEnd: 0 },
   ]);
 
   // New state for text formatting
@@ -18,9 +25,42 @@ const ShareRoute = () => {
     setCreatingPost(!creatingPost);
   };
 
-  const handleRouteChange = (id: number, value: string) => {
+  const applyMarkdown = (text: string, command: string, start: number, end: number) => {
+    const markdownSyntax = {
+      bold: '**',
+      italic: '_',
+      underline: '__',
+      strikeThrough: '~~'
+    };
+    
+    const syntax = markdownSyntax[command as keyof typeof markdownSyntax];
+    if (!syntax) return text;
+
+    const before = text.slice(0, start);
+    const selected = text.slice(start, end);
+    const after = text.slice(end);
+
+    return `${before}${syntax}${selected}${syntax}${after}`;
+  };
+
+  const handleTextFormat = useCallback((command: string, routeId: number) => {
+    setRoutes(prev => {
+      return prev.map(route => {
+        if (route.id === routeId) {
+          const { value, selectionStart, selectionEnd } = route;
+          const newValue = applyMarkdown(value, command, selectionStart, selectionEnd);
+          return { ...route, value: newValue };
+        }
+        return route;
+      });
+    });
+  }, []);
+
+  const handleRouteChange = (id: number, value: string, selectionStart: number, selectionEnd: number) => {
     const updatedRoutes = routes.map((route) =>
-      route.id === id ? { ...route, value } : route
+      route.id === id 
+        ? { ...route, value, selectionStart, selectionEnd }
+        : route
     );
 
     // If a route is emptied, remove all subsequent routes
@@ -46,26 +86,21 @@ const ShareRoute = () => {
       );
 
       if (allPreviousHaveValue) {
-        setRoutes([...updatedRoutes, { id: nextIdRef.current, value: "" }]);
+        setRoutes([...updatedRoutes, { id: nextIdRef.current, value: "", selectionStart: 0, selectionEnd: 0 }]);
         nextIdRef.current += 1;
       }
     }
   };
 
-  // Modified text format handler
-  const handleTextFormat = useCallback((command: string) => {
-    setActiveFormats(prev => {
-      const newFormats = new Set(prev);
-      if (newFormats.has(command)) {
-        newFormats.delete(command);
-        document.execCommand(command, false);
-      } else {
-        newFormats.add(command);
-        document.execCommand(command, false);
-      }
-      return newFormats;
-    });
-  }, []);
+  const renderFormattedText = (text: string) => {
+    let formattedText = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/_(.*?)_/g, '<em>$1</em>')
+      .replace(/__(.*?)__/g, '<u>$1</u>')
+      .replace(/~~(.*?)~~/g, '<s>$1</s>');
+
+    return <div dangerouslySetInnerHTML={{ __html: formattedText }} />;
+  };
 
   // Image handling functions
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,18 +197,30 @@ const ShareRoute = () => {
               {visibleRoutes.map((route, index) => (
                 <div key={route.id} className="route-entry flex items-center">
                   <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
-                  <input
-                    type="text"
-                    placeholder={
-                      index === 0 ? "Where we dey go?" : "Where next?"
-                    }
-                    value={route.value}
-                    onChange={(e) =>
-                      handleRouteChange(route.id, e.target.value)
-                    }
-                    maxLength={index === 0 ? 300 : 200}
-                    className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500"
-                  />
+                  <div className="relative w-full">
+                    <input
+                      type="text"
+                      placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
+                      value={route.value}
+                      onChange={(e) => handleRouteChange(
+                        route.id,
+                        e.target.value,
+                        e.target.selectionStart || 0,
+                        e.target.selectionEnd || 0
+                      )}
+                      onSelect={(e) => handleRouteChange(
+                        route.id,
+                        e.currentTarget.value,
+                        e.currentTarget.selectionStart || 0,
+                        e.currentTarget.selectionEnd || 0
+                      )}
+                      maxLength={index === 0 ? 300 : 200}
+                      className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500"
+                    />
+                    <div className="absolute top-0 left-0 pointer-events-none py-2 px-4 w-full">
+                      {renderFormattedText(route.value || "\u00A0")}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -212,26 +259,32 @@ const ShareRoute = () => {
                 <div
                   id="text-editor"
                   className="text-xs text-gray-400 flex justify-center items-center gap-3">
-                  <span
-                    className={`font-bold cursor-pointer hover:text-gray-600 ${activeFormats.has('bold') ? 'text-alonggreen' : ''}`}
-                    onClick={() => handleTextFormat("bold")}>
-                    B
-                  </span>
-                  <span
-                    className={`underline cursor-pointer hover:text-gray-600 ${activeFormats.has('underline') ? 'text-alonggreen' : ''}`}
-                    onClick={() => handleTextFormat("underline")}>
-                    U
-                  </span>
-                  <span
-                    className={`italic cursor-pointer hover:text-gray-600 ${activeFormats.has('italic') ? 'text-alonggreen' : ''}`}
-                    onClick={() => handleTextFormat("italic")}>
-                    I
-                  </span>
-                  <span
-                    className={`line-through cursor-pointer hover:text-gray-600 ${activeFormats.has('strikeThrough') ? 'text-alonggreen' : ''}`}
-                    onClick={() => handleTextFormat("strikeThrough")}>
-                    S
-                  </span>
+                  {visibleRoutes.map((route, index) => (
+                    route.selectionStart !== route.selectionEnd && (
+                      <div key={`format-${route.id}`} className="flex gap-3">
+                        <span
+                          className={`font-bold cursor-pointer hover:text-gray-600 ${activeFormats.has('bold') ? 'text-alonggreen' : ''}`}
+                          onClick={() => handleTextFormat("bold", route.id)}>
+                          B
+                        </span>
+                        <span
+                          className={`underline cursor-pointer hover:text-gray-600 ${activeFormats.has('underline') ? 'text-alonggreen' : ''}`}
+                          onClick={() => handleTextFormat("underline", route.id)}>
+                          U
+                        </span>
+                        <span
+                          className={`italic cursor-pointer hover:text-gray-600 ${activeFormats.has('italic') ? 'text-alonggreen' : ''}`}
+                          onClick={() => handleTextFormat("italic", route.id)}>
+                          I
+                        </span>
+                        <span
+                          className={`line-through cursor-pointer hover:text-gray-600 ${activeFormats.has('strikeThrough') ? 'text-alonggreen' : ''}`}
+                          onClick={() => handleTextFormat("strikeThrough", route.id)}>
+                          S
+                        </span>
+                      </div>
+                    )
+                  ))}
                   <input
                     type="file"
                     ref={fileInputRef}
