@@ -35,29 +35,6 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   background-color: #9ca3af;
 }
 
-/* Add these styles to your existing CSS */
-.route-input[contenteditable]:empty:before {
-  content: attr(data-placeholder);
-  color: #9ca3af;
-  pointer-events: none;
-}
-
-.route-input strong {
-  font-weight: bold;
-}
-
-.route-input em {
-  font-style: italic;
-}
-
-.route-input u {
-  text-decoration: underline;
-}
-
-.route-input s {
-  text-decoration: line-through;
-}
-
 
 
 

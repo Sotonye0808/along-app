@@ -29,38 +29,33 @@ const ShareRoute = () => {
   };
 
   const applyFormatToSelection = (format: string) => {
-    const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) return;
+    const selection = getSelection();
+    if (!selection) return;
 
-    const element = selection.getRangeAt(0).commonAncestorContainer.parentElement?.closest('[contenteditable]');
+    const element = selection.commonAncestorContainer.parentElement;
     if (!element) return;
 
     const routeId = parseInt(element.getAttribute('data-route-id') || '0');
-    document.execCommand(format, false);
+    const range = selection.cloneRange();
+    
+    let tag = '';
+    switch (format) {
+      case 'bold': tag = 'strong'; break;
+      case 'italic': tag = 'em'; break;
+      case 'underline': tag = 'u'; break;
+      case 'strikeThrough': tag = 's'; break;
+    }
+
+    const wrapper = document.createElement(tag);
+    range.surroundContents(wrapper);
     
     // Update content in state
     const updatedContent = element.innerHTML;
     setRawContent(prev => ({ ...prev, [routeId]: updatedContent }));
-    handleRouteChange(routeId, updatedContent, element as HTMLElement);
+    handleRouteChange(routeId, updatedContent, element);
   };
 
   const handleTextFormat = useCallback((format: string) => {
-    let command = format;
-    switch (format) {
-      case 'bold':
-        command = 'bold';
-        break;
-      case 'italic':
-        command = 'italic';
-        break;
-      case 'underline':
-        command = 'underline';
-        break;
-      case 'strikeThrough':
-        command = 'strikethrough';
-        break;
-    }
-    
     setActiveFormats(prev => {
       const newFormats = new Set(prev);
       if (newFormats.has(format)) {
@@ -70,14 +65,13 @@ const ShareRoute = () => {
       }
       return newFormats;
     });
-    
-    applyFormatToSelection(command);
+    applyFormatToSelection(format);
   }, []);
 
   const handleRouteChange = (id: number, value: string, element: HTMLElement) => {
-    // Save current selection
     const selection = window.getSelection();
     const range = selection?.getRangeAt(0);
+    const offset = range?.startOffset || 0;
     
     setRawContent(prev => ({ ...prev, [id]: value }));
     
@@ -113,11 +107,14 @@ const ShareRoute = () => {
       }
     }
 
-    // Restore selection after state update
+    // Restore cursor position
     requestAnimationFrame(() => {
-      if (selection && range && element.isConnected) {
+      if (selection && range) {
+        const newRange = document.createRange();
+        newRange.setStart(element.firstChild || element, offset);
+        newRange.setEnd(element.firstChild || element, offset);
         selection.removeAllRanges();
-        selection.addRange(range);
+        selection.addRange(newRange);
       }
     });
   };
@@ -214,7 +211,7 @@ const ShareRoute = () => {
                         suppressContentEditableWarning
                         data-route-id={route.id}
                         onInput={(e) => handleRouteChange(route.id, e.currentTarget.innerHTML, e.currentTarget)}
-                        className="route-input rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500 min-h-[2.5rem]"
+                        className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500 min-h-[2.5rem]"
                         data-placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
                         dangerouslySetInnerHTML={{ 
                           __html: rawContent[route.id] || ''
@@ -305,30 +302,5 @@ const ShareRoute = () => {
     </div>
   );
 };
-
-// Add this CSS to your global styles
-const styles = `
-  .route-input[contenteditable]:empty:before {
-    content: attr(data-placeholder);
-    color: #9ca3af;
-    pointer-events: none;
-  }
-  
-  .route-input strong {
-    font-weight: bold;
-  }
-  
-  .route-input em {
-    font-style: italic;
-  }
-  
-  .route-input u {
-    text-decoration: underline;
-  }
-  
-  .route-input s {
-    text-decoration: line-through;
-  }
-`;
 
 export default ShareRoute;
