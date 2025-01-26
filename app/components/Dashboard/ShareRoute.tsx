@@ -89,18 +89,14 @@ const ShareRoute = () => {
     return classes.join(" ");
   };
 
-  const handleRouteChange = (id: number, value: string, element: HTMLElement) => {
+  const handleRouteChange = (id: number, value: string, element?: Element) => {
+    const inputElement = inputRefs.current[id];
     const displayElement = displayRefs.current[id];
-    if (!displayElement) return;
 
-    // Update raw content directly from the contentEditable div
-    setRawContent(prev => ({ ...prev, [id]: element.innerHTML }));
-    
-    // Get plain text for route management
-    const plainText = element.textContent || '';
-    const newRoutes = routes.map(route =>
-      route.id === id ? { ...route, value: plainText } : route
-    );
+    if (!inputElement || !displayElement) return;
+
+    const cursorPosition = inputElement.selectionStart ?? 0;
+    const previousValue = routes.find((r) => r.id === id)?.value || "";
 
     // If element is provided, use its innerHTML as formatted content
     if (element) {
@@ -108,9 +104,6 @@ const ShareRoute = () => {
       setRawContent((prev) => ({ ...prev, [id]: updatedContent }));
     } else {
       // Process new text with formatting as before
-      const inputElement = inputRefs.current[id];
-      const previousValue = routes.find(route => route.id === id)?.value || '';
-      const cursorPosition = inputElement?.selectionStart || 0;
       const newText = value.slice(
         Math.min(previousValue.length, cursorPosition)
       );
@@ -157,9 +150,7 @@ const ShareRoute = () => {
     }
 
     // Restore cursor position
-    const cursorPosition = inputRefs.current[id]?.selectionStart || 0;
     requestAnimationFrame(() => {
-      const inputElement = inputRefs.current[id];
       if (inputElement) {
         inputElement.setSelectionRange(cursorPosition, cursorPosition);
         inputElement.focus();
@@ -196,29 +187,6 @@ const ShareRoute = () => {
         lastRoute.value + " " + linkMd,
         document.createElement("div")
       );
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, id: number) => {
-    const element = e.currentTarget;
-    
-    // Handle backspace at start of empty line
-    if (e.key === 'Backspace' && !element.textContent && id !== 1) {
-      e.preventDefault();
-      const prevRoute = routes.find(r => r.id === id - 1);
-      if (prevRoute) {
-        const prevElement = displayRefs.current[prevRoute.id];
-        if (prevElement) {
-          prevElement.focus();
-          // Place cursor at end of previous route
-          const range = document.createRange();
-          range.selectNodeContents(prevElement);
-          range.collapse(false);
-          const selection = window.getSelection();
-          selection?.removeAllRanges();
-          selection?.addRange(range);
-        }
-      }
     }
   };
 
@@ -279,39 +247,51 @@ const ShareRoute = () => {
             </div>
             <div
               id="route-entries"
-              className="flex flex-col relative max-h-[40vh] md:max-h-[50vh] overflow-y-auto px-2">
-              {/* Thread line */}
-              <div className="absolute left-[2.125rem] top-12 bottom-4 w-px bg-gray-200 z-0" />
+              className="flex flex-col gap-8 max-h-[40vh] md:max-h-[50vh] overflow-y-auto px-2">
               {visibleRoutes.map((route, index) => (
-                <div key={route.id} className="route-entry flex flex-col relative z-10">
-                  <div className="flex items-start gap-4">
-                    <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 shrink-0 relative">
-                      {/* Connection dot */}
-                      {index < visibleRoutes.length - 1 && (
-                        <div className="absolute -bottom-4 left-1/2 w-2 h-2 rounded-full bg-gray-200 -translate-x-1/2" />
-                      )}
-                    </div>
+                <div key={route.id} className="route-entry flex flex-col">
+                  <div className="flex items-center">
+                    <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
                     <div className="w-full relative">
+                      <input
+                        ref={(el) => {
+                          inputRefs.current[route.id] = el!;
+                        }}
+                        type="text"
+                        value={
+                          routes.find((r) => r.id === route.id)?.value || ""
+                        }
+                        onChange={(e) =>
+                          handleRouteChange(route.id, e.target.value)
+                        }
+                        onSelect={(e) =>
+                          handleSelectionChange(
+                            route.id,
+                            e.currentTarget.selectionStart ?? 0,
+                            e.currentTarget.selectionEnd ?? 0
+                          )
+                        }
+                        className="absolute inset-0 opacity-0 w-full h-full cursor-text"
+                        title="Route input"
+                        placeholder="Enter route details"
+                      />
                       <div
-                        ref={el => { displayRefs.current[route.id] = el!; }}
-                        contentEditable
-                        onInput={e => handleRouteChange(route.id, e.currentTarget.textContent || '', e.currentTarget)}
-                        onKeyDown={e => handleKeyDown(e, route.id)}
-                        className="rounded-lg py-2 px-4 w-full bg-transparent outline-none focus:border-r focus:border-y focus:border-green-500 min-h-[2.5rem] whitespace-pre-wrap break-words caret-black"
-                        data-placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
-                        dangerouslySetInnerHTML={{ 
-                          __html: rawContent[route.id] || ''
+                        ref={(el) => {
+                          displayRefs.current[route.id] = el!;
+                        }}
+                        className="rounded-lg py-2 px-4 w-full bg-transparent focus-within:outline-none focus-within:border-r focus-within:border-y focus-within:border-green-500 min-h-[2.5rem] whitespace-pre-wrap break-words"
+                        dangerouslySetInnerHTML={{
+                          __html: rawContent[route.id] || "",
                         }}
                       />
-                      {(!rawContent[route.id] || rawContent[route.id].length === 0) && (
+                      {(!rawContent[route.id] ||
+                        rawContent[route.id].length === 0) && (
                         <div className="absolute top-2 left-4 text-gray-400 pointer-events-none">
                           {index === 0 ? "Where we dey go?" : "Where next?"}
                         </div>
                       )}
                     </div>
                   </div>
-                  
-                  {/* Image preview section */}
                   {index === routes.length - 1 && images.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2 ml-11">
                       {images.map((img, i) => (
