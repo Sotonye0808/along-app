@@ -18,6 +18,11 @@ const ShareRoute = () => {
   // Add new state for storing raw text content
   const [rawContent, setRawContent] = useState<{ [key: number]: string }>({});
 
+  // Add state for cursor position and selection
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const inputRefs = useRef<{ [key: number]: HTMLInputElement }>({});
+  const displayRefs = useRef<{ [key: number]: HTMLDivElement }>({});
+
   const toggleCreatingPost = () => {
     setCreatingPost(!creatingPost);
   };
@@ -68,15 +73,32 @@ const ShareRoute = () => {
     applyFormatToSelection(format);
   }, []);
 
-  const handleRouteChange = (id: number, value: string, element: HTMLElement) => {
-    const selection = window.getSelection();
-    const range = selection?.getRangeAt(0);
-    const offset = range?.startOffset || 0;
+  const formatText = (text: string, formats: Set<string>): string => {
+    const formattedText = text;
+    let classes = '';
     
-    setRawContent(prev => ({ ...prev, [id]: value }));
+    if (formats.has('bold')) classes += 'font-bold ';
+    if (formats.has('italic')) classes += 'italic ';
+    if (formats.has('underline')) classes += 'underline ';
+    if (formats.has('strikeThrough')) classes += 'line-through ';
     
-    const updatedRoutes = routes.map((route) =>
-      route.id === id ? { ...route, value } : route
+    return classes ? `<span class="${classes.trim()}">${formattedText}</span>` : formattedText;
+  };
+
+  const handleRouteChange = (id: number, value: string, element?: HTMLElement) => {
+    const displayElement = displayRefs.current[id];
+    const inputElement = inputRefs.current[id];
+    
+    // Format text if there are active formats
+    const formattedValue = formatText(value, activeFormats);
+    
+    // Update raw content for display
+    setRawContent(prev => ({ ...prev, [id]: formattedValue }));
+    
+    // Update routes state with plain text
+    const plainText = value.replace(/<[^>]*>/g, '');
+    const updatedRoutes = routes.map(route =>
+      route.id === id ? { ...route, value: plainText } : route
     );
 
     // If a route is emptied, remove all subsequent routes
@@ -109,14 +131,15 @@ const ShareRoute = () => {
 
     // Restore cursor position
     requestAnimationFrame(() => {
-      if (selection && range) {
-        const newRange = document.createRange();
-        newRange.setStart(element.firstChild || element, offset);
-        newRange.setEnd(element.firstChild || element, offset);
-        selection.removeAllRanges();
-        selection.addRange(newRange);
+      if (inputElement) {
+        inputElement.setSelectionRange(selection.start, selection.end);
+        inputElement.focus();
       }
     });
+  };
+
+  const handleSelectionChange = (id: number, start: number, end: number) => {
+    setSelection({ start, end });
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,13 +229,23 @@ const ShareRoute = () => {
                   <div className="flex items-center">
                     <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
                     <div className="w-full relative">
+                      <input
+                        ref={el => { inputRefs.current[route.id] = el!; }}
+                        type="text"
+                        value={routes.find(r => r.id === route.id)?.value || ''}
+                        onChange={(e) => handleRouteChange(route.id, e.target.value)}
+                        onSelect={(e) => handleSelectionChange(
+                          route.id,
+                          e.currentTarget.selectionStart ?? 0,
+                          e.currentTarget.selectionEnd ?? 0
+                        )}
+                        className="absolute inset-0 opacity-0 w-full h-full cursor-text"
+                        title="Route input"
+                        placeholder="Enter route details"
+                      />
                       <div
-                        contentEditable
-                        suppressContentEditableWarning
-                        data-route-id={route.id}
-                        onInput={(e) => handleRouteChange(route.id, e.currentTarget.innerHTML, e.currentTarget)}
-                        className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500 min-h-[2.5rem]"
-                        data-placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
+                        ref={el => { displayRefs.current[route.id] = el!; }}
+                        className="rounded-lg py-2 px-4 w-full bg-transparent focus-within:outline-none focus-within:border-r focus-within:border-y focus-within:border-green-500 min-h-[2.5rem] whitespace-pre-wrap break-words"
                         dangerouslySetInnerHTML={{ 
                           __html: rawContent[route.id] || ''
                         }}
