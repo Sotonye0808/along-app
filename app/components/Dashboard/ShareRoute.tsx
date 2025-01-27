@@ -94,53 +94,52 @@ const ShareRoute = () => {
 
   const handleTextFormat = (format: string) => {
     const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) {
-      // Only toggle format for future typing if no text is selected
-      setActiveFormats(prev =>
-        prev.includes(format)
-          ? prev.filter(f => f !== format)
-          : [...prev, format]
-      );
-      return;
-    }
+    if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
     const selectedText = range.toString();
 
     if (selectedText) {
-      // Only modify formatting for selected text
+      // Check if selection is already formatted
       const parentSpan = range.commonAncestorContainer.parentElement;
-      if (parentSpan?.tagName === 'SPAN') {
+      if (parentSpan?.tagName === "SPAN") {
         const existingFormats = getFormatFromElement(parentSpan);
         if (existingFormats.includes(format)) {
-          // Remove only this format from the selected text
-          parentSpan.classList.remove(getFormatClasses([format]));
-          if (parentSpan.classList.length === 0) {
-            // If no classes left, unwrap the span
-            const text = parentSpan.textContent || '';
-            const textNode = document.createTextNode(text);
-            parentSpan.parentNode?.replaceChild(textNode, parentSpan);
-          }
+          // Apply opposite format to cancel out existing format
+          const span = document.createElement('span');
+          span.className = getOppositeFormatClasses([format]);
+          range.surroundContents(span);
         } else {
-          // Add new format to existing span
-          parentSpan.classList.add(getFormatClasses([format]));
+          // Add new format to selection
+          const span = document.createElement('span');
+          span.className = getFormatClasses([format]);
+          range.surroundContents(span);
         }
       } else {
         // Create new formatted span
-        const span = document.createElement('span');
+        const span = document.createElement("span");
         span.className = getFormatClasses([format]);
         range.surroundContents(span);
       }
 
       // Update the input value with the modified HTML
       const routeId = parseInt(
-        range.startContainer.parentElement?.closest('[data-route-id]')?.getAttribute('data-route-id') || '0'
+        range.startContainer.parentElement
+          ?.closest("[data-route-id]")
+          ?.getAttribute("data-route-id") || "0"
       );
       const displayDiv = displayRefs.current[routeId];
       if (displayDiv) {
         const newText = displayDiv.innerHTML;
         handleRouteChange(routeId, newText, true);
       }
+    } else {
+      // Toggle format for future typing
+      setActiveFormats((prev) =>
+        prev.includes(format)
+          ? prev.filter((f) => f !== format)
+          : [...prev, format]
+      );
     }
   };
 
@@ -159,55 +158,37 @@ const ShareRoute = () => {
       const newText = value;
       
       if (newText.length > oldText.length) {
-        // Find the last span if it exists
-        const lastSpanMatch = route.content.text.match(/<span[^>]*>[^<]*<\/span>$/);
-        
-        if (lastSpanMatch) {
-          // If there's a formatted span at the end, append to it
-          const spanContent = lastSpanMatch[0].match(/>([^<]*)</)?.[1] || '';
-          const newContent = newText.slice(oldText.length);
-          newValue = route.content.text.slice(0, -lastSpanMatch[0].length) +
-            `<span class="${getFormatClasses(activeFormats)}">${spanContent}${newContent}</span>`;
-        } else {
-          // Create new formatted span for new text
-          const addedText = newText.slice(oldText.length);
-          newValue = route.content.text + 
-            `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`;
-        }
+        // Text was added
+        const addedText = newText.slice(oldText.length);
+        newValue = route.content.text + `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`;
       } else {
-        // Handle deletions while preserving formatting
-        const spans = route.content.text.match(/<span[^>]*>[^<]*<\/span>/g) || [];
-        const plainText = route.content.text.replace(/<[^>]*>/g, '');
-        const deletedCount = plainText.length - newText.length;
+        // Text was removed
+        const remainingText = newText;
+        // Find all formatted spans and reconstruct with remaining text
+        const spans = route.content.text.match(/<span class="[^"]*">[^<]*<\/span>/g) || [];
+        // eslint-disable-next-line prefer-const
+        let plainText = route.content.text.replace(/<[^>]*>/g, '');
         
-        if (spans.length > 0) {
-          // Reconstruct the formatted text with deletions
-          let result = '';
-          let textPos = 0;
-          
-          spans.forEach(span => {
-            const spanText = span.match(/>([^<]*)</)?.[1] || '';
-            const spanPos = plainText.indexOf(spanText, textPos);
-            
-            if (spanPos >= 0) {
-              // Add any unformatted text before span
-              const beforeSpan = newText.slice(textPos, spanPos);
-              result += beforeSpan;
-              
-              // Add the span with possibly truncated text
-              const spanEndPos = spanPos + spanText.length;
-              const remainingText = newText.slice(spanPos, spanEndPos);
-              if (remainingText) {
-                result += span.replace(spanText, remainingText);
-              }
-              
-              textPos = spanEndPos;
+        newValue = '';
+        let currentPos = 0;
+        
+        spans.forEach(span => {
+          const spanText = span.match(/>([^<]*)</)?.[1] || '';
+          const spanPos = plainText.indexOf(spanText);
+          if (spanPos >= 0 && currentPos <= spanPos && spanPos + spanText.length <= remainingText.length) {
+            // Add any unformatted text before this span
+            if (spanPos > currentPos) {
+              newValue += remainingText.slice(currentPos, spanPos);
             }
-          });
-          
-          // Add any remaining unformatted text
-          result += newText.slice(textPos);
-          newValue = result;
+            // Add the span if its text is still present
+            newValue += span;
+            currentPos = spanPos + spanText.length;
+          }
+        });
+        
+        // Add any remaining unformatted text
+        if (currentPos < remainingText.length) {
+          newValue += remainingText.slice(currentPos);
         }
       }
     }
