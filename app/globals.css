@@ -40,6 +40,13 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   position: relative;
   width: 100%;
   min-height: 2.5rem;
+  border-radius: 0.375rem;
+}
+
+.input-container:focus-within {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border: 1px solid #22c55e; /* alonggreen */
 }
 
 .input-container input {
@@ -54,6 +61,7 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   background: transparent;
   color: transparent;
   caret-color: black;
+  border-radius: 0.375rem;
 }
 
 .input-container .input-renderer {
@@ -65,6 +73,13 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   pointer-events: none;
   -webkit-user-select: none;
   user-select: none;
+  color: #374151; /* text-gray-700 */
+  line-height: 1.5;
+}
+
+.input-container .input-renderer:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af; /* text-gray-400 */
 }
 
 /* Link preview styles */

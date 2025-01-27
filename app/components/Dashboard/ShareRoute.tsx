@@ -143,44 +143,73 @@ const ShareRoute = () => {
     }
   };
 
-  const handleRouteChange = (
-    id: number,
-    value: string,
-    isFormatted = false
-  ) => {
-    const route = routes.find((r) => r.id === id);
+  const handleRouteChange = (id: number, value: string, isFormatted = false) => {
+    const route = routes.find(r => r.id === id);
     if (!route) return;
 
     // Don't prevent typing in non-first routes
-    const isPreviousRouteEmpty =
-      id > 1 && routes[id - 2].content.text.trim() === "";
+    const isPreviousRouteEmpty = id > 1 && routes[id - 2].content.text.trim() === '';
     if (isPreviousRouteEmpty) return;
 
     let newValue = value;
     if (!isFormatted && activeFormats.length > 0) {
-      // Find the last formatted span if it exists
-      const lastSpanMatch = route.content.text.match(/<span class="[^"]*">([^<]*)<\/span>$/);
+      // Get the difference between old and new text
+      const oldText = route.content.text.replace(/<[^>]*>/g, '');
+      const newText = value;
       
-      if (lastSpanMatch && lastSpanMatch[1]) {
-        // If the last content was in a formatted span with the same formats
-        const previousText = route.content.text.slice(0, -lastSpanMatch[0].length);
-        const newChar = value.slice(lastSpanMatch[1].length);
-        newValue = `${previousText}<span class="${getFormatClasses(activeFormats)}">${lastSpanMatch[1]}${newChar}</span>`;
+      if (newText.length > oldText.length) {
+        // Text was added
+        const addedText = newText.slice(oldText.length);
+        newValue = route.content.text + `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`;
       } else {
-        // If there was no previous formatting or different formatting
-        const previousText = route.content.text;
-        const newChar = value.slice(previousText.replace(/<[^>]*>/g, '').length);
-        newValue = `${previousText}<span class="${getFormatClasses(activeFormats)}">${newChar}</span>`;
+        // Text was removed
+        const remainingText = newText;
+        // Find all formatted spans and reconstruct with remaining text
+        const spans = route.content.text.match(/<span class="[^"]*">[^<]*<\/span>/g) || [];
+        // eslint-disable-next-line prefer-const
+        let plainText = route.content.text.replace(/<[^>]*>/g, '');
+        
+        newValue = '';
+        let currentPos = 0;
+        
+        spans.forEach(span => {
+          const spanText = span.match(/>([^<]*)</)?.[1] || '';
+          const spanPos = plainText.indexOf(spanText);
+          if (spanPos >= 0 && currentPos <= spanPos && spanPos + spanText.length <= remainingText.length) {
+            // Add any unformatted text before this span
+            if (spanPos > currentPos) {
+              newValue += remainingText.slice(currentPos, spanPos);
+            }
+            // Add the span if its text is still present
+            newValue += span;
+            currentPos = spanPos + spanText.length;
+          }
+        });
+        
+        // Add any remaining unformatted text
+        if (currentPos < remainingText.length) {
+          newValue += remainingText.slice(currentPos);
+        }
       }
     }
 
-    const updatedRoutes = routes.map((route) =>
+    const updatedRoutes = routes.map(route =>
       route.id === id
         ? { ...route, content: { ...route.content, text: newValue } }
         : route
     );
 
     setRoutes(updatedRoutes);
+
+    // Update cursor position correctly
+    requestAnimationFrame(() => {
+      const input = inputRefs.current[id];
+      if (input) {
+        const pos = value.length;
+        input.setSelectionRange(pos, pos);
+        input.focus();
+      }
+    });
 
     // Add new input logic
     if (id === routes[routes.length - 1].id && value.trim().length > 0) {
@@ -200,15 +229,6 @@ const ShareRoute = () => {
         nextIdRef.current += 1;
       }
     }
-
-    // Update cursor position
-    requestAnimationFrame(() => {
-      const input = inputRefs.current[id];
-      if (input) {
-        const pos = value.replace(/<[^>]*>/g, "").length;
-        input.setSelectionRange(pos, pos);
-      }
-    });
   };
 
   const handleSelectionChange = (id: number, start: number, end: number) => {
@@ -338,9 +358,6 @@ const ShareRoute = () => {
                           handleRouteChange(route.id, e.target.value)
                         }
                         className="route-input"
-                        placeholder={
-                          index === 0 ? "Where we dey go?" : "Where next?"
-                        }
                         data-route-id={route.id}
                       />
                       <div
@@ -348,6 +365,7 @@ const ShareRoute = () => {
                           displayRefs.current[route.id] = el!;
                         }}
                         className="input-renderer"
+                        data-placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
                         dangerouslySetInnerHTML={{ __html: route.content.text }}
                       />
                     </div>

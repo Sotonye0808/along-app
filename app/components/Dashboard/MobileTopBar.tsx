@@ -9,8 +9,8 @@ const Topbar = () => {
         <Image
           src="/icons/notifications.svg"
           alt="search icon"
-          width={16}
-          height={16}
+          width={20}
+          height={20}
         />
       </Link>
 
@@ -18,8 +18,8 @@ const Topbar = () => {
         <Image
           src="/icons/profile.svg"
           alt="search icon"
-          width={16}
-          height={16}
+          width={20}
+          height={20}
         />
       </Link>
     </div>
