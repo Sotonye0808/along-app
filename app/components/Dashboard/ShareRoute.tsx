@@ -14,6 +14,11 @@ interface RouteContent {
   links: Link[];
 }
 
+interface FormattedSegment {
+  text: string;
+  formats: string[];
+}
+
 const ShareRoute = () => {
   const [creatingPost, setCreatingPost] = useState(false);
   const nextIdRef = useRef(3); // Start from 3 since we initialize with 1 and 2
@@ -38,6 +43,7 @@ const ShareRoute = () => {
 
   const [links, setLinks] = useState<Link[]>([]);
   const [activeFormats, setActiveFormats] = useState<string[]>([]);
+  const [formattedSegments, setFormattedSegments] = useState<{ [key: number]: FormattedSegment[] }>({});
 
   const toggleCreatingPost = () => {
     setCreatingPost(!creatingPost);
@@ -151,55 +157,87 @@ const ShareRoute = () => {
     const isPreviousRouteEmpty = id > 1 && routes[id - 2].content.text.trim() === '';
     if (isPreviousRouteEmpty) return;
 
-    let newValue = value;
-    if (!isFormatted && activeFormats.length > 0) {
-      // Get the difference between old and new text
+      // Reconstruct the formatted text
+      let newValue = '';
+      let currentPos = 0;
+      
+    if (!isFormatted) {
       const oldText = route.content.text.replace(/<[^>]*>/g, '');
       const newText = value;
       
+      // Initialize segments array if it doesn't exist
+      if (!formattedSegments[id]) {
+        formattedSegments[id] = [];
+      }
+
       if (newText.length > oldText.length) {
         // Text was added
         const addedText = newText.slice(oldText.length);
-        newValue = route.content.text + `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`;
+        
+        // Add new segment with current active formats
+        if (activeFormats.length > 0) {
+          formattedSegments[id].push({
+            text: addedText,
+            formats: [...activeFormats]
+          });
+        }
       } else {
-        // Text was removed
-        const remainingText = newText;
-        // Find all formatted spans and reconstruct with remaining text
-        const spans = route.content.text.match(/<span class="[^"]*">[^<]*<\/span>/g) || [];
-        // eslint-disable-next-line prefer-const
-        let plainText = route.content.text.replace(/<[^>]*>/g, '');
+        // Text was deleted - remove characters from segments
+        const deletedCount = oldText.length - newText.length;
+        let remainingToDelete = deletedCount;
         
-        newValue = '';
-        let currentPos = 0;
-        
-        spans.forEach(span => {
-          const spanText = span.match(/>([^<]*)</)?.[1] || '';
-          const spanPos = plainText.indexOf(spanText);
-          if (spanPos >= 0 && currentPos <= spanPos && spanPos + spanText.length <= remainingText.length) {
-            // Add any unformatted text before this span
-            if (spanPos > currentPos) {
-              newValue += remainingText.slice(currentPos, spanPos);
-            }
-            // Add the span if its text is still present
-            newValue += span;
-            currentPos = spanPos + spanText.length;
+        while (remainingToDelete > 0 && formattedSegments[id].length > 0) {
+          const lastSegment = formattedSegments[id][formattedSegments[id].length - 1];
+          if (lastSegment.text.length <= remainingToDelete) {
+            remainingToDelete -= lastSegment.text.length;
+            formattedSegments[id].pop();
+          } else {
+            lastSegment.text = lastSegment.text.slice(0, -remainingToDelete);
+            remainingToDelete = 0;
           }
-        });
-        
-        // Add any remaining unformatted text
-        if (currentPos < remainingText.length) {
-          newValue += remainingText.slice(currentPos);
         }
       }
+
+
+      formattedSegments[id].forEach(segment => {
+        // Add any unformatted text before this segment
+        const unformattedText = value.slice(currentPos, value.indexOf(segment.text, currentPos));
+        if (unformattedText) {
+          newValue += unformattedText;
+        }
+
+        // Add the formatted segment
+        if (segment.formats.length > 0) {
+          newValue += `<span class="${getFormatClasses(segment.formats)}">${segment.text}</span>`;
+        } else {
+          newValue += segment.text;
+        }
+
+        currentPos = value.indexOf(segment.text, currentPos) + segment.text.length;
+      });
+
+      // Add any remaining unformatted text
+      if (currentPos < value.length) {
+        newValue += value.slice(currentPos);
+      }
+
+      const updatedRoutes = routes.map(route =>
+        route.id === id
+          ? { ...route, content: { ...route.content, text: value } }
+          : route
+      );
+
+      setRoutes(updatedRoutes);
+      setFormattedSegments({ ...formattedSegments });
+    } else {
+      // Handle formatted text from selection
+      const updatedRoutes = routes.map(route =>
+        route.id === id
+          ? { ...route, content: { ...route.content, text: value } }
+          : route
+      );
+      setRoutes(updatedRoutes);
     }
-
-    const updatedRoutes = routes.map(route =>
-      route.id === id
-        ? { ...route, content: { ...route.content, text: newValue } }
-        : route
-    );
-
-    setRoutes(updatedRoutes);
 
     // Update cursor position correctly
     requestAnimationFrame(() => {
@@ -213,6 +251,12 @@ const ShareRoute = () => {
 
     // Add new input logic
     if (id === routes[routes.length - 1].id && value.trim().length > 0) {
+      const updatedRoutes = routes.map(route =>
+        route.id === id
+          ? { ...route, content: { ...route.content, text: newValue || value } }
+          : route
+      );
+
       const allPreviousHaveValue = routes.every(
         (route, index) =>
           index === routes.length - 1 || route.content.text.trim() !== ""

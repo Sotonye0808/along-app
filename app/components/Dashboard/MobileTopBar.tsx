@@ -8,18 +8,18 @@ const Topbar = () => {
       <Link href="/register">
         <Image
           src="/icons/notifications.svg"
-          alt="search icon"
-          width={20}
-          height={20}
+          alt="notifications icon"
+          width={24}
+          height={24}
         />
       </Link>
 
       <Link href="/otp">
         <Image
           src="/icons/profile.svg"
-          alt="search icon"
-          width={20}
-          height={20}
+          alt="profile icon"
+          width={24}
+          height={24}
         />
       </Link>
     </div>
