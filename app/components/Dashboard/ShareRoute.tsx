@@ -68,6 +68,20 @@ const ShareRoute = () => {
       .join(" ");
   };
 
+  const getOppositeFormatClasses = (formats: string[]): string => {
+    return formats
+      .map(format => {
+        switch (format) {
+          case 'bold': return 'font-normal';
+          case 'italic': return 'not-italic';
+          case 'underline': return 'no-underline';
+          case 'strikeThrough': return 'no-line-through';
+          default: return '';
+        }
+      })
+      .join(' ');
+  };
+
   const getFormatFromElement = (element: HTMLElement): string[] => {
     const formats: string[] = [];
     if (element.classList.contains("font-bold")) formats.push("bold");
@@ -91,17 +105,15 @@ const ShareRoute = () => {
       if (parentSpan?.tagName === "SPAN") {
         const existingFormats = getFormatFromElement(parentSpan);
         if (existingFormats.includes(format)) {
-          // Remove format
-          parentSpan.classList.remove(getFormatClasses([format]));
-          if (parentSpan.classList.length === 0) {
-            // If no classes left, unwrap the span
-            const text = parentSpan.textContent || "";
-            const textNode = document.createTextNode(text);
-            parentSpan.parentNode?.replaceChild(textNode, parentSpan);
-          }
+          // Apply opposite format to cancel out existing format
+          const span = document.createElement('span');
+          span.className = getOppositeFormatClasses([format]);
+          range.surroundContents(span);
         } else {
-          // Add new format to existing span
-          parentSpan.classList.add(getFormatClasses([format]));
+          // Add new format to selection
+          const span = document.createElement('span');
+          span.className = getFormatClasses([format]);
+          range.surroundContents(span);
         }
       } else {
         // Create new formatted span
@@ -146,11 +158,20 @@ const ShareRoute = () => {
 
     let newValue = value;
     if (!isFormatted && activeFormats.length > 0) {
-      // Only wrap new text in formatting
-      const lastChar = value.slice(-1);
-      newValue =
-        value.slice(0, -1) +
-        `<span class="${getFormatClasses(activeFormats)}">${lastChar}</span>`;
+      // Find the last formatted span if it exists
+      const lastSpanMatch = route.content.text.match(/<span class="[^"]*">([^<]*)<\/span>$/);
+      
+      if (lastSpanMatch && lastSpanMatch[1]) {
+        // If the last content was in a formatted span with the same formats
+        const previousText = route.content.text.slice(0, -lastSpanMatch[0].length);
+        const newChar = value.slice(lastSpanMatch[1].length);
+        newValue = `${previousText}<span class="${getFormatClasses(activeFormats)}">${lastSpanMatch[1]}${newChar}</span>`;
+      } else {
+        // If there was no previous formatting or different formatting
+        const previousText = route.content.text;
+        const newChar = value.slice(previousText.replace(/<[^>]*>/g, '').length);
+        newValue = `${previousText}<span class="${getFormatClasses(activeFormats)}">${newChar}</span>`;
+      }
     }
 
     const updatedRoutes = routes.map((route) =>
