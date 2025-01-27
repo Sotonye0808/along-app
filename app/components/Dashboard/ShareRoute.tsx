@@ -8,13 +8,8 @@ const ShareRoute = () => {
     { id: 1, value: "" },
     { id: 2, value: "" },
   ]);
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [formatting, setFormatting] = useState({
-    bold: false,
-    italic: false,
-    underline: false,
-    strikeThrough: false,
-  });
+  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>([]);
 
   const toggleCreatingPost = () => {
     setCreatingPost(!creatingPost);
@@ -54,30 +49,40 @@ const ShareRoute = () => {
     }
   };
 
-  type FormattingCommand = 'bold' | 'italic' | 'underline' | 'strikeThrough';
-
-  const handleTextFormat = useCallback((command: FormattingCommand) => {
-    setFormatting((prev) => ({ ...prev, [command]: !prev[command] }));
+  const handleTextFormat = useCallback((command: string) => {
+    setSelectedFormats((prevFormats) =>
+      prevFormats.includes(command)
+        ? prevFormats.filter((format) => format !== command)
+        : [...prevFormats, command]
+    );
   }, []);
 
-  const applyFormatting = (text: string) => {
+  const applyFormats = (text: string) => {
     let formattedText = text;
-    if (formatting.bold) formattedText = `**${formattedText}**`;
-    if (formatting.italic) formattedText = `*${formattedText}*`;
-    if (formatting.underline) formattedText = `<u>${formattedText}</u>`;
-    if (formatting.strikeThrough) formattedText = `~~${formattedText}~~`;
+    if (selectedFormats.includes("bold")) {
+      formattedText = `**${formattedText}**`;
+    }
+    if (selectedFormats.includes("italic")) {
+      formattedText = `*${formattedText}*`;
+    }
+    if (selectedFormats.includes("underline")) {
+      formattedText = `<u>${formattedText}</u>`;
+    }
+    if (selectedFormats.includes("strikeThrough")) {
+      formattedText = `~~${formattedText}~~`;
+    }
     return formattedText;
   };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const filesArray = Array.from(event.target.files);
-      setSelectedImages((prev) => [...prev, ...filesArray]);
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newImages = Array.from(e.target.files);
+      setImages((prevImages) => [...prevImages, ...newImages]);
     }
   };
 
   const removeImage = (index: number) => {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
   };
 
   // In the render section, filter routes based on previous route having content
@@ -146,9 +151,9 @@ const ShareRoute = () => {
                     placeholder={
                       index === 0 ? "Where we dey go?" : "Where next?"
                     }
-                    value={applyFormatting(route.value)}
+                    value={route.value}
                     onChange={(e) =>
-                      handleRouteChange(route.id, e.target.value)
+                      handleRouteChange(route.id, applyFormats(e.target.value))
                     }
                     maxLength={index === 0 ? 300 : 200}
                     className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500"
@@ -168,28 +173,32 @@ const ShareRoute = () => {
                   className="text-xs text-gray-400 flex justify-center items-center gap-3">
                   <span
                     className={`font-bold cursor-pointer hover:text-gray-600 ${
-                      formatting.bold ? "text-gray-600" : ""
+                      selectedFormats.includes("bold") ? "text-gray-600" : ""
                     }`}
                     onClick={() => handleTextFormat("bold")}>
                     B
                   </span>
                   <span
                     className={`underline cursor-pointer hover:text-gray-600 ${
-                      formatting.underline ? "text-gray-600" : ""
+                      selectedFormats.includes("underline")
+                        ? "text-gray-600"
+                        : ""
                     }`}
                     onClick={() => handleTextFormat("underline")}>
                     U
                   </span>
                   <span
                     className={`italic cursor-pointer hover:text-gray-600 ${
-                      formatting.italic ? "text-gray-600" : ""
+                      selectedFormats.includes("italic") ? "text-gray-600" : ""
                     }`}
                     onClick={() => handleTextFormat("italic")}>
                     I
                   </span>
                   <span
                     className={`line-through cursor-pointer hover:text-gray-600 ${
-                      formatting.strikeThrough ? "text-gray-600" : ""
+                      selectedFormats.includes("strikeThrough")
+                        ? "text-gray-600"
+                        : ""
                     }`}
                     onClick={() => handleTextFormat("strikeThrough")}>
                     S
@@ -203,16 +212,15 @@ const ShareRoute = () => {
                         height={12}
                       />
                     </label>
-                    <label htmlFor="image-upload" className="sr-only">Upload Images</label>
                     <input
                       id="image-upload"
+                      name="image-upload"
+                      title="Image Upload"
                       type="file"
-                      multiple
                       accept="image/*"
+                      multiple
                       className="hidden"
                       onChange={handleImageChange}
-                      title="Upload Images"
-                      placeholder="Upload Images"
                     />
                   </span>
                   <span>
@@ -231,12 +239,12 @@ const ShareRoute = () => {
                 Post
               </button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {selectedImages.map((image, index) => (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {images.map((image, index) => (
                 <div key={index} className="relative">
                   <img
                     src={URL.createObjectURL(image)}
-                    alt={`preview ${index}`}
+                    alt={`preview-${index}`}
                     className="w-20 h-20 object-cover rounded-md"
                   />
                   <button
