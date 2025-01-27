@@ -84,33 +84,6 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   pointer-events: none;
 }
 
-/* Markdown styles */
-.input-renderer p {
-  margin: 0;
-  display: inline;
-}
-
-.input-renderer strong {
-  font-weight: bold;
-}
-
-.input-renderer em {
-  font-style: italic;
-}
-
-.input-renderer u {
-  text-decoration: underline;
-}
-
-.input-renderer del {
-  text-decoration: line-through;
-}
-
-.input-renderer a {
-  color: #10B981;
-  text-decoration: underline;
-}
-
 
 
 

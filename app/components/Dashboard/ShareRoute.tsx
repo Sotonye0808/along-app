@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useCallback, useRef } from "react";
 import Image from "next/image";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 const ShareRoute = () => {
   const [creatingPost, setCreatingPost] = useState(false);
@@ -35,39 +33,31 @@ const ShareRoute = () => {
     return selection.getRangeAt(0);
   };
 
-  const formatToMarkdown = (format: string, text: string): string => {
-    switch (format) {
-      case 'bold': return `**${text}**`;
-      case 'italic': return `*${text}*`;
-      case 'underline': return `<u>${text}</u>`; // HTML fallback for underline
-      case 'strikeThrough': return `~~${text}~~`;
-      default: return text;
-    }
-  };
-
   const applyFormatToSelection = (format: string) => {
-    const inputElement = document.activeElement as HTMLInputElement;
-    if (inputElement?.type !== 'text') return;
+    const selection = getSelection();
+    if (!selection) return;
 
-    const routeId = parseInt(inputElement.getAttribute('data-route-id') || '0');
-    const start = inputElement.selectionStart || 0;
-    const end = inputElement.selectionEnd || 0;
-    const text = inputElement.value;
+    const element = selection.commonAncestorContainer.parentElement;
+    if (!element) return;
+
+    const routeId = parseInt(element.getAttribute('data-route-id') || '0');
+    const range = selection.cloneRange();
     
-    const selectedText = text.substring(start, end);
-    const formattedText = formatToMarkdown(format, selectedText);
+    let tag = '';
+    switch (format) {
+      case 'bold': tag = 'strong'; break;
+      case 'italic': tag = 'em'; break;
+      case 'underline': tag = 'u'; break;
+      case 'strikeThrough': tag = 's'; break;
+    }
+
+    const wrapper = document.createElement(tag);
+    range.surroundContents(wrapper);
     
-    const newText = text.substring(0, start) + formattedText + text.substring(end);
-    handleRouteChange(routeId, newText);
-    
-    // Restore selection
-    requestAnimationFrame(() => {
-      inputElement.focus();
-      inputElement.setSelectionRange(
-        start + formattedText.length - selectedText.length,
-        end + formattedText.length - selectedText.length
-      );
-    });
+    // Update content in state
+    const updatedContent = element.innerHTML;
+    setRawContent(prev => ({ ...prev, [routeId]: updatedContent }));
+    handleRouteChange(routeId, updatedContent, element);
   };
 
   const handleTextFormat = useCallback((format: string) => {
@@ -103,13 +93,16 @@ const ShareRoute = () => {
     }
   };
 
-  const handleRouteChange = (id: number, value: string) => {
-    // Store markdown content
+  const handleRouteChange = (id: number, value: string, element?: HTMLElement) => {
+    const displayElement = displayRefs.current[id];
+    
+    // Store raw HTML content
     setRawContent(prev => ({ ...prev, [id]: value }));
     
-    // Update routes state with the same value
+    // Update routes state with plain text
+    const plainText = value.replace(/<[^>]*>/g, '');
     const updatedRoutes = routes.map(route =>
-      route.id === id ? { ...route, value } : route
+      route.id === id ? { ...route, value: plainText } : route
     );
 
     // If a route is emptied, remove all subsequent routes
@@ -174,7 +167,7 @@ const ShareRoute = () => {
       const linkMd = `[${text}](${url})`;
       // Insert at current route's cursor position or append to last route
       const lastRoute = routes[routes.length - 1];
-      handleRouteChange(lastRoute.id, lastRoute.value + ' ' + linkMd);
+      handleRouteChange(lastRoute.id, lastRoute.value + ' ' + linkMd, document.createElement('div'));
     }
   };
 
@@ -253,24 +246,15 @@ const ShareRoute = () => {
                             e.currentTarget.selectionStart ?? 0,
                             e.currentTarget.selectionEnd ?? 0
                           )}
-                          data-route-id={route.id}
                           className="route-input"
                         />
                         <div
                           ref={el => { displayRefs.current[route.id] = el!; }}
                           className="input-renderer"
-                        >
-                          <ReactMarkdown 
-                            remarkPlugins={[remarkGfm]}
-                            components={{
-                              // Override component rendering as needed
-                              p: ({children}) => <span>{children}</span>,
-                              u: ({children}) => <u>{children}</u>,
-                            }}
-                          >
-                            {rawContent[route.id] || ''}
-                          </ReactMarkdown>
-                        </div>
+                          dangerouslySetInnerHTML={{ 
+                            __html: rawContent[route.id] || ''
+                          }}
+                        />
                         {(!rawContent[route.id] || rawContent[route.id].length === 0) && (
                           <div className="input-placeholder">
                             {index === 0 ? "Where we dey go?" : "Where next?"}
