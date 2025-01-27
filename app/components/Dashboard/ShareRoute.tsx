@@ -120,15 +120,48 @@ const ShareRoute = () => {
     }
   };
 
-  const handleFormatHelp = () => {
-    alert(
-      'Text Formatting Guide:\n' +
-      '**text** for bold\n' +
-      '*text* for italic\n' +
-      '__text__ for underline\n' +
-      '~~text~~ for strikethrough'
-    );
+  const wrapTextWithMarkdown = (format: string) => {
+    const element = document.activeElement as HTMLElement;
+    if (!element || !element.hasAttribute('data-route-id')) return;
+
+    const routeId = parseInt(element.getAttribute('data-route-id') || '0');
+    const selection = window.getSelection();
+    if (!selection?.toString()) return;
+
+    const start = selection.anchorOffset;
+    const end = selection.focusOffset;
+    const text = element.textContent || '';
+
+    let wrapper = '';
+    switch (format) {
+      case 'bold': wrapper = '**'; break;
+      case 'italic': wrapper = '*'; break;
+      case 'underline': wrapper = '__'; break;
+      case 'strikeThrough': wrapper = '~~'; break;
+    }
+
+    const newText = 
+      text.slice(0, start) + 
+      wrapper + 
+      text.slice(start, end) + 
+      wrapper + 
+      text.slice(end);
+
+    handleRouteChange(routeId, newText, element);
+
+    // Adjust cursor position to end of formatted text
+    requestAnimationFrame(() => {
+      const range = document.createRange();
+      range.setStart(element.firstChild || element, end + (2 * wrapper.length));
+      range.setEnd(element.firstChild || element, end + (2 * wrapper.length));
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
   };
+
+  const handleTextFormat = useCallback((format: string) => {
+    wrapTextWithMarkdown(format);
+  }, []);
 
   // In the render section, filter routes based on previous route having content
   const visibleRoutes = routes.filter((route, index) => {
@@ -239,8 +272,25 @@ const ShareRoute = () => {
                 <div
                   id="text-editor"
                   className="text-xs text-gray-400 flex justify-center items-center gap-3">
-                  <span className="cursor-pointer hover:text-gray-600" onClick={handleFormatHelp}>
-                    Format Guide
+                  <span
+                    className="font-bold cursor-pointer hover:text-gray-600"
+                    onClick={() => handleTextFormat("bold")}>
+                    B
+                  </span>
+                  <span
+                    className="underline cursor-pointer hover:text-gray-600"
+                    onClick={() => handleTextFormat("underline")}>
+                    U
+                  </span>
+                  <span
+                    className="italic cursor-pointer hover:text-gray-600"
+                    onClick={() => handleTextFormat("italic")}>
+                    I
+                  </span>
+                  <span
+                    className="line-through cursor-pointer hover:text-gray-600"
+                    onClick={() => handleTextFormat("strikeThrough")}>
+                    S
                   </span>
                   <input
 				  	id="fileInput"
