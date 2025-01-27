@@ -8,6 +8,7 @@ const ShareRoute = () => {
     { id: 1, value: "" },
     { id: 2, value: "" },
   ]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
 
@@ -50,29 +51,8 @@ const ShareRoute = () => {
   };
 
   const handleTextFormat = useCallback((command: string) => {
-    setSelectedFormats((prevFormats) =>
-      prevFormats.includes(command)
-        ? prevFormats.filter((format) => format !== command)
-        : [...prevFormats, command]
-    );
+    document.execCommand(command, false);
   }, []);
-
-  const applyFormats = (text: string) => {
-    let formattedText = text;
-    if (selectedFormats.includes("bold")) {
-      formattedText = `**${formattedText}**`;
-    }
-    if (selectedFormats.includes("italic")) {
-      formattedText = `*${formattedText}*`;
-    }
-    if (selectedFormats.includes("underline")) {
-      formattedText = `<u>${formattedText}</u>`;
-    }
-    if (selectedFormats.includes("strikeThrough")) {
-      formattedText = `~~${formattedText}~~`;
-    }
-    return formattedText;
-  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -146,17 +126,19 @@ const ShareRoute = () => {
               {visibleRoutes.map((route, index) => (
                 <div key={route.id} className="route-entry flex items-center">
                   <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
-                  <input
-                    type="text"
-                    placeholder={
-                      index === 0 ? "Where we dey go?" : "Where next?"
-                    }
-                    value={route.value}
-                    onChange={(e) =>
-                      handleRouteChange(route.id, applyFormats(e.target.value))
-                    }
-                    maxLength={index === 0 ? 300 : 200}
-                    className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500"
+                  <div
+                  contentEditable
+                  data-placeholder={
+                    index === 0 ? "Where we dey go?" : "Where next?"
+                  }
+                  onInput={(e) =>
+                    handleRouteChange(
+                    route.id,
+                    (e.target as HTMLDivElement).innerHTML
+                    )
+                  }
+                  className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500 placeholder-gray-500"
+                  dangerouslySetInnerHTML={{ __html: route.value }}
                   />
                 </div>
               ))}
