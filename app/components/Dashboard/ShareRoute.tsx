@@ -2,12 +2,24 @@
 import React, { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 
+// Add these new interfaces
+interface Link {
+  id: string;
+  url: string;
+  text: string;
+}
+
+interface RouteContent {
+  text: string;
+  links: Link[];
+}
+
 const ShareRoute = () => {
   const [creatingPost, setCreatingPost] = useState(false);
   const nextIdRef = useRef(3); // Start from 3 since we initialize with 1 and 2
-  const [routes, setRoutes] = useState([
-    { id: 1, value: "" },
-    { id: 2, value: "" },
+  const [routes, setRoutes] = useState<{ id: number; content: RouteContent }[]>([
+    { id: 1, content: { text: '', links: [] } },
+    { id: 2, content: { text: '', links: [] } },
   ]);
 
   // New state for active formatting and media
@@ -85,60 +97,44 @@ const ShareRoute = () => {
     return classes ? `<span class="${classes.trim()}">${formattedText}</span>` : formattedText;
   };
 
-  const syncScroll = (id: number, e: React.UIEvent<HTMLInputElement>) => {
-    const displayElement = displayRefs.current[id];
-    if (displayElement) {
-      displayElement.scrollTop = e.currentTarget.scrollTop;
-      displayElement.scrollLeft = e.currentTarget.scrollLeft;
-    }
-  };
-
   const handleRouteChange = (id: number, value: string, element?: HTMLElement) => {
-    const displayElement = displayRefs.current[id];
-    
-    // Store raw HTML content
-    setRawContent(prev => ({ ...prev, [id]: value }));
-    
-    // Update routes state with plain text
-    const plainText = value.replace(/<[^>]*>/g, '');
+    const route = routes.find(r => r.id === id);
+    if (!route) return;
+
     const updatedRoutes = routes.map(route =>
-      route.id === id ? { ...route, value: plainText } : route
+      route.id === id 
+        ? { ...route, content: { ...route.content, text: value } }
+        : route
     );
 
-    // If a route is emptied, remove all subsequent routes
-    if (!value) {
-      const currentIndex = routes.findIndex((route) => route.id === id);
-      if (currentIndex >= 1) {
-        // Allow first route to be empty
-        const filteredRoutes = updatedRoutes.filter(
-          (_, index) => index <= currentIndex
-        );
-        setRoutes(filteredRoutes);
-        return;
-      }
+    // Prevent backward deletion
+    if (value.length < route.content.text.length && id > 1) {
+      return;
     }
 
     setRoutes(updatedRoutes);
 
-    // Add new input only if typing in last input AND all previous routes have values
+    // Add new input logic
     if (id === routes[routes.length - 1].id && value.length > 0) {
       const allPreviousHaveValue = routes.every(
-        (route, index) =>
-          index === routes.length - 1 || route.value.trim() !== ""
+        (route, index) => index === routes.length - 1 || route.content.text.trim() !== ""
       );
 
       if (allPreviousHaveValue) {
-        setRoutes([...updatedRoutes, { id: nextIdRef.current, value: "" }]);
+        setRoutes([...updatedRoutes, { 
+          id: nextIdRef.current, 
+          content: { text: "", links: [] } 
+        }]);
         nextIdRef.current += 1;
       }
     }
 
-    // Restore cursor position
+    // Update cursor position
     requestAnimationFrame(() => {
-      const inputElement = inputRefs.current[id];
-      if (inputElement) {
-        inputElement.setSelectionRange(selection.start, selection.end);
-        inputElement.focus();
+      const input = inputRefs.current[id];
+      if (input) {
+        const pos = value.length;
+        input.setSelectionRange(pos, pos);
       }
     });
   };
@@ -164,17 +160,46 @@ const ShareRoute = () => {
     const url = prompt('Enter URL:');
     const text = prompt('Enter link text:');
     if (url && text) {
-      const linkMd = `[${text}](${url})`;
-      // Insert at current route's cursor position or append to last route
       const lastRoute = routes[routes.length - 1];
-      handleRouteChange(lastRoute.id, lastRoute.value + ' ' + linkMd, document.createElement('div'));
+      const newLink = { 
+        id: Math.random().toString(36).substr(2, 9),
+        url, 
+        text 
+      };
+      
+      setRoutes(routes.map(route =>
+        route.id === lastRoute.id
+          ? {
+              ...route,
+              content: {
+                ...route.content,
+                links: [...route.content.links, newLink]
+              }
+            }
+          : route
+      ));
     }
+  };
+
+  // Add removeLink function
+  const removeLink = (routeId: number, linkId: string) => {
+    setRoutes(routes.map(route =>
+      route.id === routeId
+        ? {
+            ...route,
+            content: {
+              ...route.content,
+              links: route.content.links.filter(link => link.id !== linkId)
+            }
+          }
+        : route
+    ));
   };
 
   // In the render section, filter routes based on previous route having content
   const visibleRoutes = routes.filter((route, index) => {
     if (index === 0) return true; // Always show first route
-    return routes[index - 1].value.trim() !== ""; // Show only if previous has content
+    return routes[index - 1].content.text.trim() !== ""; // Show only if previous has content
   });
 
   return (
@@ -233,33 +258,33 @@ const ShareRoute = () => {
                 <div key={route.id} className="route-entry flex flex-col">
                   <div className="flex items-center">
                     <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
-                    <div className="w-full">
-                      <div className="input-container rounded-lg focus-within:border focus-within:border-green-500">
-                        <input
-                          ref={el => { inputRefs.current[route.id] = el!; }}
-                          type="text"
-                          value={routes.find(r => r.id === route.id)?.value || ''}
-                          onChange={(e) => handleRouteChange(route.id, e.target.value)}
-                          onScroll={(e) => syncScroll(route.id, e)}
-                          onSelect={(e) => handleSelectionChange(
-                            route.id,
-                            e.currentTarget.selectionStart ?? 0,
-                            e.currentTarget.selectionEnd ?? 0
-                          )}
-                          className="route-input"
-                        />
-                        <div
-                          ref={el => { displayRefs.current[route.id] = el!; }}
-                          className="input-renderer"
-                          dangerouslySetInnerHTML={{ 
-                            __html: rawContent[route.id] || ''
-                          }}
-                        />
-                        {(!rawContent[route.id] || rawContent[route.id].length === 0) && (
-                          <div className="input-placeholder">
-                            {index === 0 ? "Where we dey go?" : "Where next?"}
-                          </div>
-                        )}
+                    <div className="w-full relative input-container">
+                      <input
+                        ref={el => { inputRefs.current[route.id] = el!; }}
+                        type="text"
+                        value={route.content.text}
+                        onChange={(e) => handleRouteChange(route.id, e.target.value)}
+                        className="route-input"
+                        placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
+                      />
+                      <div
+                        ref={el => { displayRefs.current[route.id] = el!; }}
+                        className="input-renderer"
+                      >
+                        {route.content.text}
+                        {route.content.links.map(link => (
+                          <span key={link.id} className="link-preview">
+                            <a href={link.url} target="_blank" rel="noopener noreferrer">
+                              {link.text}
+                            </a>
+                            <span 
+                              className="remove-link"
+                              onClick={() => removeLink(route.id, link.id)}
+                            >
+                              ×
+                            </span>
+                          </span>
+                        ))}
                       </div>
                     </div>
                   </div>

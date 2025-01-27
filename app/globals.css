@@ -35,7 +35,7 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   background-color: #9ca3af;
 }
 
-/* Input overlay styles */
+/* Input container styles */
 .input-container {
   position: relative;
   width: 100%;
@@ -52,11 +52,8 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   padding: 0.5rem 1rem;
   font-size: inherit;
   background: transparent;
-  font-family: inherit;
-}
-
-.input-container input:not([value=""]) {
-  -webkit-text-fill-color: transparent;
+  color: transparent;
+  caret-color: black;
 }
 
 .input-container .input-renderer {
@@ -64,24 +61,28 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   inset: 0;
   padding: 0.5rem 1rem;
   white-space: pre-wrap;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-wrap: break-word;
+  pointer-events: none;
   -webkit-user-select: none;
   user-select: none;
-  word-break: break-word;
 }
 
-.input-container .input-renderer::-webkit-scrollbar {
-  display: none;
+/* Link preview styles */
+.link-preview {
+  display: inline-flex;
+  align-items: center;
+  background: #e5e7eb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 0 2px;
+  gap: 4px;
 }
 
-/* Placeholder styling */
-.input-placeholder {
-  position: absolute;
-  top: 0.5rem;
-  left: 1rem;
-  color: #9CA3AF;
-  pointer-events: none;
+.link-preview .remove-link {
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 14px;
+  pointer-events: auto;
 }
 
 
