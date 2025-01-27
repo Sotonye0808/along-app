@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 
@@ -8,35 +9,141 @@ const ShareRoute = () => {
     { id: 1, value: "" },
     { id: 2, value: "" },
   ]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
-  const [images, setImages] = useState<File[]>([]);
+
+  // New state for active formatting and media
+  const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
+  const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Add new state for storing raw text content
+  const [rawContent, setRawContent] = useState<{ [key: number]: string }>({});
+
+  // Add state for cursor position and selection
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const inputRefs = useRef<{ [key: number]: HTMLInputElement }>({});
+  const displayRefs = useRef<{ [key: number]: HTMLDivElement }>({});
 
   const toggleCreatingPost = () => {
     setCreatingPost(!creatingPost);
   };
 
-  const handleRouteChange = (id: number, value: string) => {
+  const getSelection = () => {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return null;
+    return selection.getRangeAt(0);
+  };
+
+  const applyFormatToSelection = (format: string) => {
+    const selection = getSelection();
+    if (!selection) return;
+
+    const element = selection.commonAncestorContainer.parentElement;
+    if (!element) return;
+
+    const routeId = parseInt(element.getAttribute("data-route-id") || "0");
+    const range = selection.cloneRange();
+
+    let tag = "";
+    switch (format) {
+      case "bold":
+        tag = "strong";
+        break;
+      case "italic":
+        tag = "em";
+        break;
+      case "underline":
+        tag = "u";
+        break;
+      case "strikeThrough":
+        tag = "s";
+        break;
+    }
+
+    const wrapper = document.createElement(tag);
+    range.surroundContents(wrapper);
+
+    // Update content in state
+    const updatedContent = element.innerHTML;
+    setRawContent((prev) => ({ ...prev, [routeId]: updatedContent }));
+    handleRouteChange(routeId, updatedContent, element);
+  };
+
+  const handleTextFormat = useCallback((format: string) => {
+    setActiveFormats((prev) => {
+      const newFormats = new Set(prev);
+      if (newFormats.has(format)) {
+        newFormats.delete(format);
+      } else {
+        newFormats.add(format);
+      }
+      return newFormats;
+    });
+  }, []);
+
+  const getFormatClasses = (formats: Set<string>): string => {
+    const classes = [];
+    if (formats.has("bold")) classes.push("font-bold");
+    if (formats.has("italic")) classes.push("italic");
+    if (formats.has("underline")) classes.push("underline");
+    if (formats.has("strikeThrough")) classes.push("line-through");
+    return classes.join(" ");
+  };
+
+  const handleRouteChange = (id: number, value: string, element: HTMLElement) => {
+    const displayElement = displayRefs.current[id];
+    if (!displayElement) return;
+
+    // Update raw content directly from the contentEditable div
+    setRawContent(prev => ({ ...prev, [id]: element.innerHTML }));
+    
+    // Get plain text for route management
+    const plainText = element.textContent || '';
+    const newRoutes = routes.map(route =>
+      route.id === id ? { ...route, value: plainText } : route
+    );
+
+    // If element is provided, use its innerHTML as formatted content
+    if (element) {
+      const updatedContent = element.innerHTML;
+      setRawContent((prev) => ({ ...prev, [id]: updatedContent }));
+    } else {
+      // Process new text with formatting as before
+      const inputElement = inputRefs.current[id];
+      const previousValue = routes.find(route => route.id === id)?.value || '';
+      const cursorPosition = inputElement?.selectionStart || 0;
+      const newText = value.slice(
+        Math.min(previousValue.length, cursorPosition)
+      );
+      let updatedContent = rawContent[id] || "";
+
+      if (newText && activeFormats.size > 0) {
+        const formatClasses = getFormatClasses(activeFormats);
+        const formattedText = `<span class="${formatClasses}">${newText}</span>`;
+        updatedContent += formattedText;
+        setRawContent((prev) => ({ ...prev, [id]: updatedContent }));
+      } else if (newText) {
+        updatedContent += newText;
+        setRawContent((prev) => ({ ...prev, [id]: updatedContent }));
+      }
+    }
+
+    // Update routes state with plain text
     const updatedRoutes = routes.map((route) =>
       route.id === id ? { ...route, value } : route
     );
 
-    // If a route is emptied, remove all subsequent routes
+    // Handle route management
     if (!value) {
       const currentIndex = routes.findIndex((route) => route.id === id);
       if (currentIndex >= 1) {
-        // Allow first route to be empty
-        const filteredRoutes = updatedRoutes.filter(
-          (_, index) => index <= currentIndex
-        );
-        setRoutes(filteredRoutes);
+        setRoutes(updatedRoutes.filter((_, index) => index <= currentIndex));
         return;
       }
     }
 
     setRoutes(updatedRoutes);
 
-    // Add new input only if typing in last input AND all previous routes have values
+    // Add new route if needed
     if (id === routes[routes.length - 1].id && value.length > 0) {
       const allPreviousHaveValue = routes.every(
         (route, index) =>
@@ -48,21 +155,71 @@ const ShareRoute = () => {
         nextIdRef.current += 1;
       }
     }
+
+    // Restore cursor position
+    const cursorPosition = inputRefs.current[id]?.selectionStart || 0;
+    requestAnimationFrame(() => {
+      const inputElement = inputRefs.current[id];
+      if (inputElement) {
+        inputElement.setSelectionRange(cursorPosition, cursorPosition);
+        inputElement.focus();
+      }
+    });
   };
 
-  const handleTextFormat = useCallback((command: string) => {
-    document.execCommand(command, false);
-  }, []);
+  const handleSelectionChange = (id: number, start: number, end: number) => {
+    setSelection({ start, end });
+  };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newImages = Array.from(e.target.files);
-      setImages((prevImages) => [...prevImages, ...newImages]);
-    }
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setImages((prev) => [...prev, ...newImages]);
   };
 
   const removeImage = (index: number) => {
-    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleLinkAdd = () => {
+    const url = prompt("Enter URL:");
+    const text = prompt("Enter link text:");
+    if (url && text) {
+      const linkMd = `[${text}](${url})`;
+      // Insert at current route's cursor position or append to last route
+      const lastRoute = routes[routes.length - 1];
+      handleRouteChange(
+        lastRoute.id,
+        lastRoute.value + " " + linkMd,
+        document.createElement("div")
+      );
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, id: number) => {
+    const element = e.currentTarget;
+    
+    // Handle backspace at start of empty line
+    if (e.key === 'Backspace' && !element.textContent && id !== 1) {
+      e.preventDefault();
+      const prevRoute = routes.find(r => r.id === id - 1);
+      if (prevRoute) {
+        const prevElement = displayRefs.current[prevRoute.id];
+        if (prevElement) {
+          prevElement.focus();
+          // Place cursor at end of previous route
+          const range = document.createRange();
+          range.selectNodeContents(prevElement);
+          range.collapse(false);
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        }
+      }
+    }
   };
 
   // In the render section, filter routes based on previous route having content
@@ -122,24 +279,59 @@ const ShareRoute = () => {
             </div>
             <div
               id="route-entries"
-              className="flex flex-col gap-8 max-h-[40vh] md:max-h-[50vh] overflow-y-auto px-2">
+              className="flex flex-col relative max-h-[40vh] md:max-h-[50vh] overflow-y-auto px-2">
+              {/* Thread line */}
+              <div className="absolute left-[2.125rem] top-12 bottom-4 w-px bg-gray-200 z-0" />
               {visibleRoutes.map((route, index) => (
-                <div key={route.id} className="route-entry flex items-center">
-                  <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
-                  <div
-                  contentEditable
-                  data-placeholder={
-                    index === 0 ? "Where we dey go?" : "Where next?"
-                  }
-                  onInput={(e) =>
-                    handleRouteChange(
-                    route.id,
-                    (e.target as HTMLDivElement).innerHTML
-                    )
-                  }
-                  className="rounded-lg py-2 px-4 w-full bg-transparent focus:outline-none focus:border-r focus:border-y focus:border-green-500 placeholder-gray-500"
-                  dangerouslySetInnerHTML={{ __html: route.value }}
-                  />
+                <div key={route.id} className="route-entry flex flex-col relative z-10">
+                  <div className="flex items-start gap-4">
+                    <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 shrink-0 relative">
+                      {/* Connection dot */}
+                      {index < visibleRoutes.length - 1 && (
+                        <div className="absolute -bottom-4 left-1/2 w-2 h-2 rounded-full bg-gray-200 -translate-x-1/2" />
+                      )}
+                    </div>
+                    <div className="w-full relative">
+                      <div
+                        ref={el => { displayRefs.current[route.id] = el!; }}
+                        contentEditable
+                        onInput={e => handleRouteChange(route.id, e.currentTarget.textContent || '', e.currentTarget)}
+                        onKeyDown={e => handleKeyDown(e, route.id)}
+                        className="rounded-lg py-2 px-4 w-full bg-transparent outline-none focus:border-r focus:border-y focus:border-green-500 min-h-[2.5rem] whitespace-pre-wrap break-words caret-black"
+                        data-placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
+                        dangerouslySetInnerHTML={{ 
+                          __html: rawContent[route.id] || ''
+                        }}
+                      />
+                      {(!rawContent[route.id] || rawContent[route.id].length === 0) && (
+                        <div className="absolute top-2 left-4 text-gray-400 pointer-events-none">
+                          {index === 0 ? "Where we dey go?" : "Where next?"}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Image preview section */}
+                  {index === routes.length - 1 && images.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2 ml-11">
+                      {images.map((img, i) => (
+                        <div key={i} className="relative w-20 h-20">
+                          <Image
+                            src={img.preview}
+                            alt="preview"
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded"
+                          />
+                          <button
+                            onClick={() => removeImage(i)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -155,57 +347,55 @@ const ShareRoute = () => {
                   className="text-xs text-gray-400 flex justify-center items-center gap-3">
                   <span
                     className={`font-bold cursor-pointer hover:text-gray-600 ${
-                      selectedFormats.includes("bold") ? "text-gray-600" : ""
+                      activeFormats.has("bold") ? "text-alonggreen" : ""
                     }`}
                     onClick={() => handleTextFormat("bold")}>
                     B
                   </span>
                   <span
                     className={`underline cursor-pointer hover:text-gray-600 ${
-                      selectedFormats.includes("underline")
-                        ? "text-gray-600"
-                        : ""
+                      activeFormats.has("underline") ? "text-alonggreen" : ""
                     }`}
                     onClick={() => handleTextFormat("underline")}>
                     U
                   </span>
                   <span
                     className={`italic cursor-pointer hover:text-gray-600 ${
-                      selectedFormats.includes("italic") ? "text-gray-600" : ""
+                      activeFormats.has("italic") ? "text-alonggreen" : ""
                     }`}
                     onClick={() => handleTextFormat("italic")}>
                     I
                   </span>
                   <span
                     className={`line-through cursor-pointer hover:text-gray-600 ${
-                      selectedFormats.includes("strikeThrough")
-                        ? "text-gray-600"
+                      activeFormats.has("strikeThrough")
+                        ? "text-alonggreen"
                         : ""
                     }`}
                     onClick={() => handleTextFormat("strikeThrough")}>
                     S
                   </span>
-                  <span>
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Image
-                        src="/icons/image.svg"
-                        alt="image icon"
-                        width={12}
-                        height={12}
-                      />
-                    </label>
-                    <input
-                      id="image-upload"
-                      name="image-upload"
-                      title="Image Upload"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={handleImageChange}
+                  <input
+                    id="fileInput"
+                    title="Upload Image(s)"
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <span
+                    className="cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}>
+                    <Image
+                      src="/icons/image.svg"
+                      alt="image icon"
+                      width={12}
+                      height={12}
                     />
                   </span>
-                  <span>
+                  <span className="cursor-pointer" onClick={handleLinkAdd}>
                     <Image
                       src="/icons/link.svg"
                       alt="link icon"
@@ -220,23 +410,6 @@ const ShareRoute = () => {
                 className="mr-2 hover:bg-opacity-85 bg-alonggreen text-white text-sm px-2 py-1 rounded-md">
                 Post
               </button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-4">
-              {images.map((image, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={URL.createObjectURL(image)}
-                    alt={`preview-${index}`}
-                    className="w-20 h-20 object-cover rounded-md"
-                  />
-                  <button
-                    type="button"
-                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                    onClick={() => removeImage(index)}>
-                    x
-                  </button>
-                </div>
-              ))}
             </div>
           </form>
         </div>
