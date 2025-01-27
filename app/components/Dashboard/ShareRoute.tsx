@@ -29,20 +29,17 @@ const ShareRoute = () => {
   };
 
   const formatTextInRealTime = (text: string): string => {
-    // Replace markdown patterns with HTML, being careful with cursor position
-    // eslint-disable-next-line prefer-const
-    let formattedText = text
-      .replace(/\*\*(.*?)\*\*/g, '<span class="font-bold">$1</span>')
-      .replace(/\*(.*?)\*/g, '<span class="italic">$1</span>')
-      .replace(/__(.*?)__/g, '<span class="underline">$1</span>')
-      .replace(/~~(.*?)~~/g, '<span class="line-through">$1</span>');
-    
-    return formattedText;
+    // Convert markdown to HTML with classes
+    return text
+      .replace(/\*\*([^*]+)\*\*/g, '<span class="font-bold">$1</span>')
+      .replace(/\*([^*]+)\*/g, '<span class="italic">$1</span>')
+      .replace(/__([^_]+)__/g, '<span class="underline">$1</span>')
+      .replace(/~~([^~]+)~~/, '<span class="line-through">$1</span>');
   };
 
   const handleRouteChange = (id: number, value: string, element: HTMLElement) => {
     const selection = window.getSelection();
-    const cursorPosition = selection?.getRangeAt(0).startOffset || 0;
+    const range = selection?.getRangeAt(0);
     
     // Store the raw text (with markdown syntax) in routes
     const updatedRoutes = routes.map((route) =>
@@ -81,19 +78,17 @@ const ShareRoute = () => {
       }
     }
 
-    // Restore cursor position
-    requestAnimationFrame(() => {
-      const range = document.createRange();
-      const sel = window.getSelection();
-      
-      if (element.firstChild) {
-        const position = Math.min(cursorPosition, element.textContent?.length || 0);
-        range.setStart(element.firstChild, position);
-        range.setEnd(element.firstChild, position);
-        sel?.removeAllRanges();
-        sel?.addRange(range);
-      }
-    });
+    // Preserve selection
+    if (selection && range) {
+      requestAnimationFrame(() => {
+        try {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } catch (e) {
+          console.log('Selection restoration failed');
+        }
+      });
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,11 +121,11 @@ const ShareRoute = () => {
 
     const routeId = parseInt(element.getAttribute('data-route-id') || '0');
     const selection = window.getSelection();
-    if (!selection?.toString()) return;
+    if (!selection || !selection.rangeCount) return;
 
-    const start = selection.anchorOffset;
-    const end = selection.focusOffset;
-    const text = element.textContent || '';
+    const range = selection.getRangeAt(0);
+    const selectedText = selection.toString();
+    if (!selectedText) return;
 
     let wrapper = '';
     switch (format) {
@@ -140,23 +135,24 @@ const ShareRoute = () => {
       case 'strikeThrough': wrapper = '~~'; break;
     }
 
-    const newText = 
-      text.slice(0, start) + 
-      wrapper + 
-      text.slice(start, end) + 
-      wrapper + 
-      text.slice(end);
+    // Create formatted content
+    const formattedText = wrapper + selectedText + wrapper;
 
-    handleRouteChange(routeId, newText, element);
+    // Insert formatted text
+    range.deleteContents();
+    const textNode = document.createTextNode(formattedText);
+    range.insertNode(textNode);
 
-    // Adjust cursor position to end of formatted text
-    requestAnimationFrame(() => {
-      const range = document.createRange();
-      range.setStart(element.firstChild || element, end + (2 * wrapper.length));
-      range.setEnd(element.firstChild || element, end + (2 * wrapper.length));
-      selection.removeAllRanges();
-      selection.addRange(range);
-    });
+    // Update route content
+    const newContent = element.textContent || '';
+    handleRouteChange(routeId, newContent, element);
+
+    // Set cursor after inserted text
+    const newRange = document.createRange();
+    newRange.setStartAfter(textNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
   };
 
   const handleTextFormat = useCallback((format: string) => {
