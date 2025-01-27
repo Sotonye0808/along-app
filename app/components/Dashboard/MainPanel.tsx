@@ -21,7 +21,7 @@ const MainPanel = () => {
 						iaculis pellentesque posuere at et.
 					</p>
 					<div className="mb-4">
-						<img
+						<Image
 							src="/post-image.jpeg"
 							alt="post content"
 							className="rounded-md"

@@ -17,10 +17,12 @@ interface RouteContent {
 const ShareRoute = () => {
   const [creatingPost, setCreatingPost] = useState(false);
   const nextIdRef = useRef(3); // Start from 3 since we initialize with 1 and 2
-  const [routes, setRoutes] = useState<{ id: number; content: RouteContent }[]>([
-    { id: 1, content: { text: '', links: [] } },
-    { id: 2, content: { text: '', links: [] } },
-  ]);
+  const [routes, setRoutes] = useState<{ id: number; content: RouteContent }[]>(
+    [
+      { id: 1, content: { text: "", links: [] } },
+      { id: 2, content: { text: "", links: [] } },
+    ]
+  );
 
   // New state for active formatting and media
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
@@ -49,83 +51,131 @@ const ShareRoute = () => {
 
   const getFormatClasses = (formats: string[]) => {
     return formats
-      .map(format => {
+      .map((format) => {
         switch (format) {
-          case 'bold': return 'font-bold';
-          case 'italic': return 'italic';
-          case 'underline': return 'underline';
-          case 'strikeThrough': return 'line-through';
-          default: return '';
+          case "bold":
+            return "font-bold";
+          case "italic":
+            return "italic";
+          case "underline":
+            return "underline";
+          case "strikeThrough":
+            return "line-through";
+          default:
+            return "";
         }
       })
-      .join(' ');
+      .join(" ");
+  };
+
+  const getFormatFromElement = (element: HTMLElement): string[] => {
+    const formats: string[] = [];
+    if (element.classList.contains("font-bold")) formats.push("bold");
+    if (element.classList.contains("italic")) formats.push("italic");
+    if (element.classList.contains("underline")) formats.push("underline");
+    if (element.classList.contains("line-through"))
+      formats.push("strikeThrough");
+    return formats;
   };
 
   const handleTextFormat = (format: string) => {
-    const range = getSelection();
-    const selectedText = range?.toString();
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const selectedText = range.toString();
 
     if (selectedText) {
-      // For selected text
-      const span = document.createElement('span');
-      span.className = getFormatClasses([format]);
-      range?.surroundContents(span);
-      
-      // Update the input value with the formatted HTML
-      const routeId = parseInt(range?.startContainer.parentElement?.closest('[data-route-id]')?.getAttribute('data-route-id') || '0');
-      const input = inputRefs.current[routeId];
-      if (input) {
-        const displayDiv = displayRefs.current[routeId];
-        if (displayDiv) {
-          const newText = displayDiv.innerHTML;
-          handleRouteChange(routeId, newText);
+      // Check if selection is already formatted
+      const parentSpan = range.commonAncestorContainer.parentElement;
+      if (parentSpan?.tagName === "SPAN") {
+        const existingFormats = getFormatFromElement(parentSpan);
+        if (existingFormats.includes(format)) {
+          // Remove format
+          parentSpan.classList.remove(getFormatClasses([format]));
+          if (parentSpan.classList.length === 0) {
+            // If no classes left, unwrap the span
+            const text = parentSpan.textContent || "";
+            const textNode = document.createTextNode(text);
+            parentSpan.parentNode?.replaceChild(textNode, parentSpan);
+          }
+        } else {
+          // Add new format to existing span
+          parentSpan.classList.add(getFormatClasses([format]));
         }
+      } else {
+        // Create new formatted span
+        const span = document.createElement("span");
+        span.className = getFormatClasses([format]);
+        range.surroundContents(span);
+      }
+
+      // Update the input value with the modified HTML
+      const routeId = parseInt(
+        range.startContainer.parentElement
+          ?.closest("[data-route-id]")
+          ?.getAttribute("data-route-id") || "0"
+      );
+      const displayDiv = displayRefs.current[routeId];
+      if (displayDiv) {
+        const newText = displayDiv.innerHTML;
+        handleRouteChange(routeId, newText, true);
       }
     } else {
-      // For future typing
-      setActiveFormats(prev => 
-        prev.includes(format) 
-          ? prev.filter(f => f !== format)
+      // Toggle format for future typing
+      setActiveFormats((prev) =>
+        prev.includes(format)
+          ? prev.filter((f) => f !== format)
           : [...prev, format]
       );
     }
   };
 
-  const handleRouteChange = (id: number, value: string) => {
-    // Prevent backward deletion
-    const route = routes.find(r => r.id === id);
+  const handleRouteChange = (
+    id: number,
+    value: string,
+    isFormatted = false
+  ) => {
+    const route = routes.find((r) => r.id === id);
     if (!route) return;
-    if (value.length < route.content.text.length && id > 1) return;
 
-    // Apply active formats to new text
-    const formattedValue = activeFormats.length > 0
-      ? `<span class="${getFormatClasses(activeFormats)}">${value}</span>`
-      : value;
+    // Don't prevent typing in non-first routes
+    const isPreviousRouteEmpty =
+      id > 1 && routes[id - 2].content.text.trim() === "";
+    if (isPreviousRouteEmpty) return;
 
-    const updatedRoutes = routes.map(route =>
-      route.id === id 
-        ? { ...route, content: { ...route.content, text: formattedValue } }
+    let newValue = value;
+    if (!isFormatted && activeFormats.length > 0) {
+      // Only wrap new text in formatting
+      const lastChar = value.slice(-1);
+      newValue =
+        value.slice(0, -1) +
+        `<span class="${getFormatClasses(activeFormats)}">${lastChar}</span>`;
+    }
+
+    const updatedRoutes = routes.map((route) =>
+      route.id === id
+        ? { ...route, content: { ...route.content, text: newValue } }
         : route
     );
-
-    // Prevent backward deletion
-    if (value.length < route.content.text.length && id > 1) {
-      return;
-    }
 
     setRoutes(updatedRoutes);
 
     // Add new input logic
-    if (id === routes[routes.length - 1].id && value.length > 0) {
+    if (id === routes[routes.length - 1].id && value.trim().length > 0) {
       const allPreviousHaveValue = routes.every(
-        (route, index) => index === routes.length - 1 || route.content.text.trim() !== ""
+        (route, index) =>
+          index === routes.length - 1 || route.content.text.trim() !== ""
       );
 
       if (allPreviousHaveValue) {
-        setRoutes([...updatedRoutes, { 
-          id: nextIdRef.current, 
-          content: { text: "", links: [] } 
-        }]);
+        setRoutes([
+          ...updatedRoutes,
+          {
+            id: nextIdRef.current,
+            content: { text: "", links: [] },
+          },
+        ]);
         nextIdRef.current += 1;
       }
     }
@@ -134,7 +184,7 @@ const ShareRoute = () => {
     requestAnimationFrame(() => {
       const input = inputRefs.current[id];
       if (input) {
-        const pos = value.length;
+        const pos = value.replace(/<[^>]*>/g, "").length;
         input.setSelectionRange(pos, pos);
       }
     });
@@ -146,32 +196,32 @@ const ShareRoute = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newImages = files.map(file => ({
+    const newImages = files.map((file) => ({
       file,
-      preview: URL.createObjectURL(file)
+      preview: URL.createObjectURL(file),
     }));
-    setImages(prev => [...prev, ...newImages]);
+    setImages((prev) => [...prev, ...newImages]);
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleLinkAdd = () => {
-    const url = prompt('Enter URL:');
-    const text = prompt('Enter link text:');
+    const url = prompt("Enter URL:");
+    const text = prompt("Enter link text:");
     if (url && text) {
-      const newLink = { 
+      const newLink = {
         id: Math.random().toString(36).substr(2, 9),
-        url, 
-        text 
+        url,
+        text,
       };
-      setLinks(prev => [...prev, newLink]);
+      setLinks((prev) => [...prev, newLink]);
     }
   };
 
   const removeLink = (linkId: string) => {
-    setLinks(prev => prev.filter(link => link.id !== linkId));
+    setLinks((prev) => prev.filter((link) => link.id !== linkId));
   };
 
   // In the render section, filter routes based on previous route having content
@@ -232,15 +282,17 @@ const ShareRoute = () => {
             {/* Add links display section */}
             {links.length > 0 && (
               <div className="flex flex-wrap gap-2 px-4">
-                {links.map(link => (
+                {links.map((link) => (
                   <span key={link.id} className="link-preview">
-                    <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer">
                       {link.text}
                     </a>
-                    <span 
+                    <span
                       className="remove-link"
-                      onClick={() => removeLink(link.id)}
-                    >
+                      onClick={() => removeLink(link.id)}>
                       ×
                     </span>
                   </span>
@@ -256,16 +308,24 @@ const ShareRoute = () => {
                     <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
                     <div className="w-full relative input-container">
                       <input
-                        ref={el => { inputRefs.current[route.id] = el!; }}
+                        ref={(el) => {
+                          inputRefs.current[route.id] = el!;
+                        }}
                         type="text"
-                        value={route.content.text.replace(/<[^>]*>/g, '')}
-                        onChange={(e) => handleRouteChange(route.id, e.target.value)}
+                        value={route.content.text.replace(/<[^>]*>/g, "")}
+                        onChange={(e) =>
+                          handleRouteChange(route.id, e.target.value)
+                        }
                         className="route-input"
-                        placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
+                        placeholder={
+                          index === 0 ? "Where we dey go?" : "Where next?"
+                        }
                         data-route-id={route.id}
                       />
                       <div
-                        ref={el => { displayRefs.current[route.id] = el!; }}
+                        ref={(el) => {
+                          displayRefs.current[route.id] = el!;
+                        }}
                         className="input-renderer"
                         dangerouslySetInnerHTML={{ __html: route.content.text }}
                       />
@@ -275,11 +335,16 @@ const ShareRoute = () => {
                     <div className="flex flex-wrap gap-2 mt-2 ml-11">
                       {images.map((img, i) => (
                         <div key={i} className="relative w-20 h-20">
-                          <Image src={img.preview} alt="preview" layout="fill" objectFit="cover" className="rounded" />
+                          <Image
+                            src={img.preview}
+                            alt="preview"
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded"
+                          />
                           <button
                             onClick={() => removeImage(i)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                          >
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
                             ×
                           </button>
                         </div>
@@ -299,20 +364,23 @@ const ShareRoute = () => {
                 <div
                   id="text-editor"
                   className="text-xs text-gray-400 flex justify-center items-center gap-3">
-                  {['bold', 'underline', 'italic', 'strikeThrough'].map(format => (
-                    <span
-                      key={format}
-                      className={`cursor-pointer hover:text-gray-600 ${
-                        activeFormats.includes(format) ? 'text-alonggreen' : ''
-                      } ${format === 'bold' ? 'font-bold' : ''} 
-                        ${format === 'italic' ? 'italic' : ''} 
-                        ${format === 'underline' ? 'underline' : ''} 
-                        ${format === 'strikeThrough' ? 'line-through' : ''}`}
-                      onClick={() => handleTextFormat(format)}
-                    >
-                      {format.charAt(0).toUpperCase()}
-                    </span>
-                  ))}
+                  {["bold", "underline", "italic", "strikeThrough"].map(
+                    (format) => (
+                      <span
+                        key={format}
+                        className={`cursor-pointer hover:text-gray-600 ${
+                          activeFormats.includes(format)
+                            ? "text-alonggreen"
+                            : ""
+                        } ${format === "bold" ? "font-bold" : ""} 
+                        ${format === "italic" ? "italic" : ""} 
+                        ${format === "underline" ? "underline" : ""} 
+                        ${format === "strikeThrough" ? "line-through" : ""}`}
+                        onClick={() => handleTextFormat(format)}>
+                        {format.charAt(0).toUpperCase()}
+                      </span>
+                    )
+                  )}
                   <input
                     id="fileInput"
                     title="Upload Image(s)"
@@ -323,11 +391,23 @@ const ShareRoute = () => {
                     accept="image/*"
                     className="hidden"
                   />
-                  <span className="cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                    <Image src="/icons/image.svg" alt="image icon" width={12} height={12} />
+                  <span
+                    className="cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}>
+                    <Image
+                      src="/icons/image.svg"
+                      alt="image icon"
+                      width={12}
+                      height={12}
+                    />
                   </span>
                   <span className="cursor-pointer" onClick={handleLinkAdd}>
-                    <Image src="/icons/link.svg" alt="link icon" width={12} height={12} />
+                    <Image
+                      src="/icons/link.svg"
+                      alt="link icon"
+                      width={12}
+                      height={12}
+                    />
                   </span>
                 </div>
               </div>
