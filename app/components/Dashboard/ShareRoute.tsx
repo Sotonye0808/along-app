@@ -14,11 +14,6 @@ interface RouteContent {
   links: Link[];
 }
 
-interface FormattedSegment {
-  text: string;
-  formats: string[];
-}
-
 const ShareRoute = () => {
   const [creatingPost, setCreatingPost] = useState(false);
   const nextIdRef = useRef(3); // Start from 3 since we initialize with 1 and 2
@@ -43,7 +38,6 @@ const ShareRoute = () => {
 
   const [links, setLinks] = useState<Link[]>([]);
   const [activeFormats, setActiveFormats] = useState<string[]>([]);
-  const [formattedSegments, setFormattedSegments] = useState<{ [key: number]: FormattedSegment[] }>({});
 
   const toggleCreatingPost = () => {
     setCreatingPost(!creatingPost);
@@ -100,52 +94,53 @@ const ShareRoute = () => {
 
   const handleTextFormat = (format: string) => {
     const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) return;
+    if (!selection || !selection.rangeCount) {
+      // Only toggle format for future typing if no text is selected
+      setActiveFormats(prev =>
+        prev.includes(format)
+          ? prev.filter(f => f !== format)
+          : [...prev, format]
+      );
+      return;
+    }
 
     const range = selection.getRangeAt(0);
     const selectedText = range.toString();
 
     if (selectedText) {
-      // Check if selection is already formatted
+      // Only modify formatting for selected text
       const parentSpan = range.commonAncestorContainer.parentElement;
-      if (parentSpan?.tagName === "SPAN") {
+      if (parentSpan?.tagName === 'SPAN') {
         const existingFormats = getFormatFromElement(parentSpan);
         if (existingFormats.includes(format)) {
-          // Apply opposite format to cancel out existing format
-          const span = document.createElement('span');
-          span.className = getOppositeFormatClasses([format]);
-          range.surroundContents(span);
+          // Remove only this format from the selected text
+          parentSpan.classList.remove(getFormatClasses([format]));
+          if (parentSpan.classList.length === 0) {
+            // If no classes left, unwrap the span
+            const text = parentSpan.textContent || '';
+            const textNode = document.createTextNode(text);
+            parentSpan.parentNode?.replaceChild(textNode, parentSpan);
+          }
         } else {
-          // Add new format to selection
-          const span = document.createElement('span');
-          span.className = getFormatClasses([format]);
-          range.surroundContents(span);
+          // Add new format to existing span
+          parentSpan.classList.add(getFormatClasses([format]));
         }
       } else {
         // Create new formatted span
-        const span = document.createElement("span");
+        const span = document.createElement('span');
         span.className = getFormatClasses([format]);
         range.surroundContents(span);
       }
 
       // Update the input value with the modified HTML
       const routeId = parseInt(
-        range.startContainer.parentElement
-          ?.closest("[data-route-id]")
-          ?.getAttribute("data-route-id") || "0"
+        range.startContainer.parentElement?.closest('[data-route-id]')?.getAttribute('data-route-id') || '0'
       );
       const displayDiv = displayRefs.current[routeId];
       if (displayDiv) {
         const newText = displayDiv.innerHTML;
         handleRouteChange(routeId, newText, true);
       }
-    } else {
-      // Toggle format for future typing
-      setActiveFormats((prev) =>
-        prev.includes(format)
-          ? prev.filter((f) => f !== format)
-          : [...prev, format]
-      );
     }
   };
 
@@ -157,87 +152,73 @@ const ShareRoute = () => {
     const isPreviousRouteEmpty = id > 1 && routes[id - 2].content.text.trim() === '';
     if (isPreviousRouteEmpty) return;
 
-      // Reconstruct the formatted text
-      let newValue = '';
-      let currentPos = 0;
-      
-    if (!isFormatted) {
+    let newValue = value;
+    if (!isFormatted && activeFormats.length > 0) {
+      // Get the difference between old and new text
       const oldText = route.content.text.replace(/<[^>]*>/g, '');
       const newText = value;
       
-      // Initialize segments array if it doesn't exist
-      if (!formattedSegments[id]) {
-        formattedSegments[id] = [];
-      }
-
       if (newText.length > oldText.length) {
-        // Text was added
-        const addedText = newText.slice(oldText.length);
+        // Find the last span if it exists
+        const lastSpanMatch = route.content.text.match(/<span[^>]*>[^<]*<\/span>$/);
         
-        // Add new segment with current active formats
-        if (activeFormats.length > 0) {
-          formattedSegments[id].push({
-            text: addedText,
-            formats: [...activeFormats]
-          });
+        if (lastSpanMatch) {
+          // If there's a formatted span at the end, append to it
+          const spanContent = lastSpanMatch[0].match(/>([^<]*)</)?.[1] || '';
+          const newContent = newText.slice(oldText.length);
+          newValue = route.content.text.slice(0, -lastSpanMatch[0].length) +
+            `<span class="${getFormatClasses(activeFormats)}">${spanContent}${newContent}</span>`;
+        } else {
+          // Create new formatted span for new text
+          const addedText = newText.slice(oldText.length);
+          newValue = route.content.text + 
+            `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`;
         }
       } else {
-        // Text was deleted - remove characters from segments
-        const deletedCount = oldText.length - newText.length;
-        let remainingToDelete = deletedCount;
+        // Handle deletions while preserving formatting
+        const spans = route.content.text.match(/<span[^>]*>[^<]*<\/span>/g) || [];
+        const plainText = route.content.text.replace(/<[^>]*>/g, '');
+        const deletedCount = plainText.length - newText.length;
         
-        while (remainingToDelete > 0 && formattedSegments[id].length > 0) {
-          const lastSegment = formattedSegments[id][formattedSegments[id].length - 1];
-          if (lastSegment.text.length <= remainingToDelete) {
-            remainingToDelete -= lastSegment.text.length;
-            formattedSegments[id].pop();
-          } else {
-            lastSegment.text = lastSegment.text.slice(0, -remainingToDelete);
-            remainingToDelete = 0;
-          }
+        if (spans.length > 0) {
+          // Reconstruct the formatted text with deletions
+          let result = '';
+          let textPos = 0;
+          
+          spans.forEach(span => {
+            const spanText = span.match(/>([^<]*)</)?.[1] || '';
+            const spanPos = plainText.indexOf(spanText, textPos);
+            
+            if (spanPos >= 0) {
+              // Add any unformatted text before span
+              const beforeSpan = newText.slice(textPos, spanPos);
+              result += beforeSpan;
+              
+              // Add the span with possibly truncated text
+              const spanEndPos = spanPos + spanText.length;
+              const remainingText = newText.slice(spanPos, spanEndPos);
+              if (remainingText) {
+                result += span.replace(spanText, remainingText);
+              }
+              
+              textPos = spanEndPos;
+            }
+          });
+          
+          // Add any remaining unformatted text
+          result += newText.slice(textPos);
+          newValue = result;
         }
       }
-
-
-      formattedSegments[id].forEach(segment => {
-        // Add any unformatted text before this segment
-        const unformattedText = value.slice(currentPos, value.indexOf(segment.text, currentPos));
-        if (unformattedText) {
-          newValue += unformattedText;
-        }
-
-        // Add the formatted segment
-        if (segment.formats.length > 0) {
-          newValue += `<span class="${getFormatClasses(segment.formats)}">${segment.text}</span>`;
-        } else {
-          newValue += segment.text;
-        }
-
-        currentPos = value.indexOf(segment.text, currentPos) + segment.text.length;
-      });
-
-      // Add any remaining unformatted text
-      if (currentPos < value.length) {
-        newValue += value.slice(currentPos);
-      }
-
-      const updatedRoutes = routes.map(route =>
-        route.id === id
-          ? { ...route, content: { ...route.content, text: value } }
-          : route
-      );
-
-      setRoutes(updatedRoutes);
-      setFormattedSegments({ ...formattedSegments });
-    } else {
-      // Handle formatted text from selection
-      const updatedRoutes = routes.map(route =>
-        route.id === id
-          ? { ...route, content: { ...route.content, text: value } }
-          : route
-      );
-      setRoutes(updatedRoutes);
     }
+
+    const updatedRoutes = routes.map(route =>
+      route.id === id
+        ? { ...route, content: { ...route.content, text: newValue } }
+        : route
+    );
+
+    setRoutes(updatedRoutes);
 
     // Update cursor position correctly
     requestAnimationFrame(() => {
@@ -251,12 +232,6 @@ const ShareRoute = () => {
 
     // Add new input logic
     if (id === routes[routes.length - 1].id && value.trim().length > 0) {
-      const updatedRoutes = routes.map(route =>
-        route.id === id
-          ? { ...route, content: { ...route.content, text: newValue || value } }
-          : route
-      );
-
       const allPreviousHaveValue = routes.every(
         (route, index) =>
           index === routes.length - 1 || route.content.text.trim() !== ""

@@ -9,8 +9,8 @@ const Topbar = () => {
         <Image
           src="/icons/notifications.svg"
           alt="notifications icon"
-          width={24}
-          height={24}
+          width={26}
+          height={26}
         />
       </Link>
 
@@ -18,8 +18,8 @@ const Topbar = () => {
         <Image
           src="/icons/profile.svg"
           alt="profile icon"
-          width={24}
-          height={24}
+          width={26}
+          height={26}
         />
       </Link>
     </div>
