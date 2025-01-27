@@ -22,7 +22,7 @@ const MainPanel = () => {
 					</p>
 					<div className="mb-4">
 						<img
-							src="https://via.placeholder.com/400x160"
+							src="/post-image.jpeg"
 							alt="post content"
 							className="rounded-md"
 						/>

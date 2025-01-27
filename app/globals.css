@@ -35,6 +35,82 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   background-color: #9ca3af;
 }
 
+/* Input overlay styles */
+.input-container {
+  position: relative;
+  width: 100%;
+  min-height: 2.5rem;
+}
+
+.input-container input {
+  width: 100%;
+  border: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  outline: none;
+  padding: 0.5rem 1rem;
+  font-size: inherit;
+  background: transparent;
+  font-family: inherit;
+}
+
+.input-container input:not([value=""]) {
+  -webkit-text-fill-color: transparent;
+}
+
+.input-container .input-renderer {
+  position: absolute;
+  inset: 0;
+  padding: 0.5rem 1rem;
+  white-space: pre-wrap;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-user-select: none;
+  user-select: none;
+  word-break: break-word;
+}
+
+.input-container .input-renderer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Placeholder styling */
+.input-placeholder {
+  position: absolute;
+  top: 0.5rem;
+  left: 1rem;
+  color: #9CA3AF;
+  pointer-events: none;
+}
+
+/* Markdown styles */
+.input-renderer p {
+  margin: 0;
+  display: inline;
+}
+
+.input-renderer strong {
+  font-weight: bold;
+}
+
+.input-renderer em {
+  font-style: italic;
+}
+
+.input-renderer u {
+  text-decoration: underline;
+}
+
+.input-renderer del {
+  text-decoration: line-through;
+}
+
+.input-renderer a {
+  color: #10B981;
+  text-decoration: underline;
+}
+
 
 
 

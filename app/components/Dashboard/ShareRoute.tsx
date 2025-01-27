@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useCallback, useRef } from "react";
 import Image from "next/image";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const ShareRoute = () => {
   const [creatingPost, setCreatingPost] = useState(false);
@@ -33,31 +35,39 @@ const ShareRoute = () => {
     return selection.getRangeAt(0);
   };
 
-  const applyFormatToSelection = (format: string) => {
-    const selection = getSelection();
-    if (!selection) return;
-
-    const element = selection.commonAncestorContainer.parentElement;
-    if (!element) return;
-
-    const routeId = parseInt(element.getAttribute('data-route-id') || '0');
-    const range = selection.cloneRange();
-    
-    let tag = '';
+  const formatToMarkdown = (format: string, text: string): string => {
     switch (format) {
-      case 'bold': tag = 'strong'; break;
-      case 'italic': tag = 'em'; break;
-      case 'underline': tag = 'u'; break;
-      case 'strikeThrough': tag = 's'; break;
+      case 'bold': return `**${text}**`;
+      case 'italic': return `*${text}*`;
+      case 'underline': return `<u>${text}</u>`; // HTML fallback for underline
+      case 'strikeThrough': return `~~${text}~~`;
+      default: return text;
     }
+  };
 
-    const wrapper = document.createElement(tag);
-    range.surroundContents(wrapper);
+  const applyFormatToSelection = (format: string) => {
+    const inputElement = document.activeElement as HTMLInputElement;
+    if (inputElement?.type !== 'text') return;
+
+    const routeId = parseInt(inputElement.getAttribute('data-route-id') || '0');
+    const start = inputElement.selectionStart || 0;
+    const end = inputElement.selectionEnd || 0;
+    const text = inputElement.value;
     
-    // Update content in state
-    const updatedContent = element.innerHTML;
-    setRawContent(prev => ({ ...prev, [routeId]: updatedContent }));
-    handleRouteChange(routeId, updatedContent, element);
+    const selectedText = text.substring(start, end);
+    const formattedText = formatToMarkdown(format, selectedText);
+    
+    const newText = text.substring(0, start) + formattedText + text.substring(end);
+    handleRouteChange(routeId, newText);
+    
+    // Restore selection
+    requestAnimationFrame(() => {
+      inputElement.focus();
+      inputElement.setSelectionRange(
+        start + formattedText.length - selectedText.length,
+        end + formattedText.length - selectedText.length
+      );
+    });
   };
 
   const handleTextFormat = useCallback((format: string) => {
@@ -85,20 +95,21 @@ const ShareRoute = () => {
     return classes ? `<span class="${classes.trim()}">${formattedText}</span>` : formattedText;
   };
 
-  const handleRouteChange = (id: number, value: string, element?: HTMLElement) => {
+  const syncScroll = (id: number, e: React.UIEvent<HTMLInputElement>) => {
     const displayElement = displayRefs.current[id];
-    const inputElement = inputRefs.current[id];
+    if (displayElement) {
+      displayElement.scrollTop = e.currentTarget.scrollTop;
+      displayElement.scrollLeft = e.currentTarget.scrollLeft;
+    }
+  };
+
+  const handleRouteChange = (id: number, value: string) => {
+    // Store markdown content
+    setRawContent(prev => ({ ...prev, [id]: value }));
     
-    // Format text if there are active formats
-    const formattedValue = formatText(value, activeFormats);
-    
-    // Update raw content for display
-    setRawContent(prev => ({ ...prev, [id]: formattedValue }));
-    
-    // Update routes state with plain text
-    const plainText = value.replace(/<[^>]*>/g, '');
+    // Update routes state with the same value
     const updatedRoutes = routes.map(route =>
-      route.id === id ? { ...route, value: plainText } : route
+      route.id === id ? { ...route, value } : route
     );
 
     // If a route is emptied, remove all subsequent routes
@@ -131,6 +142,7 @@ const ShareRoute = () => {
 
     // Restore cursor position
     requestAnimationFrame(() => {
+      const inputElement = inputRefs.current[id];
       if (inputElement) {
         inputElement.setSelectionRange(selection.start, selection.end);
         inputElement.focus();
@@ -162,7 +174,7 @@ const ShareRoute = () => {
       const linkMd = `[${text}](${url})`;
       // Insert at current route's cursor position or append to last route
       const lastRoute = routes[routes.length - 1];
-      handleRouteChange(lastRoute.id, lastRoute.value + ' ' + linkMd, document.createElement('div'));
+      handleRouteChange(lastRoute.id, lastRoute.value + ' ' + linkMd);
     }
   };
 
@@ -228,33 +240,43 @@ const ShareRoute = () => {
                 <div key={route.id} className="route-entry flex flex-col">
                   <div className="flex items-center">
                     <div className="profile-pic-placeholder w-9 h-8 rounded-full bg-gray-500 ml-2 shrink-0"></div>
-                    <div className="w-full relative">
-                      <input
-                        ref={el => { inputRefs.current[route.id] = el!; }}
-                        type="text"
-                        value={routes.find(r => r.id === route.id)?.value || ''}
-                        onChange={(e) => handleRouteChange(route.id, e.target.value)}
-                        onSelect={(e) => handleSelectionChange(
-                          route.id,
-                          e.currentTarget.selectionStart ?? 0,
-                          e.currentTarget.selectionEnd ?? 0
-                        )}
-                        className="absolute inset-0 opacity-0 w-full h-full cursor-text"
-                        title="Route input"
-                        placeholder="Enter route details"
-                      />
-                      <div
-                        ref={el => { displayRefs.current[route.id] = el!; }}
-                        className="rounded-lg py-2 px-4 w-full bg-transparent focus-within:outline-none focus-within:border-r focus-within:border-y focus-within:border-green-500 min-h-[2.5rem] whitespace-pre-wrap break-words"
-                        dangerouslySetInnerHTML={{ 
-                          __html: rawContent[route.id] || ''
-                        }}
-                      />
-                      {(!rawContent[route.id] || rawContent[route.id].length === 0) && (
-                        <div className="absolute top-2 left-4 text-gray-400 pointer-events-none">
-                          {index === 0 ? "Where we dey go?" : "Where next?"}
+                    <div className="w-full">
+                      <div className="input-container rounded-lg focus-within:border focus-within:border-green-500">
+                        <input
+                          ref={el => { inputRefs.current[route.id] = el!; }}
+                          type="text"
+                          value={routes.find(r => r.id === route.id)?.value || ''}
+                          onChange={(e) => handleRouteChange(route.id, e.target.value)}
+                          onScroll={(e) => syncScroll(route.id, e)}
+                          onSelect={(e) => handleSelectionChange(
+                            route.id,
+                            e.currentTarget.selectionStart ?? 0,
+                            e.currentTarget.selectionEnd ?? 0
+                          )}
+                          data-route-id={route.id}
+                          className="route-input"
+                        />
+                        <div
+                          ref={el => { displayRefs.current[route.id] = el!; }}
+                          className="input-renderer"
+                        >
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              // Override component rendering as needed
+                              p: ({children}) => <span>{children}</span>,
+                              u: ({children}) => <u>{children}</u>,
+                            }}
+                          >
+                            {rawContent[route.id] || ''}
+                          </ReactMarkdown>
                         </div>
-                      )}
+                        {(!rawContent[route.id] || rawContent[route.id].length === 0) && (
+                          <div className="input-placeholder">
+                            {index === 0 ? "Where we dey go?" : "Where next?"}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {index === routes.length - 1 && images.length > 0 && (
