@@ -79,32 +79,7 @@ const ShareRoute = () => {
   };
 
   const handleTextFormat = (format: string) => {
-    const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const selectedText = range.toString();
-
-    if (selectedText) {
-      // Simply wrap selected text with formatting
-      const span = document.createElement('span');
-      span.className = getFormatClasses([format]);
-      range.surroundContents(span);
-
-      // Update the input value with the modified HTML
-      const routeId = parseInt(
-        range.startContainer.parentElement
-          ?.closest('[data-route-id]')
-          ?.getAttribute('data-route-id') || '0'
-      );
-      const displayDiv = displayRefs.current[routeId];
-      if (displayDiv) {
-        const newText = displayDiv.innerHTML;
-        handleRouteChange(routeId, newText, true);
-      }
-    }
-
-    // Toggle format for future typing
+    // Simply toggle format for future typing
     setActiveFormats(prev =>
       prev.includes(format)
         ? prev.filter(f => f !== format)
@@ -117,18 +92,23 @@ const ShareRoute = () => {
     if (!route) return;
 
     let newValue = value;
-    if (!isFormatted && activeFormats.length > 0) {
+    if (!isFormatted) {
       // Get the difference between old and new text
       const oldText = route.content.text.replace(/<[^>]*>/g, '');
       const newText = value;
       
       if (newText.length > oldText.length) {
-        // Format only newly added text
+        // Only format newly added text
         const addedText = newText.slice(oldText.length);
-        const formattedSpan = `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`;
-        newValue = route.content.text + formattedSpan;
+        
+        // Keep existing content (with its formatting) and only format new text if formats are active
+        newValue = route.content.text + (
+          activeFormats.length > 0 
+            ? `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`
+            : addedText
+        );
       } else {
-        // Handle text removal while preserving formatting
+        // Text was removed - preserve formatting of remaining text
         const remainingText = newText;
         const spans = route.content.text.match(/<span[^>]*>[^<]*<\/span>/g) || [];
         const plainText = route.content.text.replace(/<[^>]*>/g, '');
@@ -146,11 +126,11 @@ const ShareRoute = () => {
               newValue += remainingText.slice(currentPos, spanPos);
             }
             
-            // Add the formatted span if its text is still present
+            // Keep the formatted span if its text is still present
             const spanEndPos = spanPos + spanText.length;
             if (spanEndPos <= remainingText.length) {
               const preservedText = remainingText.slice(spanPos, spanEndPos);
-              newValue += `<span${span.match(/class="[^"]*"/)?.[0] || ''}>${preservedText}</span>`;
+              newValue += span.replace(spanText, preservedText);
             }
             currentPos = spanEndPos;
           }
