@@ -362,7 +362,7 @@ const ShareRoute = () => {
                         key={format}
                         className={`cursor-pointer hover:text-gray-600 ${
                           activeFormats.includes(format)
-                            ? "text-alonggreen bg-alonggreen rounded-sm p-[0.05rem]"
+                            ? "text-alonggreen bg-alonggreen rounded-md p-[0.08rem]"
                             : ""
                         } ${format === "bold" ? "font-bold" : ""} 
                         ${format === "italic" ? "italic" : ""} 
