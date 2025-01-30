@@ -80,23 +80,27 @@ const ShareRoute = () => {
 
   const handleTextFormat = (format: string) => {
     // Simply toggle format for future typing
-    setActiveFormats(prev =>
+    setActiveFormats((prev) =>
       prev.includes(format)
-        ? prev.filter(f => f !== format)
+        ? prev.filter((f) => f !== format)
         : [...prev, format]
     );
   };
 
-  const handleRouteChange = (id: number, value: string, isFormatted = false) => {
-    const route = routes.find(r => r.id === id);
+  const handleRouteChange = (
+    id: number,
+    value: string,
+    isFormatted = false
+  ) => {
+    const route = routes.find((r) => r.id === id);
     if (!route) return;
 
     let newValue = value;
     if (!isFormatted) {
       const input = inputRefs.current[id];
       const cursorPos = input?.selectionStart || 0;
-      const oldText = route.content.text.replace(/<[^>]*>/g, '');
-      
+      const oldText = route.content.text.replace(/<[^>]*>/g, "");
+
       // Handle text insertion at cursor position
       if (value.length > oldText.length) {
         const addedChar = value[cursorPos - 1];
@@ -109,23 +113,37 @@ const ShareRoute = () => {
 
         if (lastSpanBeforeCursor && spanContinuesAfter) {
           // Insert within existing formatted span
-          const spanClassMatch = lastSpanBeforeCursor[0].match(/class="([^"]*)"/);
+          const spanClassMatch =
+            lastSpanBeforeCursor[0].match(/class="([^"]*)"/);
           const spanClass = spanClassMatch ? spanClassMatch[1] : "";
-          const textBeforeSpan = beforeCursor.slice(0, lastSpanBeforeCursor.index);
-          const textInSpanBefore = lastSpanBeforeCursor[0].replace(/<span[^>]*>/, '');
-          const textInSpanAfter = spanContinuesAfter[0].replace(/<\/span>/, '');
-          
-          newValue = `${textBeforeSpan}<span class="${spanClass}">${textInSpanBefore}${addedChar}${textInSpanAfter}</span>${afterCursor.slice(spanContinuesAfter[0].length)}`;
+          const textBeforeSpan = beforeCursor.slice(
+            0,
+            lastSpanBeforeCursor.index
+          );
+          const textInSpanBefore = lastSpanBeforeCursor[0].replace(
+            /<span[^>]*>/,
+            ""
+          );
+          const textInSpanAfter = spanContinuesAfter[0].replace(/<\/span>/, "");
+
+          newValue = `${textBeforeSpan}<span class="${spanClass}">${textInSpanBefore}${addedChar}${textInSpanAfter}</span>${afterCursor.slice(
+            spanContinuesAfter[0].length
+          )}`;
         } else {
           // Insert new character with active formatting if any
-          const insertion = activeFormats.length > 0
-            ? `<span class="${getFormatClasses(activeFormats)}">${addedChar}</span>`
-            : addedChar;
+          const insertion =
+            activeFormats.length > 0
+              ? `<span class="${getFormatClasses(
+                  activeFormats
+                )}">${addedChar}</span>`
+              : addedChar;
           newValue = beforeCursor + insertion + afterCursor;
         }
       } else {
         // Handle text deletion while preserving formatting
-        const deletedPos = oldText.split('').findIndex((char, i) => value[i] !== char);
+        const deletedPos = oldText
+          .split("")
+          .findIndex((char, i) => value[i] !== char);
         const beforeDelete = route.content.text.slice(0, deletedPos);
         const afterDelete = route.content.text.slice(deletedPos + 1);
 
@@ -134,7 +152,7 @@ const ShareRoute = () => {
       }
     }
 
-    const updatedRoutes = routes.map(route =>
+    const updatedRoutes = routes.map((route) =>
       route.id === id
         ? { ...route, content: { ...route.content, text: newValue } }
         : route
@@ -300,7 +318,10 @@ const ShareRoute = () => {
                         onSelect={(e) => {
                           const input = e.currentTarget;
                           requestAnimationFrame(() => {
-                            input.setSelectionRange(input.selectionStart, input.selectionEnd);
+                            input.setSelectionRange(
+                              input.selectionStart,
+                              input.selectionEnd
+                            );
                           });
                         }}
                         className="route-input"
@@ -311,7 +332,9 @@ const ShareRoute = () => {
                           displayRefs.current[route.id] = el!;
                         }}
                         className="input-renderer"
-                        data-placeholder={index === 0 ? "Where we dey go?" : "Where next?"}
+                        data-placeholder={
+                          index === 0 ? "Where we dey go?" : "Where next?"
+                        }
                         dangerouslySetInnerHTML={{ __html: route.content.text }}
                       />
                     </div>
@@ -362,7 +385,37 @@ const ShareRoute = () => {
                         ${format === "underline" ? "underline" : ""} 
                         ${format === "strikeThrough" ? "line-through" : ""}`}
                         onClick={() => handleTextFormat(format)}>
-                        {format.charAt(0).toUpperCase()}
+                        {format.charAt(0).toUpperCase() === "B" ? (
+                          <Image
+                            src="/icons/bold.svg"
+                            alt="Bold icon"
+                            width={14}
+                            height={14}
+                          />
+                        ) : format.charAt(0).toUpperCase() === "I" ? (
+                          <Image
+                            src="/icons/italicize.svg"
+                            alt="Italics icon"
+                            width={14}
+                            height={14}
+                          />
+                        ) : format.charAt(0).toUpperCase() === "U" ? (
+                          <Image
+                            src="/icons/underline.svg"
+                            alt="Underline icon"
+                            width={14}
+                            height={14}
+                          />
+                        ) : format.charAt(0).toUpperCase() === "S" ? (
+                          <Image
+                            src="/icons/strikethrough.svg"
+                            alt="Strikethrough icon"
+                            width={14}
+                            height={14}
+                          />
+                        ) : (
+                          ""
+                        )}
                       </span>
                     )
                   )}
@@ -382,16 +435,16 @@ const ShareRoute = () => {
                     <Image
                       src="/icons/image.svg"
                       alt="image icon"
-                      width={12}
-                      height={12}
+                      width={14}
+                      height={14}
                     />
                   </span>
                   <span className="cursor-pointer" onClick={handleLinkAdd}>
                     <Image
                       src="/icons/link.svg"
                       alt="link icon"
-                      width={12}
-                      height={12}
+                      width={14}
+                      height={14}
                     />
                   </span>
                 </div>
