@@ -29,7 +29,7 @@ const Dashboard = () => {
 
 				{/* Main Panel */}
 				<div className="flex">
-					<div className="md:w-4/6 py-2 pb-20 md:pb-3 flex flex-col md:h-[90vh] h-[85vh] overflow-y-auto">
+					<div className="md:w-4/6 py-3 pb-20 md:pb-3 flex flex-col md:h-[85vh] h-[82.5vh] overflow-y-auto">
 						<div className="md:mr-4">
 							<MainPanel />
 						</div>

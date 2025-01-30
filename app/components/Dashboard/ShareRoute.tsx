@@ -23,6 +23,8 @@ const ShareRoute = () => {
       { id: 2, content: { text: "", links: [] } },
     ]
   );
+  const maxintialRouteLength = 300;
+  const maxSubsequentRouteLength = 200;
 
   // New state for active formatting and media
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
@@ -309,6 +311,7 @@ const ShareRoute = () => {
                         }
                         className="route-input"
                         data-route-id={route.id}
+                        max={index === 0 ? maxintialRouteLength : maxSubsequentRouteLength}
                       />
                       <div
                         ref={(el) => {
