@@ -68,20 +68,6 @@ const ShareRoute = () => {
       .join(" ");
   };
 
-  const getOppositeFormatClasses = (formats: string[]): string => {
-    return formats
-      .map(format => {
-        switch (format) {
-          case 'bold': return 'font-normal';
-          case 'italic': return 'not-italic';
-          case 'underline': return 'no-underline';
-          case 'strikeThrough': return 'no-line-through';
-          default: return '';
-        }
-      })
-      .join(' ');
-  };
-
   const getFormatFromElement = (element: HTMLElement): string[] => {
     const formats: string[] = [];
     if (element.classList.contains("font-bold")) formats.push("bold");
@@ -100,56 +86,35 @@ const ShareRoute = () => {
     const selectedText = range.toString();
 
     if (selectedText) {
-      // Check if selection is already formatted
-      const parentSpan = range.commonAncestorContainer.parentElement;
-      if (parentSpan?.tagName === "SPAN") {
-        const existingFormats = getFormatFromElement(parentSpan);
-        if (existingFormats.includes(format)) {
-          // Apply opposite format to cancel out existing format
-          const span = document.createElement('span');
-          span.className = getOppositeFormatClasses([format]);
-          range.surroundContents(span);
-        } else {
-          // Add new format to selection
-          const span = document.createElement('span');
-          span.className = getFormatClasses([format]);
-          range.surroundContents(span);
-        }
-      } else {
-        // Create new formatted span
-        const span = document.createElement("span");
-        span.className = getFormatClasses([format]);
-        range.surroundContents(span);
-      }
+      // Simply wrap selected text with formatting
+      const span = document.createElement('span');
+      span.className = getFormatClasses([format]);
+      range.surroundContents(span);
 
       // Update the input value with the modified HTML
       const routeId = parseInt(
         range.startContainer.parentElement
-          ?.closest("[data-route-id]")
-          ?.getAttribute("data-route-id") || "0"
+          ?.closest('[data-route-id]')
+          ?.getAttribute('data-route-id') || '0'
       );
       const displayDiv = displayRefs.current[routeId];
       if (displayDiv) {
         const newText = displayDiv.innerHTML;
         handleRouteChange(routeId, newText, true);
       }
-    } else {
-      // Toggle format for future typing
-      setActiveFormats((prev) =>
-        prev.includes(format)
-          ? prev.filter((f) => f !== format)
-          : [...prev, format]
-      );
     }
+
+    // Toggle format for future typing
+    setActiveFormats(prev =>
+      prev.includes(format)
+        ? prev.filter(f => f !== format)
+        : [...prev, format]
+    );
   };
 
   const handleRouteChange = (id: number, value: string, isFormatted = false) => {
     const route = routes.find(r => r.id === id);
     if (!route) return;
-
-    // Don't prevent typing in non-first routes
-    const isPreviousRouteEmpty = id > 1 && routes[id - 2].content.text.trim() === '';
-    if (isPreviousRouteEmpty) return;
 
     let newValue = value;
     if (!isFormatted && activeFormats.length > 0) {
@@ -158,33 +123,38 @@ const ShareRoute = () => {
       const newText = value;
       
       if (newText.length > oldText.length) {
-        // Text was added
+        // Format only newly added text
         const addedText = newText.slice(oldText.length);
-        newValue = route.content.text + `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`;
+        const formattedSpan = `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`;
+        newValue = route.content.text + formattedSpan;
       } else {
-        // Text was removed
+        // Handle text removal while preserving formatting
         const remainingText = newText;
-        // Find all formatted spans and reconstruct with remaining text
-        const spans = route.content.text.match(/<span class="[^"]*">[^<]*<\/span>/g) || [];
-        // eslint-disable-next-line prefer-const
-        let plainText = route.content.text.replace(/<[^>]*>/g, '');
+        const spans = route.content.text.match(/<span[^>]*>[^<]*<\/span>/g) || [];
+        const plainText = route.content.text.replace(/<[^>]*>/g, '');
         
-        newValue = '';
         let currentPos = 0;
+        newValue = '';
         
-        spans.forEach(span => {
+        for (const span of spans) {
           const spanText = span.match(/>([^<]*)</)?.[1] || '';
-          const spanPos = plainText.indexOf(spanText);
-          if (spanPos >= 0 && currentPos <= spanPos && spanPos + spanText.length <= remainingText.length) {
+          const spanPos = plainText.indexOf(spanText, currentPos);
+          
+          if (spanPos >= 0 && spanPos < remainingText.length) {
             // Add any unformatted text before this span
             if (spanPos > currentPos) {
               newValue += remainingText.slice(currentPos, spanPos);
             }
-            // Add the span if its text is still present
-            newValue += span;
-            currentPos = spanPos + spanText.length;
+            
+            // Add the formatted span if its text is still present
+            const spanEndPos = spanPos + spanText.length;
+            if (spanEndPos <= remainingText.length) {
+              const preservedText = remainingText.slice(spanPos, spanEndPos);
+              newValue += `<span${span.match(/class="[^"]*"/)?.[0] || ''}>${preservedText}</span>`;
+            }
+            currentPos = spanEndPos;
           }
-        });
+        }
         
         // Add any remaining unformatted text
         if (currentPos < remainingText.length) {
@@ -201,7 +171,7 @@ const ShareRoute = () => {
 
     setRoutes(updatedRoutes);
 
-    // Update cursor position correctly
+    // Update cursor position
     requestAnimationFrame(() => {
       const input = inputRefs.current[id];
       if (input) {
