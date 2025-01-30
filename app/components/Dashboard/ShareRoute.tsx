@@ -93,53 +93,44 @@ const ShareRoute = () => {
 
     let newValue = value;
     if (!isFormatted) {
-      // Get the difference between old and new text
+      const input = inputRefs.current[id];
+      const cursorPos = input?.selectionStart || 0;
       const oldText = route.content.text.replace(/<[^>]*>/g, '');
-      const newText = value;
       
-      if (newText.length > oldText.length) {
-        // Only format newly added text
-        const addedText = newText.slice(oldText.length);
-        
-        // Keep existing content (with its formatting) and only format new text if formats are active
-        newValue = route.content.text + (
-          activeFormats.length > 0 
-            ? `<span class="${getFormatClasses(activeFormats)}">${addedText}</span>`
-            : addedText
-        );
-      } else {
-        // Text was removed - preserve formatting of remaining text
-        const remainingText = newText;
-        const spans = route.content.text.match(/<span[^>]*>[^<]*<\/span>/g) || [];
-        const plainText = route.content.text.replace(/<[^>]*>/g, '');
-        
-        let currentPos = 0;
-        newValue = '';
-        
-        for (const span of spans) {
-          const spanText = span.match(/>([^<]*)</)?.[1] || '';
-          const spanPos = plainText.indexOf(spanText, currentPos);
+      // Handle text insertion at cursor position
+      if (value.length > oldText.length) {
+        const addedChar = value[cursorPos - 1];
+        const beforeCursor = route.content.text.slice(0, cursorPos - 1);
+        const afterCursor = route.content.text.slice(cursorPos - 1);
+
+        // Check if cursor is within a formatted span
+        const lastSpanBeforeCursor = beforeCursor.match(/<span[^>]*>[^<]*$/);
+        const spanContinuesAfter = afterCursor.match(/^[^<]*<\/span>/);
+
+        if (lastSpanBeforeCursor && spanContinuesAfter) {
+          // Insert within existing formatted span
+          const spanClassMatch = lastSpanBeforeCursor[0].match(/class="([^"]*)"/);
+          const spanClass = spanClassMatch ? spanClassMatch[1] : "";
+          const textBeforeSpan = beforeCursor.slice(0, lastSpanBeforeCursor.index);
+          const textInSpanBefore = lastSpanBeforeCursor[0].replace(/<span[^>]*>/, '');
+          const textInSpanAfter = spanContinuesAfter[0].replace(/<\/span>/, '');
           
-          if (spanPos >= 0 && spanPos < remainingText.length) {
-            // Add any unformatted text before this span
-            if (spanPos > currentPos) {
-              newValue += remainingText.slice(currentPos, spanPos);
-            }
-            
-            // Keep the formatted span if its text is still present
-            const spanEndPos = spanPos + spanText.length;
-            if (spanEndPos <= remainingText.length) {
-              const preservedText = remainingText.slice(spanPos, spanEndPos);
-              newValue += span.replace(spanText, preservedText);
-            }
-            currentPos = spanEndPos;
-          }
+          newValue = `${textBeforeSpan}<span class="${spanClass}">${textInSpanBefore}${addedChar}${textInSpanAfter}</span>${afterCursor.slice(spanContinuesAfter[0].length)}`;
+        } else {
+          // Insert new character with active formatting if any
+          const insertion = activeFormats.length > 0
+            ? `<span class="${getFormatClasses(activeFormats)}">${addedChar}</span>`
+            : addedChar;
+          newValue = beforeCursor + insertion + afterCursor;
         }
-        
-        // Add any remaining unformatted text
-        if (currentPos < remainingText.length) {
-          newValue += remainingText.slice(currentPos);
-        }
+      } else {
+        // Handle text deletion while preserving formatting
+        const deletedPos = oldText.split('').findIndex((char, i) => value[i] !== char);
+        const beforeDelete = route.content.text.slice(0, deletedPos);
+        const afterDelete = route.content.text.slice(deletedPos + 1);
+
+        // Reconstruct the content preserving formatting
+        newValue = beforeDelete + afterDelete;
       }
     }
 
@@ -151,12 +142,11 @@ const ShareRoute = () => {
 
     setRoutes(updatedRoutes);
 
-    // Update cursor position
+    // Preserve cursor position
     requestAnimationFrame(() => {
       const input = inputRefs.current[id];
       if (input) {
-        const pos = value.length;
-        input.setSelectionRange(pos, pos);
+        input.setSelectionRange(input.selectionStart, input.selectionStart);
         input.focus();
       }
     });
@@ -307,6 +297,12 @@ const ShareRoute = () => {
                         onChange={(e) =>
                           handleRouteChange(route.id, e.target.value)
                         }
+                        onSelect={(e) => {
+                          const input = e.currentTarget;
+                          requestAnimationFrame(() => {
+                            input.setSelectionRange(input.selectionStart, input.selectionEnd);
+                          });
+                        }}
                         className="route-input"
                         data-route-id={route.id}
                       />
