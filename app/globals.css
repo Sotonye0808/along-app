@@ -68,9 +68,6 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   position: absolute;
   inset: 0;
   padding: 0.5rem 1rem;
-  pointer-events: none;
-  -webkit-user-select: none;
-  user-select: none;
   color: #374151; /* text-gray-700 */
   line-height: 1.5;
   overflow-y: auto;
