@@ -41,6 +41,7 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   width: 100%;
   min-height: 2.5rem;
   border-radius: 0.375rem;
+  overflow: hidden;
 }
 
 .input-container:focus-within {
@@ -62,14 +63,16 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   color: transparent;
   caret-color: black;
   border-radius: 0.375rem;
+  overflow-x: auto;
+  white-space: pre;
 }
 
 .input-container .input-renderer {
   position: absolute;
   inset: 0;
   padding: 0.5rem 1rem;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
+  white-space: pre;
+  overflow-x: auto;
   pointer-events: none;
   -webkit-user-select: none;
   user-select: none;

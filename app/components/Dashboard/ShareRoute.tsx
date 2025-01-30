@@ -39,6 +39,9 @@ const ShareRoute = () => {
   const [links, setLinks] = useState<Link[]>([]);
   const [activeFormats, setActiveFormats] = useState<string[]>([]);
 
+  const MAX_CHARS_FIRST_ROUTE = 300;
+  const MAX_CHARS_OTHER_ROUTES = 200;
+
   const toggleCreatingPost = () => {
     setCreatingPost(!creatingPost);
   };
@@ -87,6 +90,18 @@ const ShareRoute = () => {
     );
   };
 
+  const sanitizeHTML = (html: string) => {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.innerHTML;
+  };
+
+  const getPlainTextLength = (html: string) => {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent?.length || 0;
+  };
+
   const handleRouteChange = (
     id: number,
     value: string,
@@ -95,60 +110,60 @@ const ShareRoute = () => {
     const route = routes.find((r) => r.id === id);
     if (!route) return;
 
+    const input = inputRefs.current[id];
+    const cursorPos = input?.selectionStart || 0;
+    
+    // Check character limit
+    const isFirstRoute = id === 1;
+    const maxChars = isFirstRoute ? MAX_CHARS_FIRST_ROUTE : MAX_CHARS_OTHER_ROUTES;
+    const plainTextLength = getPlainTextLength(route.content.text);
+    
+    if (plainTextLength >= maxChars && value.length > plainTextLength) {
+      return;
+    }
+
     let newValue = value;
     if (!isFormatted) {
-      const input = inputRefs.current[id];
-      const cursorPos = input?.selectionStart || 0;
-      const oldText = route.content.text.replace(/<[^>]*>/g, "");
-
-      // Handle text insertion at cursor position
-      if (value.length > oldText.length) {
-        const addedChar = value[cursorPos - 1];
-        const beforeCursor = route.content.text.slice(0, cursorPos - 1);
-        const afterCursor = route.content.text.slice(cursorPos - 1);
-
-        // Check if cursor is within a formatted span
-        const lastSpanBeforeCursor = beforeCursor.match(/<span[^>]*>[^<]*$/);
-        const spanContinuesAfter = afterCursor.match(/^[^<]*<\/span>/);
-
-        if (lastSpanBeforeCursor && spanContinuesAfter) {
-          // Insert within existing formatted span
-          const spanClassMatch =
-            lastSpanBeforeCursor[0].match(/class="([^"]*)"/);
-          const spanClass = spanClassMatch ? spanClassMatch[1] : "";
-          const textBeforeSpan = beforeCursor.slice(
-            0,
-            lastSpanBeforeCursor.index
-          );
-          const textInSpanBefore = lastSpanBeforeCursor[0].replace(
-            /<span[^>]*>/,
-            ""
-          );
-          const textInSpanAfter = spanContinuesAfter[0].replace(/<\/span>/, "");
-
-          newValue = `${textBeforeSpan}<span class="${spanClass}">${textInSpanBefore}${addedChar}${textInSpanAfter}</span>${afterCursor.slice(
-            spanContinuesAfter[0].length
-          )}`;
-        } else {
-          // Insert new character with active formatting if any
-          const insertion =
-            activeFormats.length > 0
-              ? `<span class="${getFormatClasses(
-                  activeFormats
-                )}">${addedChar}</span>`
-              : addedChar;
-          newValue = beforeCursor + insertion + afterCursor;
-        }
+      const oldText = route.content.text;
+      const oldPlainText = oldText.replace(/<[^>]*>/g, '');
+      
+      // Handle text deletion
+      if (value.length < oldPlainText.length) {
+        const beforeCursor = oldText.slice(0, cursorPos);
+        const afterCursor = oldText.slice(cursorPos + (oldPlainText.length - value.length));
+        newValue = sanitizeHTML(beforeCursor + afterCursor);
       } else {
-        // Handle text deletion while preserving formatting
-        const deletedPos = oldText
-          .split("")
-          .findIndex((char, i) => value[i] !== char);
-        const beforeDelete = route.content.text.slice(0, deletedPos);
-        const afterDelete = route.content.text.slice(deletedPos + 1);
+        // Handle text insertion
+        const addedChar = value.slice(cursorPos - 1, cursorPos);
+        const beforeCursor = oldText.slice(0, cursorPos - 1);
+        const afterCursor = oldText.slice(cursorPos - 1);
 
-        // Reconstruct the content preserving formatting
-        newValue = beforeDelete + afterDelete;
+        // Check if inserting within a formatted span
+        const spanInfo = findSpanAtPosition(oldText, cursorPos - 1);
+        
+        if (spanInfo) {
+          const { start, end, class: spanClass } = spanInfo;
+          const beforeSpan = oldText.slice(0, start);
+          const afterSpan = oldText.slice(end);
+          const spanContent = oldText.slice(start, end);
+          const insertPos = cursorPos - 1 - start;
+          
+          newValue = sanitizeHTML(
+            beforeSpan +
+            `<span class="${spanClass}">` +
+            spanContent.slice(0, insertPos) +
+            addedChar +
+            spanContent.slice(insertPos) +
+            '</span>' +
+            afterSpan
+          );
+        } else {
+          // Insert with active formatting if any
+          const insertion = activeFormats.length > 0
+            ? `<span class="${getFormatClasses(activeFormats)}">${addedChar}</span>`
+            : addedChar;
+          newValue = sanitizeHTML(beforeCursor + insertion + afterCursor);
+        }
       }
     }
 
@@ -164,8 +179,20 @@ const ShareRoute = () => {
     requestAnimationFrame(() => {
       const input = inputRefs.current[id];
       if (input) {
-        input.setSelectionRange(input.selectionStart, input.selectionStart);
+        input.setSelectionRange(cursorPos, cursorPos);
         input.focus();
+        
+        // Ensure cursor is visible by scrolling if needed
+        const scrollWidth = input.scrollWidth;
+        const clientWidth = input.clientWidth;
+        const scrollLeft = input.scrollLeft;
+        const cursorOffset = cursorPos * 8; // Approximate character width
+
+        if (cursorOffset > scrollLeft + clientWidth) {
+          input.scrollLeft = cursorOffset - clientWidth + 20;
+        } else if (cursorOffset < scrollLeft) {
+          input.scrollLeft = cursorOffset;
+        }
       }
     });
 
@@ -187,6 +214,46 @@ const ShareRoute = () => {
         nextIdRef.current += 1;
       }
     }
+  };
+
+  // Helper function to find span at cursor position
+  const findSpanAtPosition = (html: string, pos: number) => {
+    let plainTextPos = 0;
+    let htmlPos = 0;
+    
+    while (htmlPos < html.length) {
+      if (html[htmlPos] === '<') {
+        const spanMatch = html.slice(htmlPos).match(/<span class="([^"]*)">/);
+        if (spanMatch) {
+          const spanStart = htmlPos;
+          const spanEnd = html.indexOf('</span>', spanStart);
+          
+          if (spanEnd !== -1) {
+            const spanContent = html.slice(spanStart + spanMatch[0].length, spanEnd);
+            const contentLength = spanContent.length;
+            
+            if (plainTextPos <= pos && pos < plainTextPos + contentLength) {
+              return {
+                start: spanStart,
+                end: spanEnd + 7,
+                class: spanMatch[1]
+              };
+            }
+            
+            plainTextPos += contentLength;
+            htmlPos = spanEnd + 7;
+            continue;
+          }
+        }
+      }
+      
+      if (html[htmlPos] !== '<' && html[htmlPos] !== '>') {
+        plainTextPos++;
+      }
+      htmlPos++;
+    }
+    
+    return null;
   };
 
   const handleSelectionChange = (id: number, start: number, end: number) => {
@@ -318,12 +385,19 @@ const ShareRoute = () => {
                         onSelect={(e) => {
                           const input = e.currentTarget;
                           requestAnimationFrame(() => {
-                            input.setSelectionRange(
-                              input.selectionStart,
-                              input.selectionEnd
-                            );
+                            const start = input.selectionStart || 0;
+                            const end = input.selectionEnd || 0;
+                            input.setSelectionRange(start, end);
                           });
                         }}
+                        onScroll={(e) => {
+                          const input = e.currentTarget;
+                          const renderer = displayRefs.current[route.id];
+                          if (renderer) {
+                            renderer.scrollLeft = input.scrollLeft;
+                          }
+                        }}
+                        maxLength={route.id === 1 ? MAX_CHARS_FIRST_ROUTE : MAX_CHARS_OTHER_ROUTES}
                         className="route-input"
                         data-route-id={route.id}
                       />
@@ -378,7 +452,7 @@ const ShareRoute = () => {
                         key={format}
                         className={`cursor-pointer hover:text-gray-600 ${
                           activeFormats.includes(format)
-                            ? "text-alonggreen"
+                            ? "text-alonggreen bg-alonggreen"
                             : ""
                         } ${format === "bold" ? "font-bold" : ""} 
                         ${format === "italic" ? "italic" : ""} 
