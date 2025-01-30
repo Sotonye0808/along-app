@@ -68,8 +68,6 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   position: absolute;
   inset: 0;
   padding: 0.5rem 1rem;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
   pointer-events: none;
   -webkit-user-select: none;
   user-select: none;
@@ -77,7 +75,6 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   line-height: 1.5;
   overflow-y: auto;
   overflow-x: hidden;
-  text-overflow: ellipsis;
 }
 
 .input-container .input-renderer:empty::before {
