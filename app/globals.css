@@ -75,7 +75,8 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   user-select: none;
   color: #374151; /* text-gray-700 */
   line-height: 1.5;
-  overflow: hidden;
+  overflow-y: hidden;
+  overflow-x: auto;
   text-overflow: ellipsis;
 }
 
