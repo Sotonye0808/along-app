@@ -20,11 +20,11 @@ const MainPanel = () => {
 						malesuada magna venenatis volutpat nisi risus nec. Elit mi sodales
 						iaculis pellentesque posuere at et.
 					</p>
-					<div className="mb-4">
+					<div className="mb-4 w-full">
 						<Image
 							src="/post-image.jpeg"
 							alt="post content"
-							className="rounded-md"
+							className="rounded-md object-cover w-full"
 						/>
 					</div>
 					<div className="text-xs md:flex gap-4 grid grid-cols-6 text-gray-500">
