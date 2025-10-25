@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	@apply to-basewhite; 
+  font-family: 'Inter', Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* 
+
+Helper class for suitable value as max-height, used in the index.tsx for main-panel scrollability, and reusable elsewhere as needed */
+.h-almost {
+	max-height: 85vh;
+}
+
+@media (max-width: 767px) {
+	.h-almost {
+		max-height: 90vh;
+	}
+}
+
+/* Route entry connector line */
+.route-entry {
+  position: relative;
+}
+
+.route-entry:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 1.6rem;
+  top: 2.4rem;
+  width: 1px;
+  height: calc(53% + 1rem);
+  background-color: #9ca3af;
+}
+
+/* Input container styles */
+.input-container {
+  position: relative;
+  width: 100%;
+  min-height: 2.5rem;
+  border-radius: 0.375rem;
+}
+
+.input-container:focus-within {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border: 1px solid #22c55e; /* alonggreen */
+}
+
+.input-container input {
+  width: 100%;
+  border: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  outline: none;
+  padding: 0.5rem 1rem;
+  font-size: inherit;
+  background: transparent;
+  color: transparent;
+  caret-color: black;
+  border-radius: 0.375rem;
+}
+
+.input-container .input-renderer {
+  position: absolute;
+  inset: 0;
+  padding: 0.5rem 1rem;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  color: #374151; /* text-gray-700 */
+  line-height: 1.5;
+}
+
+.input-container .input-renderer:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af; /* text-gray-400 */
+}
+
+/* Link preview styles */
+.link-preview {
+  display: inline-flex;
+  align-items: center;
+  background: #e5e7eb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 0 2px;
+  gap: 4px;
+}
+
+.link-preview .remove-link {
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 14px;
+  pointer-events: auto;
+}
+
+
+
+

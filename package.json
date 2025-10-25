@@ -1,0 +1,42 @@
+{
+  "name": "along-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "mock-api": "json-server --watch mock-backend/db.json --port 3001",
+    "dev:all": "concurrently \"npm run dev\" \"npm run mock-api\""
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.1.0",
+    "@ant-design/nextjs-registry": "^1.1.0",
+    "antd": "^5.27.6",
+    "axios": "^1.12.2",
+    "js-cookie": "^3.0.5",
+    "next": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^24",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.38.0",
+    "eslint-config-next": "^16.0.0",
+    "json-server": "^1.0.0-beta.3",
+    "postcss": "^8",
+    "tailwindcss": "^4.1.16",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2"
+  }
+}
