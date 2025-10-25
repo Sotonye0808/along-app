@@ -1,0 +1,160 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "userName": "johndoe",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@example.com",
+      "password": "$2a$10$example",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+      "bio": "Travel enthusiast and route explorer",
+      "followers": 245,
+      "following": 189,
+      "createdAt": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "2",
+      "userName": "janedoe",
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "email": "jane@example.com",
+      "password": "$2a$10$example",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane",
+      "bio": "Adventure seeker | Food lover",
+      "followers": 512,
+      "following": 203,
+      "createdAt": "2024-02-20T14:20:00Z"
+    }
+  ],
+  "posts": [
+    {
+      "id": "1",
+      "userId": "1",
+      "title": "Amazing Road Trip Through California Coast",
+      "routes": [
+        {
+          "id": "r1",
+          "text": "Started our journey in San Francisco. The Golden Gate Bridge at sunrise was breathtaking! 🌅",
+          "links": [
+            {
+              "text": "Golden Gate Bridge",
+              "url": "https://www.goldengatebridge.org/"
+            }
+          ],
+          "order": 1,
+          "vehicles": ["car", "bike"]
+        },
+        {
+          "id": "r2",
+          "text": "Drove down Highway 1 to Monterey. The coastal views were absolutely stunning!",
+          "links": [
+            {
+              "text": "Highway 1 Guide",
+              "url": "https://www.visitcalifornia.com"
+            }
+          ],
+          "order": 2,
+          "vehicles": ["car"]
+        },
+        {
+          "id": "r3",
+          "text": "Ended in Big Sur. Stayed at a cozy cabin with ocean views. Perfect ending to day 1!",
+          "links": [],
+          "order": 3,
+          "vehicles": ["car", "trekking"]
+        }
+      ],
+      "images": [
+        "https://images.unsplash.com/photo-1501594907352-04cda38ebc29",
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4"
+      ],
+      "tags": ["roadtrip", "california", "coastal", "scenic"],
+      "likes": 142,
+      "dislikes": 3,
+      "comments": 28,
+      "bookmarks": 67,
+      "createdAt": "2024-10-20T15:30:00Z",
+      "updatedAt": "2024-10-20T15:30:00Z"
+    },
+    {
+      "id": "2",
+      "userId": "2",
+      "title": "Hidden Gems in Tokyo",
+      "routes": [
+        {
+          "id": "r4",
+          "text": "Started in Shibuya - the famous crossing is a must-see! Best time is around 8 AM to avoid crowds.",
+          "links": [
+            {
+              "text": "Shibuya Crossing",
+              "url": "https://www.japan-guide.com/e/e3007.html"
+            }
+          ],
+          "order": 1,
+          "vehicles": ["bike", "bus"]
+        },
+        {
+          "id": "r5",
+          "text": "Found an amazing ramen spot in Shinjuku. Ask the locals for recommendations!",
+          "links": [],
+          "order": 2,
+          "vehicles": ["bike", "bus", "keke"]
+        }
+      ],
+      "images": [
+        "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf"
+      ],
+      "tags": ["tokyo", "japan", "food", "urban"],
+      "likes": 89,
+      "dislikes": 1,
+      "comments": 15,
+      "bookmarks": 34,
+      "createdAt": "2024-10-22T10:15:00Z",
+      "updatedAt": "2024-10-22T10:15:00Z"
+    }
+  ],
+  "comments": [
+    {
+      "id": "1",
+      "postId": "1",
+      "userId": "2",
+      "text": "This looks amazing! How many days did the trip take?",
+      "createdAt": "2024-10-20T16:45:00Z"
+    },
+    {
+      "id": "2",
+      "postId": "1",
+      "userId": "1",
+      "text": "It was a 3-day trip. Totally worth it!",
+      "createdAt": "2024-10-20T17:00:00Z"
+    }
+  ],
+  "likes": [
+    {
+      "id": "1",
+      "postId": "1",
+      "userId": "2",
+      "type": "like"
+    }
+  ],
+  "bookmarks": [
+    {
+      "id": "1",
+      "postId": "1",
+      "userId": "2",
+      "createdAt": "2024-10-20T16:30:00Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "userId": "1",
+      "type": "like",
+      "message": "janedoe liked your post",
+      "postId": "1",
+      "read": false,
+      "createdAt": "2024-10-20T16:30:00Z"
+    }
+  ]
+}

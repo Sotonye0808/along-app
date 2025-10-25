@@ -59,6 +59,10 @@ app/
 mock-backend/                # Mock backend with json-server
     └── db.json
     └── routes.json
+public/
+    └── assets/
+        ├── images/
+        └── icons/
 ```
 
 ### 2.2 Mock Backend Setup

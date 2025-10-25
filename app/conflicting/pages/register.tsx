@@ -1,8 +1,8 @@
 import React from "react";
-import "../app/globals.css" // so tailwind styles can take effect
-import HeroNavbar from "../app/components/Hero/HeroNavbar";
-import Main from "../app/components/Hero/LegendSignUp";
-import Form from "../app/components/Hero/SignUp";
+import "../app/globals.css"; // so tailwind styles can take effect
+import HeroNavbar from "../Hero/HeroNavbar";
+import Main from "../Hero/LegendSignUp";
+import Form from "../Hero/SignUp";
 
 const RegisterPage = () => {
   return (
