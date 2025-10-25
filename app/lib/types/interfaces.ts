@@ -9,7 +9,9 @@ declare global {
         avatar?: string;
         bio?: string;
         followers?: number;
-        following?: number;
+        following?: string[];
+        likes?: string[];
+        bookmarks?: string[];
         createdAt: string;
     }
 
@@ -46,7 +48,9 @@ declare global {
         postId: string;
         userId: string;
         text: string;
-        createdAt: string;
+        createdAt: string;        
+        likes: number;
+        dislikes: number;
     }
 
     interface Like {
