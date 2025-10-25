@@ -1,8 +1,9 @@
+import { OtpForm } from "@/components/features/auth/OtpForm";
+
 export default function OtpPage() {
   return (
-    <div>
-      <h1>OTP Verification Page</h1>
-      {/* OTP verification will be implemented here */}
+    <div className="flex items-center justify-center min-h-[80vh] p-4">
+      <OtpForm />
     </div>
   );
 }

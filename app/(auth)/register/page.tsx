@@ -1,8 +1,9 @@
+import { RegisterForm } from "@/components/features/auth/RegisterForm";
+
 export default function RegisterPage() {
   return (
-    <div>
-      <h1>Register Page</h1>
-      {/* Registration form will be implemented here */}
+    <div className="flex items-center justify-center min-h-[80vh] p-4">
+      <RegisterForm />
     </div>
   );
 }

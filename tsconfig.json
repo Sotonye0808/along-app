@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "es2015",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -12,6 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "downlevelIteration": true,
     "typeRoots": ["node_modules/@types", "./app/lib/types"],
     "plugins": [
       {
@@ -26,6 +28,13 @@
       "@/public/*": ["./public/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "./app/lib/types/types/**/*.d.ts", "./app/lib/types/interfaces/**/*.d.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "./app/lib/types/types/**/*.d.ts",
+    "./app/lib/types/interfaces/**/*.d.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -23,7 +23,7 @@ Make sure to follow the coding standards and architectural guidelines outlined i
 - Prefer `interface` over `type` for object shapes
 - Use proper generics for reusable components
 - Apart from component interfaces, globally define all types and interfaces in `lib/types.ts` file
-- Typescript configured to use custom types and interfaces without need for relative imports
+- No need to manually import custom types and interfaces in files, as they are already included in `tsconfig.json`
 
 ### React/Next.js
 - Use App Router exclusively (not Pages Router)

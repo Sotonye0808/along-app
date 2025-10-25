@@ -26,6 +26,7 @@ declare global {
         links: Link[];
         order: number;
         vehicles: VehicleType[];
+        fare?: number;
     }
 
     interface Post {
