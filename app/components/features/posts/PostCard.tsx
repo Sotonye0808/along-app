@@ -1,0 +1,301 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  Card,
+  Avatar,
+  Button,
+  Dropdown,
+  Image as AntImage,
+  Tag,
+  Space,
+  Divider,
+} from "antd";
+import {
+  LikeOutlined,
+  DislikeOutlined,
+  CommentOutlined,
+  ShareAltOutlined,
+  BookOutlined,
+  MoreOutlined,
+  LikeFilled,
+  DislikeFilled,
+  BookFilled,
+  EnvironmentOutlined,
+  DollarOutlined,
+} from "@ant-design/icons";
+import type { MenuProps } from "antd";
+import Link from "next/link";
+import { formatDate, formatNumber } from "@/lib/utils/format";
+
+interface PostCardProps {
+  post: Post;
+  author: User;
+  onLike?: (postId: string) => void;
+  onDislike?: (postId: string) => void;
+  onComment?: (postId: string) => void;
+  onBookmark?: (postId: string) => void;
+  onShare?: (postId: string) => void;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  isBookmarked?: boolean;
+}
+
+const vehicleIcons: Record<VehicleType, string> = {
+  taxi: "🚕",
+  bike: "🏍️",
+  keke: "🛺",
+  bus: "🚌",
+  trekking: "🚶",
+  car: "🚗",
+};
+
+export function PostCard({
+  post,
+  author,
+  onLike,
+  onDislike,
+  onComment,
+  onBookmark,
+  onShare,
+  isLiked = false,
+  isDisliked = false,
+  isBookmarked = false,
+}: PostCardProps) {
+  const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const menuItems: MenuProps["items"] = [
+    {
+      key: "report",
+      label: "Report post",
+    },
+    {
+      key: "hide",
+      label: "Hide this post",
+    },
+    {
+      key: "follow",
+      label: `Follow @${author.userName}`,
+    },
+  ];
+
+  const handleImageClick = (index: number) => {
+    setCurrentImageIndex(index);
+    setImagePreviewOpen(true);
+  };
+
+  return (
+    <Card className="mb-4 hover:shadow-md transition-shadow" bordered={false}>
+      {/* Post Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <Link href={`/profile/${author.userName}`}>
+            <Avatar
+              size={48}
+              src={author.avatar}
+              className="cursor-pointer hover:opacity-80 transition-opacity">
+              {author.firstName[0]}
+              {author.lastName[0]}
+            </Avatar>
+          </Link>
+          <div>
+            <Link href={`/profile/${author.userName}`}>
+              <h3 className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer">
+                {author.firstName} {author.lastName}
+              </h3>
+            </Link>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>@{author.userName}</span>
+              <span>•</span>
+              <span>{formatDate(post.createdAt)}</span>
+            </div>
+          </div>
+        </div>
+        <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
+          <Button type="text" icon={<MoreOutlined />} />
+        </Dropdown>
+      </div>
+
+      {/* Post Title */}
+      <h2 className="text-xl font-bold text-gray-900 mb-4">{post.title}</h2>
+
+      {/* Routes */}
+      <div className="space-y-4 mb-4">
+        {post.routes.map((route, index) => (
+          <div key={route.id} className="flex gap-3">
+            {/* Route number indicator */}
+            <div className="flex flex-col items-center">
+              <div className="w-8 h-8 rounded-full bg-[#00623B] text-white flex items-center justify-center font-semibold text-sm">
+                {index + 1}
+              </div>
+              {index < post.routes.length - 1 && (
+                <div className="w-0.5 h-full bg-gray-300 my-1 flex-1" />
+              )}
+            </div>
+
+            {/* Route content */}
+            <div className="flex-1">
+              <p className="text-gray-800 mb-2">{route.text}</p>
+
+              {/* Vehicle types and fare */}
+              {route.vehicles && route.vehicles.length > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <Space size={4}>
+                    {route.vehicles.map((vehicle) => (
+                      <span key={vehicle} className="text-xl" title={vehicle}>
+                        {vehicleIcons[vehicle]}
+                      </span>
+                    ))}
+                  </Space>
+                  {route.fare && (
+                    <Tag icon={<DollarOutlined />} color="green">
+                      ₦{formatNumber(route.fare)}
+                    </Tag>
+                  )}
+                </div>
+              )}
+
+              {/* Links */}
+              {route.links && route.links.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {route.links.map((link) => (
+                    <a
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-[#00623B] hover:underline flex items-center gap-1">
+                      <EnvironmentOutlined />
+                      {link.text}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Images */}
+      {post.images && post.images.length > 0 && (
+        <div
+          className={`grid gap-2 mb-4 ${
+            post.images.length === 1
+              ? "grid-cols-1"
+              : post.images.length === 2
+              ? "grid-cols-2"
+              : "grid-cols-2"
+          }`}>
+          {post.images.slice(0, 4).map((image, index) => (
+            <div
+              key={index}
+              className="relative aspect-video rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => handleImageClick(index)}>
+              <img
+                src={image}
+                alt={`${post.title} - Image ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+              {index === 3 && post.images.length > 4 && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <span className="text-white text-2xl font-bold">
+                    +{post.images.length - 4}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      <div className="hidden">
+        <AntImage.PreviewGroup
+          preview={{
+            visible: imagePreviewOpen,
+            onVisibleChange: setImagePreviewOpen,
+            current: currentImageIndex,
+          }}>
+          {post.images?.map((image, index) => (
+            <AntImage key={index} src={image} />
+          ))}
+        </AntImage.PreviewGroup>
+      </div>
+
+      {/* Tags */}
+      {post.tags && post.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {post.tags.map((tag) => (
+            <Tag key={tag} className="cursor-pointer hover:opacity-80">
+              #{tag}
+            </Tag>
+          ))}
+        </div>
+      )}
+
+      <Divider className="my-3" />
+
+      {/* Post Actions */}
+      <div className="flex items-center justify-between text-gray-600">
+        <Space size="large">
+          <Button
+            type="text"
+            icon={
+              isLiked ? (
+                <LikeFilled className="text-[#00623B]" />
+              ) : (
+                <LikeOutlined />
+              )
+            }
+            onClick={() => onLike?.(post.id)}
+            className={isLiked ? "text-[#00623B]" : ""}>
+            {formatNumber(post.likes)}
+          </Button>
+
+          <Button
+            type="text"
+            icon={
+              isDisliked ? (
+                <DislikeFilled className="text-red-500" />
+              ) : (
+                <DislikeOutlined />
+              )
+            }
+            onClick={() => onDislike?.(post.id)}
+            className={isDisliked ? "text-red-500" : ""}>
+            {formatNumber(post.dislikes)}
+          </Button>
+
+          <Button
+            type="text"
+            icon={<CommentOutlined />}
+            onClick={() => onComment?.(post.id)}>
+            {formatNumber(post.comments)}
+          </Button>
+        </Space>
+
+        <Space>
+          <Button
+            type="text"
+            icon={
+              isBookmarked ? (
+                <BookFilled className="text-[#00623B]" />
+              ) : (
+                <BookOutlined />
+              )
+            }
+            onClick={() => onBookmark?.(post.id)}
+            className={isBookmarked ? "text-[#00623B]" : ""}
+          />
+          <Button
+            type="text"
+            icon={<ShareAltOutlined />}
+            onClick={() => onShare?.(post.id)}>
+            Share
+          </Button>
+        </Space>
+      </div>
+    </Card>
+  );
+}
