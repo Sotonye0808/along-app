@@ -6,13 +6,21 @@
       "firstName": "Chidi",
       "lastName": "Okafor",
       "email": "chidi@example.com",
-      "password": "$2a$10$example",
+      "password": "password234",
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Chidi",
       "bio": "Lagos navigator | Public transport expert | Sharing the best routes around Nigeria 🇳🇬",
       "followers": 1245,
-      "following": ["2", "3"],
-      "likes": ["1", "2"],
-      "bookmarks": ["2"],
+      "following": [
+        "2",
+        "3"
+      ],
+      "likes": [
+        "1",
+        "2"
+      ],
+      "bookmarks": [
+        "2"
+      ],
       "createdAt": "2024-01-15T10:30:00Z"
     },
     {
@@ -21,13 +29,20 @@
       "firstName": "Ada",
       "lastName": "Nwosu",
       "email": "ada@example.com",
-      "password": "$2a$10$example",
+      "password": "password234",
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ada",
       "bio": "Port Harcourt babe | Food & travel | Making Lagos traffic bearable one route at a time 😊",
       "followers": 2512,
-      "following": ["1"],
-      "likes": ["1"],
-      "bookmarks": ["1", "2"],
+      "following": [
+        "1"
+      ],
+      "likes": [
+        "1"
+      ],
+      "bookmarks": [
+        "1",
+        "2"
+      ],
       "createdAt": "2024-02-20T14:20:00Z"
     },
     {
@@ -36,14 +51,35 @@
       "firstName": "Emeka",
       "lastName": "Igwe",
       "email": "emeka@example.com",
-      "password": "$2a$10$example",
+      "password": "password234",
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Emeka",
       "bio": "Abuja resident | Budget traveler | Your guide to affordable trips across Nigeria",
       "followers": 856,
-      "following": ["1", "2"],
-      "likes": ["2"],
+      "following": [
+        "1",
+        "2"
+      ],
+      "likes": [
+        "2"
+      ],
       "bookmarks": [],
       "createdAt": "2024-03-10T09:15:00Z"
+    },
+    {
+      "id": "4",
+      "userName": "Eddie",
+      "firstName": "Edward",
+      "lastName": "Ijeruh",
+      "email": "ijeruh20@gmail.com",
+      "password": "Password345",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Edward",
+      "bio": "",
+      "followers": 0,
+      "following": [],
+      "likes": [],
+      "bookmarks": [],
+      "createdAt": "2025-10-28T12:03:46.715Z",
+      "verified": true
     }
   ],
   "posts": [
@@ -62,7 +98,9 @@
             }
           ],
           "order": 1,
-          "vehicles": ["bus"],
+          "vehicles": [
+            "bus"
+          ],
           "fare": 300
         },
         {
@@ -70,7 +108,10 @@
           "text": "Stop at Obalende. From there, hop on a yellow danfo or keke to VI. Keke is faster but costs ₦200, danfo is ₦150.",
           "links": [],
           "order": 2,
-          "vehicles": ["bus", "keke"],
+          "vehicles": [
+            "bus",
+            "keke"
+          ],
           "fare": 200
         },
         {
@@ -83,7 +124,9 @@
             }
           ],
           "order": 3,
-          "vehicles": ["keke"],
+          "vehicles": [
+            "keke"
+          ],
           "fare": 150
         }
       ],
@@ -91,7 +134,13 @@
         "https://images.unsplash.com/photo-1578662996442-48f60103fc96",
         "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957"
       ],
-      "tags": ["lagos", "ikeja", "vi", "brt", "traffic-hack"],
+      "tags": [
+        "lagos",
+        "ikeja",
+        "vi",
+        "brt",
+        "traffic-hack"
+      ],
       "likes": 342,
       "dislikes": 8,
       "comments": 45,
@@ -114,7 +163,9 @@
             }
           ],
           "order": 1,
-          "vehicles": ["bus"],
+          "vehicles": [
+            "bus"
+          ],
           "fare": 2500
         },
         {
@@ -122,7 +173,9 @@
           "text": "Journey takes 2-3 hours depending on traffic. Bus has AC and makes one stop at Sagamu. Bring snacks and water!",
           "links": [],
           "order": 2,
-          "vehicles": ["bus"],
+          "vehicles": [
+            "bus"
+          ],
           "fare": 0
         },
         {
@@ -135,7 +188,10 @@
             }
           ],
           "order": 3,
-          "vehicles": ["bike", "keke"],
+          "vehicles": [
+            "bike",
+            "keke"
+          ],
           "fare": 150
         }
       ],
@@ -167,7 +223,9 @@
           "text": "Start from Kubwa Phase 4. Take a keke to Kubwa main junction (₦100). Plenty of kekes available from 6 AM.",
           "links": [],
           "order": 1,
-          "vehicles": ["keke"],
+          "vehicles": [
+            "keke"
+          ],
           "fare": 100
         },
         {
@@ -175,7 +233,10 @@
           "text": "At the junction, board a taxi or bus going to Berger Roundabout. Fare: ₦300 (shared taxi) or ₦200 (bus)",
           "links": [],
           "order": 2,
-          "vehicles": ["taxi", "bus"],
+          "vehicles": [
+            "taxi",
+            "bus"
+          ],
           "fare": 300
         },
         {
@@ -188,12 +249,22 @@
             }
           ],
           "order": 3,
-          "vehicles": ["bus"],
+          "vehicles": [
+            "bus"
+          ],
           "fare": 150
         }
       ],
-      "images": ["https://images.unsplash.com/photo-1555196301-e08c30eb40a2"],
-      "tags": ["abuja", "kubwa", "wuse", "market", "daily-commute"],
+      "images": [
+        "https://images.unsplash.com/photo-1555196301-e08c30eb40a2"
+      ],
+      "tags": [
+        "abuja",
+        "kubwa",
+        "wuse",
+        "market",
+        "daily-commute"
+      ],
       "likes": 94,
       "dislikes": 2,
       "comments": 18,

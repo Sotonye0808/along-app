@@ -190,7 +190,7 @@ interface PaginatedResponse<T> {
 
 ### 5.1 Authentication Flow
 
-- [ ] Implement Server Actions for auth
+- [x] Implement Server Actions for auth
 - [ ] JWT token management with httpOnly cookies
 - [ ] Protected routes with middleware
 - [ ] User session management

@@ -67,7 +67,8 @@ export function SuggestionsPanel() {
     <Card
       title={<div className="font-semibold">Suggested for you</div>}
       className="h-fit"
-      bordered={false}>
+      variant="outlined"
+    >
       {suggestedUsers.length === 0 ? (
         <Empty
           description="No suggestions"
@@ -83,7 +84,8 @@ export function SuggestionsPanel() {
                   <Avatar
                     size={48}
                     src={user.avatar}
-                    className="cursor-pointer hover:opacity-80 shrink-0">
+                    className="cursor-pointer hover:opacity-80 shrink-0"
+                  >
                     {user.firstName[0]}
                     {user.lastName[0]}
                   </Avatar>
@@ -112,7 +114,8 @@ export function SuggestionsPanel() {
                   followingIds.has(user.id)
                     ? ""
                     : "bg-[#00623B] hover:bg-[#004d2e]"
-                }>
+                }
+              >
                 {followingIds.has(user.id) ? "Following" : "Follow"}
               </Button>
             </div>

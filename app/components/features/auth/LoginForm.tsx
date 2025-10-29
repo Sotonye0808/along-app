@@ -27,6 +27,8 @@ export function LoginForm() {
         API_ENDPOINTS.LOGIN,
         values
       );
+
+      //
       const { user, accessToken, refreshToken } = response.data;
 
       // Store tokens and user data
@@ -62,13 +64,15 @@ export function LoginForm() {
         layout="vertical"
         onFinish={handleSubmit}
         autoComplete="on"
-        size="large">
+        size="large"
+      >
         <Form.Item
           name="email"
           rules={[
             { required: true, message: "Please enter your email" },
             { type: "email", message: "Please enter a valid email" },
-          ]}>
+          ]}
+        >
           <Input
             prefix={<MailOutlined className="text-gray-400" />}
             placeholder="youremail@example.com"
@@ -81,7 +85,8 @@ export function LoginForm() {
           rules={[
             { required: true, message: "Please enter your password" },
             { min: 8, message: "Password must be at least 8 characters" },
-          ]}>
+          ]}
+        >
           <Input.Password
             prefix={<LockOutlined className="text-gray-400" />}
             placeholder="Enter your password"
@@ -95,7 +100,8 @@ export function LoginForm() {
             htmlType="submit"
             loading={loading}
             block
-            className="h-11">
+            className="h-11"
+          >
             {loading ? "Signing in..." : "Sign In"}
           </Button>
         </Form.Item>
@@ -107,14 +113,16 @@ export function LoginForm() {
             icon={<GoogleOutlined />}
             onClick={() => handleOAuthLogin("google")}
             block
-            className="h-11">
+            className="h-11"
+          >
             Google
           </Button>
           <Button
             icon={<AppleOutlined />}
             onClick={() => handleOAuthLogin("apple")}
             block
-            className="h-11">
+            className="h-11"
+          >
             Apple
           </Button>
         </div>
@@ -123,7 +131,8 @@ export function LoginForm() {
           Don&apos;t have an account?{" "}
           <Link
             href={APP_ROUTES.REGISTER}
-            className="text-[#00623B] hover:underline font-medium">
+            className="text-[#00623B] hover:underline font-medium"
+          >
             Sign Up
           </Link>
         </div>

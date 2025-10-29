@@ -3,21 +3,23 @@
 @tailwind utilities;
 
 body {
-	@apply to-basewhite; 
-  font-family: 'Inter', Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  /* @apply bg-white; */
+  font-family: "Inter", Roboto, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
 }
 
 /* 
 
 Helper class for suitable value as max-height, used in the index.tsx for main-panel scrollability, and reusable elsewhere as needed */
 .h-almost {
-	max-height: 85vh;
+  max-height: 85vh;
 }
 
 @media (max-width: 767px) {
-	.h-almost {
-		max-height: 90vh;
-	}
+  .h-almost {
+    max-height: 90vh;
+  }
 }
 
 /* Route entry connector line */
@@ -26,7 +28,7 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
 }
 
 .route-entry:not(:last-child)::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 1.6rem;
   top: 2.4rem;
@@ -99,7 +101,3 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   font-size: 14px;
   pointer-events: auto;
 }
-
-
-
-

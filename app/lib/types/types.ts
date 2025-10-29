@@ -1,5 +1,5 @@
 declare global {
- type VehicleType = "taxi" | "bike" | "keke" | "bus" | "trekking" | "car";
+  type VehicleType = "taxi" | "bike" | "keke" | "bus" | "trekking" | "car";
 }
 
-export { }
+export interface User {}
