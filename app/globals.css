@@ -101,3 +101,7 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   font-size: 14px;
   pointer-events: auto;
 }
+
+anticon{
+  color: unset;
+}
