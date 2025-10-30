@@ -15,7 +15,7 @@ interface CommentSectionProps {
   open: boolean;
   onClose: () => void;
   postId: string;
-  comments: (Comment & { author: User })[];
+  comments: (PostComment & { author: User })[];
   currentUser: User | null;
   onAddComment: (postId: string, text: string) => Promise<void>;
   onLikeComment?: (commentId: string) => void;

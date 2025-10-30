@@ -102,6 +102,6 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   pointer-events: auto;
 }
 
-.anticon, anticon {
+.anticon, .overwrite-anticon-color {
   color: unset;
 }

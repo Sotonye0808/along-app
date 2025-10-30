@@ -6,6 +6,7 @@ declare global {
         firstName: string;
         lastName: string;
         email: string;
+        password?: string;
         avatar?: string;
         bio?: string;
         followers?: number;
@@ -13,6 +14,7 @@ declare global {
         likes?: string[];
         bookmarks?: string[];
         createdAt: string;
+        verified?: boolean;
     }
 
     interface Link {
@@ -45,12 +47,12 @@ declare global {
         updatedAt: string;
     }
 
-    interface Comment {
+    interface PostComment { // renamed PostComment to prevent conflict with native TS Comment interface
         id: string;
         postId: string;
         userId: string;
         text: string;
-        createdAt: string;        
+        createdAt: string;
         likes: number;
         dislikes: number;
     }
@@ -69,7 +71,7 @@ declare global {
         createdAt: string;
     }
 
-    interface Notification {
+    interface AppNotification { // renamed AppNotification to prevent conflict with native TS Notification interface
         id: string;
         userId: string;
         type: 'like' | 'comment' | 'follow' | 'mention';

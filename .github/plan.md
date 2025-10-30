@@ -67,18 +67,25 @@ public/
         └── icons/
 ```
 
-### 2.2 Mock Backend Setup
+### 2.2 Mock Backend Setup ✅
 
-- [x] Install json-server: `npm install -D json-server`
-- [x] Create `mock-backend/` directory
-- [x] Create `db.json` with schemas:
-  - Users
-  - Posts/Routes
-  - Comments
-  - Likes
-  - Bookmarks
-  - Notifications
-- [x] Add npm script: `"mock-api": "json-server --watch mock-backend/db.json --port 3001"`
+- [x] ~~Install json-server: `npm install -D json-server`~~
+- [x] ~~Create `mock-backend/` directory~~
+- [x] Create TypeScript-based mock data in `app/lib/data/mockData.ts`
+- [x] Create database service in `app/lib/data/database.ts`
+- [x] Create Next.js API routes in `app/api/`:
+  - Users (GET, POST, PUT, DELETE)
+  - Posts (GET, POST, PUT, DELETE)
+  - Comments (GET, POST)
+  - Likes (POST, DELETE)
+  - Bookmarks (POST, GET)
+  - Notifications (GET, POST, PATCH)
+- [x] Update API_BASE_URL to use Next.js API routes (`/api`)
+- [x] ~~Add npm script: `"mock-api": "json-server --watch mock-backend/db.json --port 3001"`~~
+- [x] **Production-ready**: Works on Vercel/Netlify without external services
+- [x] **Migration-ready**: Easy to swap for real database
+
+**Note**: The new TypeScript-based mock backend uses Next.js API routes instead of json-server. This provides better type safety, works in production environments, and makes it easy to migrate to a real database in the future. See `.github/mock-backend-architecture.md` for details.
 
 ## Phase 3: Type System Implementation
 

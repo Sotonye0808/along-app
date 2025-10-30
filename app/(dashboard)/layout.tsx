@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { DashboardNavbar } from "@/components/features/navigation/DashboardNavbar";
 import { MobileTopBar } from "@/components/features/navigation/MobileTopBar";
 import { DesktopTopBar } from "@/components/features/navigation/DesktopTopBar";
-import { STORAGE_KEYS, APP_ROUTES } from "@/lib/constants";
+import { APP_ROUTES } from "@/lib/constants";
 
 export default function DashboardLayout({
   children,
@@ -17,14 +16,27 @@ export default function DashboardLayout({
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const token = Cookies.get(STORAGE_KEYS.ACCESS_TOKEN);
+    // Check authentication by making a request to verify the token
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/verify", {
+          credentials: "include",
+        });
 
-    if (!token) {
-      router.replace(APP_ROUTES.LOGIN);
-      setIsAuthenticated(false);
-    } else {
-      setIsAuthenticated(true);
-    }
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          router.replace(APP_ROUTES.LOGIN);
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        setIsAuthenticated(false);
+        router.replace(APP_ROUTES.LOGIN);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   if (isAuthenticated === null) {

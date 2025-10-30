@@ -114,7 +114,7 @@ export function PostCard({
   };
 
   return (
-    <Card className="mb-4 hover:shadow-md transition-shadow" bordered={false}>
+    <Card className="mb-4 hover:shadow-md transition-shadow" variant="borderless">
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
