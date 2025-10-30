@@ -4,10 +4,11 @@ import { db } from '@/lib/data/database';
 // GET /api/posts/[id]/comments - Get comments for a post
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const comments = await db.getCommentsByPostId(params.id);
+    const comments = await db.getCommentsByPostId(id);
     return NextResponse.json(comments, { status: 200 });
   } catch (error) {
     console.error('Error fetching comments:', error);
@@ -21,15 +22,16 @@ export async function GET(
 // POST /api/posts/[id]/comments - Create a comment
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const body = await request.json();
     const newComment = await db.createComment({
       ...body,
-      postId: params.id,
+      postId: id,
     });
-    
+
     return NextResponse.json(newComment, { status: 201 });
   } catch (error) {
     console.error('Error creating comment:', error);
