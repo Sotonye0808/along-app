@@ -69,7 +69,7 @@ export function ComponentName({ prop }: ComponentProps) {
 - Import components from 'antd'
 - Use Ant Design theme configuration
 - Combine with Tailwind for custom styling
-- Use Ant Design icons from '@ant-design/icons'
+- Use Ant Design icons from '@ant-design/icons' for cases not covered by custom SVGs in assets/icons
 
 ### API Patterns
 - Use Server Actions for mutations

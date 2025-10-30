@@ -1,15 +1,17 @@
 // API Configuration
+// Uses Next.js API routes by default, can be overridden with NEXT_PUBLIC_API_URL for production backend
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth
-  REGISTER: "/register",
-  LOGIN: "/login",
-  VERIFY_OTP: "/verify-otp",
-  REFRESH_TOKEN: "/refresh-token",
-  LOGOUT: "/logout",
+  REGISTER: '/auth/register',
+  LOGIN: '/auth/login',
+  LOGOUT: '/auth/logout',
+  VERIFY_OTP: '/auth/verify-otp',
+  REFRESH_TOKEN: '/auth/refresh',
+  VERIFY: '/auth/verify',
 
   // Users
   USERS: "/users",

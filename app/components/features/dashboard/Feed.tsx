@@ -17,7 +17,7 @@ export function Feed() {
   const [loading, setLoading] = useState(true);
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [comments, setComments] = useState<(Comment & { author: User })[]>([]);
+  const [comments, setComments] = useState<(PostComment & { author: User })[]>([]);
 
   useEffect(() => {
     fetchPosts();
@@ -86,7 +86,7 @@ export function Feed() {
 
     try {
       // Fetch comments for this post
-      const commentsResponse = await api.get<Comment[]>(API_ENDPOINTS.COMMENTS);
+      const commentsResponse = await api.get<PostComment[]>(API_ENDPOINTS.COMMENTS);
       const allComments = commentsResponse.data;
       const postComments = allComments.filter((c) => c.postId === postId);
 
@@ -115,7 +115,7 @@ export function Feed() {
 
   const handleAddComment = async (postId: string, text: string) => {
     try {
-      const newComment: Partial<Comment> = {
+      const newComment: Partial<PostComment> = {
         postId,
         userId: "1", // Current user ID - replace with actual user
         text,

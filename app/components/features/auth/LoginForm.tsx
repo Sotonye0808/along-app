@@ -10,9 +10,7 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/utils/api";
-import { setAuthTokens, setUser } from "@/lib/utils/auth";
-import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
+import { API_BASE_URL, API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
@@ -23,26 +21,35 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await api.post<AuthResponse>(
-        API_ENDPOINTS.LOGIN,
-        values
-      );
+      const endpoint = API_BASE_URL + API_ENDPOINTS.LOGIN;
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Important: include cookies
+        body: JSON.stringify(values),
+      });
 
-      //
-      const { user, accessToken, refreshToken } = response.data;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Login failed");
+      }
 
-      // Store tokens and user data
-      setAuthTokens(accessToken, refreshToken);
-      setUser(user);
+      const data: AuthResponse = await response.json();
+
+      // Store user data in localStorage (not tokens - they're in httpOnly cookies)
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       message.success("Login successful! Redirecting...");
 
+      // Small delay to ensure cookies are set
       setTimeout(() => {
         router.push(APP_ROUTES.DASHBOARD);
-      }, 1000);
+        router.refresh(); // Force a refresh to update the layout
+      }, 500);
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.error || "Login failed. Please try again.";
+      const errorMessage = error.message || "Login failed. Please try again.";
       message.error(errorMessage);
       console.error("Login error:", error);
     } finally {
@@ -64,15 +71,13 @@ export function LoginForm() {
         layout="vertical"
         onFinish={handleSubmit}
         autoComplete="on"
-        size="large"
-      >
+        size="large">
         <Form.Item
           name="email"
           rules={[
             { required: true, message: "Please enter your email" },
             { type: "email", message: "Please enter a valid email" },
-          ]}
-        >
+          ]}>
           <Input
             prefix={<MailOutlined className="text-gray-400" />}
             placeholder="youremail@example.com"
@@ -85,8 +90,7 @@ export function LoginForm() {
           rules={[
             { required: true, message: "Please enter your password" },
             { min: 8, message: "Password must be at least 8 characters" },
-          ]}
-        >
+          ]}>
           <Input.Password
             prefix={<LockOutlined className="text-gray-400" />}
             placeholder="Enter your password"
@@ -100,8 +104,7 @@ export function LoginForm() {
             htmlType="submit"
             loading={loading}
             block
-            className="h-11"
-          >
+            className="h-11">
             {loading ? "Signing in..." : "Sign In"}
           </Button>
         </Form.Item>
@@ -113,16 +116,14 @@ export function LoginForm() {
             icon={<GoogleOutlined />}
             onClick={() => handleOAuthLogin("google")}
             block
-            className="h-11"
-          >
+            className="h-11">
             Google
           </Button>
           <Button
             icon={<AppleOutlined />}
             onClick={() => handleOAuthLogin("apple")}
             block
-            className="h-11"
-          >
+            className="h-11">
             Apple
           </Button>
         </div>
@@ -131,8 +132,7 @@ export function LoginForm() {
           Don&apos;t have an account?{" "}
           <Link
             href={APP_ROUTES.REGISTER}
-            className="text-[#00623B] hover:underline font-medium"
-          >
+            className="text-[#00623B] hover:underline font-medium">
             Sign Up
           </Link>
         </div>

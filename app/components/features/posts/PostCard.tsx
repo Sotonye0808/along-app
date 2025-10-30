@@ -10,6 +10,7 @@ import {
   Tag,
   Space,
   Divider,
+  Tooltip,
 } from "antd";
 import {
   LikeOutlined,
@@ -23,6 +24,10 @@ import {
   BookFilled,
   EnvironmentOutlined,
   DollarOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import Link from "next/link";
@@ -48,6 +53,29 @@ const vehicleIcons: Record<VehicleType, string> = {
   bus: "🚌",
   trekking: "🚶",
   car: "🚗",
+};
+
+const statusConfig = {
+  verified: {
+    icon: CheckCircleOutlined,
+    color: "text-green-500",
+    tooltip: "Verified Route",
+  },
+  unverified: {
+    icon: ExclamationCircleOutlined,
+    color: "text-gray-500",
+    tooltip: "Unverified Route",
+  },
+  pending: {
+    icon: ClockCircleOutlined,
+    color: "text-yellow-500",
+    tooltip: "Pending Verification",
+  },
+  rejected: {
+    icon: CloseCircleOutlined,
+    color: "text-red-500",
+    tooltip: "Rejected Route",
+  },
 };
 
 export function PostCard({
@@ -86,7 +114,7 @@ export function PostCard({
   };
 
   return (
-    <Card className="mb-4 hover:shadow-md transition-shadow" bordered={false}>
+    <Card className="mb-4 hover:shadow-md transition-shadow" variant="borderless">
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -122,59 +150,71 @@ export function PostCard({
 
       {/* Routes */}
       <div className="space-y-4 mb-4">
-        {post.routes.map((route, index) => (
-          <div key={route.id} className="flex gap-3">
-            {/* Route number indicator */}
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 rounded-full bg-[#00623B] text-white flex items-center justify-center font-semibold text-sm">
-                {index + 1}
+        {post.routes.map((route, index) => {
+          const StatusIcon = statusConfig[route.status].icon;
+          return (
+            <div key={route.id} className="flex gap-3">
+              {/* Route number indicator */}
+              <div className="flex flex-col items-center">
+                <div className="w-8 h-8 rounded-full bg-[#00623B] text-white flex items-center justify-center font-semibold text-sm">
+                  {index + 1}
+                </div>
+                {index < post.routes.length - 1 && (
+                  <div className="w-0.5 h-full bg-gray-300 my-1 flex-1" />
+                )}
               </div>
-              {index < post.routes.length - 1 && (
-                <div className="w-0.5 h-full bg-gray-300 my-1 flex-1" />
-              )}
-            </div>
 
-            {/* Route content */}
-            <div className="flex-1">
-              <p className="text-gray-800 mb-2">{route.text}</p>
+              {/* Route content */}
+              <div className="flex-1">
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-gray-800 flex-1">{route.text}</p>
+                  <Tooltip title={statusConfig[route.status].tooltip}>
+                    <StatusIcon
+                      className={`text-lg ml-2 overwrite-anticon-color ${
+                        statusConfig[route.status].color
+                      }`}
+                    />
+                  </Tooltip>
+                </div>
 
-              {/* Vehicle types and fare */}
-              {route.vehicles && route.vehicles.length > 0 && (
-                <div className="flex items-center gap-2 mb-2">
-                  <Space size={4}>
-                    {route.vehicles.map((vehicle) => (
-                      <span key={vehicle} className="text-xl" title={vehicle}>
-                        {vehicleIcons[vehicle]}
-                      </span>
+                {/* Vehicle types and fare */}
+                {route.vehicles && route.vehicles.length > 0 && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <Space size={4}>
+                      {route.vehicles.map((vehicle) => (
+                        <span key={vehicle} className="text-xl" title={vehicle}>
+                          {vehicleIcons[vehicle]}
+                        </span>
+                      ))}
+                    </Space>
+                    {route.fare && (
+                      <Tag icon={<DollarOutlined />} color="green">
+                        ₦{formatNumber(route.fare)}
+                      </Tag>
+                    )}
+                  </div>
+                )}
+
+                {/* Links */}
+                {route.links && route.links.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {route.links.map((link) => (
+                      <a
+                        key={link.url}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-[#00623B] hover:underline flex items-center gap-1">
+                        <EnvironmentOutlined />
+                        {link.text}
+                      </a>
                     ))}
-                  </Space>
-                  {route.fare && (
-                    <Tag icon={<DollarOutlined />} color="green">
-                      ₦{formatNumber(route.fare)}
-                    </Tag>
-                  )}
-                </div>
-              )}
-
-              {/* Links */}
-              {route.links && route.links.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {route.links.map((link) => (
-                    <a
-                      key={link.url}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-[#00623B] hover:underline flex items-center gap-1">
-                      <EnvironmentOutlined />
-                      {link.text}
-                    </a>
-                  ))}
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Images */}
