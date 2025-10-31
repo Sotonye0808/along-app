@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/data/database';
 
-// GET /api/users/[id] - Get user by ID
+// GET /api/users/[id] - return user by id
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await db.getUserById(params.id);
+        const { id } = await params;
+        if (!id) {
+            return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+        }
+
+        const user = await db.getUserById?.(id); // optional chaining to avoid crash if method missing
 
         if (!user) {
-            return NextResponse.json(
-                { error: 'User not found' },
-                { status: 404 }
-            );
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
         // Remove password from response
@@ -22,21 +24,20 @@ export async function GET(
         return NextResponse.json(sanitizedUser, { status: 200 });
     } catch (error) {
         console.error('Error fetching user:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch user' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
     }
 }
 
 // PUT /api/users/[id] - Update user
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const body = await request.json();
-        const updatedUser = await db.updateUser(params.id, body);
+
+        const updatedUser = await db.updateUser(id, body);
 
         if (!updatedUser) {
             return NextResponse.json(
@@ -61,12 +62,14 @@ export async function PUT(
 // DELETE /api/users/[id] - Delete user
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const success = await db.deleteUser(params.id);
+        const { id } = await params;
 
-        if (!success) {
+        const deleted = await db.deleteUser(id);
+
+        if (!deleted) {
             return NextResponse.json(
                 { error: 'User not found' },
                 { status: 404 }

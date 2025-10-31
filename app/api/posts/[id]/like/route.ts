@@ -4,51 +4,44 @@ import { db } from '@/lib/data/database';
 // POST /api/posts/[id]/like - Toggle like/dislike on a post
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const body = await request.json();
-        const { userId, type } = body; // type: 'like' | 'dislike'
+    const { id } = await params;
+    const body = await request.json();
+    const { userId, type } = body; // type: 'like' | 'dislike'
 
-        if (!userId || !type) {
-            return NextResponse.json(
-                { error: 'Missing userId or type' },
-                { status: 400 }
-            );
-        }
-
-        // Check if user already liked/disliked this post
-        const existingLike = await db.getLike(params.id, userId);
-
-        if (existingLike) {
-            if (existingLike.type === type) {
-                // Remove like/dislike if same type
-                await db.deleteLike(params.id, userId);
-                return NextResponse.json(
-                    { message: 'Like removed', action: 'removed' },
-                    { status: 200 }
-                );
-            } else {
-                // Switch between like and dislike
-                await db.createLike({ postId: params.id, userId, type });
-                return NextResponse.json(
-                    { message: 'Like updated', action: 'updated' },
-                    { status: 200 }
-                );
-            }
-        } else {
-            // Create new like/dislike
-            await db.createLike({ postId: params.id, userId, type });
-            return NextResponse.json(
-                { message: 'Like created', action: 'created' },
-                { status: 201 }
-            );
-        }
-    } catch (error) {
-        console.error('Error toggling like:', error);
+    if (!userId || !type) {
         return NextResponse.json(
-            { error: 'Failed to toggle like' },
-            { status: 500 }
+            { error: 'Missing userId or type' },
+            { status: 400 }
+        );
+    }
+
+    // Check if user already liked/disliked this post
+    const existingLike = await db.getLike(id, userId);
+
+    if (existingLike) {
+        if (existingLike.type === type) {
+            // Remove like/dislike if same type
+            await db.deleteLike(id, userId);
+            return NextResponse.json(
+                { message: 'Like removed', action: 'removed' },
+                { status: 200 }
+            );
+        } else {
+            // Switch between like and dislike
+            await db.createLike({ postId: id, userId, type });
+            return NextResponse.json(
+                { message: 'Like updated', action: 'updated' },
+                { status: 200 }
+            );
+        }
+    } else {
+        // Create new like/dislike
+        await db.createLike({ postId: id, userId, type });
+        return NextResponse.json(
+            { message: 'Like created', action: 'created' },
+            { status: 201 }
         );
     }
 }
@@ -56,9 +49,10 @@ export async function POST(
 // DELETE /api/posts/[id]/like - Remove like/dislike
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('userId');
 
@@ -69,7 +63,7 @@ export async function DELETE(
             );
         }
 
-        const success = await db.deleteLike(params.id, userId);
+        const success = await db.deleteLike(id, userId);
 
         if (!success) {
             return NextResponse.json(

@@ -4,10 +4,12 @@ import { db } from '@/lib/data/database';
 // GET /api/posts/[id] - Get post by ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
+
     try {
-        const post = await db.getPostById(params.id);
+        const post = await db.getPostById(id);
 
         if (!post) {
             return NextResponse.json(
@@ -29,11 +31,13 @@ export async function GET(
 // PUT /api/posts/[id] - Update post
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
+
     try {
         const body = await request.json();
-        const updatedPost = await db.updatePost(params.id, body);
+        const updatedPost = await db.updatePost(id, body);
 
         if (!updatedPost) {
             return NextResponse.json(
@@ -55,10 +59,12 @@ export async function PUT(
 // DELETE /api/posts/[id] - Delete post
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
+
     try {
-        const success = await db.deletePost(params.id);
+        const success = await db.deletePost(id);
 
         if (!success) {
             return NextResponse.json(

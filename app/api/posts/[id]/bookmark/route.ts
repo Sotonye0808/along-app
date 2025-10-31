@@ -4,9 +4,10 @@ import { db } from '@/lib/data/database';
 // POST /api/posts/[id]/bookmark - Toggle bookmark on a post
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const body = await request.json();
         const { userId } = body;
 
@@ -18,18 +19,18 @@ export async function POST(
         }
 
         // Check if bookmark already exists
-        const existingBookmark = await db.getBookmark(params.id, userId);
+        const existingBookmark = await db.getBookmark(id, userId);
 
         if (existingBookmark) {
             // Remove bookmark
-            await db.deleteBookmark(params.id, userId);
+            await db.deleteBookmark(id, userId);
             return NextResponse.json(
                 { message: 'Bookmark removed', action: 'removed' },
                 { status: 200 }
             );
         } else {
             // Create bookmark
-            await db.createBookmark({ postId: params.id, userId });
+            await db.createBookmark({ postId: id, userId });
             return NextResponse.json(
                 { message: 'Bookmark created', action: 'created' },
                 { status: 201 }

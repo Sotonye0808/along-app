@@ -52,7 +52,7 @@ export function ShareRouteModal({
 }: ShareRouteModalProps) {
   const [title, setTitle] = useState("");
   const [routes, setRoutes] = useState<RouteInput[]>([
-    { tempId: "1", text: "", links: [], order: 1, vehicles: [], fare: 0 },
+    { tempId: "1", text: "", links: [], order: 1, vehicles: [], fare: 0 , status: 'unverified'},
   ]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
@@ -92,6 +92,7 @@ export function ShareRouteModal({
           order: prev.length + 1,
           vehicles: [],
           fare: 0,
+          status: 'unverified',
         },
       ]);
     }
@@ -171,6 +172,7 @@ export function ShareRouteModal({
           order: index + 1,
           vehicles: route.vehicles,
           fare: route.fare,
+          status: route.status,
         })),
         images: fileList.map((file) => file.url || file.thumbUrl || ""),
         tags,
@@ -181,7 +183,7 @@ export function ShareRouteModal({
       // Reset form
       setTitle("");
       setRoutes([
-        { tempId: "1", text: "", links: [], order: 1, vehicles: [], fare: 0 },
+        { tempId: "1", text: "", links: [], order: 1, vehicles: [], fare: 0, status: 'unverified' },
       ]);
       setTags([]);
       setFileList([]);
