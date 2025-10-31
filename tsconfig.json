@@ -53,7 +53,8 @@
     "./app/lib/types/types/**/*.d.ts",
     "./app/lib/types/interfaces/**/*.d.ts",
     ".next\\dev/types/**/*.ts",
-    ".next\\dev/types/**/*.ts"
+    ".next\\dev/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
