@@ -7,27 +7,140 @@ import Link from "next/link";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils/format";
+import { useAuth } from "../../../providers/AuthProvider";
+
+interface SuggestionScore {
+  user: User;
+  score: number;
+  reasons: string[];
+}
 
 export function SuggestionsPanel() {
+  const { user: currentUser } = useAuth();
   const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchSuggestions();
-  }, []);
+  }, [currentUser]);
+
+  const calculateSuggestionScore = (
+    user: User,
+    currentUser: User | null,
+    allPosts: Post[]
+  ): SuggestionScore => {
+    let score = 0;
+    const reasons: string[] = [];
+
+    // Base score from followers (normalized to 0-30)
+    const followerScore = Math.min((user.followers || 0) / 100, 30);
+    score += followerScore;
+
+    if (currentUser) {
+      // Location-based suggestions (40 points)
+      if (
+        user.location &&
+        currentUser.location &&
+        user.location.toLowerCase().includes(currentUser.location.toLowerCase())
+      ) {
+        score += 40;
+        reasons.push("Same location");
+      } else if (
+        user.location &&
+        currentUser.location &&
+        user.location.split(",")[0].toLowerCase() ===
+          currentUser.location.split(",")[0].toLowerCase()
+      ) {
+        score += 20;
+        reasons.push("Nearby location");
+      }
+
+      // Activity-based suggestions (30 points)
+      const userPosts = allPosts.filter((p) => p.userId === user.id);
+      const currentUserLikes = currentUser.likes || [];
+      const currentUserBookmarks = currentUser.bookmarks || [];
+
+      // Check if current user interacted with this user's posts
+      const hasLikedUserPosts = userPosts.some((post) =>
+        currentUserLikes.includes(post.id)
+      );
+      const hasBookmarkedUserPosts = userPosts.some((post) =>
+        currentUserBookmarks.includes(post.id)
+      );
+
+      if (hasLikedUserPosts) {
+        score += 15;
+        reasons.push("You liked their posts");
+      }
+      if (hasBookmarkedUserPosts) {
+        score += 15;
+        reasons.push("You bookmarked their posts");
+      }
+
+      // Check for common tags (20 points)
+      const currentUserPosts = allPosts.filter(
+        (p) => p.userId === currentUser.id
+      );
+      const currentUserTags = new Set(currentUserPosts.flatMap((p) => p.tags));
+      const userTags = new Set(userPosts.flatMap((p) => p.tags));
+      const commonTags = Array.from(currentUserTags).filter((tag) =>
+        userTags.has(tag)
+      );
+
+      if (commonTags.length > 0) {
+        score += Math.min(commonTags.length * 5, 20);
+        reasons.push(`${commonTags.length} common interests`);
+      }
+
+      // Mutual connections (10 points)
+      const currentUserFollowing = new Set(currentUser.following || []);
+      const userFollowing = new Set(user.following || []);
+      const mutualCount = Array.from(currentUserFollowing).filter((id) =>
+        userFollowing.has(id)
+      ).length;
+
+      if (mutualCount > 0) {
+        score += Math.min(mutualCount * 5, 10);
+        reasons.push(`${mutualCount} mutual connections`);
+      }
+    }
+
+    // Verified users get a small boost (5 points)
+    if (user.verified) {
+      score += 5;
+    }
+
+    return { user, score, reasons };
+  };
 
   const fetchSuggestions = async () => {
     setLoading(true);
     try {
-      const response = await api.get<User[]>(API_ENDPOINTS.USERS);
-      // Get top 5 users by followers (excluding current user)
-      const suggestions = response.data
-        .filter((user) => user.id !== "1") // Exclude current user
-        .sort((a, b) => (b.followers || 0) - (a.followers || 0))
-        .slice(0, 5);
+      const [usersResponse, postsResponse] = await Promise.all([
+        api.get<User[]>(API_ENDPOINTS.USERS),
+        api.get<Post[]>(API_ENDPOINTS.POSTS),
+      ]);
 
-      setSuggestedUsers(suggestions);
+      // Filter out current user and already following
+      const currentUserFollowing = new Set(currentUser?.following || []);
+      const candidateUsers = usersResponse.data.filter(
+        (user) =>
+          user.id !== currentUser?.id && !currentUserFollowing.has(user.id)
+      );
+
+      // Calculate scores for each user
+      const scoredUsers = candidateUsers.map((user) =>
+        calculateSuggestionScore(user, currentUser, postsResponse.data)
+      );
+
+      // Sort by score and take top 5
+      const topSuggestions = scoredUsers
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5)
+        .map((s) => s.user);
+
+      setSuggestedUsers(topSuggestions);
     } catch (error) {
       console.error("Failed to fetch suggestions:", error);
     } finally {
@@ -67,8 +180,7 @@ export function SuggestionsPanel() {
     <Card
       title={<div className="font-semibold">Suggested for you</div>}
       className="h-fit"
-      variant="outlined"
-    >
+      variant="outlined">
       {suggestedUsers.length === 0 ? (
         <Empty
           description="No suggestions"
@@ -84,8 +196,7 @@ export function SuggestionsPanel() {
                   <Avatar
                     size={48}
                     src={user.avatar}
-                    className="cursor-pointer hover:opacity-80 shrink-0"
-                  >
+                    className="cursor-pointer hover:opacity-80 shrink-0">
                     {user.firstName[0]}
                     {user.lastName[0]}
                   </Avatar>
@@ -114,8 +225,7 @@ export function SuggestionsPanel() {
                   followingIds.has(user.id)
                     ? ""
                     : "bg-[#00623B] hover:bg-[#004d2e]"
-                }
-              >
+                }>
                 {followingIds.has(user.id) ? "Following" : "Follow"}
               </Button>
             </div>

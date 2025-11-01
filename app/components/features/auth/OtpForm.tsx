@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, message } from "antd";
+import { Button, App } from "antd";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS, APP_ROUTES, VALIDATION } from "@/lib/constants";
@@ -15,6 +15,7 @@ export function OtpForm() {
   const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const router = useRouter();
+  const { message } = App.useApp();
 
   useEffect(() => {
     // Get email from localStorage

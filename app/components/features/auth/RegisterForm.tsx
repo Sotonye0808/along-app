@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Form, Input, Button, Divider, message } from 'antd';
+import { Form, Input, Button, Divider, App } from 'antd';
 import { UserOutlined, MailOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -12,6 +12,7 @@ export function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const router = useRouter();
+  const { message } = App.useApp();
 
   const handleSubmit = async (values: RegisterData & { confirmPassword: string }) => {
     setLoading(true);

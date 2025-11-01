@@ -4,7 +4,11 @@
 Along is a social route-sharing platform where users can share, discover, and interact with travel routes and destinations.
 
 ## Note
-Make sure to follow the coding standards and architectural guidelines outlined in the project documentation. Make use of plan and project context files for reference.
+- Make sure to follow the coding standards and architectural guidelines outlined in the project documentation. 
+- Make use of plan and project context files for reference. Provide as close to production-ready code as possible. 
+- Leave nothing unimplemented but with flexibility and consideration of scalability.
+- Ignore 'app/conflicting' directory and its contents as it is old code kept for reference during migration.
+- Store any summary files in the '.github/summaries' directory for organization.
 
 ## Tech Stack
 - **Framework**: Next.js 15+ (App Router)

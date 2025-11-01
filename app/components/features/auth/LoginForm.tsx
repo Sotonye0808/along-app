@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Form, Input, Button, Divider, message } from "antd";
+import { Form, Input, Button, Divider, App } from "antd";
 import {
   MailOutlined,
   LockOutlined,
@@ -11,43 +11,22 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
+import { useAuth } from "@/providers/AuthProvider";
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const router = useRouter();
+  const { message } = App.useApp();
+  const { login } = useAuth();
 
   const handleSubmit = async (values: LoginCredentials) => {
     setLoading(true);
 
     try {
-      const endpoint = API_BASE_URL + API_ENDPOINTS.LOGIN;
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Important: include cookies
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Login failed");
-      }
-
-      const data: AuthResponse = await response.json();
-
-      // Store user data in localStorage (not tokens - they're in httpOnly cookies)
-      localStorage.setItem("user", JSON.stringify(data.user));
-
+      await login(values.email, values.password);
       message.success("Login successful! Redirecting...");
-
-      // Small delay to ensure cookies are set
-      setTimeout(() => {
-        router.push(APP_ROUTES.DASHBOARD);
-        router.refresh(); // Force a refresh to update the layout
-      }, 500);
+      router.push(APP_ROUTES.DASHBOARD);
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please try again.";
       message.error(errorMessage);

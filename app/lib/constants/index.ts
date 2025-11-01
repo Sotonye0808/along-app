@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   USER_BY_ID: (id: string) => `/users/${id}`,
   USER_POSTS: (id: string) => `/users/${id}/posts`,
   USER_BOOKMARKS: (id: string) => `/users/${id}/bookmarks`,
+  USER_FOLLOW: (id: string) => `/users/${id}/follow`,
 
   // Posts
   POSTS: "/posts",
@@ -27,9 +28,6 @@ export const API_ENDPOINTS = {
   POST_COMMENTS: (id: string) => `/posts/${id}/comments`,
   POST_BOOKMARK: (id: string) => `/posts/${id}/bookmark`,
   POST_SHARE: (id: string) => `/posts/${id}/share`,
-
-  // Comments
-  COMMENTS: "/comments",
 
   // Notifications
   NOTIFICATIONS: "/notifications",

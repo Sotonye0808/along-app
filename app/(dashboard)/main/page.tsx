@@ -8,7 +8,7 @@ import {
 
 export default function DashboardPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="w-full mx-auto px-1 py-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Feed Column */}
         <div className="lg:col-span-7 xl:col-span-8">
