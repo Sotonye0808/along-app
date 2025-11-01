@@ -167,7 +167,7 @@ export function PostCard({
             </Avatar>
           </Link>
           <div className="flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2 mb-2">
               <Link href={`/profile/${author.userName}`}>
                 <h3 className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer">
                   {author.firstName} {author.lastName}
@@ -180,14 +180,14 @@ export function PostCard({
                   onClick={() => onFollow(author.id)}
                   className={
                     isFollowing
-                      ? "border-[#00623B] text-[#00623B] hover:bg-gray-50"
+                      ? "border-[#00623B] text-[#00623B] text-sm hover:bg-gray-50"
                       : "bg-[#00623B] hover:bg-[#004d2e]"
                   }>
                   {isFollowing ? "Following" : "Follow"}
                 </Button>
               )}
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center justify-between gap-2 text-xs text-gray-500">
               <span>@{author.userName}</span>
               <span>•</span>
               <span>{formatDate(post.createdAt)}</span>
@@ -222,9 +222,9 @@ export function PostCard({
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <p className="text-gray-800 flex-1">{route.text}</p>
-                  <Tooltip title={statusConfig[route.status].tooltip}>
+                  <Tooltip className={`overwrite-anticon-color ${statusConfig[route.status].color}`} title={statusConfig[route.status].tooltip}>
                     <StatusIcon
-                      className={`text-lg ml-2 overwrite-anticon-color ${
+                      className={`text-sm ml-2 overwrite-anticon-color ${
                         statusConfig[route.status].color
                       }`}
                     />
@@ -303,19 +303,23 @@ export function PostCard({
         </div>
       )}
 
-      {/* Image Preview Modal */}
-      <div className="hidden">
-        <AntImage.PreviewGroup
-          preview={{
-            visible: imagePreviewOpen,
-            onVisibleChange: setImagePreviewOpen,
-            current: currentImageIndex,
-          }}>
-          {post.images?.map((image, index) => (
-            <AntImage key={index} src={image} />
-          ))}
-        </AntImage.PreviewGroup>
-      </div>
+            {/* Image Preview Modal */}
+      <AntImage.PreviewGroup
+        preview={{
+          visible: imagePreviewOpen,
+          onVisibleChange: setImagePreviewOpen,
+          current: currentImageIndex,
+          onChange: (current) => setCurrentImageIndex(current),
+        }}>
+        {post.images?.map((image, index) => (
+          <AntImage
+            key={index}
+            src={image}
+            style={{ display: 'none' }}
+            alt={`${post.title} - Image ${index + 1}`}
+          />
+        ))}
+      </AntImage.PreviewGroup>
 
       {/* Tags */}
       {post.tags && post.tags.length > 0 && (

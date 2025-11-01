@@ -40,7 +40,7 @@ export const APP_ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   OTP: "/otp",
-  DASHBOARD: "/main",
+  DASHBOARD: "/home",
   EXPLORE: "/explore",
   BOOKMARKS: "/bookmarks",
   MARKETPLACE: "/marketplace",

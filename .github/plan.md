@@ -275,11 +275,15 @@ interface PaginatedResponse<T> {
 - [ ] Implement React.lazy for heavy components
 - [ ] Optimize images
 - [ ] Add loading states
+- [ ] Disable buttons during async actions
+- [ ] Disable unnecessary re-renders with React.memo
 - [ ] Implement error boundaries
+- [ ] 404 Not Found page
 
 ### 6.2 UX Improvements
 
 - [ ] Loading skeletons (Ant Design Skeleton)
+- [ ] Smooth transitions/animations
 - [ ] Toast notifications
 - [ ] Confirmation dialogs
 - [ ] Form validation feedback

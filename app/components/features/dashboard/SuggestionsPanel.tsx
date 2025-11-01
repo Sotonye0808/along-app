@@ -209,9 +209,9 @@ export function SuggestionsPanel() {
           className="py-4"
         />
       ) : (
-        <div className="space-y-4">
+        <div className="flex gap-6 flex-row lg:flex-col overflow-x-auto">
           {suggestedUsers.map((user) => (
-            <div key={user.id} className="flex items-center justify-between">
+            <div key={user.id} className="flex flex-col lg:flex-row gap-2 items-center justify-between">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Link href={`/profile/${user.userName}`}>
                   <Avatar

@@ -16,7 +16,7 @@ export default function DashboardLayout({
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spin size="large" tip="Loading..." />
+        <Spin size="large" />
       </div>
     );
   }
@@ -29,7 +29,7 @@ export default function DashboardLayout({
       <DesktopTopBar />
 
       {/* Main Content */}
-      <main className="md:ml-20 md:mt-16 mt-16 mb-20 md:mb-0">
+      <main className="md:ml-20 md:mt-12 mt-8 mb-20 md:mb-0">
         <div className="max-w-7xl mx-auto p-1 md:p-4">{children}</div>
       </main>
     </div>
