@@ -13,7 +13,7 @@ import {
 import type { MenuProps } from "antd";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import Link from "next/link";
 
 export function MobileTopBar() {
@@ -73,15 +73,16 @@ export function MobileTopBar() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button
+            <button type="button"
               onClick={() => setSearchVisible(true)}
               className="text-xl text-gray-700">
               <SearchOutlined />
             </button>
 
             <Badge count={5} size="small" offset={[-2, 2]}>
-              <button className="text-xl text-gray-700">
+              <button type="button" className="text-xl text-gray-700">
                 <BellOutlined />
+                <span className="sr-only">Bell</span> {/*for discernable text*/}
               </button>
             </Badge>
 

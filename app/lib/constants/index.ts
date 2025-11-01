@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
   POSTS: "/posts",
   POST_BY_ID: (id: string) => `/posts/${id}`,
   POST_LIKE: (id: string) => `/posts/${id}/like`,
+  POST_LIKE_CHECK: (id: string, userId: string) => `/posts/${id}/like?userId=${userId}`,
   POST_DISLIKE: (id: string) => `/posts/${id}/dislike`,
   POST_COMMENTS: (id: string) => `/posts/${id}/comments`,
   POST_BOOKMARK: (id: string) => `/posts/${id}/bookmark`,

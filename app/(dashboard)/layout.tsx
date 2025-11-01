@@ -3,7 +3,7 @@
 import { DashboardNavbar } from "@/components/features/navigation/DashboardNavbar";
 import { MobileTopBar } from "@/components/features/navigation/MobileTopBar";
 import { DesktopTopBar } from "@/components/features/navigation/DesktopTopBar";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { Spin } from "antd";
 
 export default function DashboardLayout({

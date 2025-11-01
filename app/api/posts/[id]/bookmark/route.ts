@@ -1,6 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/data/database';
 
+// GET /api/posts/[id]/bookmark - Check if user has bookmarked this post
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params;
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get('userId');
+
+        if (!userId) {
+            return NextResponse.json(
+                { error: 'Missing userId' },
+                { status: 400 }
+            );
+        }
+
+        const bookmark = await db.getBookmark(id, userId);
+
+        return NextResponse.json(
+            { data: bookmark },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error('Error checking bookmark:', error);
+        return NextResponse.json(
+            { error: 'Failed to check bookmark' },
+            { status: 500 }
+        );
+    }
+}
+
 // POST /api/posts/[id]/bookmark - Toggle bookmark on a post
 export async function POST(
     request: NextRequest,
@@ -40,30 +72,6 @@ export async function POST(
         console.error('Error toggling bookmark:', error);
         return NextResponse.json(
             { error: 'Failed to toggle bookmark' },
-            { status: 500 }
-        );
-    }
-}
-
-// GET /api/posts/[id]/bookmark - Get bookmarks for a user
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Missing userId' },
-                { status: 400 }
-            );
-        }
-
-        const bookmarks = await db.getBookmarksByUserId(userId);
-        return NextResponse.json(bookmarks, { status: 200 });
-    } catch (error) {
-        console.error('Error fetching bookmarks:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch bookmarks' },
             { status: 500 }
         );
     }

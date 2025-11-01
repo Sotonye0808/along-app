@@ -60,46 +60,35 @@ export function Feed() {
     if (!currentUser) return;
 
     try {
-      // Fetch all posts to check user's interactions
-      const [postsRes, likesRes, bookmarksRes] = await Promise.all([
-        api.get<Post[]>(API_ENDPOINTS.POSTS),
-        // You can add dedicated endpoints for user's likes/bookmarks
-        // For now, we'll check each post individually
-        Promise.resolve({ data: [] as Like[] }),
-        Promise.resolve({ data: [] as Bookmark[] }),
-      ]);
-
-      // For a more efficient implementation, you'd want dedicated endpoints
-      // like /api/users/:userId/likes, /api/users/:userId/bookmarks
-      // But for now, we'll make individual checks when needed
-
       const likes = new Set<string>();
       const dislikes = new Set<string>();
       const bookmarks = new Set<string>();
 
-      // Check each post for user's interactions
-      // This is a simplified version - in production, use batch endpoints
+      // Fetch all posts first
+      const postsRes = await api.get<Post[]>(API_ENDPOINTS.POSTS);
+
+      // Check each post for user's interactions using GET requests
       for (const post of postsRes.data) {
         try {
           // Check if user has liked/disliked this post
-          const likeCheck = await api.get<Like | null>(
+          const likeCheck = await api.get<{ data: Like | null }>(
             `${API_ENDPOINTS.POST_LIKE(post.id)}?userId=${currentUser.id}`
           );
 
-          if (likeCheck.data) {
-            if (likeCheck.data.type === "like") {
+          if (likeCheck.data.data) {
+            if (likeCheck.data.data.type === "like") {
               likes.add(post.id);
-            } else if (likeCheck.data.type === "dislike") {
+            } else if (likeCheck.data.data.type === "dislike") {
               dislikes.add(post.id);
             }
           }
 
           // Check if user has bookmarked this post
-          const bookmarkCheck = await api.get<Bookmark | null>(
+          const bookmarkCheck = await api.get<{ data: Bookmark | null }>(
             `${API_ENDPOINTS.POST_BOOKMARK(post.id)}?userId=${currentUser.id}`
           );
 
-          if (bookmarkCheck.data) {
+          if (bookmarkCheck.data.data) {
             bookmarks.add(post.id);
           }
         } catch (error) {
@@ -126,7 +115,7 @@ export function Feed() {
     try {
       // Get user data to access following array
       const userResponse = await api.get<User>(
-        `${API_ENDPOINTS.USERS}/${currentUser.id}`
+        API_ENDPOINTS.USER_BY_ID(currentUser.id)
       );
 
       const followingSet = new Set(userResponse.data.following || []);
@@ -559,7 +548,9 @@ export function Feed() {
     );
 
     try {
-      await api.post(API_ENDPOINTS.USER_FOLLOW(userId));
+      await api.post(API_ENDPOINTS.USER_FOLLOW(userId), {
+        userId: currentUser.id,
+      });
 
       message.success(
         isCurrentlyFollowing

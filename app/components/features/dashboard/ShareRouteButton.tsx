@@ -6,7 +6,7 @@ import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 
 interface ShareRouteButtonProps {

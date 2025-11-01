@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);

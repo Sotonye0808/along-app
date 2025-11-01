@@ -149,8 +149,11 @@ export function SuggestionsPanel() {
   };
 
   const handleFollow = async (userId: string) => {
+    if (!currentUser) {
+      return;
+    }
+
     try {
-      // Mock follow - replace with actual API call
       setFollowingIds((prev) => new Set([...prev, userId]));
 
       // Update user followers count optimistically
@@ -161,8 +164,26 @@ export function SuggestionsPanel() {
             : user
         )
       );
+
+      // Make API call with userId in body
+      await api.post(API_ENDPOINTS.USER_FOLLOW(userId), {
+        userId: currentUser.id,
+      });
     } catch (error) {
       console.error("Failed to follow user:", error);
+      // Rollback on error
+      setFollowingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+      setSuggestedUsers((prev) =>
+        prev.map((user) =>
+          user.id === userId
+            ? { ...user, followers: (user.followers || 0) - 1 }
+            : user
+        )
+      );
     }
   };
 
