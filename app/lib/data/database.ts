@@ -291,6 +291,10 @@ class InMemoryStore {
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
+    async getNotificationById(id: string): Promise<AppNotification | null> {
+        return this.notifications.find((n) => n.id === id) || null;
+    }
+
     async createNotification(notificationData: Partial<AppNotification>): Promise<AppNotification> {
         const newNotification: AppNotification = {
             id: this.generateId(),
@@ -305,6 +309,13 @@ class InMemoryStore {
         return newNotification;
     }
 
+    async updateNotification(id: string, updates: Partial<AppNotification>): Promise<AppNotification | null> {
+        const index = this.notifications.findIndex((n) => n.id === id);
+        if (index === -1) return null;
+        this.notifications[index] = { ...this.notifications[index], ...updates };
+        return this.notifications[index];
+    }
+
     async markNotificationAsRead(id: string): Promise<boolean> {
         const notification = this.notifications.find((n) => n.id === id);
         if (!notification) return false;
@@ -316,6 +327,13 @@ class InMemoryStore {
         this.notifications
             .filter((n) => n.userId === userId)
             .forEach((n) => (n.read = true));
+        return true;
+    }
+
+    async deleteNotification(id: string): Promise<boolean> {
+        const index = this.notifications.findIndex((n) => n.id === id);
+        if (index === -1) return false;
+        this.notifications.splice(index, 1);
         return true;
     }
 }
