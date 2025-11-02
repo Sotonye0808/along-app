@@ -449,6 +449,55 @@ export default function ProfilePage() {
     }
   };
 
+  const handleLikeComment = async (commentId: string) => {
+    // TODO: Implement comment like/dislike tracking
+    message.info("Comment interaction - to be implemented with backend");
+  };
+
+  const handleDislikeComment = async (commentId: string) => {
+    message.info("Comment interaction - to be implemented with backend");
+  };
+
+  const handleEditComment = async (commentId: string, newText: string) => {
+    try {
+      // Find the comment's post
+      const comment = comments.find((c) => c.id === commentId);
+      if (!comment) return;
+
+      await api.put(
+        `${API_ENDPOINTS.POST_COMMENTS(comment.postId)}/${commentId}`,
+        {
+          text: newText,
+        }
+      );
+
+      // Update local state
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, text: newText } : c))
+      );
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+      throw error;
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const comment = comments.find((c) => c.id === commentId);
+      if (!comment) return;
+
+      await api.delete(
+        `${API_ENDPOINTS.POST_COMMENTS(comment.postId)}/${commentId}`
+      );
+
+      // Update local state
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      throw error;
+    }
+  };
+
   const handleDelete = async (postId: string) => {
     const { notification } = App.useApp();
     const key = `delete-post-${postId}`;
@@ -519,6 +568,10 @@ export default function ProfilePage() {
         onShare={handleShare}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onLikeComment={handleLikeComment}
+        onDislikeComment={handleDislikeComment}
+        onEditComment={handleEditComment}
+        onDeleteComment={handleDeleteComment}
       />
 
       <EditProfileModal

@@ -218,7 +218,7 @@ export function SearchBar() {
 
       {/* Search Results Dropdown */}
       {showResults && (query || results.length > 0) && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[500px] overflow-y-auto z-50">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[500px] overflow-y-auto z-[9999]">
           {loading ? (
             <div className="flex justify-center items-center py-8">
               <Spin />

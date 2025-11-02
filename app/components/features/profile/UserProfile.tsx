@@ -32,6 +32,10 @@ interface UserProfileProps {
   onShare?: (postId: string) => void;
   onEdit?: (post: Post) => void;
   onDelete?: (postId: string) => void;
+  onLikeComment?: (commentId: string) => void;
+  onDislikeComment?: (commentId: string) => void;
+  onEditComment?: (commentId: string, newText: string) => Promise<void>;
+  onDeleteComment?: (commentId: string) => Promise<void>;
   userInteractions?: {
     likes: Set<string>;
     dislikes: Set<string>;
@@ -56,6 +60,10 @@ export function UserProfile({
   onShare,
   onEdit,
   onDelete,
+  onLikeComment,
+  onDislikeComment,
+  onEditComment,
+  onDeleteComment,
   userInteractions = {
     likes: new Set(),
     dislikes: new Set(),
@@ -63,6 +71,10 @@ export function UserProfile({
   },
 }: UserProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [selectedComment, setSelectedComment] = useState<
+    (PostComment & { author: User; post: Post }) | null
+  >(null);
   const { message, modal } = App.useApp();
   const router = useRouter();
 
@@ -160,8 +172,10 @@ export function UserProfile({
             />
           ) : (
             comments.map((comment) => (
-              <Card key={comment.id} className="mb-4">
-                <div className="flex flex-col gap-2">
+              <Card
+                key={comment.id}
+                className="mb-4 hover:shadow-md transition-shadow">
+                <div className="flex flex-col gap-3">
                   <div className="text-sm text-gray-500">
                     Commented on{" "}
                     <Link
@@ -171,8 +185,52 @@ export function UserProfile({
                     </Link>
                   </div>
                   <p className="text-gray-700">{comment.text}</p>
-                  <div className="text-xs text-gray-400">
-                    {formatDate(comment.createdAt)}
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-gray-400">
+                      {formatDate(comment.createdAt)}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={
+                          <svg
+                            className="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20">
+                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                          </svg>
+                        }
+                        onClick={() => onLikeComment?.(comment.id)}
+                        className="text-gray-600 hover:text-[#00623B]">
+                        {comment.likes > 0 && comment.likes}
+                      </Button>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={
+                          <svg
+                            className="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20">
+                            <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
+                          </svg>
+                        }
+                        onClick={() => onDislikeComment?.(comment.id)}
+                        className="text-gray-600 hover:text-red-500">
+                        {comment.dislikes > 0 && comment.dislikes}
+                      </Button>
+                      <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                          setSelectedComment(comment);
+                          setCommentModalOpen(true);
+                        }}
+                        className="text-[#00623B]">
+                        View Thread
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -303,6 +361,25 @@ export function UserProfile({
         items={tabItems}
         className="profile-tabs"
       />
+
+      {/* Comment Section Modal */}
+      {selectedComment && (
+        <CommentSection
+          open={commentModalOpen}
+          onClose={() => {
+            setCommentModalOpen(false);
+            setSelectedComment(null);
+          }}
+          postId={selectedComment.postId}
+          comments={comments.filter((c) => c.postId === selectedComment.postId)}
+          currentUser={currentUserId ? ({ id: currentUserId } as User) : null}
+          onAddComment={async () => {}}
+          onLikeComment={onLikeComment}
+          onDislikeComment={onDislikeComment}
+          onEditComment={onEditComment}
+          onDeleteComment={onDeleteComment}
+        />
+      )}
     </div>
   );
 }

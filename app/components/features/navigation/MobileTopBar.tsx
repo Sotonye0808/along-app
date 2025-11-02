@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input, Avatar, Dropdown, Badge, Button } from "antd";
+import { Avatar, Dropdown, Badge, Button } from "antd";
 import {
   SearchOutlined,
   BellOutlined,
@@ -9,12 +9,14 @@ import {
   SettingOutlined,
   LogoutOutlined,
   LoginOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { NotificationsDropdown } from "./NotificationsDropdown";
+import { SearchBar } from "@/components/features/dashboard/SearchBar";
 import Link from "next/link";
 
 export function MobileTopBar() {
@@ -52,23 +54,22 @@ export function MobileTopBar() {
   ];
 
   return (
-    <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-50">
+    <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-50">
       {searchVisible ? (
-        <div className="flex-1 flex items-center gap-2">
-          <Input
-            placeholder="Search routes, users..."
-            prefix={<SearchOutlined className="text-gray-400" />}
-            autoFocus
-            className="flex-1"
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <SearchBar />
+          </div>
           <button
+            type="button"
             onClick={() => setSearchVisible(false)}
-            className="text-sm text-gray-600 font-medium">
-            Cancel
+            className="text-gray-600 hover:text-gray-800 p-1">
+            <CloseOutlined className="text-lg" />
+            <span className="sr-only">Close Button</span>
           </button>
         </div>
       ) : (
-        <>
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-[#00623B]">Along</h1>
           </div>
@@ -125,7 +126,7 @@ export function MobileTopBar() {
               </Link>
             )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
