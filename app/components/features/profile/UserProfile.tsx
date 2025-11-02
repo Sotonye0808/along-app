@@ -8,9 +8,12 @@ import {
   CalendarOutlined,
   LinkOutlined,
 } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PostCard } from "@/components/features/posts/PostCard";
 import { CommentSection } from "@/components/features/posts/CommentSection";
 import { formatDate } from "@/lib/utils/format";
+import { APP_ROUTES } from "@/lib/constants";
 
 interface UserProfileProps {
   user: User;
@@ -18,6 +21,7 @@ interface UserProfileProps {
   posts: (Post & { author: User })[];
   comments: (PostComment & { author: User; post: Post })[];
   currentUserId?: string;
+  isAuthenticated?: boolean;
   onEditProfile?: () => void;
   onFollow?: (userId: string) => void;
   isFollowing?: boolean;
@@ -41,6 +45,7 @@ export function UserProfile({
   posts,
   comments,
   currentUserId,
+  isAuthenticated = false,
   onEditProfile,
   onFollow,
   isFollowing = false,
@@ -58,12 +63,47 @@ export function UserProfile({
   },
 }: UserProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
+  const router = useRouter();
+
+  const handleFollowClick = () => {
+    if (!isAuthenticated) {
+      modal.confirm({
+        title: "Login Required",
+        content:
+          "You need to be logged in to follow users. Would you like to login now?",
+        okText: "Login",
+        cancelText: "Cancel",
+        onOk: () => {
+          router.push(APP_ROUTES.LOGIN);
+        },
+      });
+      return;
+    }
+    onFollow?.(user.id);
+  };
 
   const handleCopyProfileLink = () => {
     const profileUrl = `${window.location.origin}/profile/${user.userName}`;
-    navigator.clipboard.writeText(profileUrl);
-    message.success("Profile link copied to clipboard!");
+
+    if (navigator.share) {
+      navigator
+        .share({
+          title: `${user.firstName} ${user.lastName} on Along`,
+          text: `Check out ${user.firstName}'s profile on Along!`,
+          url: profileUrl,
+        })
+        .catch((error) => {
+          // User cancelled or share failed
+          if (error.name !== "AbortError") {
+            navigator.clipboard.writeText(profileUrl);
+            message.success("Profile link copied to clipboard!");
+          }
+        });
+    } else {
+      navigator.clipboard.writeText(profileUrl);
+      message.success("Profile link copied to clipboard!");
+    }
   };
 
   const tabItems = [
@@ -124,9 +164,11 @@ export function UserProfile({
                 <div className="flex flex-col gap-2">
                   <div className="text-sm text-gray-500">
                     Commented on{" "}
-                    <span className="font-semibold text-gray-900">
+                    <Link
+                      href={`/posts/${comment.post.id}`}
+                      className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer">
                       {comment.post.title}
-                    </span>
+                    </Link>
                   </div>
                   <p className="text-gray-700">{comment.text}</p>
                   <div className="text-xs text-gray-400">
@@ -195,7 +237,7 @@ export function UserProfile({
                 ) : (
                   <Button
                     type={isFollowing ? "default" : "primary"}
-                    onClick={() => onFollow?.(user.id)}
+                    onClick={handleFollowClick}
                     className={
                       isFollowing
                         ? "border-[#00623B] text-[#00623B] hover:bg-gray-50"
@@ -239,7 +281,7 @@ export function UserProfile({
 
             {/* Additional Info */}
             <div className="flex flex-col gap-2 text-sm text-gray-600">
-              {user.location && (
+              {isOwnProfile && user.location && (
                 <div className="flex items-center gap-2">
                   <EnvironmentOutlined className="text-gray-400" />
                   <span>{user.location}</span>

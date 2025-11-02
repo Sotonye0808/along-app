@@ -222,7 +222,11 @@ export function PostCard({
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <p className="text-gray-800 flex-1">{route.text}</p>
-                  <Tooltip className={`overwrite-anticon-color ${statusConfig[route.status].color}`} title={statusConfig[route.status].tooltip}>
+                  <Tooltip
+                    className={`overwrite-anticon-color ${
+                      statusConfig[route.status].color
+                    }`}
+                    title={statusConfig[route.status].tooltip}>
                     <StatusIcon
                       className={`text-sm ml-2 overwrite-anticon-color ${
                         statusConfig[route.status].color
@@ -303,7 +307,7 @@ export function PostCard({
         </div>
       )}
 
-            {/* Image Preview Modal */}
+      {/* Image Preview Modal */}
       <AntImage.PreviewGroup
         preview={{
           visible: imagePreviewOpen,
@@ -315,7 +319,7 @@ export function PostCard({
           <AntImage
             key={index}
             src={image}
-            style={{ display: 'none' }}
+            style={{ display: "none" }}
             alt={`${post.title} - Image ${index + 1}`}
           />
         ))}
@@ -325,7 +329,14 @@ export function PostCard({
       {post.tags && post.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {post.tags.map((tag) => (
-            <Tag key={tag} className="cursor-pointer hover:opacity-80">
+            <Tag
+              key={tag}
+              className="cursor-pointer hover:opacity-80"
+              onClick={() => {
+                // Navigate to home/explore with tag search
+                const searchParams = new URLSearchParams({ q: tag });
+                window.location.href = `/home?${searchParams.toString()}`;
+              }}>
               #{tag}
             </Tag>
           ))}

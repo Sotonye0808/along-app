@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, Avatar, Button, Empty, Spin } from "antd";
+import { Card, Avatar, Button, Empty, Spin, App } from "antd";
 import { UserAddOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/utils/api";
-import { API_ENDPOINTS } from "@/lib/constants";
+import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils/format";
 import { useAuth } from "../../../providers/AuthProvider";
 
@@ -16,7 +17,9 @@ interface SuggestionScore {
 }
 
 export function SuggestionsPanel() {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isAuthenticated } = useAuth();
+  const { modal } = App.useApp();
+  const router = useRouter();
   const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
@@ -149,7 +152,17 @@ export function SuggestionsPanel() {
   };
 
   const handleFollow = async (userId: string) => {
-    if (!currentUser) {
+    if (!isAuthenticated || !currentUser) {
+      modal.confirm({
+        title: "Login Required",
+        content:
+          "You need to be logged in to follow users. Would you like to login now?",
+        okText: "Login",
+        cancelText: "Cancel",
+        onOk: () => {
+          router.push(APP_ROUTES.LOGIN);
+        },
+      });
       return;
     }
 
@@ -211,7 +224,9 @@ export function SuggestionsPanel() {
       ) : (
         <div className="flex gap-6 flex-row lg:flex-col overflow-x-auto">
           {suggestedUsers.map((user) => (
-            <div key={user.id} className="flex flex-col lg:flex-row gap-2 items-center justify-between">
+            <div
+              key={user.id}
+              className="flex flex-col lg:flex-row gap-2 items-center justify-between">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Link href={`/profile/${user.userName}`}>
                   <Avatar

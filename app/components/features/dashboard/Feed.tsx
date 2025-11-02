@@ -378,6 +378,57 @@ export function Feed() {
     }
   };
 
+  const handleEditComment = async (commentId: string, newText: string) => {
+    if (!currentUser) {
+      message.warning("Please login to edit comments");
+      throw new Error("User not logged in");
+    }
+
+    try {
+      await api.put(
+        `${API_ENDPOINTS.POST_COMMENTS(selectedPostId!)}/${commentId}`,
+        {
+          text: newText,
+        }
+      );
+
+      // Update local state
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment.id === commentId ? { ...comment, text: newText } : comment
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+      throw error;
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!currentUser || !selectedPostId) return;
+
+    try {
+      await api.delete(
+        `${API_ENDPOINTS.POST_COMMENTS(selectedPostId)}/${commentId}`
+      );
+
+      // Update local state
+      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+
+      // Update comment count
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === selectedPostId
+            ? { ...post, comments: post.comments - 1 }
+            : post
+        )
+      );
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      throw error;
+    }
+  };
+
   const handleBookmark = async (postId: string) => {
     if (!currentUser) {
       message.warning("Please login to bookmark posts");
@@ -487,25 +538,40 @@ export function Feed() {
   };
 
   const handleDelete = (postId: string) => {
-    modal.confirm({
-      title: "Delete Post",
-      icon: <ExclamationCircleOutlined />,
-      content:
-        "Are you sure you want to delete this post? This action cannot be undone.",
-      okText: "Delete",
-      okType: "danger",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          await api.delete(`${API_ENDPOINTS.POSTS}/${postId}`);
+    const { notification } = App.useApp();
+    const key = `delete-post-${postId}`;
+    let undoClicked = false;
 
-          // Remove the post from local state
-          setPosts((prev) => prev.filter((p) => p.id !== postId));
+    notification.open({
+      key,
+      message: "Post deleted",
+      description: "Undo within 10 seconds",
+      duration: 10,
+      btn: (
+        <Button
+          type="primary"
+          size="small"
+          onClick={() => {
+            undoClicked = true;
+            notification.destroy(key);
+            message.info("Deletion cancelled");
+          }}>
+          Undo
+        </Button>
+      ),
+      onClose: async () => {
+        if (!undoClicked) {
+          try {
+            await api.delete(`${API_ENDPOINTS.POSTS}/${postId}`);
 
-          message.success("Post deleted successfully!");
-        } catch (error) {
-          console.error("Failed to delete post:", error);
-          message.error("Failed to delete post");
+            // Remove the post from local state
+            setPosts((prev) => prev.filter((p) => p.id !== postId));
+
+            message.success("Post deleted permanently");
+          } catch (error) {
+            console.error("Failed to delete post:", error);
+            message.error("Failed to delete post");
+          }
         }
       },
     });
@@ -673,6 +739,8 @@ export function Feed() {
           comments={comments}
           currentUser={currentUser}
           onAddComment={handleAddComment}
+          onEditComment={handleEditComment}
+          onDeleteComment={handleDeleteComment}
         />
       )}
     </>

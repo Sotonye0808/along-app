@@ -14,6 +14,7 @@ import type { MenuProps } from "antd";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { NotificationsDropdown } from "./NotificationsDropdown";
 import Link from "next/link";
 
 export function MobileTopBar() {
@@ -73,18 +74,30 @@ export function MobileTopBar() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setSearchVisible(true)}
-              className="text-xl text-gray-700">
+              className="text-xl text-gray-700"
+              title="Search"
+              aria-label="Search routes and users">
               <SearchOutlined />
             </button>
 
-            <Badge count={5} size="small" offset={[-2, 2]}>
-              <button type="button" className="text-xl text-gray-700">
-                <BellOutlined />
-                <span className="sr-only">Bell</span> {/*for discernable text*/}
-              </button>
-            </Badge>
+            {isAuthenticated && user ? (
+              <NotificationsDropdown userId={user.id} />
+            ) : (
+              <Badge count={0} size="small" offset={[-2, 2]}>
+                <button
+                  type="button"
+                  className="text-xl text-gray-700"
+                  disabled
+                  title="Notifications"
+                  aria-label="Notifications">
+                  <BellOutlined />
+                  <span className="sr-only">Bell</span>
+                </button>
+              </Badge>
+            )}
 
             {isAuthenticated && user ? (
               <Dropdown

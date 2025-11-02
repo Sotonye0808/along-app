@@ -233,12 +233,13 @@ export function EditProfileModal({
         {/* Location */}
         <Form.Item
           label="Location"
-          name="location"
           rules={[
             { max: 50, message: "Location must be less than 50 characters" },
           ]}>
           <div className="flex gap-2">
-            <Input placeholder="e.g., Lagos, Nigeria" className="flex-1" />
+            <Form.Item name="location" noStyle>
+              <Input placeholder="e.g., Lagos, Nigeria" className="flex-1" />
+            </Form.Item>
             <Button
               icon={<EnvironmentOutlined />}
               onClick={handleUseCurrentLocation}

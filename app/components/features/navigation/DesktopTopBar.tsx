@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import { useAuth } from "../../../providers/AuthProvider";
 import { SearchBar } from "@/components/features/dashboard/SearchBar";
+import { NotificationsDropdown } from "./NotificationsDropdown";
 import Link from "next/link";
 
 export function DesktopTopBar() {
@@ -60,14 +61,19 @@ export function DesktopTopBar() {
       </div>
 
       <div className="flex items-center gap-6">
-        <Badge count={5} offset={[-2, 2]}>
-          <button
-            className="text-2xl text-gray-700 hover:text-[#00623B] transition-colors"
-            title="Notifications"
-            aria-label="View notifications">
-            <BellOutlined />
-          </button>
-        </Badge>
+        {isAuthenticated && user ? (
+          <NotificationsDropdown userId={user.id} />
+        ) : (
+          <Badge count={0} offset={[-2, 2]}>
+            <button
+              className="text-2xl text-gray-700 hover:text-[#00623B] transition-colors"
+              title="Notifications"
+              aria-label="View notifications"
+              disabled>
+              <BellOutlined />
+            </button>
+          </Badge>
+        )}
 
         {isAuthenticated && user ? (
           <Dropdown

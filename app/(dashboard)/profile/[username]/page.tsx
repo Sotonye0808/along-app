@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { Spin, App } from "antd";
+import { useRouter, useParams } from "next/navigation";
 import { UserProfile, EditProfileModal } from "@/components/features/profile";
 import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
-import { useAuth } from "../../providers/AuthProvider";
+import { useAuth } from "../../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
 
@@ -17,13 +18,15 @@ interface CommentWithAuthorAndPost extends PostComment {
   post: Post;
 }
 
-export default function ProfilePage() {
+export default function UserProfilePage() {
+  const params = useParams();
+  const username = params.username as string;
   const { user: currentUser, isAuthenticated } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [comments, setComments] = useState<CommentWithAuthorAndPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [editPostModalOpen, setEditPostModalOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
   const [userInteractions, setUserInteractions] = useState({
@@ -32,56 +35,75 @@ export default function ProfilePage() {
     bookmarks: new Set<string>(),
   });
   const { message } = App.useApp();
+  const router = useRouter();
+
+  const isOwnProfile = currentUser?.userName === username;
 
   useEffect(() => {
-    if (currentUser) {
+    if (username) {
       fetchUserProfile();
       fetchUserPosts();
       fetchUserComments();
-      fetchUserInteractions();
+      if (currentUser) {
+        fetchUserInteractions();
+      }
     }
-  }, [currentUser]);
+  }, [username, currentUser]);
 
   const fetchUserProfile = async () => {
-    if (!currentUser) return;
-
     try {
-      const response = await api.get<User>(
-        `${API_ENDPOINTS.USERS}/${currentUser.id}`
-      );
-      setUser(response.data);
+      // Find user by username
+      const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
+      const foundUser = usersResponse.data.find((u) => u.userName === username);
+
+      if (!foundUser) {
+        message.error("User not found");
+        router.push("/home");
+        return;
+      }
+
+      setUser(foundUser);
+
+      // Check if current user is following this user
+      if (currentUser && foundUser.id !== currentUser.id) {
+        const isFollowingUser = currentUser.following?.includes(foundUser.id);
+        setIsFollowing(!!isFollowingUser);
+      }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
       message.error("Failed to load profile");
+      router.push("/home");
     } finally {
       setLoading(false);
     }
   };
 
   const fetchUserPosts = async () => {
-    if (!currentUser) return;
-
     try {
-      // Fetch all posts and filter by user
+      // Fetch all posts and filter by username
       const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
+      const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
+
+      const targetUser = usersResponse.data.find(
+        (u) => u.userName === username
+      );
+      if (!targetUser) return;
+
       const userPosts = postsResponse.data.filter(
-        (post) => post.userId === currentUser.id
+        (post) => post.userId === targetUser.id
       );
 
-      // Fetch users to attach author info
-      const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
       const usersData = usersResponse.data;
-
       const postsWithAuthors = userPosts.map((post) => ({
         ...post,
         author:
           usersData.find((u) => u.id === post.userId) ||
           ({
-            id: currentUser.id,
-            userName: currentUser.userName,
-            firstName: currentUser.firstName,
-            lastName: currentUser.lastName,
-            email: currentUser.email,
+            id: targetUser.id,
+            userName: targetUser.userName,
+            firstName: targetUser.firstName,
+            lastName: targetUser.lastName,
+            email: targetUser.email,
             createdAt: new Date().toISOString(),
           } as User),
       }));
@@ -93,20 +115,18 @@ export default function ProfilePage() {
   };
 
   const fetchUserComments = async () => {
-    if (!currentUser) return;
-
     try {
-      // Fetch all posts to get comments
       const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
       const allPosts = postsResponse.data;
 
-      // Fetch all users
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
       const usersData = usersResponse.data;
 
+      const targetUser = usersData.find((u) => u.userName === username);
+      if (!targetUser) return;
+
       const userComments: CommentWithAuthorAndPost[] = [];
 
-      // Get comments from each post
       for (const post of allPosts) {
         try {
           const commentsResponse = await api.get<PostComment[]>(
@@ -114,17 +134,17 @@ export default function ProfilePage() {
           );
 
           const postComments = commentsResponse.data
-            .filter((comment) => comment.userId === currentUser.id)
+            .filter((comment) => comment.userId === targetUser.id)
             .map((comment) => ({
               ...comment,
               author:
                 usersData.find((u) => u.id === comment.userId) ||
                 ({
-                  id: currentUser.id,
-                  userName: currentUser.userName,
-                  firstName: currentUser.firstName,
-                  lastName: currentUser.lastName,
-                  email: currentUser.email,
+                  id: targetUser.id,
+                  userName: targetUser.userName,
+                  firstName: targetUser.firstName,
+                  lastName: targetUser.lastName,
+                  email: targetUser.email,
                   createdAt: new Date().toISOString(),
                 } as User),
               post,
@@ -153,7 +173,6 @@ export default function ProfilePage() {
 
       for (const post of postsResponse.data) {
         try {
-          // Check likes/dislikes
           const likeCheck = await api.get<Like | null>(
             `${API_ENDPOINTS.POST_LIKE(post.id)}?userId=${currentUser.id}`
           );
@@ -166,7 +185,6 @@ export default function ProfilePage() {
             }
           }
 
-          // Check bookmarks
           const bookmarkCheck = await api.get<Bookmark | null>(
             `${API_ENDPOINTS.POST_BOOKMARK(post.id)}?userId=${currentUser.id}`
           );
@@ -175,10 +193,7 @@ export default function ProfilePage() {
             bookmarks.add(post.id);
           }
         } catch (error) {
-          console.error(
-            `Failed to check interactions for post ${post.id}:`,
-            error
-          );
+          // Ignore errors for individual posts
         }
       }
 
@@ -188,20 +203,41 @@ export default function ProfilePage() {
     }
   };
 
-  const handleUpdateProfile = async (userData: Partial<User>) => {
+  const handleFollow = async (userId: string) => {
     if (!currentUser) return;
 
     try {
-      await api.put(`${API_ENDPOINTS.USERS}/${currentUser.id}`, userData);
+      const newFollowingState = !isFollowing;
+      setIsFollowing(newFollowingState);
 
-      // Update local state
-      setUser((prev) => (prev ? { ...prev, ...userData } : null));
+      // Optimistically update follower count
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              followers: newFollowingState
+                ? (prev.followers || 0) + 1
+                : (prev.followers || 1) - 1,
+            }
+          : null
+      );
 
-      // Refresh user data
-      await fetchUserProfile();
+      await api.post(API_ENDPOINTS.USER_FOLLOW(userId), {
+        userId: currentUser.id,
+        action: newFollowingState ? "follow" : "unfollow",
+      });
+
+      message.success(
+        newFollowingState
+          ? `You are now following ${user?.firstName}`
+          : `You unfollowed ${user?.firstName}`
+      );
     } catch (error) {
-      console.error("Failed to update profile:", error);
-      throw error;
+      console.error("Failed to follow/unfollow user:", error);
+      message.error("Failed to update follow status");
+      // Rollback
+      setIsFollowing(!isFollowing);
+      await fetchUserProfile();
     }
   };
 
@@ -214,7 +250,6 @@ export default function ProfilePage() {
     const wasLiked = userInteractions.likes.has(postId);
     const wasDisliked = userInteractions.dislikes.has(postId);
 
-    // Optimistic update
     const newLikes = new Set(userInteractions.likes);
     const newDislikes = new Set(userInteractions.dislikes);
 
@@ -256,18 +291,15 @@ export default function ProfilePage() {
         await api.delete(`${API_ENDPOINTS.POST_LIKE(postId)}`, {
           data: { userId: currentUser.id },
         });
-        message.success("Like removed");
       } else {
         await api.post(`${API_ENDPOINTS.POST_LIKE(postId)}`, {
           userId: currentUser.id,
           type: "like",
         });
-        message.success("Post liked");
       }
     } catch (error) {
       console.error("Failed to like post:", error);
       message.error("Failed to update like");
-      // Rollback
       await fetchUserPosts();
       await fetchUserInteractions();
     }
@@ -282,7 +314,6 @@ export default function ProfilePage() {
     const wasDisliked = userInteractions.dislikes.has(postId);
     const wasLiked = userInteractions.likes.has(postId);
 
-    // Optimistic update
     const newLikes = new Set(userInteractions.likes);
     const newDislikes = new Set(userInteractions.dislikes);
 
@@ -324,18 +355,15 @@ export default function ProfilePage() {
         await api.delete(`${API_ENDPOINTS.POST_LIKE(postId)}`, {
           data: { userId: currentUser.id },
         });
-        message.success("Dislike removed");
       } else {
         await api.post(`${API_ENDPOINTS.POST_LIKE(postId)}`, {
           userId: currentUser.id,
           type: "dislike",
         });
-        message.success("Post disliked");
       }
     } catch (error) {
       console.error("Failed to dislike post:", error);
       message.error("Failed to update dislike");
-      // Rollback
       await fetchUserPosts();
       await fetchUserInteractions();
     }
@@ -352,8 +380,6 @@ export default function ProfilePage() {
     }
 
     const wasBookmarked = userInteractions.bookmarks.has(postId);
-
-    // Optimistic update
     const newBookmarks = new Set(userInteractions.bookmarks);
 
     if (wasBookmarked) {
@@ -396,7 +422,6 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Failed to bookmark post:", error);
       message.error("Failed to update bookmark");
-      // Rollback
       await fetchUserPosts();
       await fetchUserInteractions();
     }
@@ -493,24 +518,21 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user || !currentUser) {
-    return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <p className="text-gray-500">Please login to view your profile</p>
-      </div>
-    );
+  if (!user) {
+    return null;
   }
 
   return (
     <>
       <UserProfile
         user={user}
-        isOwnProfile={true}
+        isOwnProfile={isOwnProfile}
         posts={posts}
         comments={comments}
-        currentUserId={currentUser.id}
+        currentUserId={currentUser?.id}
         isAuthenticated={isAuthenticated}
-        onEditProfile={() => setEditModalOpen(true)}
+        onFollow={handleFollow}
+        isFollowing={isFollowing}
         userInteractions={userInteractions}
         onLike={handleLike}
         onDislike={handleDislike}
@@ -519,14 +541,6 @@ export default function ProfilePage() {
         onShare={handleShare}
         onEdit={handleEdit}
         onDelete={handleDelete}
-      />
-
-      <EditProfileModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        user={user}
-        onSave={handleUpdateProfile}
-        isAuthenticated={true}
       />
 
       {postToEdit && (

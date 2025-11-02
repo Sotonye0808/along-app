@@ -61,14 +61,13 @@ export function SearchBar() {
       const searchLower = searchQuery.toLowerCase();
       const searchResults: SearchResult[] = [];
 
-      // Search users
+      // Search users (excluding location for privacy)
       const matchingUsers = usersResponse.data
         .filter(
           (user) =>
             user.userName.toLowerCase().includes(searchLower) ||
             user.firstName.toLowerCase().includes(searchLower) ||
-            user.lastName.toLowerCase().includes(searchLower) ||
-            user.location?.toLowerCase().includes(searchLower)
+            user.lastName.toLowerCase().includes(searchLower)
         )
         .slice(0, 3)
         .map((user) => ({
@@ -78,7 +77,7 @@ export function SearchBar() {
           subtitle: `@${user.userName}`,
           avatar: user.avatar,
           link: `/profile/${user.userName}`,
-          metadata: user.location,
+          metadata: undefined, // Location is private
         }));
 
       searchResults.push(...matchingUsers);

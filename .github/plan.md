@@ -253,7 +253,7 @@ interface PaginatedResponse<T> {
 
 - [x] Search bar with live results
   - [x] Debounced search (300ms delay)
-  - [x] Search across users (name, username, location)
+  - [x] Search across users (name, username)
   - [x] Search across posts (title, routes, tags)
   - [x] Search across tags
   - [x] Categorized results dropdown (Users, Posts, Tags)
