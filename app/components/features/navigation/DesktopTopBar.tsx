@@ -1,18 +1,21 @@
 "use client";
 
 import React from "react";
-import { Avatar, Dropdown, Badge, Button } from "antd";
+import { Avatar, Dropdown, Badge, Button, Switch } from "antd";
 import {
   BellOutlined,
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
   LoginOutlined,
+  BulbOutlined,
+  BulbFilled,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import { useAuth } from "../../../providers/AuthProvider";
+import { useTheme } from "../../../providers/ThemeProvider";
 import { SearchBar } from "@/components/features/dashboard/SearchBar";
 import { NotificationsDropdown } from "./NotificationsDropdown";
 import Link from "next/link";
@@ -20,6 +23,7 @@ import Link from "next/link";
 export function DesktopTopBar() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     await logout();
@@ -31,6 +35,23 @@ export function DesktopTopBar() {
       icon: <UserOutlined />,
       label: "My Profile",
       onClick: () => router.push(APP_ROUTES.PROFILE),
+    },
+    {
+      key: "theme",
+      icon: theme === "dark" ? <BulbFilled /> : <BulbOutlined />,
+      label: (
+        <div className="flex items-center justify-between w-full">
+          <span>Dark Mode</span>
+          <Switch
+            checked={theme === "dark"}
+            size="small"
+            onClick={(_, e) => {
+              e.stopPropagation();
+            }}
+          />
+        </div>
+      ),
+      onClick: toggleTheme,
     },
     {
       key: "settings",
@@ -51,9 +72,11 @@ export function DesktopTopBar() {
   ];
 
   return (
-    <div className="hidden md:flex fixed top-0 left-20 right-0 bg-white border-b border-gray-200 px-6 py-3 items-center justify-between z-50">
+    <div className="hidden md:flex fixed top-0 left-20 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-3 items-center justify-between z-50 transition-colors duration-200">
       <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-bold text-[#00623B]">Along</h1>
+        <h1 className="text-2xl font-bold text-[#00623B] dark:text-[#00a862]">
+          Along
+        </h1>
       </div>
 
       <div className="flex-1 max-w-2xl mx-8">

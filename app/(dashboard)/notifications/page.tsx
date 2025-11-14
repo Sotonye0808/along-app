@@ -14,6 +14,7 @@ import { useAuth } from "../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
 import { formatDate } from "@/lib/utils/format";
+import { NotificationSettings } from "@/app/components/features/pwa";
 
 export default function NotificationsPage() {
   const { user: currentUser, isAuthenticated } = useAuth();
@@ -157,9 +158,11 @@ export default function NotificationsPage() {
     <div className="max-w-4xl mx-auto p-4 md:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Notifications
+          </h1>
           {unreadCount > 0 && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
             </p>
           )}
@@ -174,8 +177,13 @@ export default function NotificationsPage() {
         )}
       </div>
 
+      {/* Push Notification Settings */}
+      <div className="mb-6">
+        <NotificationSettings />
+      </div>
+
       {notifications.length === 0 ? (
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <Empty
             description="No notifications yet"
             image={Empty.PRESENTED_IMAGE_SIMPLE}

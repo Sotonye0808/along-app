@@ -1,9 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button, FloatButton, App } from "antd";
+import React, { useState, lazy, Suspense } from "react";
+import { Button, FloatButton, App, Spin } from "antd";
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
-import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
+const ShareRouteModal = lazy(() =>
+  import("@/components/features/posts/ShareRouteModal").then((mod) => ({
+    default: mod.ShareRouteModal,
+  }))
+);
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -93,11 +97,15 @@ export function ShareRouteButton({ onPostCreated }: ShareRouteButtonProps) {
       />
 
       {/* Share Route Modal */}
-      <ShareRouteModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleSubmit}
-      />
+      {modalOpen && (
+        <Suspense fallback={<Spin size="large" fullscreen />}>
+          <ShareRouteModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onSubmit={handleSubmit}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

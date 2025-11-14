@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Empty, Spin, Button, App, Modal } from "antd";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+import { Empty, Spin, Button, App, Modal, Skeleton, Card } from "antd";
 import { ReloadOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { PostCard } from "@/components/features/posts/PostCard";
 import { CommentSection } from "@/components/features/posts/CommentSection";
-import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
+const ShareRouteModal = lazy(() =>
+  import("@/components/features/posts/ShareRouteModal").then((mod) => ({
+    default: mod.ShareRouteModal,
+  }))
+);
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
 
@@ -36,6 +40,8 @@ export function Feed() {
   });
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
+  const [scrolledDown, setScrolledDown] = useState(false);
+  const [hasNewPosts, setHasNewPosts] = useState(false);
   const { message, modal } = App.useApp();
 
   // Get current user from localStorage (or auth context)
@@ -54,7 +60,44 @@ export function Feed() {
     if (currentUser) {
       fetchUserInteractions();
     }
+
+    // Track scroll position
+    const handleScroll = () => {
+      setScrolledDown(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Check for new posts periodically when user has scrolled down
+  useEffect(() => {
+    if (!scrolledDown) {
+      setHasNewPosts(false);
+      return;
+    }
+
+    const checkForNewPosts = async () => {
+      try {
+        const response = await api.get<Post[]>(API_ENDPOINTS.POSTS);
+        if (response.data.length > posts.length) {
+          setHasNewPosts(true);
+        }
+      } catch (error) {
+        console.error("Failed to check for new posts:", error);
+      }
+    };
+
+    // Check every 30 seconds
+    const interval = setInterval(checkForNewPosts, 30000);
+    return () => clearInterval(interval);
+  }, [scrolledDown, posts.length]);
+
+  const handleLoadNewPosts = async () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setHasNewPosts(false);
+    await fetchPosts();
+  };
 
   const fetchUserInteractions = async () => {
     if (!currentUser) return;
@@ -663,8 +706,12 @@ export function Feed() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <Spin size="large" />
+      <div className="space-y-4">
+        {[1, 2, 3].map((n) => (
+          <Card key={n} className="mb-4">
+            <Skeleton active avatar paragraph={{ rows: 4 }} />
+          </Card>
+        ))}
       </div>
     );
   }
@@ -689,6 +736,20 @@ export function Feed() {
 
   return (
     <>
+      {/* New Posts Notification Banner */}
+      {hasNewPosts && scrolledDown && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-40 animate-slideDown">
+          <Button
+            type="primary"
+            icon={<ReloadOutlined />}
+            onClick={handleLoadNewPosts}
+            size="large"
+            className="bg-[#00623B] dark:bg-[#00a862] shadow-lg">
+            Load New Posts
+          </Button>
+        </div>
+      )}
+
       <div className="space-y-4">
         {posts.map((post) => (
           <PostCard
@@ -714,16 +775,18 @@ export function Feed() {
 
       {/* Edit Post Modal */}
       {postToEdit && (
-        <ShareRouteModal
-          open={editModalOpen}
-          onClose={() => {
-            setEditModalOpen(false);
-            setPostToEdit(null);
-          }}
-          onSubmit={handleUpdatePost}
-          editMode={true}
-          postToEdit={postToEdit}
-        />
+        <Suspense fallback={<Spin size="large" />}>
+          <ShareRouteModal
+            open={editModalOpen}
+            onClose={() => {
+              setEditModalOpen(false);
+              setPostToEdit(null);
+            }}
+            onSubmit={handleUpdatePost}
+            editMode={true}
+            postToEdit={postToEdit}
+          />
+        </Suspense>
       )}
 
       {/* Comment Section Modal */}

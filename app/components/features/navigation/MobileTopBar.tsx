@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Avatar, Dropdown, Badge, Button } from "antd";
+import { Avatar, Dropdown, Badge, Button, Switch } from "antd";
 import {
   SearchOutlined,
   BellOutlined,
@@ -10,11 +10,14 @@ import {
   LogoutOutlined,
   LoginOutlined,
   CloseOutlined,
+  BulbOutlined,
+  BulbFilled,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { useTheme } from "@/app/providers/ThemeProvider";
 import { NotificationsDropdown } from "./NotificationsDropdown";
 import { SearchBar } from "@/components/features/dashboard/SearchBar";
 import Link from "next/link";
@@ -23,6 +26,7 @@ export function MobileTopBar() {
   const [searchVisible, setSearchVisible] = useState(false);
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     await logout();
@@ -34,6 +38,23 @@ export function MobileTopBar() {
       icon: <UserOutlined />,
       label: "My Profile",
       onClick: () => router.push(APP_ROUTES.PROFILE),
+    },
+    {
+      key: "theme",
+      icon: theme === "dark" ? <BulbFilled /> : <BulbOutlined />,
+      label: (
+        <div className="flex items-center justify-between w-full">
+          <span>Dark Mode</span>
+          <Switch
+            checked={theme === "dark"}
+            size="small"
+            onClick={(_, e) => {
+              e.stopPropagation();
+            }}
+          />
+        </div>
+      ),
+      onClick: toggleTheme,
     },
     {
       key: "settings",
@@ -54,7 +75,7 @@ export function MobileTopBar() {
   ];
 
   return (
-    <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-50">
+    <div className="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 z-50 transition-colors duration-200">
       {searchVisible ? (
         <div className="flex items-center gap-2">
           <div className="flex-1">
@@ -63,7 +84,7 @@ export function MobileTopBar() {
           <button
             type="button"
             onClick={() => setSearchVisible(false)}
-            className="text-gray-600 hover:text-gray-800 p-1">
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1">
             <CloseOutlined className="text-lg" />
             <span className="sr-only">Close Button</span>
           </button>
@@ -71,7 +92,9 @@ export function MobileTopBar() {
       ) : (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-[#00623B]">Along</h1>
+            <h1 className="text-xl font-bold text-[#00623B] dark:text-[#00a862]">
+              Along
+            </h1>
           </div>
 
           <div className="flex items-center gap-4">

@@ -10,16 +10,6 @@ import { formatNumber } from "@/lib/utils/format";
 
 const { Search } = Input;
 
-interface SearchResult {
-  type: "user" | "post" | "tag";
-  id: string;
-  title: string;
-  subtitle?: string;
-  avatar?: string;
-  link: string;
-  metadata?: string;
-}
-
 export function SearchBar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);

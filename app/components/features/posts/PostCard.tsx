@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import {
   Card,
   Avatar,
@@ -31,6 +31,7 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import Link from "next/link";
+import Image from "next/image";
 import { formatDate, formatNumber } from "@/lib/utils/format";
 
 interface PostCardProps {
@@ -83,7 +84,7 @@ const statusConfig = {
   },
 };
 
-export function PostCard({
+export const PostCard = memo(function PostCard({
   post,
   author,
   currentUserId,
@@ -102,8 +103,24 @@ export function PostCard({
 }: PostCardProps) {
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loadingAction, setLoadingAction] = useState<
+    "like" | "dislike" | "bookmark" | "share" | "follow" | null
+  >(null);
 
   const isOwnPost = currentUserId === post.userId;
+
+  const handleActionWithLoading = async (
+    action: "like" | "dislike" | "bookmark" | "share" | "follow",
+    callback?: (...args: any[]) => void,
+    ...args: any[]
+  ) => {
+    setLoadingAction(action);
+    try {
+      await callback?.(...args);
+    } finally {
+      setLoadingAction(null);
+    }
+  };
 
   const menuItems: MenuProps["items"] = [
     ...(isOwnPost
@@ -177,7 +194,13 @@ export function PostCard({
                 <Button
                   type={isFollowing ? "default" : "primary"}
                   size="small"
-                  onClick={() => onFollow(author.id)}
+                  onClick={() =>
+                    handleActionWithLoading("follow", onFollow, author.id)
+                  }
+                  loading={loadingAction === "follow"}
+                  disabled={
+                    loadingAction !== null && loadingAction !== "follow"
+                  }
                   className={
                     isFollowing
                       ? "border-[#00623B] text-[#00623B] text-sm hover:bg-gray-50"
@@ -290,10 +313,14 @@ export function PostCard({
               key={index}
               className="relative aspect-video rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => handleImageClick(index)}>
-              <img
+              <Image
                 src={image}
                 alt={`${post.title} - Image ${index + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover"
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
               />
               {index === 3 && post.images.length > 4 && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -346,7 +373,10 @@ export function PostCard({
       <Divider className="my-3" />
 
       {/* Post Actions */}
-      <div className="flex items-center justify-between text-gray-600">
+      <div
+        className="flex items-center justify-between text-gray-600"
+        role="group"
+        aria-label="Post actions">
         <Space>
           <Button
             type="text"
@@ -357,8 +387,16 @@ export function PostCard({
                 <LikeOutlined />
               )
             }
-            onClick={() => onLike?.(post.id)}
-            className={isLiked ? "text-[#00623B]" : ""}>
+            onClick={() => handleActionWithLoading("like", onLike, post.id)}
+            loading={loadingAction === "like"}
+            disabled={loadingAction !== null && loadingAction !== "like"}
+            className={isLiked ? "text-[#00623B]" : ""}
+            aria-label={
+              isLiked
+                ? `Unlike post. ${post.likes} likes`
+                : `Like post. ${post.likes} likes`
+            }
+            aria-pressed={isLiked}>
             {formatNumber(post.likes)}
           </Button>
 
@@ -371,15 +409,27 @@ export function PostCard({
                 <DislikeOutlined />
               )
             }
-            onClick={() => onDislike?.(post.id)}
-            className={isDisliked ? "text-red-500" : ""}>
+            onClick={() =>
+              handleActionWithLoading("dislike", onDislike, post.id)
+            }
+            loading={loadingAction === "dislike"}
+            disabled={loadingAction !== null && loadingAction !== "dislike"}
+            className={isDisliked ? "text-red-500" : ""}
+            aria-label={
+              isDisliked
+                ? `Remove dislike. ${post.dislikes} dislikes`
+                : `Dislike post. ${post.dislikes} dislikes`
+            }
+            aria-pressed={isDisliked}>
             {formatNumber(post.dislikes)}
           </Button>
 
           <Button
             type="text"
             icon={<CommentOutlined />}
-            onClick={() => onComment?.(post.id)}>
+            onClick={() => onComment?.(post.id)}
+            disabled={loadingAction !== null}
+            aria-label={`View comments. ${post.comments} comments`}>
             {formatNumber(post.comments)}
           </Button>
         </Space>
@@ -394,15 +444,25 @@ export function PostCard({
                 <BookOutlined />
               )
             }
-            onClick={() => onBookmark?.(post.id)}
+            onClick={() =>
+              handleActionWithLoading("bookmark", onBookmark, post.id)
+            }
+            loading={loadingAction === "bookmark"}
+            disabled={loadingAction !== null && loadingAction !== "bookmark"}
             className={isBookmarked ? "text-[#00623B]" : ""}
+            aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
+            aria-pressed={isBookmarked}
           />
           <Button
             type="text"
             icon={<ShareAltOutlined />}
-            onClick={() => onShare?.(post.id)}></Button>
+            onClick={() => handleActionWithLoading("share", onShare, post.id)}
+            loading={loadingAction === "share"}
+            disabled={loadingAction !== null && loadingAction !== "share"}
+            aria-label="Share post"
+          />
         </Space>
       </div>
     </Card>
   );
-}
+});

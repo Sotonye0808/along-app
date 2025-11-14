@@ -1,0 +1,3 @@
+@echo off
+echo Running tests...
+npm test -- --no-coverage --testTimeout=15000

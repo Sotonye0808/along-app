@@ -1,9 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Spin, App } from "antd";
-import { UserProfile, EditProfileModal } from "@/components/features/profile";
-import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+import { Spin, App, Skeleton, Card } from "antd";
+import { UserProfile } from "@/components/features/profile";
+const EditProfileModal = lazy(() =>
+  import("@/components/features/profile/EditProfileModal").then((mod) => ({
+    default: mod.EditProfileModal,
+  }))
+);
+const ShareRouteModal = lazy(() =>
+  import("@/components/features/posts/ShareRouteModal").then((mod) => ({
+    default: mod.ShareRouteModal,
+  }))
+);
 import { useAuth } from "../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -536,8 +545,17 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <Spin size="large" />
+      <div className="max-w-4xl mx-auto p-4">
+        <Card>
+          <Skeleton active avatar paragraph={{ rows: 2 }} />
+        </Card>
+        <div className="mt-6 space-y-4">
+          {[1, 2, 3].map((n) => (
+            <Card key={n}>
+              <Skeleton active paragraph={{ rows: 3 }} />
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -574,25 +592,31 @@ export default function ProfilePage() {
         onDeleteComment={handleDeleteComment}
       />
 
-      <EditProfileModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        user={user}
-        onSave={handleUpdateProfile}
-        isAuthenticated={true}
-      />
+      {editModalOpen && (
+        <Suspense fallback={<Spin size="large" fullscreen />}>
+          <EditProfileModal
+            open={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            user={user}
+            onSave={handleUpdateProfile}
+            isAuthenticated={true}
+          />
+        </Suspense>
+      )}
 
       {postToEdit && (
-        <ShareRouteModal
-          open={editPostModalOpen}
-          onClose={() => {
-            setEditPostModalOpen(false);
-            setPostToEdit(null);
-          }}
-          onSubmit={handleUpdatePost}
-          editMode={true}
-          postToEdit={postToEdit}
-        />
+        <Suspense fallback={<Spin size="large" fullscreen />}>
+          <ShareRouteModal
+            open={editPostModalOpen}
+            onClose={() => {
+              setEditPostModalOpen(false);
+              setPostToEdit(null);
+            }}
+            onSubmit={handleUpdatePost}
+            editMode={true}
+            postToEdit={postToEdit}
+          />
+        </Suspense>
       )}
     </>
   );

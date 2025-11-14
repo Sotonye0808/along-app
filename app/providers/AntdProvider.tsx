@@ -1,16 +1,28 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ConfigProvider, App } from 'antd';
+import React from "react";
+import { ConfigProvider, App, theme } from "antd";
+import { useTheme } from "./ThemeProvider";
 
 export function AntdProvider({ children }: { children: React.ReactNode }) {
+  const { theme: currentTheme } = useTheme();
+
   return (
     <ConfigProvider
       theme={{
+        algorithm:
+          currentTheme === "dark"
+            ? theme.darkAlgorithm
+            : theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#00623B',
+          colorPrimary: "#00623B",
           borderRadius: 8,
-          fontFamily: 'Inter, Roboto, system-ui, sans-serif',
+          fontFamily: "Inter, Roboto, system-ui, sans-serif",
+          // Dark mode specific adjustments
+          ...(currentTheme === "dark" && {
+            colorBgBase: "#1a1a1a",
+            colorTextBase: "#e5e5e5",
+          }),
         },
         components: {
           Button: {
@@ -21,8 +33,7 @@ export function AntdProvider({ children }: { children: React.ReactNode }) {
             controlHeight: 44,
           },
         },
-      }}
-    >
+      }}>
       <App>{children}</App>
     </ConfigProvider>
   );

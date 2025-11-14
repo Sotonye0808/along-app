@@ -8,6 +8,7 @@ import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
 import { useAuth } from "../../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { generatePersonSchema } from "@/lib/utils/structuredData";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -522,8 +523,17 @@ export default function UserProfilePage() {
     return null;
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const personSchema = generatePersonSchema(user, baseUrl);
+
   return (
     <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
+
       <UserProfile
         user={user}
         isOwnProfile={isOwnProfile}

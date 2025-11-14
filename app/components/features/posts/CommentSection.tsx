@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import {
   Modal,
   Input,
@@ -38,7 +38,7 @@ interface CommentSectionProps {
   onDeleteComment?: (commentId: string) => Promise<void>;
 }
 
-export function CommentSection({
+export const CommentSection = memo(function CommentSection({
   open,
   onClose,
   postId,
@@ -145,12 +145,18 @@ export function CommentSection({
       onCancel={onClose}
       footer={null}
       width={600}>
-      <div className="max-h-[60vh] overflow-y-auto">
+      <div
+        className="max-h-[60vh] overflow-y-auto"
+        role="region"
+        aria-label="Comments section">
         {/* Add Comment */}
         {currentUser && (
           <div className="sticky top-0 bg-white z-10 pb-4 mb-4 border-b">
             <div className="flex gap-3">
-              <Avatar src={currentUser.avatar} size={40}>
+              <Avatar
+                src={currentUser.avatar}
+                size={40}
+                alt={`${currentUser.firstName} ${currentUser.lastName}`}>
                 {currentUser.firstName[0]}
                 {currentUser.lastName[0]}
               </Avatar>
@@ -166,6 +172,7 @@ export function CommentSection({
                     e.preventDefault();
                     handleSubmit();
                   }}
+                  aria-label="Write a comment"
                 />
                 <div className="flex justify-end mt-2">
                   <Button
@@ -174,7 +181,8 @@ export function CommentSection({
                     onClick={handleSubmit}
                     loading={loading}
                     disabled={!commentText.trim()}
-                    className="bg-[#00623B]">
+                    className="bg-[#00623B]"
+                    aria-label="Submit comment">
                     Comment
                   </Button>
                 </div>
@@ -191,10 +199,13 @@ export function CommentSection({
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4" role="list" aria-label="List of comments">
             {comments.map((comment) => (
-              <div key={comment.id} className="flex gap-3">
-                <Avatar src={comment.author.avatar} size={40}>
+              <div key={comment.id} className="flex gap-3" role="listitem">
+                <Avatar
+                  src={comment.author.avatar}
+                  size={40}
+                  alt={`${comment.author.firstName} ${comment.author.lastName}`}>
                   {comment.author.firstName[0]}
                   {comment.author.lastName[0]}
                 </Avatar>
@@ -302,4 +313,4 @@ export function CommentSection({
       </div>
     </Modal>
   );
-}
+});

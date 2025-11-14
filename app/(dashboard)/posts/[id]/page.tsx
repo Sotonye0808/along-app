@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Spin, App, Button } from "antd";
+import { Spin, App, Button, Skeleton, Card } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useRouter, useParams } from "next/navigation";
 import { PostCard } from "@/components/features/posts/PostCard";
@@ -9,6 +9,7 @@ import { CommentSection } from "@/components/features/posts/CommentSection";
 import { useAuth } from "../../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { generateArticleSchema } from "@/lib/utils/structuredData";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -393,8 +394,17 @@ export default function PostPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <Spin size="large" />
+      <div className="max-w-3xl mx-auto p-4">
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => router.back()}
+          className="mb-4">
+          Back
+        </Button>
+        <Card>
+          <Skeleton active avatar paragraph={{ rows: 6 }} />
+        </Card>
       </div>
     );
   }
@@ -413,8 +423,17 @@ export default function PostPage() {
     );
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const articleSchema = generateArticleSchema(post, post.author, baseUrl);
+
   return (
     <div className="max-w-3xl mx-auto p-4">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+
       <Button
         type="text"
         icon={<ArrowLeftOutlined />}
