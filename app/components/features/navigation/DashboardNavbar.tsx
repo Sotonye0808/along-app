@@ -54,12 +54,6 @@ const navItems: NavItem[] = [
     label: "Marketplace",
     showOnMobile: true,
   },
-  {
-    href: APP_ROUTES.PROFILE,
-    icon: <UserOutlined />,
-    label: "Profile",
-    showOnMobile: false,
-  },
 ];
 
 export function DashboardNavbar() {

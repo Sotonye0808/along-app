@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, message } from "antd";
+import { Button, App } from "antd";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS, APP_ROUTES, VALIDATION } from "@/lib/constants";
@@ -15,6 +15,7 @@ export function OtpForm() {
   const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const router = useRouter();
+  const { message } = App.useApp();
 
   useEffect(() => {
     // Get email from localStorage
@@ -140,18 +141,28 @@ export function OtpForm() {
 
       <div className="flex justify-between gap-2 mb-8" onPaste={handlePaste}>
         {code.map((digit, index) => (
-          <input
-            key={index}
-            id={`otp-input-${index}`}
-            type="text"
-            inputMode="numeric"
-            maxLength={1}
-            value={digit}
-            onChange={(e) => handleCodeChange(index, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(index, e)}
-            className="w-12 h-14 text-center text-2xl font-semibold bg-gray-100 border-2 border-gray-300 rounded-lg focus:border-[#00623B] focus:outline-none transition-colors"
-            autoComplete="one-time-code"
-          />
+          <>
+            <label
+              htmlFor={`otp-input-${index}`}
+              key={index}
+              className="sr-only"
+            >
+              OTP Digit {index + 1}
+            </label>
+            <input
+              key={index}
+              id={`otp-input-${index}`}
+              name={`otp-input-${index}`}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleCodeChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e)}
+              className="w-12 h-14 text-center text-2xl font-semibold bg-gray-100 border-2 border-gray-300 rounded-lg focus:border-[#00623B] focus:outline-none transition-colors"
+              autoComplete="one-time-code"
+            />
+          </>
         ))}
       </div>
 

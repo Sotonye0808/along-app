@@ -15,6 +15,7 @@ declare global {
         bookmarks?: string[];
         createdAt: string;
         verified?: boolean;
+        location?: string;
     }
 
     interface Link {

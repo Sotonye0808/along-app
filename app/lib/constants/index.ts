@@ -18,18 +18,17 @@ export const API_ENDPOINTS = {
   USER_BY_ID: (id: string) => `/users/${id}`,
   USER_POSTS: (id: string) => `/users/${id}/posts`,
   USER_BOOKMARKS: (id: string) => `/users/${id}/bookmarks`,
+  USER_FOLLOW: (id: string) => `/users/${id}/follow`,
 
   // Posts
   POSTS: "/posts",
   POST_BY_ID: (id: string) => `/posts/${id}`,
   POST_LIKE: (id: string) => `/posts/${id}/like`,
+  POST_LIKE_CHECK: (id: string, userId: string) => `/posts/${id}/like?userId=${userId}`,
   POST_DISLIKE: (id: string) => `/posts/${id}/dislike`,
   POST_COMMENTS: (id: string) => `/posts/${id}/comments`,
   POST_BOOKMARK: (id: string) => `/posts/${id}/bookmark`,
   POST_SHARE: (id: string) => `/posts/${id}/share`,
-
-  // Comments
-  COMMENTS: "/comments",
 
   // Notifications
   NOTIFICATIONS: "/notifications",
@@ -41,7 +40,7 @@ export const APP_ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   OTP: "/otp",
-  DASHBOARD: "/main",
+  DASHBOARD: "/home",
   EXPLORE: "/explore",
   BOOKMARKS: "/bookmarks",
   MARKETPLACE: "/marketplace",

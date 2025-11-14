@@ -1,33 +1,29 @@
 'use client';
 
 import React from 'react';
-import { AntdRegistry } from '@ant-design/nextjs-registry';
-import { ConfigProvider, theme } from 'antd';
+import { ConfigProvider, App } from 'antd';
 
-interface AntdProviderProps {
-  children: React.ReactNode;
-}
-
-export function AntdProvider({ children }: AntdProviderProps) {
+export function AntdProvider({ children }: { children: React.ReactNode }) {
   return (
-    <AntdRegistry>
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: '#00623B',
-            colorSuccess: '#a4f4e7',
-            colorWarning: '#f4c790',
-            colorError: '#e4626f',
-            colorBgBase: '#f7f7f7',
-            colorTextBase: '#232323',
-            borderRadius: 8,
-            fontFamily: 'Inter, Roboto, system-ui, sans-serif',
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#00623B',
+          borderRadius: 8,
+          fontFamily: 'Inter, Roboto, system-ui, sans-serif',
+        },
+        components: {
+          Button: {
+            controlHeight: 44,
+            fontWeight: 500,
           },
-          algorithm: theme.defaultAlgorithm,
-        }}
-      >
-        {children}
-      </ConfigProvider>
-    </AntdRegistry>
+          Input: {
+            controlHeight: 44,
+          },
+        },
+      }}
+    >
+      <App>{children}</App>
+    </ConfigProvider>
   );
 }

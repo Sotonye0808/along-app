@@ -36,14 +36,19 @@ import { formatDate, formatNumber } from "@/lib/utils/format";
 interface PostCardProps {
   post: Post;
   author: User;
+  currentUserId?: string;
   onLike?: (postId: string) => void;
   onDislike?: (postId: string) => void;
   onComment?: (postId: string) => void;
   onBookmark?: (postId: string) => void;
   onShare?: (postId: string) => void;
+  onEdit?: (post: Post) => void;
+  onDelete?: (postId: string) => void;
+  onFollow?: (userId: string) => void;
   isLiked?: boolean;
   isDisliked?: boolean;
   isBookmarked?: boolean;
+  isFollowing?: boolean;
 }
 
 const vehicleIcons: Record<VehicleType, string> = {
@@ -81,19 +86,44 @@ const statusConfig = {
 export function PostCard({
   post,
   author,
+  currentUserId,
   onLike,
   onDislike,
   onComment,
   onBookmark,
   onShare,
+  onEdit,
+  onDelete,
+  onFollow,
   isLiked = false,
   isDisliked = false,
   isBookmarked = false,
+  isFollowing = false,
 }: PostCardProps) {
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  const isOwnPost = currentUserId === post.userId;
+
   const menuItems: MenuProps["items"] = [
+    ...(isOwnPost
+      ? [
+          {
+            key: "edit",
+            label: "Edit post",
+            onClick: () => onEdit?.(post),
+          },
+          {
+            key: "delete",
+            label: "Delete post",
+            danger: true,
+            onClick: () => onDelete?.(post.id),
+          },
+          {
+            type: "divider" as const,
+          },
+        ]
+      : []),
     {
       key: "report",
       label: "Report post",
@@ -102,10 +132,17 @@ export function PostCard({
       key: "hide",
       label: "Hide this post",
     },
-    {
-      key: "follow",
-      label: `Follow @${author.userName}`,
-    },
+    ...(!isOwnPost
+      ? [
+          {
+            key: "follow",
+            label: isFollowing
+              ? `Unfollow @${author.userName}`
+              : `Follow @${author.userName}`,
+            onClick: () => onFollow?.(author.id),
+          },
+        ]
+      : []),
   ];
 
   const handleImageClick = (index: number) => {
@@ -114,7 +151,9 @@ export function PostCard({
   };
 
   return (
-    <Card className="mb-4 hover:shadow-md transition-shadow" variant="borderless">
+    <Card
+      className="mb-4 hover:shadow-md transition-shadow"
+      variant="borderless">
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -127,13 +166,28 @@ export function PostCard({
               {author.lastName[0]}
             </Avatar>
           </Link>
-          <div>
-            <Link href={`/profile/${author.userName}`}>
-              <h3 className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer">
-                {author.firstName} {author.lastName}
-              </h3>
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <Link href={`/profile/${author.userName}`}>
+                <h3 className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer">
+                  {author.firstName} {author.lastName}
+                </h3>
+              </Link>
+              {!isOwnPost && onFollow && (
+                <Button
+                  type={isFollowing ? "default" : "primary"}
+                  size="small"
+                  onClick={() => onFollow(author.id)}
+                  className={
+                    isFollowing
+                      ? "border-[#00623B] text-[#00623B] text-sm hover:bg-gray-50"
+                      : "bg-[#00623B] hover:bg-[#004d2e]"
+                  }>
+                  {isFollowing ? "Following" : "Follow"}
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center justify-between gap-2 text-xs text-gray-500">
               <span>@{author.userName}</span>
               <span>•</span>
               <span>{formatDate(post.createdAt)}</span>
@@ -168,9 +222,13 @@ export function PostCard({
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <p className="text-gray-800 flex-1">{route.text}</p>
-                  <Tooltip title={statusConfig[route.status].tooltip}>
+                  <Tooltip
+                    className={`overwrite-anticon-color ${
+                      statusConfig[route.status].color
+                    }`}
+                    title={statusConfig[route.status].tooltip}>
                     <StatusIcon
-                      className={`text-lg ml-2 overwrite-anticon-color ${
+                      className={`text-sm ml-2 overwrite-anticon-color ${
                         statusConfig[route.status].color
                       }`}
                     />
@@ -250,24 +308,35 @@ export function PostCard({
       )}
 
       {/* Image Preview Modal */}
-      <div className="hidden">
-        <AntImage.PreviewGroup
-          preview={{
-            visible: imagePreviewOpen,
-            onVisibleChange: setImagePreviewOpen,
-            current: currentImageIndex,
-          }}>
-          {post.images?.map((image, index) => (
-            <AntImage key={index} src={image} />
-          ))}
-        </AntImage.PreviewGroup>
-      </div>
+      <AntImage.PreviewGroup
+        preview={{
+          visible: imagePreviewOpen,
+          onVisibleChange: setImagePreviewOpen,
+          current: currentImageIndex,
+          onChange: (current) => setCurrentImageIndex(current),
+        }}>
+        {post.images?.map((image, index) => (
+          <AntImage
+            key={index}
+            src={image}
+            style={{ display: "none" }}
+            alt={`${post.title} - Image ${index + 1}`}
+          />
+        ))}
+      </AntImage.PreviewGroup>
 
       {/* Tags */}
       {post.tags && post.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {post.tags.map((tag) => (
-            <Tag key={tag} className="cursor-pointer hover:opacity-80">
+            <Tag
+              key={tag}
+              className="cursor-pointer hover:opacity-80"
+              onClick={() => {
+                // Navigate to home/explore with tag search
+                const searchParams = new URLSearchParams({ q: tag });
+                window.location.href = `/home?${searchParams.toString()}`;
+              }}>
               #{tag}
             </Tag>
           ))}
@@ -278,7 +347,7 @@ export function PostCard({
 
       {/* Post Actions */}
       <div className="flex items-center justify-between text-gray-600">
-        <Space size="large">
+        <Space>
           <Button
             type="text"
             icon={
@@ -331,9 +400,7 @@ export function PostCard({
           <Button
             type="text"
             icon={<ShareAltOutlined />}
-            onClick={() => onShare?.(post.id)}>
-            Share
-          </Button>
+            onClick={() => onShare?.(post.id)}></Button>
         </Space>
       </div>
     </Card>

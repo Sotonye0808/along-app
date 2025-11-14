@@ -1,6 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/data/database';
 
+// GET /api/posts/[id]/like - Check if user has liked/disliked this post
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params;
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get('userId');
+
+        if (!userId) {
+            return NextResponse.json(
+                { error: 'Missing userId' },
+                { status: 400 }
+            );
+        }
+
+        const like = await db.getLike(id, userId);
+
+        return NextResponse.json(
+            { data: like },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error('Error checking like status:', error);
+        return NextResponse.json(
+            { error: 'Failed to check like status' },
+            { status: 500 }
+        );
+    }
+}
+
 // POST /api/posts/[id]/like - Toggle like/dislike on a post
 export async function POST(
     request: NextRequest,

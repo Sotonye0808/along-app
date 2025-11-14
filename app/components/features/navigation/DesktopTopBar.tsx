@@ -1,25 +1,28 @@
 "use client";
 
 import React from "react";
-import { Input, Avatar, Dropdown, Badge } from "antd";
+import { Avatar, Dropdown, Badge, Button } from "antd";
 import {
-  SearchOutlined,
   BellOutlined,
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
+  LoginOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useRouter } from "next/navigation";
-import { logout } from "@/lib/utils/auth";
 import { APP_ROUTES } from "@/lib/constants";
+import { useAuth } from "../../../providers/AuthProvider";
+import { SearchBar } from "@/components/features/dashboard/SearchBar";
+import { NotificationsDropdown } from "./NotificationsDropdown";
+import Link from "next/link";
 
 export function DesktopTopBar() {
   const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
-    router.push(APP_ROUTES.LOGIN);
+  const handleLogout = async () => {
+    await logout();
   };
 
   const userMenuItems: MenuProps["items"] = [
@@ -54,39 +57,56 @@ export function DesktopTopBar() {
       </div>
 
       <div className="flex-1 max-w-2xl mx-8">
-        <Input
-          placeholder="Search routes, locations, users..."
-          prefix={<SearchOutlined className="text-gray-400" />}
-          size="large"
-          className="rounded-full"
-        />
+        <SearchBar />
       </div>
 
       <div className="flex items-center gap-6">
-        <Badge count={5} offset={[-2, 2]}>
-          <button className="text-2xl text-gray-700 hover:text-[#00623B] transition-colors">
-            <BellOutlined />
-          </button>
-        </Badge>
+        {isAuthenticated && user ? (
+          <NotificationsDropdown userId={user.id} />
+        ) : (
+          <Badge count={0} offset={[-2, 2]}>
+            <button
+              className="text-2xl text-gray-700 hover:text-[#00623B] transition-colors"
+              title="Notifications"
+              aria-label="View notifications"
+              disabled>
+              <BellOutlined />
+            </button>
+          </Badge>
+        )}
 
-        <Dropdown
-          menu={{ items: userMenuItems }}
-          trigger={["click"]}
-          placement="bottomRight">
-          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-            <Avatar
-              size="large"
-              icon={<UserOutlined />}
-              className="bg-[#00623B]"
-            />
-            <div className="text-left">
-              <div className="text-sm font-semibold text-gray-900">
-                John Doe
+        {isAuthenticated && user ? (
+          <Dropdown
+            menu={{ items: userMenuItems }}
+            trigger={["click"]}
+            placement="bottomRight">
+            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+              <Avatar
+                size="large"
+                src={user.avatar}
+                icon={!user.avatar ? <UserOutlined /> : undefined}
+                className="bg-[#00623B]">
+                {!user.avatar && user.firstName[0]}
+                {!user.avatar && user.lastName[0]}
+              </Avatar>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-gray-900">
+                  {user.firstName} {user.lastName}
+                </div>
+                <div className="text-xs text-gray-500">@{user.userName}</div>
               </div>
-              <div className="text-xs text-gray-500">@johndoe</div>
             </div>
-          </div>
-        </Dropdown>
+          </Dropdown>
+        ) : (
+          <Link href={APP_ROUTES.LOGIN}>
+            <Button
+              type="primary"
+              icon={<LoginOutlined />}
+              className="bg-[#00623B]">
+              Login
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );

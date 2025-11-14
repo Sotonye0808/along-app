@@ -17,6 +17,7 @@ export const mockUsers: User[] = [
         likes: ["1", "2"],
         bookmarks: ["2"],
         createdAt: "2024-01-15T10:30:00Z",
+        location: "Lagos, Nigeria",
     },
     {
         id: "2",
@@ -33,6 +34,7 @@ export const mockUsers: User[] = [
         likes: ["1"],
         bookmarks: ["1", "2"],
         createdAt: "2024-02-20T14:20:00Z",
+        location: "Port Harcourt, Nigeria",
     },
     {
         id: "3",
@@ -49,6 +51,7 @@ export const mockUsers: User[] = [
         likes: ["2"],
         bookmarks: [],
         createdAt: "2024-03-10T09:15:00Z",
+        location: "Abuja, Nigeria",
     },
     {
         id: "4",
@@ -65,6 +68,7 @@ export const mockUsers: User[] = [
         bookmarks: [],
         createdAt: "2025-10-28T12:03:46.715Z",
         verified: true,
+        location: "Lagos, Nigeria",
     },
 ];
 

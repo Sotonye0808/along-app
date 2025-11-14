@@ -11,7 +11,7 @@ import {
   Avatar,
   Select,
   InputNumber,
-  message,
+  App,
 } from "antd";
 import {
   PlusOutlined,
@@ -30,6 +30,8 @@ interface ShareRouteModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (postData: Partial<Post>) => Promise<void>;
+  editMode?: boolean;
+  postToEdit?: Post;
 }
 
 interface RouteInput extends Omit<Route, "id"> {
@@ -49,10 +51,20 @@ export function ShareRouteModal({
   open,
   onClose,
   onSubmit,
+  editMode = false,
+  postToEdit,
 }: ShareRouteModalProps) {
   const [title, setTitle] = useState("");
   const [routes, setRoutes] = useState<RouteInput[]>([
-    { tempId: "1", text: "", links: [], order: 1, vehicles: [], fare: 0 , status: 'unverified'},
+    {
+      tempId: "1",
+      text: "",
+      links: [],
+      order: 1,
+      vehicles: [],
+      fare: 0,
+      status: "unverified",
+    },
   ]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
@@ -66,6 +78,51 @@ export function ShareRouteModal({
   const [linkText, setLinkText] = useState("");
 
   const textAreaRefs = useRef<Record<string, any | null>>({});
+  const { message } = App.useApp();
+
+  // Load post data for editing
+  React.useEffect(() => {
+    if (editMode && postToEdit && open) {
+      setTitle(postToEdit.title);
+      setRoutes(
+        postToEdit.routes.map((route) => ({
+          tempId: route.id,
+          text: route.text,
+          links: route.links,
+          order: route.order,
+          vehicles: route.vehicles,
+          fare: route.fare,
+          status: route.status,
+        }))
+      );
+      setTags(postToEdit.tags);
+      setFileList(
+        postToEdit.images.map((img, idx) => ({
+          uid: `img-${idx}`,
+          name: `image-${idx}`,
+          status: "done",
+          url: img,
+          thumbUrl: img,
+        }))
+      );
+    } else if (!open) {
+      // Reset form when modal closes
+      setTitle("");
+      setRoutes([
+        {
+          tempId: "1",
+          text: "",
+          links: [],
+          order: 1,
+          vehicles: [],
+          fare: 0,
+          status: "unverified",
+        },
+      ]);
+      setTags([]);
+      setFileList([]);
+    }
+  }, [editMode, postToEdit, open]);
 
   const handleRouteChange = (
     tempId: string,
@@ -92,7 +149,7 @@ export function ShareRouteModal({
           order: prev.length + 1,
           vehicles: [],
           fare: 0,
-          status: 'unverified',
+          status: "unverified",
         },
       ]);
     }
@@ -102,6 +159,60 @@ export function ShareRouteModal({
     if (routes.length > 1) {
       setRoutes((prev) => prev.filter((route) => route.tempId !== tempId));
     }
+  };
+
+  const applyFormatting = (tempId: string, format: string) => {
+    const textarea = textAreaRefs.current[tempId]?.resizableTextArea?.textArea;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+
+    if (!selectedText) {
+      message.info("Please select text to format");
+      return;
+    }
+
+    let formattedText = "";
+    let offset = 0;
+
+    switch (format) {
+      case "bold":
+        formattedText = `**${selectedText}**`;
+        offset = 2;
+        break;
+      case "italic":
+        formattedText = `*${selectedText}*`;
+        offset = 1;
+        break;
+      case "underline":
+        formattedText = `__${selectedText}__`;
+        offset = 2;
+        break;
+      case "strikethrough":
+        formattedText = `~~${selectedText}~~`;
+        offset = 2;
+        break;
+      default:
+        return;
+    }
+
+    const newText =
+      textarea.value.substring(0, start) +
+      formattedText +
+      textarea.value.substring(end);
+
+    handleRouteChange(tempId, "text", newText);
+
+    // Set cursor position after formatting
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(
+        start + offset,
+        start + offset + selectedText.length
+      );
+    }, 0);
   };
 
   const handleAddTag = () => {
@@ -148,6 +259,52 @@ export function ShareRouteModal({
     );
   };
 
+  const handleImageUpload = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to convert image to base64"));
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleBeforeUpload = async (file: File) => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("You can only upload image files!");
+      return Upload.LIST_IGNORE;
+    }
+
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error("Image must be smaller than 5MB!");
+      return Upload.LIST_IGNORE;
+    }
+
+    try {
+      const base64 = await handleImageUpload(file);
+      const newFile: UploadFile = {
+        uid: `${Date.now()}-${file.name}`,
+        name: file.name,
+        status: "done",
+        url: base64,
+        thumbUrl: base64,
+      };
+      setFileList((prev) => [...prev, newFile]);
+    } catch (error) {
+      message.error("Failed to upload image");
+      console.error(error);
+    }
+
+    return false; // Prevent default upload behavior
+  };
+
   const handleSubmit = async () => {
     if (!title.trim()) {
       message.error("Please add a title");
@@ -164,9 +321,10 @@ export function ShareRouteModal({
 
     try {
       const postData: Partial<Post> = {
+        ...(editMode && postToEdit ? { id: postToEdit.id } : {}),
         title: title.trim(),
         routes: validRoutes.map((route, index) => ({
-          id: `r${Date.now()}-${index}`,
+          id: editMode ? route.tempId : `r${Date.now()}-${index}`,
           text: route.text,
           links: route.links,
           order: index + 1,
@@ -176,6 +334,7 @@ export function ShareRouteModal({
         })),
         images: fileList.map((file) => file.url || file.thumbUrl || ""),
         tags,
+        ...(editMode ? { updatedAt: new Date().toISOString() } : {}),
       };
 
       await onSubmit(postData);
@@ -183,14 +342,26 @@ export function ShareRouteModal({
       // Reset form
       setTitle("");
       setRoutes([
-        { tempId: "1", text: "", links: [], order: 1, vehicles: [], fare: 0, status: 'unverified' },
+        {
+          tempId: "1",
+          text: "",
+          links: [],
+          order: 1,
+          vehicles: [],
+          fare: 0,
+          status: "unverified",
+        },
       ]);
       setTags([]);
       setFileList([]);
-      message.success("Post created successfully!");
+      message.success(
+        editMode ? "Post updated successfully!" : "Post created successfully!"
+      );
       onClose();
     } catch (error) {
-      message.error("Failed to create post");
+      message.error(
+        editMode ? "Failed to update post" : "Failed to create post"
+      );
       console.error(error);
     } finally {
       setLoading(false);
@@ -205,7 +376,11 @@ export function ShareRouteModal({
   return (
     <>
       <Modal
-        title={<div className="text-xl font-bold">Share a route</div>}
+        title={
+          <div className="text-xl font-bold">
+            {editMode ? "Edit route" : "Share a route"}
+          </div>
+        }
         open={open}
         onCancel={onClose}
         width={700}
@@ -235,6 +410,40 @@ export function ShareRouteModal({
                   {index + 1}
                 </Avatar>
                 <div className="flex-1 space-y-2">
+                  {/* Formatting buttons */}
+                  <div className="flex gap-1">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<BoldOutlined />}
+                      onClick={() => applyFormatting(route.tempId, "bold")}
+                      title="Bold (Markdown: **text**)"
+                    />
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<ItalicOutlined />}
+                      onClick={() => applyFormatting(route.tempId, "italic")}
+                      title="Italic (Markdown: *text*)"
+                    />
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<UnderlineOutlined />}
+                      onClick={() => applyFormatting(route.tempId, "underline")}
+                      title="Underline (Markdown: __text__)"
+                    />
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<StrikethroughOutlined />}
+                      onClick={() =>
+                        applyFormatting(route.tempId, "strikethrough")
+                      }
+                      title="Strikethrough (Markdown: ~~text~~)"
+                    />
+                  </div>
+
                   <div className="relative">
                     <Input.TextArea
                       ref={(el) => {
@@ -396,7 +605,7 @@ export function ShareRouteModal({
                 listType="picture"
                 fileList={fileList}
                 onChange={({ fileList }) => setFileList(fileList)}
-                beforeUpload={() => false}
+                beforeUpload={handleBeforeUpload}
                 showUploadList={false}
                 accept="image/*"
                 multiple>
@@ -412,7 +621,7 @@ export function ShareRouteModal({
               loading={loading}
               onClick={handleSubmit}
               className="bg-[#00623B] hover:bg-[#004d2e]">
-              Post
+              {editMode ? "Update" : "Post"}
             </Button>
           </div>
         </div>

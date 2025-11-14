@@ -1,3 +1,7 @@
+
+import Link from "next/link";
+import { APP_ROUTES } from "@/lib/constants";
+
 export default function HomePage() {
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -18,6 +22,12 @@ export default function HomePage() {
             Sign Up
           </a>
         </div>
+        
+          <div className="mx-auto my-8">
+            <Link href={APP_ROUTES.DASHBOARD} className={"text-[#00623B] font-semibold hover:underline hover:text-[#00623B]"}>
+              Visit as guest
+            </Link>
+          </div>
       </div>
     </div>
   );

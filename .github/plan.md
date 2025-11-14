@@ -195,28 +195,78 @@ interface PaginatedResponse<T> {
 
 ## Phase 5: Feature Implementation
 
-### 5.1 Authentication Flow
+### 5.1 Authentication Flow ✅
 
 - [x] Implement Server Actions for auth
-- [ ] JWT token management with httpOnly cookies
-- [ ] Protected routes with middleware
-- [ ] User session management
+- [x] JWT token management with httpOnly cookies
+- [x] Protected routes with middleware
+- [x] User session management automatically keeping them signed in till they sign out
+- [x] Centralized AuthProvider with React Context
+- [x] Dashboard layout using AuthProvider
+- [x] LoginForm using AuthProvider
+- [x] Ensure sufficient access to basic functionality for guest users without causing errors by restricting them from doing things requiring an account and giving feedback
+- [x] Guest users can browse feed, explore, and marketplace
+- [x] Actions requiring auth (like, comment, bookmark, share route) show login prompt
+- [x] Top bars display login button for guests, user info for authenticated users
+- [x] ShareRouteButton shows login modal for guests
 
-### 5.2 Post Management
+### 5.2 Post Management ✅
 
-- [ ] Create post with routes
-- [ ] Edit/delete posts
-- [ ] Image upload (mock with base64)
-- [ ] Rich text formatting
-- [ ] Tags and links
+- [x] Create post with routes
+- [x] Edit/delete posts
+- [x] Image upload (mock with base64)
+- [x] Rich text formatting (Markdown syntax support)
+- [x] Tags and links
+- [x] Post ownership verification
+- [x] Delete confirmation dialog
+- [x] Edit mode in ShareRouteModal
+- [x] Image preview and removal
+- [x] Formatting buttons (Bold, Italic, Underline, Strikethrough)
 
 ### 5.3 Social Features
 
-- [ ] Like/dislike system
-- [ ] Comment system
-- [ ] Share functionality
-- [ ] Bookmark posts
-- [ ] User following
+- [x] Like/dislike system with toggle logic (can't like and dislike simultaneously)
+- [x] Icon color changes (filled when active, Along Green for like/bookmark, red for dislike)
+- [x] Optimistic UI updates with rollback on error
+- [x] User interaction state tracking (fetch and display existing likes/dislikes/bookmarks)
+- [x] Bookmark system with toggle
+- [x] Comment system
+- [x] Share functionality
+- [x] User following
+
+### 5.4 User Profile
+
+- [x] View own profile
+- [x] Edit own profile
+- [x] Change profile picture
+- [x] View own posts
+- [x] View own comments
+
+### 5.4.5 Side task: User location
+
+- [x] Seamlessly integrate user location field into project
+- [x] Update relevant types, mock data, and API routes without breaking changes!
+- [x] Allow users to set/update location in profile using window location api to geodata
+- [x] Prompt guest users to create accounts before being able to use their current/live location
+
+### 5.5 Search and Suggestions Functionality ✅
+
+- [x] Search bar with live results
+  - [x] Debounced search (300ms delay)
+  - [x] Search across users (name, username)
+  - [x] Search across posts (title, routes, tags)
+  - [x] Search across tags
+  - [x] Categorized results dropdown (Users, Posts, Tags)
+  - [x] Click-outside to close
+  - [x] Loading and empty states
+- [x] User suggestions based on location and previous searches/activity
+  - [x] Intelligent scoring algorithm
+  - [x] Location-based scoring (40 points max)
+  - [x] Activity-based scoring (30 points - likes & bookmarks)
+  - [x] Common interests scoring (20 points - shared tags)
+  - [x] Mutual connections scoring (10 points)
+  - [x] Verified user boost (5 points)
+  - [x] Top 5 ranked suggestions display
 
 ## Phase 6: Optimization & Polish
 
@@ -225,14 +275,20 @@ interface PaginatedResponse<T> {
 - [ ] Implement React.lazy for heavy components
 - [ ] Optimize images
 - [ ] Add loading states
+- [ ] Disable buttons during async actions
+- [ ] Disable unnecessary re-renders with React.memo
 - [ ] Implement error boundaries
+- [ ] 404 Not Found page
 
 ### 6.2 UX Improvements
 
 - [ ] Loading skeletons (Ant Design Skeleton)
+- [ ] Smooth transitions/animations
 - [ ] Toast notifications
 - [ ] Confirmation dialogs
 - [ ] Form validation feedback
+- [ ] Widespread Dark-mode inclusion
+- [ ] To the top/refresh feed notifier when user has scrolled far down
 
 ### 6.3 Accessibility
 
