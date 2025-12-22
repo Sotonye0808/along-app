@@ -45,13 +45,10 @@ export function DesktopTopBar() {
           <Switch
             checked={theme === "dark"}
             size="small"
-            onClick={(_, e) => {
-              e.stopPropagation();
-            }}
+            onChange={toggleTheme}
           />
         </div>
       ),
-      onClick: toggleTheme,
     },
     {
       key: "settings",
@@ -87,15 +84,15 @@ export function DesktopTopBar() {
         {isAuthenticated && user ? (
           <NotificationsDropdown userId={user.id} />
         ) : (
-          <Badge count={0} offset={[-2, 2]}>
-            <button
-              className="text-2xl text-gray-700 hover:text-[#00623B] transition-colors"
-              title="Notifications"
-              aria-label="View notifications"
-              disabled>
-              <BellOutlined />
-            </button>
-          </Badge>
+          <button
+            onClick={toggleTheme}
+            className="text-2xl text-gray-700 dark:text-gray-300 hover:text-[#00623B] dark:hover:text-[#00a862] transition-colors"
+            title={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+            aria-label="Toggle theme">
+            {theme === "dark" ? <BulbFilled /> : <BulbOutlined />}
+          </button>
         )}
 
         {isAuthenticated && user ? (
@@ -113,10 +110,12 @@ export function DesktopTopBar() {
                 {!user.avatar && user.lastName[0]}
               </Avatar>
               <div className="text-left">
-                <div className="text-sm font-semibold text-gray-900">
+                <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   {user.firstName} {user.lastName}
                 </div>
-                <div className="text-xs text-gray-500">@{user.userName}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  @{user.userName}
+                </div>
               </div>
             </div>
           </Dropdown>

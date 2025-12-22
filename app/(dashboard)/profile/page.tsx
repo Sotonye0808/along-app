@@ -563,7 +563,9 @@ export default function ProfilePage() {
   if (!user || !currentUser) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
-        <p className="text-gray-500">Please login to view your profile</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          Please login to view your profile
+        </p>
       </div>
     );
   }

@@ -312,7 +312,9 @@ export default function BookmarksPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Saved Routes</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+        Saved Routes
+      </h1>
 
       {bookmarkedPosts.length === 0 ? (
         <div className="flex justify-center items-center min-h-[40vh]">

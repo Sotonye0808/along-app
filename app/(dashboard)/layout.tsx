@@ -13,7 +13,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
 
   if (loading) {
     return (
@@ -27,7 +27,7 @@ export default function DashboardLayout({
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
         {/* Navigation */}
-        <DashboardNavbar />
+        <DashboardNavbar userId={user?.id} />
         <MobileTopBar />
         <DesktopTopBar />
 

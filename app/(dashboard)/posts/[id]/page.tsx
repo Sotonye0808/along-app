@@ -412,7 +412,9 @@ export default function PostPage() {
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <p className="text-gray-500 text-lg">Post not found</p>
+        <p className="text-gray-500 dark:text-gray-400 text-lg">
+          Post not found
+        </p>
         <Button
           type="primary"
           onClick={() => router.push("/home")}
@@ -470,6 +472,18 @@ export default function PostPage() {
           onAddComment={handleAddComment}
           onEditComment={handleEditComment}
           onDeleteComment={handleDeleteComment}
+          onShowLoginModal={() => {
+            modal.confirm({
+              title: "Login Required",
+              content:
+                "You need to be logged in to interact with comments. Would you like to login now?",
+              okText: "Login",
+              cancelText: "Cancel",
+              onOk: () => {
+                router.push("/login");
+              },
+            });
+          }}
         />
       )}
     </div>

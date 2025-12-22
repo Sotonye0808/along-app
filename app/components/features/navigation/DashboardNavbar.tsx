@@ -13,13 +13,18 @@ import {
 } from "@ant-design/icons";
 import { Badge } from "antd";
 import { APP_ROUTES } from "@/lib/constants";
+import { useNotifications } from "@/lib/hooks/useNotifications";
 
 interface NavItem {
   href: string;
   icon: React.ReactNode;
   label: string;
-  badge?: number;
+  badgeKey?: string;
   showOnMobile?: boolean;
+}
+
+interface DashboardNavbarProps {
+  userId?: string;
 }
 
 const navItems: NavItem[] = [
@@ -30,34 +35,36 @@ const navItems: NavItem[] = [
     showOnMobile: true,
   },
   {
+    href: APP_ROUTES.BOOKMARKS,
+    icon: <BookOutlined />,
+    label: "Bookmarks",
+    showOnMobile: true,
+  },
+  /* {
     href: APP_ROUTES.EXPLORE,
     icon: <CompassOutlined />,
     label: "Explore",
     showOnMobile: true,
   },
+  // REDUNDANT
   {
     href: "/notifications",
     icon: <BellOutlined />,
     label: "Notifications",
-    badge: 3,
+    badgeKey: "notifications",
     showOnMobile: false,
-  },
-  {
-    href: APP_ROUTES.BOOKMARKS,
-    icon: <BookOutlined />,
-    label: "Bookmarks",
-    showOnMobile: true,
   },
   {
     href: APP_ROUTES.MARKETPLACE,
     icon: <ShoppingOutlined />,
     label: "Marketplace",
     showOnMobile: true,
-  },
+  }, */
 ];
 
-export function DashboardNavbar() {
+export function DashboardNavbar({ userId }: DashboardNavbarProps) {
   const pathname = usePathname();
+ 
 
   const isActive = (href: string) => {
     if (href === APP_ROUTES.DASHBOARD) {
@@ -83,7 +90,7 @@ export function DashboardNavbar() {
                   : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#00623B] dark:hover:text-[#00a862]"
               }`}
               title={item.label}>
-              <Badge count={item.badge} size="small" offset={[10, -5]}>
+              <Badge size="small" offset={[10, -5]}>
                 <span className="text-2xl">{item.icon}</span>
               </Badge>
             </Link>
@@ -107,7 +114,7 @@ export function DashboardNavbar() {
                     ? "text-[#00623B] dark:text-[#00a862]"
                     : "text-gray-600 dark:text-gray-400"
                 }`}>
-                <Badge count={item.badge} size="small" offset={[5, 0]}>
+                <Badge size="small" offset={[5, 0]}>
                   <span className="text-2xl">{item.icon}</span>
                 </Badge>
                 <span className="text-xs font-medium">{item.label}</span>

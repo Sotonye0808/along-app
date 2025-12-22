@@ -239,14 +239,14 @@ export function SuggestionsPanel() {
                 </Link>
                 <div className="flex-1 min-w-0">
                   <Link href={`/profile/${user.userName}`}>
-                    <div className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer truncate">
+                    <div className="font-semibold text-gray-900 dark:text-gray-100 hover:text-[#00623B] dark:hover:text-[#00a862] cursor-pointer truncate">
                       {user.firstName} {user.lastName}
                     </div>
                   </Link>
-                  <div className="text-sm text-gray-500 truncate">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
                     @{user.userName}
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-gray-400 dark:text-gray-500">
                     {formatNumber(user.followers || 0)} followers
                   </div>
                 </div>

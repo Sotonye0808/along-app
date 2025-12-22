@@ -378,6 +378,13 @@ export function UserProfile({
           onDislikeComment={onDislikeComment}
           onEditComment={onEditComment}
           onDeleteComment={onDeleteComment}
+          onShowLoginModal={() => {
+            // Guest users shouldn't reach here in profile page context,
+            // but adding for completeness
+            if (typeof window !== "undefined") {
+              window.location.href = "/login";
+            }
+          }}
         />
       )}
     </div>

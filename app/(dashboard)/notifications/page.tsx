@@ -201,16 +201,16 @@ export default function NotificationsPage() {
               }`}
               styles={{ body: { padding: "16px" } }}>
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-lg">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-lg">
                   {getNotificationIcon(notification.type)}
                 </div>
                 <div
                   className="flex-1 min-w-0"
                   onClick={() => handleNotificationClick(notification)}>
-                  <p className="text-gray-800 text-sm md:text-base">
+                  <p className="text-gray-800 dark:text-gray-200 text-sm md:text-base">
                     {notification.message}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {formatDate(notification.createdAt)}
                   </p>
                 </div>
@@ -222,7 +222,7 @@ export default function NotificationsPage() {
                     e.stopPropagation();
                     deleteNotification(notification.id);
                   }}
-                  className="text-gray-400 hover:text-red-500"
+                  className="text-gray-400 dark:text-gray-500 hover:text-red-500"
                   danger
                 />
               </div>

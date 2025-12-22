@@ -36,6 +36,7 @@ interface CommentSectionProps {
   onDislikeComment?: (commentId: string) => void;
   onEditComment?: (commentId: string, newText: string) => Promise<void>;
   onDeleteComment?: (commentId: string) => Promise<void>;
+  onShowLoginModal?: () => void;
 }
 
 export const CommentSection = memo(function CommentSection({
@@ -49,6 +50,7 @@ export const CommentSection = memo(function CommentSection({
   onDislikeComment,
   onEditComment,
   onDeleteComment,
+  onShowLoginModal,
 }: CommentSectionProps) {
   const { message, notification } = App.useApp();
   const [commentText, setCommentText] = useState("");
@@ -151,7 +153,7 @@ export const CommentSection = memo(function CommentSection({
         aria-label="Comments section">
         {/* Add Comment */}
         {currentUser && (
-          <div className="sticky top-0 bg-white z-10 pb-4 mb-4 border-b">
+          <div className="sticky top-0 bg-transparent z-10 pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex gap-3">
               <Avatar
                 src={currentUser.avatar}
@@ -238,17 +240,17 @@ export const CommentSection = memo(function CommentSection({
                   ) : (
                     // View Mode
                     <>
-                      <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="bg-gray-50 dark:bg-gray-900/60 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900">
+                            <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
                               {comment.author.firstName}{" "}
                               {comment.author.lastName}
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               @{comment.author.userName}
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
                               • {formatDate(comment.createdAt)}
                             </span>
                           </div>
@@ -277,12 +279,14 @@ export const CommentSection = memo(function CommentSection({
                                 type="text"
                                 size="small"
                                 icon={<MoreOutlined />}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                               />
                             </Dropdown>
                           )}
                         </div>
-                        <p className="text-gray-800 text-sm">{comment.text}</p>
+                        <p className="text-gray-800 dark:text-gray-200 text-sm">
+                          {comment.text}
+                        </p>
                       </div>
 
                       {/* Comment Actions */}
@@ -291,14 +295,26 @@ export const CommentSection = memo(function CommentSection({
                           type="text"
                           size="small"
                           icon={<LikeOutlined />}
-                          onClick={() => onLikeComment?.(comment.id)}>
+                          onClick={() => {
+                            if (!currentUser && onShowLoginModal) {
+                              onShowLoginModal();
+                            } else {
+                              onLikeComment?.(comment.id);
+                            }
+                          }}>
                           {comment.likes > 0 && formatNumber(comment.likes)}
                         </Button>
                         <Button
                           type="text"
                           size="small"
                           icon={<DislikeOutlined />}
-                          onClick={() => onDislikeComment?.(comment.id)}>
+                          onClick={() => {
+                            if (!currentUser && onShowLoginModal) {
+                              onShowLoginModal();
+                            } else {
+                              onDislikeComment?.(comment.id);
+                            }
+                          }}>
                           {comment.dislikes > 0 &&
                             formatNumber(comment.dislikes)}
                         </Button>

@@ -48,13 +48,10 @@ export function MobileTopBar() {
           <Switch
             checked={theme === "dark"}
             size="small"
-            onClick={(_, e) => {
-              e.stopPropagation();
-            }}
+            onChange={toggleTheme}
           />
         </div>
       ),
-      onClick: toggleTheme,
     },
     {
       key: "settings",
@@ -101,7 +98,7 @@ export function MobileTopBar() {
             <button
               type="button"
               onClick={() => setSearchVisible(true)}
-              className="text-xl text-gray-700"
+              className="text-xl text-gray-700 dark:text-gray-300 hover:text-[#00623B] dark:hover:text-[#00a862]"
               title="Search"
               aria-label="Search routes and users">
               <SearchOutlined />
@@ -110,17 +107,17 @@ export function MobileTopBar() {
             {isAuthenticated && user ? (
               <NotificationsDropdown userId={user.id} />
             ) : (
-              <Badge count={0} size="small" offset={[-2, 2]}>
-                <button
-                  type="button"
-                  className="text-xl text-gray-700"
-                  disabled
-                  title="Notifications"
-                  aria-label="Notifications">
-                  <BellOutlined />
-                  <span className="sr-only">Bell</span>
-                </button>
-              </Badge>
+              <button
+                onClick={toggleTheme}
+                className="text-xl text-gray-700 dark:text-gray-300 hover:text-[#00623B] dark:hover:text-[#00a862]"
+                title={
+                  theme === "dark"
+                    ? "Switch to light mode"
+                    : "Switch to dark mode"
+                }
+                aria-label="Toggle theme">
+                {theme === "dark" ? <BulbFilled /> : <BulbOutlined />}
+              </button>
             )}
 
             {isAuthenticated && user ? (

@@ -69,7 +69,7 @@ const statusConfig = {
   },
   unverified: {
     icon: ExclamationCircleOutlined,
-    color: "text-gray-500",
+    color: "text-gray-500 dark:text-gray-400",
     tooltip: "Unverified Route",
   },
   pending: {
@@ -186,7 +186,7 @@ export const PostCard = memo(function PostCard({
           <div className="flex-1">
             <div className="flex items-center justify-between gap-2 mb-2">
               <Link href={`/profile/${author.userName}`}>
-                <h3 className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 hover:text-[#00623B] dark:hover:text-[#00a862] cursor-pointer">
                   {author.firstName} {author.lastName}
                 </h3>
               </Link>
@@ -203,14 +203,14 @@ export const PostCard = memo(function PostCard({
                   }
                   className={
                     isFollowing
-                      ? "border-[#00623B] text-[#00623B] text-sm hover:bg-gray-50"
+                      ? "border-[#00623B] dark:border-[#00a862] text-[#00623B] dark:text-[#00a862] text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                       : "bg-[#00623B] hover:bg-[#004d2e]"
                   }>
                   {isFollowing ? "Following" : "Follow"}
                 </Button>
               )}
             </div>
-            <div className="flex items-center justify-between gap-2 text-xs text-gray-500">
+            <div className="flex items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400">
               <span>@{author.userName}</span>
               <span>•</span>
               <span>{formatDate(post.createdAt)}</span>
@@ -223,7 +223,9 @@ export const PostCard = memo(function PostCard({
       </div>
 
       {/* Post Title */}
-      <h2 className="text-xl font-bold text-gray-900 mb-4">{post.title}</h2>
+      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        {post.title}
+      </h2>
 
       {/* Routes */}
       <div className="space-y-4 mb-4">
@@ -237,21 +239,23 @@ export const PostCard = memo(function PostCard({
                   {index + 1}
                 </div>
                 {index < post.routes.length - 1 && (
-                  <div className="w-0.5 h-full bg-gray-300 my-1 flex-1" />
+                  <div className="w-0.5 h-full bg-gray-300 dark:bg-gray-600 my-1 flex-1" />
                 )}
               </div>
 
               {/* Route content */}
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
-                  <p className="text-gray-800 flex-1">{route.text}</p>
+                  <p className="text-gray-800 dark:text-gray-200 flex-1">
+                    {route.text}
+                  </p>
                   <Tooltip
-                    className={`overwrite-anticon-color ${
+                    className={`${
                       statusConfig[route.status].color
                     }`}
                     title={statusConfig[route.status].tooltip}>
                     <StatusIcon
-                      className={`text-sm ml-2 overwrite-anticon-color ${
+                      className={`text-sm ml-2 ${
                         statusConfig[route.status].color
                       }`}
                     />
@@ -374,7 +378,7 @@ export const PostCard = memo(function PostCard({
 
       {/* Post Actions */}
       <div
-        className="flex items-center justify-between text-gray-600"
+        className="flex items-center justify-between text-gray-600 dark:text-gray-400"
         role="group"
         aria-label="Post actions">
         <Space>

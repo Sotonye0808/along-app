@@ -804,6 +804,18 @@ export function Feed() {
           onAddComment={handleAddComment}
           onEditComment={handleEditComment}
           onDeleteComment={handleDeleteComment}
+          onShowLoginModal={() => {
+            modal.confirm({
+              title: "Login Required",
+              content:
+                "You need to be logged in to interact with comments. Would you like to login now?",
+              okText: "Login",
+              cancelText: "Cancel",
+              onOk: () => {
+                router.push(APP_ROUTES.LOGIN);
+              },
+            });
+          }}
         />
       )}
     </>

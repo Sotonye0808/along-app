@@ -5,7 +5,7 @@
   "start_url": "/home",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#1890ff",
+  "theme_color": "#00623B",
   "orientation": "portrait-primary",
   "categories": ["travel", "social", "navigation"],
   "icons": [
