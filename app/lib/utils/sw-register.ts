@@ -26,8 +26,27 @@ export async function registerServiceWorker(): Promise<SwRegistrationResult> {
     }
 
     try {
+        // Wait for the page to be fully loaded before registering
+        if (document.readyState !== 'complete') {
+            await new Promise((resolve) => {
+                window.addEventListener('load', resolve);
+            });
+        }
+
+        // Unregister existing service workers first to prevent conflicts
+        const existingRegistrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of existingRegistrations) {
+            await registration.unregister();
+            console.log('Unregistered existing service worker');
+        }
+
+        // Small delay to ensure cleanup is complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Register new service worker
         const registration = await navigator.serviceWorker.register('/sw.js', {
             scope: '/',
+            updateViaCache: 'none', // Always fetch the latest sw.js
         });
 
         console.log('Service Worker registered successfully:', registration);

@@ -80,7 +80,7 @@
       "url": "/explore",
       "icons": [
         {
-          "src": "/assets/icons/explore-icon.png",
+          "src": "/assets/icons/explore.svg",
           "sizes": "96x96"
         }
       ]
@@ -92,7 +92,7 @@
       "url": "/bookmarks",
       "icons": [
         {
-          "src": "/assets/icons/bookmark-icon.png",
+          "src": "/assets/icons/bookmark.svg",
           "sizes": "96x96"
         }
       ]
