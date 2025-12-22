@@ -4,6 +4,7 @@ import { DashboardNavbar } from "@/components/features/navigation/DashboardNavba
 import { MobileTopBar } from "@/components/features/navigation/MobileTopBar";
 import { DesktopTopBar } from "@/components/features/navigation/DesktopTopBar";
 import { ScrollToTop } from "@/components/features/navigation/ScrollToTop";
+import { OfflineIndicator } from "@/components/features/pwa";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Spin } from "antd";
@@ -26,6 +27,9 @@ export default function DashboardLayout({
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
+        {/* Offline Indicator */}
+        <OfflineIndicator />
+
         {/* Navigation */}
         <DashboardNavbar userId={user?.id} />
         <MobileTopBar />

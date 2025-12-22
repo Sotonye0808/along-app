@@ -1,7 +1,7 @@
-const CACHE_NAME = "along-v1";
-const STATIC_CACHE_NAME = "along-static-v1";
-const DYNAMIC_CACHE_NAME = "along-dynamic-v1";
-const API_CACHE_NAME = "along-api-v1";
+const CACHE_NAME = "along-v2";
+const STATIC_CACHE_NAME = "along-static-v2";
+const DYNAMIC_CACHE_NAME = "along-dynamic-v2";
+const API_CACHE_NAME = "along-api-v2";
 
 // Files to cache on install
 const STATIC_ASSETS = [
@@ -13,20 +13,32 @@ const STATIC_ASSETS = [
   "/profile",
   "/marketplace",
   "/manifest.json",
-  "/assets/icons/icon-192x192.png",
-  "/assets/icons/icon-512x512.png",
+  "/offline.html",
 ];
 
 // Install event - cache static assets
 self.addEventListener("install", (event) => {
   console.log("[Service Worker] Installing...");
   event.waitUntil(
-    caches.open(STATIC_CACHE_NAME).then((cache) => {
-      console.log("[Service Worker] Caching static assets");
-      return cache.addAll(STATIC_ASSETS);
-    })
+    caches
+      .open(STATIC_CACHE_NAME)
+      .then((cache) => {
+        console.log("[Service Worker] Caching static assets");
+        // Use addAll with error handling
+        return cache.addAll(STATIC_ASSETS).catch((error) => {
+          console.error("[Service Worker] Failed to cache some assets:", error);
+          // Cache individual assets that succeed
+          return Promise.allSettled(
+            STATIC_ASSETS.map((url) =>
+              cache.add(url).catch((err) => {
+                console.warn(`[Service Worker] Failed to cache ${url}:`, err);
+              })
+            )
+          );
+        });
+      })
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 // Activate event - cleanup old caches
@@ -40,7 +52,8 @@ self.addEventListener("activate", (event) => {
             return (
               cacheName !== STATIC_CACHE_NAME &&
               cacheName !== DYNAMIC_CACHE_NAME &&
-              cacheName !== API_CACHE_NAME
+              cacheName !== API_CACHE_NAME &&
+              cacheName !== CACHE_NAME
             );
           })
           .map((cacheName) => {
@@ -53,43 +66,69 @@ self.addEventListener("activate", (event) => {
   return self.clients.claim();
 });
 
+// Helper function to create offline response
+function createOfflineResponse() {
+  return new Response(
+    JSON.stringify({
+      error: "Offline",
+      message:
+        "You are currently offline. This content is not available in cache.",
+      offline: true,
+    }),
+    {
+      headers: { "Content-Type": "application/json" },
+      status: 503,
+    }
+  );
+}
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Handle API requests (network-first strategy)
-  if (url.pathname.startsWith("/api/") || url.port === "3001") {
+  // Skip cross-origin requests
+  if (url.origin !== location.origin) {
+    return;
+  }
+
+  // Skip chrome extension requests
+  if (url.protocol === "chrome-extension:") {
+    return;
+  }
+
+  // Handle API requests (network-first strategy with better error handling)
+  if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone the response
-          const responseClone = response.clone();
-          // Cache successful responses
-          if (response.status === 200) {
+          // Only cache successful responses
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
             caches.open(API_CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
+              cache.put(request, responseClone).catch((error) => {
+                console.warn(
+                  "[Service Worker] Failed to cache API response:",
+                  error
+                );
+              });
             });
           }
           return response;
         })
-        .catch(() => {
+        .catch((error) => {
+          console.log(
+            "[Service Worker] API fetch failed, trying cache:",
+            error.message
+          );
           // Return cached version if available
           return caches.match(request).then((cachedResponse) => {
             if (cachedResponse) {
+              console.log("[Service Worker] Serving API from cache");
               return cachedResponse;
             }
-            // Return offline fallback for API requests
-            return new Response(
-              JSON.stringify({
-                error: "Offline",
-                message: "Unable to fetch data while offline",
-              }),
-              {
-                headers: { "Content-Type": "application/json" },
-                status: 503,
-              }
-            );
+            // Return offline response
+            return createOfflineResponse();
           });
         })
     );
@@ -101,48 +140,79 @@ self.addEventListener("fetch", (event) => {
     request.destination === "image" ||
     request.destination === "font" ||
     request.destination === "style" ||
-    request.destination === "script"
+    request.destination === "script" ||
+    request.destination === "manifest"
   ) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
         if (cachedResponse) {
           return cachedResponse;
         }
-        return fetch(request).then((response) => {
-          // Cache the fetched resource
-          const responseClone = response.clone();
-          caches.open(STATIC_CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
+        return fetch(request)
+          .then((response) => {
+            // Cache the fetched resource
+            if (response && response.status === 200) {
+              const responseClone = response.clone();
+              caches.open(STATIC_CACHE_NAME).then((cache) => {
+                cache.put(request, responseClone).catch((error) => {
+                  console.warn(
+                    "[Service Worker] Failed to cache static asset:",
+                    error
+                  );
+                });
+              });
+            }
+            return response;
+          })
+          .catch((error) => {
+            console.log(
+              "[Service Worker] Static asset fetch failed:",
+              error.message
+            );
+            // Return a fallback for images
+            if (request.destination === "image") {
+              return new Response(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="#ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#999">Offline</text></svg>',
+                { headers: { "Content-Type": "image/svg+xml" } }
+              );
+            }
+            return new Response("Offline", { status: 503 });
           });
-          return response;
-        });
       })
     );
     return;
   }
 
-  // Handle pages (stale-while-revalidate strategy)
+  // Handle pages (stale-while-revalidate strategy with better error handling)
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       const fetchPromise = fetch(request)
         .then((response) => {
           // Cache the new version
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          // Return offline page if navigation fails
-          if (request.mode === "navigate") {
-            return caches.match("/offline.html").then((offlinePage) => {
-              return offlinePage || new Response("Offline", { status: 503 });
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone).catch((error) => {
+                console.warn("[Service Worker] Failed to cache page:", error);
+              });
             });
           }
+          return response;
+        })
+        .catch((error) => {
+          console.log("[Service Worker] Page fetch failed:", error.message);
+          // Return offline page if navigation fails and no cache
+          if (request.mode === "navigate" && !cachedResponse) {
+            return caches.match("/offline.html").then((offlinePage) => {
+              return (
+                offlinePage || new Response("You are offline", { status: 503 })
+              );
+            });
+          }
+          return new Response("Offline", { status: 503 });
         });
 
-      // Return cached version immediately, update cache in background
+      // Return cached version immediately if available, update cache in background
       return cachedResponse || fetchPromise;
     })
   );

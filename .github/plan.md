@@ -280,6 +280,19 @@ interface PaginatedResponse<T> {
 - [x] Implement error boundaries
 - [x] 404 Not Found page
 
+### 6.1.5 Code Refactoring & Modularization ✅
+
+- [x] Extract Feed.tsx logic into custom hooks (826 lines → 260 lines, 68% reduction)
+  - [x] Create `useFeedPosts` hook for post management
+  - [x] Create `useFeedInteractions` hook for user interactions
+  - [x] Create `useComments` hook for comment operations
+  - [x] Create `useNewPostsNotification` hook for scroll notifications
+  - [x] Create `feedHelpers.ts` utility functions
+- [x] Refactor UserProfile.tsx to use modular hooks
+  - [x] Create `useProfileComments` hook for profile comment operations
+  - [x] Create `useProfileSharing` hook for profile link sharing
+  - [x] Maintain backward compatibility with prop-based handlers
+
 ### 6.2 UX Improvements ✅
 
 - [x] Loading skeletons (Ant Design Skeleton)

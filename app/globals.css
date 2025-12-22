@@ -20,6 +20,21 @@
     --color-error: #e4626f;
   }
 
+  @keyframes slide-down {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
   .dark {
     --color-primary: #00a862;
     --color-primary-light: #00d17a;
@@ -234,4 +249,3 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   font-size: 14px;
   pointer-events: auto;
 }
-
