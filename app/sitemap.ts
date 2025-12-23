@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://deploy-preview-6--along1.netlify.app/" || 'http://localhost:3000';
 
     // Static routes
     const staticRoutes: MetadataRoute.Sitemap = [
@@ -64,7 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         // Fetch all posts for dynamic routes
         const postsResponse = await fetch(`${baseUrl}/api/posts`, {
-            cache: 'no-store',
+            next: { revalidate: 3600 }, // Revalidate every hour
         });
         const posts = postsResponse.ok ? (await postsResponse.json()) as Post[] : [];
 
@@ -77,7 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         // Fetch all users for dynamic profile routes
         const usersResponse = await fetch(`${baseUrl}/api/users`, {
-            cache: 'no-store',
+            next: { revalidate: 3600 }, // Revalidate every hour
         });
         const users = usersResponse.ok ? (await usersResponse.json()) as User[] : [];
 
