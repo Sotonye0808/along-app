@@ -202,7 +202,9 @@ export function UserProfile({
                             <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                           </svg>
                         }
-                        onClick={() => handleLikeComment?.(comment.id)}
+                        onClick={() =>
+                          handleLikeComment?.(comment.id, comment.postId)
+                        }
                         className="text-gray-600 hover:text-[#00623B]">
                         {comment.likes > 0 && comment.likes}
                       </Button>
@@ -217,14 +219,16 @@ export function UserProfile({
                             <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
                           </svg>
                         }
-                        onClick={() => handleDislikeComment?.(comment.id)}
+                        onClick={() =>
+                          handleDislikeComment?.(comment.id, comment.postId)
+                        }
                         className="text-gray-600 hover:text-red-500">
                         {comment.dislikes > 0 && comment.dislikes}
                       </Button>
                       <Button
                         type="link"
                         size="small"
-                        onClick={() => openCommentModal(comment)}
+                        onClick={() => router.push(`/posts/${comment.postId}`)}
                         className="text-[#00623B]">
                         View Thread
                       </Button>
@@ -369,8 +373,12 @@ export function UserProfile({
           comments={comments.filter((c) => c.postId === selectedComment.postId)}
           currentUser={currentUserId ? ({ id: currentUserId } as User) : null}
           onAddComment={async () => {}}
-          onLikeComment={handleLikeComment}
-          onDislikeComment={handleDislikeComment}
+          onLikeComment={(commentId) =>
+            handleLikeComment(commentId, selectedComment.postId)
+          }
+          onDislikeComment={(commentId) =>
+            handleDislikeComment(commentId, selectedComment.postId)
+          }
           onEditComment={handleEditComment}
           onDeleteComment={handleDeleteComment}
           onShowLoginModal={() => {

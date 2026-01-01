@@ -104,36 +104,53 @@ export const CommentSection = memo(function CommentSection({
 
     const key = `delete-comment-${commentId}`;
     let undoClicked = false;
+    let countdown = 10;
 
-    notification.open({
-      key,
-      message: "Comment deleted",
-      description: "Undo within 10 seconds",
-      duration: 10,
-      btn: (
-        <Button
-          type="primary"
-          size="small"
-          onClick={() => {
-            undoClicked = true;
-            notification.destroy(key);
-            message.info("Deletion cancelled");
-          }}>
-          Undo
-        </Button>
-      ),
-      onClose: async () => {
+    const updateNotification = () => {
+      notification.open({
+        key,
+        message: "Comment deleted",
+        description: `Undo within ${countdown} second${
+          countdown !== 1 ? "s" : ""
+        }`,
+        duration: null,
+        btn: (
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => {
+              undoClicked = true;
+              notification.destroy(key);
+              clearInterval(interval);
+              message.info("Deletion cancelled");
+            }}>
+            Undo
+          </Button>
+        ),
+      });
+    };
+
+    updateNotification();
+
+    const interval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        updateNotification();
+      } else {
+        clearInterval(interval);
+        notification.destroy(key);
         if (!undoClicked) {
-          try {
-            await onDeleteComment(commentId);
-            message.success("Comment deleted permanently");
-          } catch (error) {
-            console.error("Failed to delete comment:", error);
-            message.error("Failed to delete comment");
-          }
+          onDeleteComment(commentId)
+            .then(() => {
+              message.success("Comment deleted permanently");
+            })
+            .catch((error) => {
+              console.error("Failed to delete comment:", error);
+              message.error("Failed to delete comment");
+            });
         }
-      },
-    });
+      }
+    }, 1000);
   };
 
   return (

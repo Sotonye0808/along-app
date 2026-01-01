@@ -17,7 +17,7 @@ interface PostWithAuthor extends Post {
 
 export default function PostPage() {
   const params = useParams();
-  const postId = params.id as string;
+  const postId = params?.id as string;
   const { user: currentUser, isAuthenticated } = useAuth();
   const [post, setPost] = useState<PostWithAuthor | null>(null);
   const [comments, setComments] = useState<(PostComment & { author: User })[]>(
@@ -35,13 +35,14 @@ export default function PostPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (postId) {
-      fetchPost();
-      if (currentUser) {
-        fetchUserInteractions();
-      }
-    }
-  }, [postId, currentUser]);
+    if (!postId) return;
+    fetchPost();
+  }, [postId]);
+
+  useEffect(() => {
+    if (!currentUser || !postId) return;
+    fetchUserInteractions();
+  }, [currentUser, postId]);
 
   const fetchPost = async () => {
     try {
@@ -323,6 +324,62 @@ export default function PostPage() {
     }
   };
 
+  const handleLikeComment = async (commentId: string) => {
+    if (!currentUser || !postId) {
+      message.warning("Please login to like comments");
+      return;
+    }
+
+    // Optimistic update
+    setComments((prev) =>
+      prev.map((c) => (c.id === commentId ? { ...c, likes: c.likes + 1 } : c))
+    );
+
+    try {
+      await api.post(API_ENDPOINTS.POST_COMMENT_LIKE(postId, commentId), {
+        userId: currentUser.id,
+        type: "like",
+      });
+    } catch (error) {
+      console.error("Failed to like comment:", error);
+      message.error("Failed to update like");
+      // Rollback
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, likes: c.likes - 1 } : c))
+      );
+    }
+  };
+
+  const handleDislikeComment = async (commentId: string) => {
+    if (!currentUser || !postId) {
+      message.warning("Please login to dislike comments");
+      return;
+    }
+
+    // Optimistic update
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId ? { ...c, dislikes: c.dislikes + 1 } : c
+      )
+    );
+
+    try {
+      await api.post(API_ENDPOINTS.POST_COMMENT_DISLIKE(postId, commentId), {
+        userId: currentUser.id,
+        type: "dislike",
+      });
+    } catch (error) {
+      console.error("Failed to dislike comment:", error);
+      message.error("Failed to update dislike");
+      // Rollback
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, dislikes: c.dislikes - 1 } : c
+        )
+      );
+    }
+  };
+
   const handleBookmark = async (postId: string) => {
     if (!currentUser) {
       message.warning("Please login to bookmark posts");
@@ -409,6 +466,22 @@ export default function PostPage() {
     );
   }
 
+  if (!postId) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <p className="text-gray-500 dark:text-gray-400 text-lg">
+          Invalid post ID
+        </p>
+        <Button
+          type="primary"
+          onClick={() => router.push("/home")}
+          className="bg-[#00623B]">
+          Back to Feed
+        </Button>
+      </div>
+    );
+  }
+
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
@@ -470,6 +543,8 @@ export default function PostPage() {
           comments={comments}
           currentUser={currentUser}
           onAddComment={handleAddComment}
+          onLikeComment={handleLikeComment}
+          onDislikeComment={handleDislikeComment}
           onEditComment={handleEditComment}
           onDeleteComment={handleDeleteComment}
           onShowLoginModal={() => {

@@ -51,27 +51,38 @@ export async function registerServiceWorker(): Promise<SwRegistrationResult> {
 
         console.log('Service Worker registered successfully:', registration);
 
+        // DISABLED: Automatic update checks cause excessive function calls
+        // Service worker will update naturally on page reload
+        // TODO: Consider manual update check on user action instead
         // Check for updates every hour
-        setInterval(() => {
-            registration.update();
-        }, 60 * 60 * 1000);
+        // setInterval(() => {
+        //     registration.update();
+        // }, 60 * 60 * 1000);
 
-        // Handle updates
+        // Handle updates - ensure we only show prompt once per version
+        let updatePromptShown = sessionStorage.getItem('sw-update-prompted') === 'true';
         registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
                 newWorker.addEventListener('statechange', () => {
                     if (
                         newWorker.state === 'installed' &&
-                        navigator.serviceWorker.controller
+                        navigator.serviceWorker.controller &&
+                        !updatePromptShown
                     ) {
-                        // New service worker available, notify user
+                        // New service worker available, notify user once
+                        updatePromptShown = true;
+                        sessionStorage.setItem('sw-update-prompted', 'true');
                         console.log('New service worker available');
+
                         if (
                             confirm(
                                 'A new version of Along is available. Reload to update?'
                             )
                         ) {
+                            // Clear the flag before reloading so it doesn't persist
+                            sessionStorage.removeItem('sw-update-prompted');
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
                             window.location.reload();
                         }
                     }

@@ -138,6 +138,84 @@ export function useComments(currentUser: User | null) {
         [currentUser, selectedPostId, message]
     );
 
+    const likeComment = useCallback(
+        async (commentId: string) => {
+            if (!currentUser || !selectedPostId) {
+                message.warning("Please login to like comments");
+                return;
+            }
+
+            const comment = comments.find((c) => c.id === commentId);
+            if (!comment) return;
+
+            // Optimistic update
+            setComments((prev) =>
+                prev.map((c) =>
+                    c.id === commentId ? { ...c, likes: c.likes + 1 } : c
+                )
+            );
+
+            try {
+                await api.post(
+                    API_ENDPOINTS.POST_COMMENT_LIKE(selectedPostId, commentId),
+                    {
+                        userId: currentUser.id,
+                        type: "like",
+                    }
+                );
+            } catch (error) {
+                console.error("Failed to like comment:", error);
+                message.error("Failed to update like");
+                // Rollback
+                setComments((prev) =>
+                    prev.map((c) =>
+                        c.id === commentId ? { ...c, likes: c.likes - 1 } : c
+                    )
+                );
+            }
+        },
+        [currentUser, selectedPostId, comments, message]
+    );
+
+    const dislikeComment = useCallback(
+        async (commentId: string) => {
+            if (!currentUser || !selectedPostId) {
+                message.warning("Please login to dislike comments");
+                return;
+            }
+
+            const comment = comments.find((c) => c.id === commentId);
+            if (!comment) return;
+
+            // Optimistic update
+            setComments((prev) =>
+                prev.map((c) =>
+                    c.id === commentId ? { ...c, dislikes: c.dislikes + 1 } : c
+                )
+            );
+
+            try {
+                await api.post(
+                    API_ENDPOINTS.POST_COMMENT_DISLIKE(selectedPostId, commentId),
+                    {
+                        userId: currentUser.id,
+                        type: "dislike",
+                    }
+                );
+            } catch (error) {
+                console.error("Failed to dislike comment:", error);
+                message.error("Failed to update dislike");
+                // Rollback
+                setComments((prev) =>
+                    prev.map((c) =>
+                        c.id === commentId ? { ...c, dislikes: c.dislikes - 1 } : c
+                    )
+                );
+            }
+        },
+        [currentUser, selectedPostId, comments, message]
+    );
+
     return {
         commentModalOpen,
         selectedPostId,
@@ -147,5 +225,7 @@ export function useComments(currentUser: User | null) {
         addComment,
         editComment,
         deleteComment,
+        likeComment,
+        dislikeComment,
     };
 }

@@ -83,6 +83,12 @@ export function useNotifications(userId?: string): UseNotificationsReturn {
     useEffect(() => {
         if (!userId) return;
 
+        // DISABLED IN PRODUCTION: Polling causes excessive function calls on Netlify
+        // TODO: Replace with WebSocket/SSE for real-time updates in future
+        if (process.env.NODE_ENV === 'production') {
+            return;
+        }
+
         const interval = setInterval(() => {
             fetchNotifications();
         }, 30000); // 30 seconds

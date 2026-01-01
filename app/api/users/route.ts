@@ -1,56 +1,100 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/data/database';
+import { prisma } from '@/lib/db/prisma';
+import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { cache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 
-// GET /api/users - Get all users
+/**
+ * GET /api/users
+ * Get list of users (paginated, searchable)
+ * Public endpoint with rate limiting
+ */
 export async function GET(request: NextRequest) {
     try {
-        const users = await db.getUsers();
+        // Rate limiting for guests
+        const rateLimit = await rateLimitByIP(request, {
+            maxRequests: 100,
+            windowSeconds: 60, // 100 requests per minute
+        });
 
-        // Remove sensitive data (password)
-        const sanitizedUsers = users.map(({ password, ...user }) => user);
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Rate limit exceeded' },
+                { status: 429, headers: { 'Retry-After': String(rateLimit.reset) } }
+            );
+        }
 
-        return NextResponse.json(sanitizedUsers, { status: 200 });
+        const { searchParams } = new URL(request.url);
+        const search = searchParams.get('search') || '';
+        const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
+        const cursor = searchParams.get('cursor');
+
+        // Build where clause for search
+        const whereClause = search
+            ? {
+                OR: [
+                    { userName: { contains: search, mode: 'insensitive' as const } },
+                    { firstName: { contains: search, mode: 'insensitive' as const } },
+                    { lastName: { contains: search, mode: 'insensitive' as const } },
+                ],
+            }
+            : {};
+
+        // Fetch users with pagination
+        const users = await prisma.user.findMany({
+            where: whereClause,
+            select: {
+                id: true,
+                userName: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                bio: true,
+                location: true,
+                verified: true,
+                createdAt: true,
+                _count: {
+                    select: {
+                        followers: true,
+                        following: true,
+                    },
+                },
+            },
+            orderBy: [
+                { verified: 'desc' },
+                { createdAt: 'desc' },
+            ],
+            take: limit + 1,
+            ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+        });
+
+        // Check if there are more results
+        const hasMore = users.length > limit;
+        const results = hasMore ? users.slice(0, -1) : users;
+        const nextCursor = hasMore ? results[results.length - 1].id : null;
+
+        // Transform to match frontend expectations
+        const transformedUsers = results.map((user) => ({
+            id: user.id,
+            userName: user.userName,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            avatar: user.avatar,
+            bio: user.bio,
+            location: user.location,
+            verified: user.verified,
+            followers: user._count.followers,
+            createdAt: user.createdAt.toISOString(),
+        }));
+
+        return NextResponse.json({
+            users: transformedUsers,
+            nextCursor,
+            hasMore,
+        });
     } catch (error) {
         console.error('Error fetching users:', error);
         return NextResponse.json(
             { error: 'Failed to fetch users' },
-            { status: 500 }
-        );
-    }
-}
-
-// POST /api/users - Create a new user
-export async function POST(request: NextRequest) {
-    try {
-        const body = await request.json();
-
-        // Check if user already exists
-        const existingEmail = await db.getUserByEmail(body.email);
-        if (existingEmail) {
-            return NextResponse.json(
-                { error: 'Email already exists' },
-                { status: 400 }
-            );
-        }
-
-        const existingUserName = await db.getUserByUserName(body.userName);
-        if (existingUserName) {
-            return NextResponse.json(
-                { error: 'Username already exists' },
-                { status: 400 }
-            );
-        }
-
-        const newUser = await db.createUser(body);
-
-        // Remove password from response
-        const { password, ...sanitizedUser } = newUser;
-
-        return NextResponse.json(sanitizedUser, { status: 201 });
-    } catch (error) {
-        console.error('Error creating user:', error);
-        return NextResponse.json(
-            { error: 'Failed to create user' },
             { status: 500 }
         );
     }

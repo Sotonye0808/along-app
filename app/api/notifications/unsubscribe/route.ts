@@ -1,24 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { requireAuth } from '@/lib/utils/auth-server';
+import { rateLimitByUser } from '@/lib/utils/rateLimiter';
 
 /**
  * POST /api/notifications/unsubscribe
  * Remove push notification subscription
+ * Requires authentication
+ * 
+ * TODO Phase 8.7 (Real-time Features):
+ * - Delete subscription from PushSubscription table
+ * - Match by userId and endpoint
  */
 export async function POST(request: NextRequest) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get('accessToken')?.value;
+        const authUser = await requireAuth(request);
 
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Rate limiting
+        const rateLimit = await rateLimitByUser(authUser.userId, {
+            maxRequests: 10,
+            windowSeconds: 3600, // 10 unsubscribes per hour
+        });
+
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Rate limit exceeded' },
+                { status: 429, headers: { 'Retry-After': String(rateLimit.reset) } }
+            );
         }
 
-        // In production, remove subscription from database
-        // TODO: Implement database removal for push subscriptions
-        console.log('Push subscription removed');
+        const body = await request.json();
+        const { endpoint } = body;
 
-        // Mock response
+        if (!endpoint) {
+            return NextResponse.json(
+                { error: 'Endpoint is required' },
+                { status: 400 }
+            );
+        }
+
+        // TODO: Implement database removal for push subscriptions
+        // await prisma.pushSubscription.deleteMany({
+        //     where: {
+        //         userId: authUser.userId,
+        //         endpoint: endpoint,
+        //     },
+        // });
+
+        console.log('Push subscription removed for user:', authUser.userId);
+
         return NextResponse.json({
             message: 'Subscription removed successfully',
         });

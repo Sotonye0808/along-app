@@ -172,6 +172,45 @@ class InMemoryStore {
         return true;
     }
 
+    async updateComment(id: string, updates: Partial<PostComment>): Promise<PostComment | null> {
+        const index = this.comments.findIndex((c) => c.id === id);
+        if (index === -1) return null;
+        this.comments[index] = { ...this.comments[index], ...updates };
+        return this.comments[index];
+    }
+
+    async getCommentById(id: string): Promise<PostComment | null> {
+        return this.comments.find((c) => c.id === id) || null;
+    }
+
+    async likeComment(commentId: string): Promise<PostComment | null> {
+        const comment = this.comments.find((c) => c.id === commentId);
+        if (!comment) return null;
+        comment.likes += 1;
+        return comment;
+    }
+
+    async unlikeComment(commentId: string): Promise<PostComment | null> {
+        const comment = this.comments.find((c) => c.id === commentId);
+        if (!comment || comment.likes === 0) return null;
+        comment.likes -= 1;
+        return comment;
+    }
+
+    async dislikeComment(commentId: string): Promise<PostComment | null> {
+        const comment = this.comments.find((c) => c.id === commentId);
+        if (!comment) return null;
+        comment.dislikes += 1;
+        return comment;
+    }
+
+    async undislikeComment(commentId: string): Promise<PostComment | null> {
+        const comment = this.comments.find((c) => c.id === commentId);
+        if (!comment || comment.dislikes === 0) return null;
+        comment.dislikes -= 1;
+        return comment;
+    }
+
     // Likes
     async getLikesByPostId(postId: string): Promise<Like[]> {
         return this.likes.filter((l) => l.postId === postId);

@@ -511,36 +511,50 @@ export default function ProfilePage() {
     const { notification } = App.useApp();
     const key = `delete-post-${postId}`;
     let undoClicked = false;
+    let countdown = 10;
 
-    notification.open({
-      key,
-      message: "Post deleted",
-      description: "Undo within 10 seconds",
-      duration: 10,
-      btn: (
-        <button
-          className="px-3 py-1 bg-[#00623B] text-white rounded hover:bg-[#004d2e] text-sm"
-          onClick={() => {
-            undoClicked = true;
-            notification.destroy(key);
-            message.info("Deletion cancelled");
-          }}>
-          Undo
-        </button>
-      ),
-      onClose: async () => {
+    const updateNotification = () => {
+      notification.open({
+        key,
+        message: "Post deleted",
+        description: `Undo within ${countdown} second${countdown !== 1 ? 's' : ''}`,
+        duration: 0.1,
+        btn: (
+          <button
+            className="px-3 py-1 bg-[#00623B] text-white rounded hover:bg-[#004d2e] text-sm"
+            onClick={() => {
+              undoClicked = true;
+              notification.destroy(key);
+              message.info("Deletion cancelled");
+            }}>
+            Undo
+          </button>
+        ),
+      });
+    };
+
+    updateNotification();
+
+    const interval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        updateNotification();
+      } else {
+        clearInterval(interval);
+        notification.destroy(key);
         if (!undoClicked) {
-          try {
-            await api.delete(`${API_ENDPOINTS.POSTS}/${postId}`);
-            setPosts((prev) => prev.filter((p) => p.id !== postId));
-            message.success("Post deleted permanently");
-          } catch (error) {
-            console.error("Failed to delete post:", error);
-            message.error("Failed to delete post");
-          }
+          api.delete(`${API_ENDPOINTS.POSTS}/${postId}`)
+            .then(() => {
+              setPosts((prev) => prev.filter((p) => p.id !== postId));
+              message.success("Post deleted permanently");
+            })
+            .catch((error) => {
+              console.error("Failed to delete post:", error);
+              message.error("Failed to delete post");
+            });
         }
-      },
-    });
+      }
+    }, 1000);
   };
 
   if (loading) {

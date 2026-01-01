@@ -59,6 +59,8 @@ export function Feed() {
     addComment,
     editComment,
     deleteComment,
+    likeComment,
+    dislikeComment,
   } = useComments(currentUser);
 
   const { hasNewPosts, handleLoadNewPosts } = useNewPostsNotification(
@@ -99,37 +101,55 @@ export function Feed() {
     const { notification } = App.useApp();
     const key = `delete-post-${postId}`;
     let undoClicked = false;
+    let countdown = 10;
 
-    notification.open({
-      key,
-      message: "Post deleted",
-      description: "Undo within 10 seconds",
-      duration: 10,
-      btn: (
-        <Button
-          type="primary"
-          size="small"
-          onClick={() => {
-            undoClicked = true;
-            notification.destroy(key);
-            message.info("Deletion cancelled");
-          }}>
-          Undo
-        </Button>
-      ),
-      onClose: async () => {
+    const updateNotification = () => {
+      notification.open({
+        key,
+        message: "Post deleted",
+        description: `Undo within ${countdown} second${
+          countdown !== 1 ? "s" : ""
+        }`,
+        duration: null,
+        btn: (
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => {
+              undoClicked = true;
+              notification.destroy(key);
+              clearInterval(interval);
+              message.info("Deletion cancelled");
+            }}>
+            Undo
+          </Button>
+        ),
+      });
+    };
+
+    updateNotification();
+
+    const interval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        updateNotification();
+      } else {
+        clearInterval(interval);
+        notification.destroy(key);
         if (!undoClicked) {
-          try {
-            await api.delete(`${API_ENDPOINTS.POSTS}/${postId}`);
-            removePost(postId);
-            message.success("Post deleted permanently");
-          } catch (error) {
-            console.error("Failed to delete post:", error);
-            message.error("Failed to delete post");
-          }
+          api
+            .delete(`${API_ENDPOINTS.POSTS}/${postId}`)
+            .then(() => {
+              removePost(postId);
+              message.success("Post deleted permanently");
+            })
+            .catch((error) => {
+              console.error("Failed to delete post:", error);
+              message.error("Failed to delete post");
+            });
         }
-      },
-    });
+      }
+    }, 1000);
   };
 
   if (loading) {
@@ -246,6 +266,8 @@ export function Feed() {
           onAddComment={(postId, text) =>
             addComment(postId, text, updatePostComments)
           }
+          onLikeComment={likeComment}
+          onDislikeComment={dislikeComment}
           onEditComment={editComment}
           onDeleteComment={(commentId) =>
             deleteComment(commentId, updatePostComments)

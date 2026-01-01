@@ -1,30 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { requireAuth } from '@/lib/utils/auth-server';
+import { rateLimitByUser } from '@/lib/utils/rateLimiter';
 
 /**
  * POST /api/notifications/subscribe
  * Save push notification subscription
+ * Requires authentication
+ * 
+ * TODO Phase 8.7 (Real-time Features):
+ * - Create PushSubscription model in Prisma schema
+ * - Store subscription with userId, endpoint, keys, etc.
+ * - Implement notification sending service
  */
 export async function POST(request: NextRequest) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get('accessToken')?.value;
+        const authUser = await requireAuth(request);
 
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Rate limiting
+        const rateLimit = await rateLimitByUser(authUser.userId, {
+            maxRequests: 10,
+            windowSeconds: 3600, // 10 subscriptions per hour
+        });
+
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Rate limit exceeded' },
+                { status: 429, headers: { 'Retry-After': String(rateLimit.reset) } }
+            );
         }
 
         const subscription = await request.json();
 
-        // In production, save subscription to database with user ID
-        // For now, we'll just return success
-        // TODO: Implement database storage for push subscriptions
-        console.log('Push subscription received:', subscription);
+        // Validate subscription object
+        if (!subscription.endpoint || !subscription.keys) {
+            return NextResponse.json(
+                { error: 'Invalid subscription data' },
+                { status: 400 }
+            );
+        }
 
-        // Mock response
+        // TODO: Implement database storage for push subscriptions
+        // await prisma.pushSubscription.create({
+        //     data: {
+        //         userId: authUser.userId,
+        //         endpoint: subscription.endpoint,
+        //         p256dh: subscription.keys.p256dh,
+        //         auth: subscription.keys.auth,
+        //     },
+        // });
+
+        console.log('Push subscription received for user:', authUser.userId);
+
         return NextResponse.json({
             message: 'Subscription saved successfully',
-            subscription,
         });
     } catch (error) {
         console.error('Error saving subscription:', error);

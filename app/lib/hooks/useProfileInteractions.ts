@@ -28,42 +28,42 @@ export function useProfileComments(currentUserId?: string) {
     }, []);
 
     const likeComment = useCallback(
-        async (commentId: string) => {
+        async (commentId: string, postId: string) => {
             if (!currentUserId) {
                 message.warning("Please login to like comments");
                 return;
             }
 
             try {
-                // API call for liking comment
-                await api.post(`${API_ENDPOINTS.POSTS}/comments/${commentId}/like`, {
-                    userId: currentUserId,
-                });
+                // API call for liking comment - use POST to like
+                await api.post(API_ENDPOINTS.POST_COMMENT_LIKE(postId, commentId));
                 message.success("Comment liked");
+                return true;
             } catch (error) {
                 console.error("Failed to like comment:", error);
                 message.error("Failed to like comment");
+                return false;
             }
         },
         [currentUserId, message]
     );
 
     const dislikeComment = useCallback(
-        async (commentId: string) => {
+        async (commentId: string, postId: string) => {
             if (!currentUserId) {
                 message.warning("Please login to dislike comments");
                 return;
             }
 
             try {
-                // API call for disliking comment
-                await api.post(`${API_ENDPOINTS.POSTS}/comments/${commentId}/dislike`, {
-                    userId: currentUserId,
-                });
+                // API call for disliking comment - use POST to dislike
+                await api.post(API_ENDPOINTS.POST_COMMENT_DISLIKE(postId, commentId));
                 message.success("Comment disliked");
+                return true;
             } catch (error) {
                 console.error("Failed to dislike comment:", error);
                 message.error("Failed to dislike comment");
+                return false;
             }
         },
         [currentUserId, message]

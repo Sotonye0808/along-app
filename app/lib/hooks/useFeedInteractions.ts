@@ -301,6 +301,7 @@ export function useFeedInteractions(currentUser: User | null) {
             }
 
             const isCurrentlyFollowing = userInteractions.following.has(userId);
+            const previousFollowing = new Set(userInteractions.following);
 
             // Optimistic update
             setUserInteractions((prev) => {
@@ -332,26 +333,23 @@ export function useFeedInteractions(currentUser: User | null) {
                 message.success(
                     isCurrentlyFollowing ? "Unfollowed user" : "Following user"
                 );
+
+                // Refetch to sync state
+                await fetchUserFollowing();
             } catch (error) {
                 console.error("Failed to follow/unfollow user:", error);
                 message.error("Failed to update follow status");
 
-                // Rollback
-                setUserInteractions((prev) => {
-                    const newFollowing = new Set(prev.following);
-                    if (isCurrentlyFollowing) {
-                        newFollowing.add(userId);
-                    } else {
-                        newFollowing.delete(userId);
-                    }
-                    return { ...prev, following: newFollowing };
-                });
+                // Rollback to exact previous state
+                setUserInteractions((prev) => ({
+                    ...prev,
+                    following: previousFollowing,
+                }));
 
                 updateAuthorFollowers(userId, isCurrentlyFollowing ? 1 : -1);
-                await refetchFollowing();
             }
         },
-        [currentUser, userInteractions, message]
+        [currentUser, userInteractions, message, fetchUserFollowing]
     );
 
     return {

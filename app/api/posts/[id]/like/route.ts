@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/data/database';
+import { prisma } from '@/lib/db/prisma';
+import { requireAuth } from '@/lib/utils/auth-server';
+import { rateLimitByUser } from '@/lib/utils/rateLimiter';
+import { Prisma } from '@prisma/client';
 
 // GET /api/posts/[id]/like - Check if user has liked/disliked this post
 export async function GET(
@@ -8,23 +11,31 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+        const userId = await requireAuth(request);
 
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Missing userId' },
-                { status: 400 }
-            );
-        }
-
-        const like = await db.getLike(id, userId);
+        const like = await prisma.like.findUnique({
+            where: {
+                postId_userId: {
+                    postId: id,
+                    userId
+                }
+            },
+            select: {
+                type: true
+            }
+        });
 
         return NextResponse.json(
             { data: like },
             { status: 200 }
         );
     } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') {
+            return NextResponse.json(
+                { error: 'Authentication required' },
+                { status: 401 }
+            );
+        }
         console.error('Error checking like status:', error);
         return NextResponse.json(
             { error: 'Failed to check like status' },
@@ -39,43 +50,144 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const body = await request.json();
-    const { userId, type } = body; // type: 'like' | 'dislike'
 
-    if (!userId || !type) {
-        return NextResponse.json(
-            { error: 'Missing userId or type' },
-            { status: 400 }
-        );
-    }
+    try {
+        const userId = await requireAuth(request);
 
-    // Check if user already liked/disliked this post
-    const existingLike = await db.getLike(id, userId);
+        // Rate limit check (200 likes per hour per user)
+        const rateLimit = await rateLimitByUser(userId, { maxRequests: 200, windowSeconds: 3600 });
 
-    if (existingLike) {
-        if (existingLike.type === type) {
-            // Remove like/dislike if same type
-            await db.deleteLike(id, userId);
+        if (!rateLimit.success) {
             return NextResponse.json(
-                { message: 'Like removed', action: 'removed' },
-                { status: 200 }
-            );
-        } else {
-            // Switch between like and dislike
-            await db.createLike({ postId: id, userId, type });
-            return NextResponse.json(
-                { message: 'Like updated', action: 'updated' },
-                { status: 200 }
+                { error: 'Too many like actions. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
             );
         }
-    } else {
-        // Create new like/dislike
-        await db.createLike({ postId: id, userId, type });
+
+        const body = await request.json();
+        const { type } = body; // type: 'LIKE' | 'DISLIKE'
+
+        if (!type || !['LIKE', 'DISLIKE'].includes(type)) {
+            return NextResponse.json(
+                { error: 'Invalid type. Must be LIKE or DISLIKE' },
+                { status: 400 }
+            );
+        }
+
+        // Verify post exists
+        const post = await prisma.post.findUnique({
+            where: { id },
+            select: { id: true, userId: true }
+        });
+
+        if (!post) {
+            return NextResponse.json(
+                { error: 'Post not found' },
+                { status: 404 }
+            );
+        }
+
+        // Check if user already liked/disliked this post
+        const existingLike = await prisma.like.findUnique({
+            where: {
+                postId_userId: {
+                    postId: id,
+                    userId
+                }
+            }
+        });
+
+        if (existingLike) {
+            if (existingLike.type === type) {
+                // Remove like/dislike if same type
+                await prisma.like.delete({
+                    where: {
+                        postId_userId: {
+                            postId: id,
+                            userId
+                        }
+                    }
+                });
+                return NextResponse.json(
+                    { message: 'Like removed', action: 'removed' },
+                    { status: 200 }
+                );
+            } else {
+                // Update to different type (like to dislike or vice versa)
+                await prisma.like.update({
+                    where: {
+                        postId_userId: {
+                            postId: id,
+                            userId
+                        }
+                    },
+                    data: { type }
+                });
+                return NextResponse.json(
+                    { message: 'Like updated', action: 'updated', type },
+                    { status: 200 }
+                );
+            }
+        } else {
+            // Create new like
+            await prisma.like.create({
+                data: {
+                    postId: id,
+                    userId,
+                    type
+                }
+            });
+
+            // Track user activity
+            await prisma.userActivity.create({
+                data: {
+                    userId,
+                    type: 'LIKE',
+                    postId: id,
+                    score: type === 'LIKE' ? 2 : 1
+                }
+            }).catch(err => console.error('Failed to track activity:', err));
+
+            return NextResponse.json(
+                { message: 'Like added', action: 'added', type },
+                { status: 201 }
+            );
+        }
+    } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') {
+            return NextResponse.json(
+                { error: 'Authentication required' },
+                { status: 401 }
+            );
+        }
+        console.error('Error toggling like:', error);
         return NextResponse.json(
-            { message: 'Like created', action: 'created' },
-            { status: 201 }
+            { error: 'Failed to toggle like' },
+            { status: 500 }
         );
     }
+}
+{ status: 200 }
+            );
+        } else {
+    // Switch between like and dislike
+    await db.createLike({ postId: id, userId, type });
+    return NextResponse.json(
+        { message: 'Like updated', action: 'updated' },
+        { status: 200 }
+    );
+}
+    } else {
+    // Create new like/dislike
+    await db.createLike({ postId: id, userId, type });
+    return NextResponse.json(
+        { message: 'Like created', action: 'created' },
+        { status: 201 }
+    );
+}
 }
 
 // DELETE /api/posts/[id]/like - Remove like/dislike

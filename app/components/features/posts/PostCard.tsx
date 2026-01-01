@@ -247,7 +247,7 @@ export const PostCard = memo(function PostCard({
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <p className="text-gray-800 dark:text-gray-200 flex-1">
-                    {route.text}
+                      {route.text}
                   </p>
                   <Tooltip
                     className={`${
