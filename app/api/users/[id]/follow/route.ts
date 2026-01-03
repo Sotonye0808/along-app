@@ -18,7 +18,7 @@ export async function POST(
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 100,
             windowSeconds: 3600, // 100 follows per hour
         });
@@ -31,7 +31,7 @@ export async function POST(
         }
 
         // Cannot follow yourself
-        if (authUser.userId === targetUserId) {
+        if (authUser === targetUserId) {
             return NextResponse.json(
                 { error: "Cannot follow yourself" },
                 { status: 400 }
@@ -52,7 +52,7 @@ export async function POST(
         const existingFollow = await prisma.follow.findUnique({
             where: {
                 followerId_followingId: {
-                    followerId: authUser.userId,
+                    followerId: authUser,
                     followingId: targetUserId,
                 },
             },
@@ -63,7 +63,7 @@ export async function POST(
             await prisma.follow.delete({
                 where: {
                     followerId_followingId: {
-                        followerId: authUser.userId,
+                        followerId: authUser,
                         followingId: targetUserId,
                     },
                 },
@@ -71,9 +71,9 @@ export async function POST(
 
             // Invalidate caches
             await Promise.all([
-                cache.del(CACHE_KEYS.user(authUser.userId)),
-                cache.del(CACHE_KEYS.user(targetUserId)),
-                cache.del(CACHE_KEYS.suggestions(authUser.userId)),
+                cache.del(CACHE_KEYS.userProfile(authUser)),
+                cache.del(CACHE_KEYS.userProfile(targetUserId)),
+                cache.del(CACHE_KEYS.userSuggestions(authUser)),
             ]);
 
             return NextResponse.json({
@@ -86,7 +86,7 @@ export async function POST(
                 // Create follow relationship
                 await tx.follow.create({
                     data: {
-                        followerId: authUser.userId,
+                        followerId: authUser,
                         followingId: targetUserId,
                     },
                 });
@@ -95,7 +95,7 @@ export async function POST(
                 const notification = await tx.notification.create({
                     data: {
                         type: 'FOLLOW',
-                        actorId: authUser.userId,
+                        actorId: authUser,
                         message: `started following you`,
                     },
                 });
@@ -112,9 +112,9 @@ export async function POST(
 
             // Invalidate caches
             await Promise.all([
-                cache.del(CACHE_KEYS.user(authUser.userId)),
-                cache.del(CACHE_KEYS.user(targetUserId)),
-                cache.del(CACHE_KEYS.suggestions(authUser.userId)),
+                cache.del(CACHE_KEYS.userProfile(authUser)),
+                cache.del(CACHE_KEYS.userProfile(targetUserId)),
+                cache.del(CACHE_KEYS.userSuggestions(authUser)),
             ]);
 
             return NextResponse.json({
@@ -153,7 +153,7 @@ export async function GET(
         const follow = await prisma.follow.findUnique({
             where: {
                 followerId_followingId: {
-                    followerId: authUser.userId,
+                    followerId: authUser,
                     followingId: targetUserId,
                 },
             },

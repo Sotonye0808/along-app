@@ -11,6 +11,7 @@ Along is a social route-sharing platform where users can share, discover, and in
 - Leave nothing unimplemented but with flexibility and consideration of scalability.
 - Ignore 'app/conflicting' directory and its contents as it is old code kept for reference during migration.
 - Store any summary files in the '.github/summaries' directory for organization.
+- When an error/issue is encountered, find and fix all instances of that error/issue throughout the entire codebase.
 
 ## Tech Stack
 

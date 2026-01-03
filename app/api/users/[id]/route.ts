@@ -37,7 +37,8 @@ export async function GET(
         // Rate limiting for unauthenticated requests
         const authUser = await authenticateRequest(request);
         if (!authUser) {
-            const rateLimit = await rateLimitByIP(request, {
+            const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+            const rateLimit = await rateLimitByIP(ip, {
                 maxRequests: 100,
                 windowSeconds: 60,
             });
@@ -51,8 +52,8 @@ export async function GET(
         }
 
         // Check cache first
-        const cacheKey = CACHE_KEYS.user(id);
-        const cached = await cache.get(cacheKey);
+        const cacheKey = CACHE_KEYS.userProfile(id);
+        const cached = await cache.get<string>(cacheKey);
         if (cached) {
             return NextResponse.json(cached);
         }
@@ -129,7 +130,7 @@ export async function PUT(
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 20,
             windowSeconds: 3600, // 20 updates per hour
         });
@@ -142,7 +143,7 @@ export async function PUT(
         }
 
         // Verify ownership
-        if (authUser.userId !== id) {
+        if (authUser !== id) {
             return NextResponse.json(
                 { error: 'Forbidden: You can only update your own profile' },
                 { status: 403 }
@@ -183,11 +184,11 @@ export async function PUT(
         // Handle avatar upload
         let avatarUrl = currentUser.avatar;
         if (validatedData.avatar && validatedData.avatar.startsWith('data:image')) {
-            // Validate image
-            const validation = validateImageFile(validatedData.avatar);
-            if (!validation.valid) {
+            // Validate base64 image size (approximate)
+            const base64Length = validatedData.avatar.length * 0.75; // Approximate size in bytes
+            if (base64Length > 5 * 1024 * 1024) { // 5MB limit
                 return NextResponse.json(
-                    { error: validation.error },
+                    { error: 'Image size must be less than 5MB' },
                     { status: 400 }
                 );
             }
@@ -234,7 +235,7 @@ export async function PUT(
         });
 
         // Invalidate cache
-        await cache.del(CACHE_KEYS.user(id));
+        await cache.del(CACHE_KEYS.userProfile(id));
 
         // Transform response
         const transformedUser = {
@@ -258,7 +259,7 @@ export async function PUT(
     } catch (error) {
         if (error instanceof z.ZodError) {
             return NextResponse.json(
-                { error: 'Validation error', details: error.errors },
+                { error: 'Validation error', details: error.issues },
                 { status: 400 }
             );
         }
@@ -284,7 +285,7 @@ export async function DELETE(
         const authUser = await requireAuth(request);
 
         // Verify ownership
-        if (authUser.userId !== id) {
+        if (authUser !== id) {
             return NextResponse.json(
                 { error: 'Forbidden: You can only delete your own account' },
                 { status: 403 }
@@ -312,7 +313,7 @@ export async function DELETE(
         });
 
         // Invalidate cache
-        await cache.del(CACHE_KEYS.user(id));
+        await cache.del(CACHE_KEYS.userProfile(id));
 
         return NextResponse.json(
             { message: 'User deleted successfully' },

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 10,
             windowSeconds: 3600, // 10 unsubscribes per hour
         });
@@ -41,12 +41,12 @@ export async function POST(request: NextRequest) {
         // TODO: Implement database removal for push subscriptions
         // await prisma.pushSubscription.deleteMany({
         //     where: {
-        //         userId: authUser.userId,
+        //         userId: authUser,
         //         endpoint: endpoint,
         //     },
         // });
 
-        console.log('Push subscription removed for user:', authUser.userId);
+        console.log('Push subscription removed for user:', authUser);
 
         return NextResponse.json({
             message: 'Subscription removed successfully',

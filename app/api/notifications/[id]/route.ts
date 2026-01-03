@@ -17,7 +17,7 @@ export async function GET(
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 100,
             windowSeconds: 60,
         });
@@ -32,7 +32,7 @@ export async function GET(
         // Find notification through recipient
         const recipient = await prisma.notificationRecipient.findFirst({
             where: {
-                userId: authUser.userId,
+                userId: authUser,
                 notification: {
                     id: id,
                 },
@@ -104,7 +104,7 @@ export async function PATCH(
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 50,
             windowSeconds: 60,
         });
@@ -119,7 +119,7 @@ export async function PATCH(
         // Find recipient
         const recipient = await prisma.notificationRecipient.findFirst({
             where: {
-                userId: authUser.userId,
+                userId: authUser,
                 notification: {
                     id: id,
                 },
@@ -165,7 +165,7 @@ export async function DELETE(
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 50,
             windowSeconds: 60,
         });
@@ -180,7 +180,7 @@ export async function DELETE(
         // Find recipient
         const recipient = await prisma.notificationRecipient.findFirst({
             where: {
-                userId: authUser.userId,
+                userId: authUser,
                 notification: {
                     id: id,
                 },

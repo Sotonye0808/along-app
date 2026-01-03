@@ -26,12 +26,13 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  posts         Post[]
-  comments      Comment[]
-  likes         Like[]
-  bookmarks     Bookmark[]
-  notifications NotificationRecipient[]
-  activities    UserActivity[]
+  posts                Post[]
+  comments             Comment[]
+  likes                Like[]
+  bookmarks            Bookmark[]
+  notifications        NotificationRecipient[]
+  notificationsAsActor Notification[]          @relation("NotificationActor")
+  activities           UserActivity[]
 
   // Self-referential many-to-many for following
   following Follow[] @relation("UserFollowing")
@@ -158,10 +159,12 @@ model Notification {
   createdAt DateTime         @default(now())
 
   // Relations
+  actor      User                    @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
   post       Post?                   @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment    Comment?                @relation(fields: [commentId], references: [id], onDelete: Cascade)
   recipients NotificationRecipient[]
 
+  @@index([actorId])
   @@index([createdAt(sort: Desc)])
 }
 
@@ -191,13 +194,13 @@ model NotificationRecipient {
 
 // UserActivity Model (For feed algorithm)
 model UserActivity {
-  id        String           @id @default(cuid())
+  id        String       @id @default(cuid())
   userId    String
   type      ActivityType
   postId    String?
   tagId     String?
-  score     Float            @default(1.0)
-  createdAt DateTime         @default(now())
+  score     Float        @default(1.0)
+  createdAt DateTime     @default(now())
 
   // Relations
   user User  @relation(fields: [userId], references: [id], onDelete: Cascade)

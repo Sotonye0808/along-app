@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         // Get stored OTP from Redis cache first, then fallback to in-memory
         let storedOTP: { code: string; expiresAt: number } | null = null;
 
-        const cachedOTP = await cache.get(`otp:${email}`);
+        const cachedOTP = await cache.get<string>(`otp:${email}`);
         if (cachedOTP) {
             storedOTP = JSON.parse(cachedOTP);
         } else {

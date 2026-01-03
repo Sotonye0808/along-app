@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByUser } from '@/lib/utils/rateLimiter';
-import { Prisma } from '@prisma/client';
 
 // GET /api/posts/[id]/like - Check if user has liked/disliked this post
 export async function GET(
@@ -170,25 +169,6 @@ export async function POST(
         );
     }
 }
-{ status: 200 }
-            );
-        } else {
-    // Switch between like and dislike
-    await db.createLike({ postId: id, userId, type });
-    return NextResponse.json(
-        { message: 'Like updated', action: 'updated' },
-        { status: 200 }
-    );
-}
-    } else {
-    // Create new like/dislike
-    await db.createLike({ postId: id, userId, type });
-    return NextResponse.json(
-        { message: 'Like created', action: 'created' },
-        { status: 201 }
-    );
-}
-}
 
 // DELETE /api/posts/[id]/like - Remove like/dislike
 export async function DELETE(
@@ -197,30 +177,46 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+        const userId = await requireAuth(request);
 
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Missing userId' },
-                { status: 400 }
-            );
-        }
+        // Check if like exists
+        const existingLike = await prisma.like.findUnique({
+            where: {
+                postId_userId: {
+                    postId: id,
+                    userId
+                }
+            }
+        });
 
-        const success = await db.deleteLike(id, userId);
-
-        if (!success) {
+        if (!existingLike) {
             return NextResponse.json(
                 { error: 'Like not found' },
                 { status: 404 }
             );
         }
 
+        // Delete the like
+        await prisma.like.delete({
+            where: {
+                postId_userId: {
+                    postId: id,
+                    userId
+                }
+            }
+        });
+
         return NextResponse.json(
             { message: 'Like removed successfully' },
             { status: 200 }
         );
     } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') {
+            return NextResponse.json(
+                { error: 'Authentication required' },
+                { status: 401 }
+            );
+        }
         console.error('Error removing like:', error);
         return NextResponse.json(
             { error: 'Failed to remove like' },

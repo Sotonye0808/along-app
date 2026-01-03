@@ -100,9 +100,3 @@ export async function POST(request: NextRequest) {
         );
     }
 }
-return NextResponse.json(
-    { error: 'Token refresh failed. Please log in again.' },
-    { status: 500 }
-);
-    }
-}

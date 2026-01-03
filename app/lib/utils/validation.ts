@@ -68,6 +68,18 @@ export const verifyOtpSchema = z.object({
 });
 
 // ============================================================================
+// Validation Helper Functions
+// ============================================================================
+
+export function validateLoginData(data: unknown) {
+    return loginSchema.safeParse(data);
+}
+
+export function validateRegisterData(data: unknown) {
+    return registerSchema.safeParse(data);
+}
+
+// ============================================================================
 // Post Validation Schemas
 // ============================================================================
 

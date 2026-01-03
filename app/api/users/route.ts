@@ -11,7 +11,8 @@ import { cache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 export async function GET(request: NextRequest) {
     try {
         // Rate limiting for guests
-        const rateLimit = await rateLimitByIP(request, {
+        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const rateLimit = await rateLimitByIP(ip, {
             maxRequests: 100,
             windowSeconds: 60, // 100 requests per minute
         });

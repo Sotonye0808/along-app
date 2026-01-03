@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 10,
             windowSeconds: 3600, // 10 subscriptions per hour
         });
@@ -42,14 +42,14 @@ export async function POST(request: NextRequest) {
         // TODO: Implement database storage for push subscriptions
         // await prisma.pushSubscription.create({
         //     data: {
-        //         userId: authUser.userId,
+        //         userId: authUser,
         //         endpoint: subscription.endpoint,
         //         p256dh: subscription.keys.p256dh,
         //         auth: subscription.keys.auth,
         //     },
         // });
 
-        console.log('Push subscription received for user:', authUser.userId);
+        console.log('Push subscription received for user:', authUser);
 
         return NextResponse.json({
             message: 'Subscription saved successfully',

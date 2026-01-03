@@ -42,9 +42,9 @@ export async function POST(request: NextRequest) {
 
         // Validate input data
         const validation = validateLoginData(body);
-        if (!validation.valid) {
+        if (!validation.success) {
             return NextResponse.json(
-                { error: validation.error },
+                { error: validation.error.issues[0]?.message || 'Invalid input data' },
                 { status: 400 }
             );
         }

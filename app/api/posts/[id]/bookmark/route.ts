@@ -141,21 +141,3 @@ export async function POST(
         );
     }
 }
-{ status: 200 }
-            );
-        } else {
-    // Create bookmark
-    await db.createBookmark({ postId: id, userId });
-    return NextResponse.json(
-        { message: 'Bookmark created', action: 'created' },
-        { status: 201 }
-    );
-}
-    } catch (error) {
-    console.error('Error toggling bookmark:', error);
-    return NextResponse.json(
-        { error: 'Failed to toggle bookmark' },
-        { status: 500 }
-    );
-}
-}

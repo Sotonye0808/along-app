@@ -33,7 +33,7 @@ export async function GET(
 
         // Check cache first
         const cacheKey = CACHE_KEYS.post(id);
-        const cached = await cache.get(cacheKey);
+        const cached = await cache.get<string>(cacheKey);
 
         if (cached) {
             return NextResponse.json(JSON.parse(cached), { status: 200 });
@@ -56,9 +56,9 @@ export async function GET(
                 },
                 _count: {
                     select: {
-                        comments: true,
-                        likes: true,
-                        bookmarks: true
+                        postComments: true,
+                        postLikes: true,
+                        postBookmarks: true
                     }
                 }
             }
@@ -86,9 +86,9 @@ export async function GET(
         // Transform response
         const transformedPost = {
             ...post,
-            routes: post.routes as Route[],
-            comments: post._count.comments,
-            bookmarks: post._count.bookmarks
+            routes: post.routes as unknown as Route[],
+            comments: post._count.postComments,
+            bookmarks: post._count.postBookmarks
         };
 
         // Cache the result (15 minute TTL)
@@ -199,9 +199,9 @@ export async function PUT(
                 },
                 _count: {
                     select: {
-                        comments: true,
-                        likes: true,
-                        bookmarks: true
+                        postComments: true,
+                        postLikes: true,
+                        postBookmarks: true
                     }
                 }
             }
@@ -214,9 +214,9 @@ export async function PUT(
         // Transform response
         const transformedPost = {
             ...updatedPost,
-            routes: updatedPost.routes as Route[],
-            comments: updatedPost._count.comments,
-            bookmarks: updatedPost._count.bookmarks
+            routes: updatedPost.routes as unknown as Route[],
+            comments: updatedPost._count.postComments,
+            bookmarks: updatedPost._count.postBookmarks
         };
 
         return NextResponse.json(transformedPost, { status: 200 });

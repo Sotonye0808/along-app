@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 100,
             windowSeconds: 60, // 100 requests per minute
         });
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         // Fetch notifications through recipient relationship
         const notificationRecipients = await prisma.notificationRecipient.findMany({
             where: {
-                userId: authUser.userId,
+                userId: authUser,
             },
             include: {
                 notification: {
@@ -110,7 +110,7 @@ export async function PATCH(request: NextRequest) {
         const authUser = await requireAuth(request);
 
         // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser.userId, {
+        const rateLimit = await rateLimitByUser(authUser, {
             maxRequests: 50,
             windowSeconds: 60, // 50 updates per minute
         });
@@ -129,7 +129,7 @@ export async function PATCH(request: NextRequest) {
             // Mark all notifications as read for this user
             await prisma.notificationRecipient.updateMany({
                 where: {
-                    userId: authUser.userId,
+                    userId: authUser,
                     read: false,
                 },
                 data: {
@@ -144,7 +144,7 @@ export async function PATCH(request: NextRequest) {
             // Mark single notification as read
             const recipient = await prisma.notificationRecipient.findFirst({
                 where: {
-                    userId: authUser.userId,
+                    userId: authUser,
                     notification: {
                         id: notificationId,
                     },

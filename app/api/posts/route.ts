@@ -50,9 +50,9 @@ export async function GET(request: NextRequest) {
                     },
                     _count: {
                         select: {
-                            comments: true,
-                            likes: true,
-                            bookmarks: true
+                            postComments: true,
+                            postLikes: true,
+                            postBookmarks: true
                         }
                     }
                 },
@@ -63,9 +63,9 @@ export async function GET(request: NextRequest) {
             // Transform to match frontend interface
             const transformedPosts = posts.map(post => ({
                 ...post,
-                routes: post.routes as Route[],
-                comments: post._count.comments,
-                bookmarks: post._count.bookmarks
+                routes: post.routes as unknown as Route[],
+                comments: post._count.postComments,
+                bookmarks: post._count.postBookmarks
             }));
 
             return NextResponse.json(transformedPosts, { status: 200 });
@@ -76,13 +76,13 @@ export async function GET(request: NextRequest) {
             const cacheKey = `${CACHE_KEYS.userFeed(authenticatedUserId)}:${cursor || 'initial'}`;
 
             // Check cache first
-            const cached = await cache.get(cacheKey);
+            const cached = await cache.get<string>(cacheKey);
             if (cached) {
                 return NextResponse.json(JSON.parse(cached), { status: 200 });
             }
 
             // Get personalized feed from algorithm
-            const feed = await getPersonalizedFeed(authenticatedUserId, limit, cursor || undefined);
+            const feed = await getPersonalizedFeed(authenticatedUserId, cursor || undefined, limit);
 
             // Cache the result (5 minute TTL)
             await cache.set(cacheKey, JSON.stringify(feed), CACHE_TTL.feed);
@@ -106,9 +106,9 @@ export async function GET(request: NextRequest) {
                 },
                 _count: {
                     select: {
-                        comments: true,
-                        likes: true,
-                        bookmarks: true
+                        postComments: true,
+                        postLikes: true,
+                        postBookmarks: true
                     }
                 }
             },
@@ -121,9 +121,9 @@ export async function GET(request: NextRequest) {
         // Transform to match frontend interface
         const transformedPosts = posts.map(post => ({
             ...post,
-            routes: post.routes as Route[],
-            comments: post._count.comments,
-            bookmarks: post._count.bookmarks
+            routes: post.routes as unknown as Route[],
+            comments: post._count.postComments,
+            bookmarks: post._count.postBookmarks
         }));
 
         const nextCursor = posts.length === limit ? posts[posts.length - 1].id : null;
@@ -222,9 +222,9 @@ export async function POST(request: NextRequest) {
                 },
                 _count: {
                     select: {
-                        comments: true,
-                        likes: true,
-                        bookmarks: true
+                        postComments: true,
+                        postLikes: true,
+                        postBookmarks: true
                     }
                 }
             }
@@ -247,9 +247,9 @@ export async function POST(request: NextRequest) {
         // Transform response
         const transformedPost = {
             ...newPost,
-            routes: newPost.routes as Route[],
-            comments: newPost._count.comments,
-            bookmarks: newPost._count.bookmarks
+            routes: newPost.routes as unknown as Route[],
+            comments: newPost._count.postComments,
+            bookmarks: newPost._count.postBookmarks
         };
 
         return NextResponse.json(transformedPost, { status: 201 });
