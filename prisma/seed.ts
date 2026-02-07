@@ -10,76 +10,141 @@
 
 import { prisma } from '../app/lib/db/prisma';
 import { hashPassword } from '../app/lib/utils/security';
+import type { User as PrismaUser } from '../app/generated/prisma/client';
 
-// Nigerian cities for realistic location data
-const nigerianCities = [
-    'Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan',
-    'Benin City', 'Kaduna', 'Enugu', 'Jos', 'Calabar',
-    'Owerri', 'Warri', 'Abeokuta', 'Ilorin', 'Maiduguri'
-];
+// Type definitions for seed data
+interface SeedUser {
+    userName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    location: string;
+    bio: string;
+    verified: boolean;
+}
 
-// Travel-related tags
-const travelTags = [
-    'roadtrip', 'adventure', 'beach', 'mountains', 'city',
-    'budget', 'luxury', 'foodie', 'culture', 'wildlife',
-    'photography', 'solo', 'family', 'weekend', 'business'
-];
+interface SeedPost {
+    userId: string;
+    title: string;
+    tags: string[];
+    routes: Route[];
+    images: string[];
+}
 
-// Vehicle types
-const vehicles = ['car', 'bus', 'okada', 'keke', 'bicycle', 'walking'];
+interface SeedComment {
+    postId: string;
+    userId: string;
+    text: string;
+}
 
-async function seedUsers() {
+interface SeedLike {
+    userId: string;
+    postId: string;
+    type: 'LIKE' | 'DISLIKE';
+}
+
+interface SeedBookmark {
+    userId: string;
+    postId: string;
+}
+
+async function seedUsers(): Promise<PrismaUser[]> {
     console.log('👥 Seeding users...');
 
-    const users = [
+    const users: SeedUser[] = [
         {
-            userName: 'john_traveler',
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john@example.com',
-            location: 'Lagos',
-            bio: 'Adventure seeker | Travel blogger | Road trip enthusiast',
+            userName: 'chidi_travels',
+            firstName: 'Chidi',
+            lastName: 'Okafor',
+            email: 'chidi@example.com',
+            location: 'Lagos, Nigeria',
+            bio: 'Lagos navigator | Public transport expert | Sharing the best routes around Nigeria 🇳🇬',
             verified: true,
         },
         {
-            userName: 'sarah_explorer',
-            firstName: 'Sarah',
-            lastName: 'Johnson',
-            email: 'sarah@example.com',
-            location: 'Abuja',
-            bio: 'Exploring Nigeria one route at a time 🚗',
+            userName: 'ada_explorer',
+            firstName: 'Ada',
+            lastName: 'Nwosu',
+            email: 'ada@example.com',
+            location: 'Port Harcourt, Nigeria',
+            bio: 'Port Harcourt babe | Food & travel | Making Lagos traffic bearable one route at a time 😊',
             verified: true,
         },
         {
-            userName: 'mike_routes',
-            firstName: 'Mike',
-            lastName: 'Williams',
-            email: 'mike@example.com',
-            location: 'Port Harcourt',
-            bio: 'Weekend warrior | Documenting hidden routes',
+            userName: 'emeka_routes',
+            firstName: 'Emeka',
+            lastName: 'Igwe',
+            email: 'emeka@example.com',
+            location: 'Abuja, Nigeria',
+            bio: 'Abuja resident | Budget traveler | Your guide to affordable trips across Nigeria',
+            verified: true,
+        },
+        {
+            userName: 'ngozi_wanderer',
+            firstName: 'Ngozi',
+            lastName: 'Eze',
+            email: 'ngozi@example.com',
+            location: 'Enugu, Nigeria',
+            bio: 'Coal City explorer | Culture enthusiast | Weekend adventurer',
             verified: false,
         },
         {
-            userName: 'emma_wanderlust',
-            firstName: 'Emma',
-            lastName: 'Brown',
-            email: 'emma@example.com',
-            location: 'Ibadan',
-            bio: 'Travel writer | Culture enthusiast',
+            userName: 'tunde_navigator',
+            firstName: 'Tunde',
+            lastName: 'Adeyemi',
+            email: 'tunde@example.com',
+            location: 'Ibadan, Nigeria',
+            bio: 'Ibadan local | History buff | Documenting ancient routes',
             verified: true,
         },
         {
-            userName: 'david_navigator',
-            firstName: 'David',
-            lastName: 'Wilson',
-            email: 'david@example.com',
-            location: 'Enugu',
-            bio: 'Local guide | Love sharing scenic routes',
+            userName: 'zainab_traveler',
+            firstName: 'Zainab',
+            lastName: 'Musa',
+            email: 'zainab@example.com',
+            location: 'Kano, Nigeria',
+            bio: 'Northern Nigeria guide | Cultural tourism advocate',
+            verified: false,
+        },
+        {
+            userName: 'bola_roadtrip',
+            firstName: 'Bola',
+            lastName: 'Williams',
+            email: 'bola@example.com',
+            location: 'Calabar, Nigeria',
+            bio: 'Road trip enthusiast | Carnival lover | Beach bum 🏖️',
+            verified: true,
+        },
+        {
+            userName: 'ifeanyi_budget',
+            firstName: 'Ifeanyi',
+            lastName: 'Okonkwo',
+            email: 'ifeanyi@example.com',
+            location: 'Owerri, Nigeria',
+            bio: 'Budget travel expert | Student traveler | Sharing affordable routes',
+            verified: false,
+        },
+        {
+            userName: 'amina_explorer',
+            firstName: 'Amina',
+            lastName: 'Bello',
+            email: 'amina@example.com',
+            location: 'Kaduna, Nigeria',
+            bio: 'Adventure seeker | Mountain lover | Hiking enthusiast',
+            verified: true,
+        },
+        {
+            userName: 'john_doe',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john.doe@example.com',
+            location: 'Lagos, Nigeria',
+            bio: 'Tech enthusiast | Weekend explorer | Learning the ropes',
             verified: false,
         },
     ];
 
-    const createdUsers = [];
+    const createdUsers: PrismaUser[] = [];
     const defaultPassword = await hashPassword('Password123!');
 
     for (const userData of users) {
@@ -98,16 +163,21 @@ async function seedUsers() {
     return createdUsers;
 }
 
-async function seedFollows(users: any[]) {
+async function seedFollows(users: PrismaUser[]): Promise<void> {
     console.log('🤝 Seeding follow relationships...');
 
     // Create a network of follows
-    const follows = [
-        [0, 1], [0, 2], [0, 3], // John follows Sarah, Mike, Emma
-        [1, 0], [1, 3], [1, 4], // Sarah follows John, Emma, David
-        [2, 0], [2, 1], // Mike follows John, Sarah
-        [3, 0], [3, 1], [3, 4], // Emma follows John, Sarah, David
-        [4, 1], [4, 3], // David follows Sarah, Emma
+    const follows: [number, number][] = [
+        [0, 1], [0, 2], [0, 4], [0, 6], // Chidi follows Ada, Emeka, Tunde, Bola
+        [1, 0], [1, 2], [1, 3], [1, 7], // Ada follows Chidi, Emeka, Ngozi, Ifeanyi
+        [2, 0], [2, 1], [2, 4], [2, 8], // Emeka follows Chidi, Ada, Tunde, Amina
+        [3, 0], [3, 4], [3, 5], // Ngozi follows Chidi, Tunde, Zainab
+        [4, 0], [4, 1], [4, 2], // Tunde follows Chidi, Ada, Emeka
+        [5, 2], [5, 8], // Zainab follows Emeka, Amina
+        [6, 0], [6, 1], [6, 3], // Bola follows Chidi, Ada, Ngozi
+        [7, 0], [7, 1], [7, 2], [7, 4], // Ifeanyi follows Chidi, Ada, Emeka, Tunde
+        [8, 2], [8, 5], // Amina follows Emeka, Zainab
+        [9, 0], [9, 1], [9, 2], [9, 4], [9, 7], // John follows Chidi, Ada, Emeka, Tunde, Ifeanyi
     ];
 
     for (const [followerIdx, followingIdx] of follows) {
@@ -126,48 +196,153 @@ async function seedFollows(users: any[]) {
     console.log(`✅ Created ${follows.length} follow relationships`);
 }
 
-async function seedPosts(users: any[]) {
+async function seedPosts(users: PrismaUser[]): Promise<any[]> {
     console.log('📝 Seeding posts...');
 
-    const posts = [
+    const posts: SeedPost[] = [
         {
-            userId: users[0].id,
-            title: 'Lagos to Abuja: The Ultimate Road Trip Guide',
-            tags: ['roadtrip', 'adventure', 'longdistance'],
+            userId: users[0].id, // Chidi
+            title: 'Best Route from Ikeja to Victoria Island - Beat the Traffic!',
+            tags: ['lagos', 'ikeja', 'vi', 'brt', 'traffic-hack', 'daily-commute'],
             routes: [
                 {
                     id: '1',
-                    text: 'Start from Ikeja City Mall. Get your coffee and snacks for the journey.',
+                    text: 'Start at Ikeja Bus Stop. Take a BRT bus heading towards CMS. The dedicated lane saves you from go-slow! Fare: ₦300',
+                    links: [{ text: 'BRT Lagos Route Map', url: 'https://www.primerolagos.com' }],
+                    order: 0,
+                    vehicles: ['bus' as VehicleType],
+                    status: 'verified',
+                    fare: 300,
+                },
+                {
+                    id: '2',
+                    text: 'Stop at Obalende. From there, hop on a yellow danfo or keke to VI. Keke is faster but costs ₦200, danfo is ₦150.',
+                    links: [],
+                    order: 1,
+                    vehicles: ['bus' as VehicleType, 'keke' as VehicleType],
+                    status: 'unverified',
+                    fare: 200,
+                },
+                {
+                    id: '3',
+                    text: 'Get off at Adeola Odeku. If you\'re going to Lekki Phase 1, take another keke for ₦150. Total time: 45 mins (off-peak)',
+                    links: [{ text: 'Google Maps - VI', url: 'https://maps.google.com' }],
+                    order: 2,
+                    vehicles: ['keke' as VehicleType],
+                    status: 'verified',
+                    fare: 150,
+                },
+            ],
+            images: [],
+        },
+        {
+            userId: users[1].id, // Ada
+            title: 'Weekend Trip: Lagos to Ibadan via Public Transport',
+            tags: ['lagos', 'ibadan', 'interstate', 'weekend-trip', 'budget-travel'],
+            routes: [
+                {
+                    id: '1',
+                    text: 'Head to Ojota Motor Park early morning (before 7 AM to avoid crowd). Look for ABC Transport or GUO buses. Fare: ₦2,500 - ₦3,000',
+                    links: [{ text: 'ABC Transport Schedule', url: 'https://abctransport.com' }],
+                    order: 0,
+                    vehicles: ['bus' as VehicleType],
+                    status: 'verified',
+                    fare: 2500,
+                },
+                {
+                    id: '2',
+                    text: 'Journey takes 2-3 hours depending on traffic. Bus has AC and makes one stop at Sagamu. Bring snacks and water!',
+                    links: [],
+                    order: 1,
+                    vehicles: ['bus' as VehicleType],
+                    status: 'pending',
+                    fare: 0,
+                },
+                {
+                    id: '3',
+                    text: 'Arrive at Iwo Road Terminal in Ibadan. From there, take okada (₦200) or keke (₦150) to Dugbe Market or UI if visiting campus.',
+                    links: [{ text: 'Things to do in Ibadan', url: 'https://www.google.com/travel/things-to-do/see-all?dest_mid=%2Fm%2F0fnky' }],
+                    order: 2,
+                    vehicles: ['bike' as VehicleType, 'keke' as VehicleType],
+                    status: 'verified',
+                    fare: 150,
+                },
+            ],
+            images: [],
+        },
+        {
+            userId: users[2].id, // Emeka
+            title: 'Navigating Abuja: Kubwa to Wuse Market Route',
+            tags: ['abuja', 'kubwa', 'wuse', 'market', 'daily-commute'],
+            routes: [
+                {
+                    id: '1',
+                    text: 'Start from Kubwa Phase 4. Take a keke to Kubwa main junction (₦100). Plenty of kekes available from 6 AM.',
+                    links: [],
+                    order: 0,
+                    vehicles: ['keke' as VehicleType],
+                    status: 'verified',
+                    fare: 100,
+                },
+                {
+                    id: '2',
+                    text: 'At the junction, board a taxi or bus going to Berger Roundabout. Fare: ₦300 (shared taxi) or ₦200 (bus)',
+                    links: [],
+                    order: 1,
+                    vehicles: ['taxi' as VehicleType, 'bus' as VehicleType],
+                    status: 'verified',
+                    fare: 300,
+                },
+                {
+                    id: '3',
+                    text: 'From Berger, take another bus directly to Wuse Market. Fare: ₦150. Total journey: 40-50 minutes depending on traffic.',
+                    links: [{ text: 'Wuse Market Guide', url: 'https://www.google.com/maps/place/Wuse+Market' }],
+                    order: 2,
+                    vehicles: ['bus' as VehicleType],
+                    status: 'verified',
+                    fare: 150,
+                },
+            ],
+            images: [],
+        },
+        {
+            userId: users[4].id, // Tunde
+            title: 'Lagos to Abuja: The Ultimate Road Trip Guide',
+            tags: ['roadtrip', 'adventure', 'longdistance', 'lagos', 'abuja'],
+            routes: [
+                {
+                    id: '1',
+                    text: 'Start from Ikeja City Mall early morning. Get your coffee and snacks for the journey. Fuel up!',
                     links: [{ text: 'Ikeja City Mall', url: 'https://maps.google.com' }],
                     order: 0,
-                    vehicles: ['car'],
+                    vehicles: ['car' as VehicleType],
                     status: 'verified',
                     fare: 0,
                 },
                 {
                     id: '2',
-                    text: 'Take Ibadan Expressway towards Ibadan. Stop at Redemption Camp for restroom break.',
+                    text: 'Take Lagos-Ibadan Expressway. Stop at Redemption Camp for restroom break. Road is good but watch for trailers.',
                     links: [],
                     order: 1,
-                    vehicles: ['car'],
+                    vehicles: ['car' as VehicleType],
                     status: 'verified',
                     fare: 0,
                 },
                 {
                     id: '3',
-                    text: 'Continue through Ibadan to Osogbo. Grab lunch at local restaurant.',
+                    text: 'Continue through Ibadan to Osogbo. Stop at a local restaurant for lunch. Try amala and ewedu!',
                     links: [],
                     order: 2,
-                    vehicles: ['car'],
+                    vehicles: ['car' as VehicleType],
                     status: 'verified',
-                    fare: 15000,
+                    fare: 0,
                 },
                 {
                     id: '4',
-                    text: 'Final stretch to Abuja via Lokoja. Amazing views of River Niger bridge!',
-                    links: [{ text: 'Niger Bridge', url: 'https://maps.google.com' }],
+                    text: 'Final stretch to Abuja via Lokoja. Amazing views of River Niger bridge! Total time: 8-10 hours with stops.',
+                    links: [{ text: 'Niger Bridge View', url: 'https://maps.google.com' }],
                     order: 3,
-                    vehicles: ['car'],
+                    vehicles: ['car' as VehicleType],
                     status: 'verified',
                     fare: 0,
                 },
@@ -175,25 +350,69 @@ async function seedPosts(users: any[]) {
             images: [],
         },
         {
-            userId: users[1].id,
-            title: 'Weekend Getaway: Abuja to Jos',
-            tags: ['weekend', 'mountains', 'scenic'],
+            userId: users[3].id, // Ngozi
+            title: 'Enugu: Coal City Historical Walking Tour',
+            tags: ['enugu', 'culture', 'history', 'walking', 'tourism'],
             routes: [
                 {
                     id: '1',
-                    text: 'Start from Jabi Lake Mall. Perfect spot for breakfast.',
-                    links: [],
+                    text: 'Start at National Museum Enugu. Learn about coal mining history. Entry fee: ₦500',
+                    links: [{ text: 'National Museum Enugu', url: 'https://maps.google.com' }],
                     order: 0,
-                    vehicles: ['car'],
+                    vehicles: ['trekking' as VehicleType],
+                    status: 'verified',
+                    fare: 500,
+                },
+                {
+                    id: '2',
+                    text: 'Walk to Okpara Square (15 mins). Great spot for photos and local snacks. Try the suya!',
+                    links: [],
+                    order: 1,
+                    vehicles: ['trekking' as VehicleType],
+                    status: 'verified',
+                    fare: 0,
+                },
+                {
+                    id: '3',
+                    text: 'End at Polo Park Mall for lunch and shopping. Take keke back to your location (₦200).',
+                    links: [],
+                    order: 2,
+                    vehicles: ['trekking' as VehicleType, 'keke' as VehicleType],
+                    status: 'verified',
+                    fare: 200,
+                },
+            ],
+            images: [],
+        },
+        {
+            userId: users[6].id, // Bola
+            title: 'Calabar Carnival Route: Best Viewing Spots',
+            tags: ['calabar', 'carnival', 'festival', 'tourism', 'december'],
+            routes: [
+                {
+                    id: '1',
+                    text: 'Start at Eleven-Eleven Roundabout early (by 9 AM). This is the parade starting point. Come prepared with water!',
+                    links: [{ text: 'Calabar Carnival Info', url: 'https://calabarcarnival.com' }],
+                    order: 0,
+                    vehicles: ['trekking' as VehicleType],
                     status: 'verified',
                     fare: 0,
                 },
                 {
                     id: '2',
-                    text: 'Drive through scenic routes to Jos. Stop at Shere Hills for photos.',
-                    links: [{ text: 'Shere Hills', url: 'https://maps.google.com' }],
+                    text: 'Follow parade route to Marian Road. Great viewing spots with food vendors. Security is tight, stay alert.',
+                    links: [],
                     order: 1,
-                    vehicles: ['car'],
+                    vehicles: ['trekking' as VehicleType],
+                    status: 'verified',
+                    fare: 0,
+                },
+                {
+                    id: '3',
+                    text: 'End at U.J. Esuene Stadium for main performances. Entry is free but arrive early for good spots.',
+                    links: [],
+                    order: 2,
+                    vehicles: ['trekking' as VehicleType],
                     status: 'verified',
                     fare: 0,
                 },
@@ -201,25 +420,69 @@ async function seedPosts(users: any[]) {
             images: [],
         },
         {
-            userId: users[2].id,
-            title: 'Port Harcourt City Tour: Best Food Stops',
-            tags: ['foodie', 'city', 'culture'],
+            userId: users[7].id, // Ifeanyi
+            title: 'Budget Trip: Owerri to Port Harcourt',
+            tags: ['owerri', 'portharcourt', 'budget-travel', 'interstate', 'student'],
             routes: [
                 {
                     id: '1',
-                    text: 'Start at GRA Phase 2. Try the best bole and fish at the roadside.',
+                    text: 'Go to Owerri Main Park. Take a bus to Port Harcourt. Fare: ₦1,500. Ask for direct buses, not those stopping everywhere.',
                     links: [],
                     order: 0,
-                    vehicles: ['keke', 'okada', 'car'],
-                    status: 'unverified',
+                    vehicles: ['bus' as VehicleType],
+                    status: 'verified',
+                    fare: 1500,
+                },
+                {
+                    id: '2',
+                    text: 'Journey takes 1.5-2 hours. You\'ll arrive at Mile 1 or Mile 3 Park in Port Harcourt.',
+                    links: [],
+                    order: 1,
+                    vehicles: ['bus' as VehicleType],
+                    status: 'verified',
+                    fare: 0,
+                },
+                {
+                    id: '3',
+                    text: 'From the park, take keke to your destination. Fare varies ₦100-₦300 depending on distance.',
+                    links: [],
+                    order: 2,
+                    vehicles: ['keke' as VehicleType],
+                    status: 'verified',
+                    fare: 200,
+                },
+            ],
+            images: [],
+        },
+        {
+            userId: users[5].id, // Zainab
+            title: 'Exploring Kano: From Dala Hill to Kurmi Market',
+            tags: ['kano', 'culture', 'history', 'market', 'northern-nigeria'],
+            routes: [
+                {
+                    id: '1',
+                    text: 'Start at Dala Hill, one of Kano\'s oldest settlements. Climb for panoramic city views. Go early morning to avoid heat!',
+                    links: [{ text: 'Dala Hill History', url: 'https://en.wikipedia.org/wiki/Dala_Hill' }],
+                    order: 0,
+                    vehicles: ['trekking' as VehicleType],
+                    status: 'verified',
+                    fare: 0,
+                },
+                {
+                    id: '2',
+                    text: 'Take okada or keke to Gidan Makama Museum (₦200). Learn about Kano\'s rich history and see traditional artifacts.',
+                    links: [],
+                    order: 1,
+                    vehicles: ['bike' as VehicleType, 'keke' as VehicleType],
+                    status: 'verified',
                     fare: 200,
                 },
                 {
-                    id: '2',
-                    text: 'Visit Port Harcourt Mall for ice cream break.',
-                    links: [],
-                    order: 1,
-                    vehicles: ['car'],
+                    id: '3',
+                    text: 'End at Kurmi Market, one of Africa\'s oldest markets. Perfect for buying traditional crafts. Bargain well!',
+                    links: [{ text: 'Kurmi Market Guide', url: 'https://maps.google.com' }],
+                    order: 2,
+                    vehicles: ['trekking' as VehicleType],
                     status: 'verified',
                     fare: 0,
                 },
@@ -227,64 +490,77 @@ async function seedPosts(users: any[]) {
             images: [],
         },
         {
-            userId: users[3].id,
-            title: 'Budget-Friendly: Ibadan to Lagos by Public Transport',
-            tags: ['budget', 'commute', 'publictransport'],
+            userId: users[8].id, // Amina
+            title: 'Kaduna to Jos: Mountain Adventure',
+            tags: ['kaduna', 'jos', 'adventure', 'mountains', 'hiking'],
             routes: [
                 {
                     id: '1',
-                    text: 'Take bus from Iwo Road Motor Park. Early morning departures recommended.',
+                    text: 'Depart from Rigasa Motor Park in Kaduna. Take a bus to Jos. Fare: ₦2,000. Journey takes 3-4 hours through scenic routes.',
                     links: [],
                     order: 0,
-                    vehicles: ['bus'],
+                    vehicles: ['bus' as VehicleType],
                     status: 'verified',
-                    fare: 3500,
+                    fare: 2000,
                 },
                 {
                     id: '2',
-                    text: 'Arrive at Ojota Bus Terminal. Connect to your destination via BRT or Keke.',
-                    links: [],
+                    text: 'Arrive at Bauchi Road Park in Jos. Take taxi to Shere Hills (₦1,500). Perfect spot for hiking and rock climbing.',
+                    links: [{ text: 'Shere Hills', url: 'https://maps.google.com' }],
                     order: 1,
-                    vehicles: ['bus', 'keke'],
+                    vehicles: ['taxi' as VehicleType],
                     status: 'verified',
-                    fare: 500,
+                    fare: 1500,
+                },
+                {
+                    id: '3',
+                    text: 'Visit Jos Wildlife Park nearby. Entry: ₦1,000. Don\'t miss the museum! Return to Kaduna same day or stay overnight.',
+                    links: [],
+                    order: 2,
+                    vehicles: ['taxi' as VehicleType],
+                    status: 'verified',
+                    fare: 1000,
                 },
             ],
             images: [],
         },
         {
-            userId: users[4].id,
-            title: 'Enugu: Coal City Historical Tour',
-            tags: ['culture', 'history', 'walking'],
+            userId: users[9].id, // John
+            title: 'First Timer\'s Guide: Lekki Phase 1 to Ajah',
+            tags: ['lagos', 'lekki', 'ajah', 'beginner', 'daily-commute'],
             routes: [
                 {
                     id: '1',
-                    text: 'Start at National Museum Enugu. Learn about coal mining history.',
-                    links: [{ text: 'National Museum', url: 'https://maps.google.com' }],
+                    text: 'From Lekki Phase 1, walk to the main road. Flag down a yellow and black bus heading to Ajah. Fare: ₦200-₦300.',
+                    links: [],
                     order: 0,
-                    vehicles: ['walking'],
-                    status: 'verified',
-                    fare: 500,
+                    vehicles: ['bus' as VehicleType],
+                    status: 'unverified',
+                    fare: 250,
                 },
                 {
                     id: '2',
-                    text: 'Walk to Okpara Square. Great spot for photos and local snacks.',
+                    text: 'Alternative: Take Uber/Bolt if it\'s your first time. Costs ₦1,500-₦2,000 but less confusing. Traffic can be heavy!',
                     links: [],
                     order: 1,
-                    vehicles: ['walking'],
+                    vehicles: ['car' as VehicleType],
                     status: 'verified',
-                    fare: 0,
+                    fare: 1500,
                 },
             ],
             images: [],
         },
     ];
 
-    const createdPosts = [];
+    const createdPosts: any[] = [];
     for (const postData of posts) {
         const post = await prisma.post.create({
             data: {
-                ...postData,
+                userId: postData.userId,
+                title: postData.title,
+                tags: postData.tags,
+                routes: postData.routes as any, // Cast to any to satisfy Prisma's JSON type
+                images: postData.images,
                 likes: Math.floor(Math.random() * 50) + 10,
                 dislikes: Math.floor(Math.random() * 5),
                 comments: Math.floor(Math.random() * 20),
@@ -299,34 +575,84 @@ async function seedPosts(users: any[]) {
     return createdPosts;
 }
 
-async function seedComments(users: any[], posts: any[]) {
+async function seedComments(users: PrismaUser[], posts: any[]): Promise<void> {
     console.log('💬 Seeding comments...');
 
-    const comments = [
+    const comments: SeedComment[] = [
         {
             postId: posts[0].id,
             userId: users[1].id,
-            text: 'Great guide! I did this trip last month and it was amazing. The Niger Bridge view is breathtaking!',
+            text: 'This route saved my life! Used it yesterday and avoided 2 hours of traffic. Thanks! 🙏',
         },
         {
             postId: posts[0].id,
             userId: users[2].id,
-            text: 'How long did the journey take? Planning to do this next weekend.',
+            text: 'The keke from Obalende to VI can be ₦250 during rush hour o. But still faster than sitting in traffic!',
         },
         {
             postId: posts[1].id,
             userId: users[0].id,
-            text: 'Jos is beautiful! Don\'t forget to visit the Wildlife Park.',
+            text: 'GUO is more comfortable than ABC in my experience. But both are good options.',
+        },
+        {
+            postId: posts[1].id,
+            userId: users[2].id,
+            text: 'Pro tip: Book your return ticket immediately you arrive in Ibadan. They fill up fast on Sundays!',
         },
         {
             postId: posts[2].id,
-            userId: users[4].id,
-            text: 'The bole and fish at GRA is the best! 🔥',
+            userId: users[0].id,
+            text: 'Abuja traffic is nothing compared to Lagos 😂 But this route is solid!',
         },
         {
             postId: posts[3].id,
+            userId: users[1].id,
+            text: 'Great guide! I did this trip last month and it was amazing. The Niger Bridge view is breathtaking!',
+        },
+        {
+            postId: posts[3].id,
+            userId: users[7].id,
+            text: 'How much should I budget for fuel? Planning this trip next month.',
+        },
+        {
+            postId: posts[4].id,
+            userId: users[6].id,
+            text: 'The museum is really informative. Spent 2 hours there learning about Enugu\'s coal history!',
+        },
+        {
+            postId: posts[5].id,
+            userId: users[1].id,
+            text: 'Calabar carnival is the best! Been going for 3 years now. This route guide is spot on!',
+        },
+        {
+            postId: posts[6].id,
+            userId: users[9].id,
+            text: 'As a student, this helps a lot. Saved ₦1,000 compared to taking a taxi!',
+        },
+        {
+            postId: posts[7].id,
+            userId: users[2].id,
+            text: 'Kurmi Market is amazing! Got beautiful fabrics there. Bargaining is a must though.',
+        },
+        {
+            postId: posts[8].id,
+            userId: users[5].id,
+            text: 'Jos weather is so cool compared to Lagos. Perfect for hiking!',
+        },
+        {
+            postId: posts[8].id,
+            userId: users[4].id,
+            text: 'Don\'t forget to try the Irish potatoes when you get to Jos. They\'re famous for a reason!',
+        },
+        {
+            postId: posts[9].id,
             userId: users[0].id,
-            text: 'Very helpful for budget travelers. Thanks for sharing!',
+            text: 'Welcome to Lagos! The public transport can be confusing at first but you\'ll get used to it.',
+        },
+        {
+            postId: posts[9].id,
+            userId: users[6].id,
+            text: 'If you\'re taking the bus, make sure to hold your phone tight. Pickpockets are real in Lagos traffic!',
         },
     ];
 
@@ -342,19 +668,34 @@ async function seedComments(users: any[], posts: any[]) {
     }
 }
 
-async function seedLikes(users: any[], posts: any[]) {
+async function seedLikes(users: PrismaUser[], posts: any[]): Promise<void> {
     console.log('👍 Seeding likes...');
 
-    // Each user likes some posts
-    const likes = [
+    const likes: SeedLike[] = [
         { userId: users[0].id, postId: posts[1].id, type: 'LIKE' },
         { userId: users[0].id, postId: posts[2].id, type: 'LIKE' },
+        { userId: users[0].id, postId: posts[5].id, type: 'LIKE' },
         { userId: users[1].id, postId: posts[0].id, type: 'LIKE' },
         { userId: users[1].id, postId: posts[3].id, type: 'LIKE' },
+        { userId: users[1].id, postId: posts[7].id, type: 'LIKE' },
         { userId: users[2].id, postId: posts[0].id, type: 'LIKE' },
-        { userId: users[2].id, postId: posts[4].id, type: 'DISLIKE' },
+        { userId: users[2].id, postId: posts[4].id, type: 'LIKE' },
+        { userId: users[2].id, postId: posts[8].id, type: 'LIKE' },
         { userId: users[3].id, postId: posts[2].id, type: 'LIKE' },
+        { userId: users[3].id, postId: posts[4].id, type: 'LIKE' },
         { userId: users[4].id, postId: posts[1].id, type: 'LIKE' },
+        { userId: users[4].id, postId: posts[3].id, type: 'LIKE' },
+        { userId: users[4].id, postId: posts[6].id, type: 'DISLIKE' },
+        { userId: users[5].id, postId: posts[7].id, type: 'LIKE' },
+        { userId: users[5].id, postId: posts[8].id, type: 'LIKE' },
+        { userId: users[6].id, postId: posts[5].id, type: 'LIKE' },
+        { userId: users[6].id, postId: posts[9].id, type: 'LIKE' },
+        { userId: users[7].id, postId: posts[0].id, type: 'LIKE' },
+        { userId: users[7].id, postId: posts[6].id, type: 'LIKE' },
+        { userId: users[8].id, postId: posts[2].id, type: 'LIKE' },
+        { userId: users[8].id, postId: posts[8].id, type: 'LIKE' },
+        { userId: users[9].id, postId: posts[0].id, type: 'LIKE' },
+        { userId: users[9].id, postId: posts[1].id, type: 'DISLIKE' },
     ];
 
     for (const likeData of likes) {
@@ -370,16 +711,28 @@ async function seedLikes(users: any[], posts: any[]) {
     console.log(`✅ Created ${likes.length} likes`);
 }
 
-async function seedBookmarks(users: any[], posts: any[]) {
+async function seedBookmarks(users: PrismaUser[], posts: any[]): Promise<void> {
     console.log('🔖 Seeding bookmarks...');
 
-    const bookmarks = [
+    const bookmarks: SeedBookmark[] = [
         { userId: users[0].id, postId: posts[1].id },
         { userId: users[0].id, postId: posts[3].id },
+        { userId: users[0].id, postId: posts[5].id },
         { userId: users[1].id, postId: posts[0].id },
+        { userId: users[1].id, postId: posts[2].id },
         { userId: users[2].id, postId: posts[0].id },
-        { userId: users[3].id, postId: posts[2].id },
+        { userId: users[2].id, postId: posts[4].id },
+        { userId: users[3].id, postId: posts[1].id },
+        { userId: users[3].id, postId: posts[4].id },
         { userId: users[4].id, postId: posts[1].id },
+        { userId: users[4].id, postId: posts[3].id },
+        { userId: users[5].id, postId: posts[7].id },
+        { userId: users[6].id, postId: posts[5].id },
+        { userId: users[7].id, postId: posts[0].id },
+        { userId: users[7].id, postId: posts[6].id },
+        { userId: users[8].id, postId: posts[8].id },
+        { userId: users[9].id, postId: posts[0].id },
+        { userId: users[9].id, postId: posts[9].id },
     ];
 
     for (const bookmarkData of bookmarks) {
@@ -410,11 +763,16 @@ async function main() {
         console.log('\n📊 Seed Summary:');
         console.log(`   Users:     ${users.length}`);
         console.log(`   Posts:     ${posts.length}`);
-        console.log('   Comments:  5');
-        console.log('   Likes:     8');
-        console.log('   Bookmarks: 6');
-        console.log('   Follows:   10');
+        console.log('   Comments:  15');
+        console.log('   Likes:     24');
+        console.log('   Bookmarks: 18');
+        console.log('   Follows:   22');
         console.log('\n💡 Default password for all users: Password123!');
+        console.log('\n🔐 Test Accounts:');
+        console.log('   chidi@example.com    - Lagos expert');
+        console.log('   ada@example.com      - Port Harcourt traveler');
+        console.log('   emeka@example.com    - Abuja navigator');
+        console.log('   john.doe@example.com - New user');
     } catch (error) {
         console.error('❌ Seeding failed:', error);
         throw error;

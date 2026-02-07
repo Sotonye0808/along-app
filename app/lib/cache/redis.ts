@@ -1,17 +1,31 @@
 /**
  * Redis Cache Configuration
  * 
- * This file contains the Redis client setup and cache utility functions
- * using Upstash Redis for serverless edge compatibility.
+ * This file contains the Redis client setup and cache utility functions.
+ * - In development: Uses in-memory mock Redis (no external connection needed)
+ * - In production: Uses Upstash Redis for serverless edge compatibility
  */
 
 import { Redis } from '@upstash/redis';
+import { mockRedis } from './mock-redis';
 
-// Initialize Upstash Redis client
-const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+// Determine if we should use mock Redis (development mode)
+const USE_MOCK_REDIS = process.env.NODE_ENV === 'development' || !process.env.UPSTASH_REDIS_REST_URL;
+
+// Initialize Redis client
+const redis = USE_MOCK_REDIS
+    ? mockRedis
+    : new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL!,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    });
+
+// Log which Redis implementation is being used
+if (USE_MOCK_REDIS) {
+    console.log('🔧 Using Mock Redis (in-memory) for development');
+} else {
+    console.log('☁️ Using Upstash Redis for production');
+}
 
 // Cache TTL constants (in seconds)
 export const CACHE_TTL = {

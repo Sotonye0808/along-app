@@ -135,7 +135,7 @@ export function UserProfile({
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
           ) : (
-            posts.map((post) => (
+            (posts || []).map((post) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -254,8 +254,8 @@ export function UserProfile({
               size={120}
               src={user.avatar}
               className="border-4 border-[#00623B]">
-              {user.firstName[0]}
-              {user.lastName[0]}
+              {user.firstName?.[0] || ""}
+              {user.lastName?.[0] || ""}
             </Avatar>
           </div>
 

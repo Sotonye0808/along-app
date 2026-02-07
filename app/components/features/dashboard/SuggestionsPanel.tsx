@@ -127,14 +127,18 @@ export function SuggestionsPanel() {
 
       // Filter out current user and already following
       const currentUserFollowing = new Set(currentUser?.following || []);
-      const candidateUsers = usersResponse.data.filter(
+      const candidateUsers = (usersResponse.data || []).filter(
         (user) =>
           user.id !== currentUser?.id && !currentUserFollowing.has(user.id)
       );
 
       // Calculate scores for each user
+      // Handle both array response and wrapped {data: []} response
+      const allPosts = Array.isArray(postsResponse.data) 
+        ? postsResponse.data 
+        : (postsResponse.data || []);
       const scoredUsers = candidateUsers.map((user) =>
-        calculateSuggestionScore(user, currentUser, postsResponse.data)
+        calculateSuggestionScore(user, currentUser, allPosts)
       );
 
       // Sort by score and take top 5

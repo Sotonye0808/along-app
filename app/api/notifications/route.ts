@@ -10,7 +10,16 @@ import { rateLimitByUser } from '@/lib/utils/rateLimiter';
  */
 export async function GET(request: NextRequest) {
     try {
-        const authUser = await requireAuth(request);
+        // Authenticate user - if fails, return 401
+        let authUser: string;
+        try {
+            authUser = await requireAuth(request);
+        } catch (authError) {
+            return NextResponse.json(
+                { error: 'Unauthorized. Please log in again.' },
+                { status: 401 }
+            );
+        }
 
         // Rate limiting
         const rateLimit = await rateLimitByUser(authUser, {
@@ -86,11 +95,8 @@ export async function GET(request: NextRequest) {
             actor: recipient.notification.actor,
         }));
 
-        return NextResponse.json({
-            notifications: transformedNotifications,
-            nextCursor,
-            hasMore,
-        });
+        // Return array directly for frontend compatibility
+        return NextResponse.json(transformedNotifications);
     } catch (error) {
         console.error('Error fetching notifications:', error);
         return NextResponse.json(

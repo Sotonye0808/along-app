@@ -228,14 +228,14 @@ export const PostCard = memo(function PostCard({
       </h2>
 
       {/* Routes */}
-      <div className="space-y-4 mb-4">
+      <div className="space-y-1 mb-4">
         {post.routes.map((route, index) => {
           const StatusIcon = statusConfig[route.status].icon;
           return (
             <div key={route.id} className="flex gap-3">
               {/* Route number indicator */}
               <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-[#00623B] text-white flex items-center justify-center font-semibold text-sm">
+                <div className="w-8 h-8 mb-1 rounded-full bg-[#00623B] text-white flex items-center justify-center font-semibold text-sm">
                   {index + 1}
                 </div>
                 {index < post.routes.length - 1 && (
@@ -245,7 +245,7 @@ export const PostCard = memo(function PostCard({
 
               {/* Route content */}
               <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
+                <div className="flex items-start justify-between">
                   <p className="text-gray-800 dark:text-gray-200 flex-1">
                       {route.text}
                   </p>

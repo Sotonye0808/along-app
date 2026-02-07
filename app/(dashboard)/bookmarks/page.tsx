@@ -57,7 +57,9 @@ export default function BookmarksPage() {
 
       // Fetch all users
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
-      const usersMap = new Map(usersResponse.data.map((u) => [u.id, u]));
+      const usersMap = new Map(
+        (usersResponse.data || []).map((u) => [u.id, u])
+      );
 
       // Filter posts that user has bookmarked
       const bookmarkedPostIds = user.bookmarks || [];
@@ -325,7 +327,7 @@ export default function BookmarksPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {bookmarkedPosts.map((post) => (
+          {(bookmarkedPosts || []).map((post) => (
             <PostCard
               key={post.id}
               post={post}

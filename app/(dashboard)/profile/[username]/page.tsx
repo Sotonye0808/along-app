@@ -55,7 +55,9 @@ export default function UserProfilePage() {
     try {
       // Find user by username
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
-      const foundUser = usersResponse.data.find((u) => u.userName === username);
+      const foundUser = (usersResponse.data || []).find(
+        (u) => u.userName === username
+      );
 
       if (!foundUser) {
         message.error("User not found");
@@ -85,12 +87,12 @@ export default function UserProfilePage() {
       const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
 
-      const targetUser = usersResponse.data.find(
+      const targetUser = (usersResponse.data || []).find(
         (u) => u.userName === username
       );
       if (!targetUser) return;
 
-      const userPosts = postsResponse.data.filter(
+      const userPosts = (postsResponse.data || []).filter(
         (post) => post.userId === targetUser.id
       );
 
@@ -485,7 +487,9 @@ export default function UserProfilePage() {
       notification.open({
         key,
         message: "Post deleted",
-        description: `Undo within ${countdown} second${countdown !== 1 ? 's' : ''}`,
+        description: `Undo within ${countdown} second${
+          countdown !== 1 ? "s" : ""
+        }`,
         duration: 0.1,
         btn: (
           <button
@@ -511,7 +515,8 @@ export default function UserProfilePage() {
         clearInterval(interval);
         notification.destroy(key);
         if (!undoClicked) {
-          api.delete(`${API_ENDPOINTS.POSTS}/${postId}`)
+          api
+            .delete(`${API_ENDPOINTS.POSTS}/${postId}`)
             .then(() => {
               setPosts((prev) => prev.filter((p) => p.id !== postId));
               message.success("Post deleted permanently");

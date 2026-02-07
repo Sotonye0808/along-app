@@ -235,7 +235,7 @@ export default function PostPage() {
       );
 
       const commentsWithAuthors = await Promise.all(
-        commentsRes.data.map(async (comment) => {
+        (commentsRes.data || []).map(async (comment) => {
           const authorRes = await api.get<User>(
             `${API_ENDPOINTS.USERS}/${comment.userId}`
           );

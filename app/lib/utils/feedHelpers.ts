@@ -21,9 +21,11 @@ export const combinePostsWithAuthors = (
     posts: Post[],
     users: User[]
 ): (Post & { author: User })[] => {
-    return posts.map((post) => ({
+    const safePosts = posts || [];
+    const safeUsers = users || [];
+    return safePosts.map((post) => ({
         ...post,
-        author: users.find((user) => user.id === post.userId) || {
+        author: safeUsers.find((user) => user.id === post.userId) || {
             id: post.userId,
             userName: "unknown",
             firstName: "Unknown",
@@ -41,9 +43,11 @@ export const combineCommentsWithAuthors = (
     comments: PostComment[],
     users: User[]
 ): (PostComment & { author: User })[] => {
-    return comments.map((comment) => ({
+    const safeComments = comments || [];
+    const safeUsers = users || [];
+    return safeComments.map((comment) => ({
         ...comment,
-        author: users.find((user) => user.id === comment.userId) || {
+        author: safeUsers.find((user) => user.id === comment.userId) || {
             id: comment.userId,
             userName: "unknown",
             firstName: "Unknown",

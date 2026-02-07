@@ -61,11 +61,20 @@ export async function GET(request: NextRequest) {
             });
 
             // Transform to match frontend interface
-            const transformedPosts = posts.map(post => ({
-                ...post,
+            const transformedPosts = (posts || []).map(post => ({
+                id: post.id,
+                userId: post.userId,
+                title: post.title,
                 routes: post.routes as unknown as Route[],
+                images: post.images,
+                tags: post.tags,
+                likes: post.likes,
+                dislikes: post.dislikes,
                 comments: post._count.postComments,
-                bookmarks: post._count.postBookmarks
+                bookmarks: post._count.postBookmarks,
+                views: post.views,
+                createdAt: post.createdAt.toISOString(),
+                updatedAt: post.updatedAt.toISOString(),
             }));
 
             return NextResponse.json(transformedPosts, { status: 200 });
@@ -78,7 +87,9 @@ export async function GET(request: NextRequest) {
             // Check cache first
             const cached = await cache.get<string>(cacheKey);
             if (cached) {
-                return NextResponse.json(JSON.parse(cached), { status: 200 });
+                const parsedCache = JSON.parse(cached);
+                // Return only the data array, not the wrapped object
+                return NextResponse.json(parsedCache.data || parsedCache, { status: 200 });
             }
 
             // Get personalized feed from algorithm
@@ -87,7 +98,8 @@ export async function GET(request: NextRequest) {
             // Cache the result (5 minute TTL)
             await cache.set(cacheKey, JSON.stringify(feed), CACHE_TTL.feed);
 
-            return NextResponse.json(feed, { status: 200 });
+            // Return only the data array, not the wrapped object
+            return NextResponse.json(feed.data || [], { status: 200 });
         }
 
         // For guests, return recent posts
@@ -119,19 +131,25 @@ export async function GET(request: NextRequest) {
         });
 
         // Transform to match frontend interface
-        const transformedPosts = posts.map(post => ({
-            ...post,
+        const transformedPosts = (posts || []).map(post => ({
+            id: post.id,
+            userId: post.userId,
+            title: post.title,
             routes: post.routes as unknown as Route[],
+            images: post.images,
+            tags: post.tags,
+            likes: post.likes,
+            dislikes: post.dislikes,
             comments: post._count.postComments,
-            bookmarks: post._count.postBookmarks
+            bookmarks: post._count.postBookmarks,
+            views: post.views,
+            createdAt: post.createdAt.toISOString(),
+            updatedAt: post.updatedAt.toISOString(),
         }));
 
         const nextCursor = posts.length === limit ? posts[posts.length - 1].id : null;
 
-        return NextResponse.json({
-            posts: transformedPosts,
-            nextCursor
-        }, { status: 200 });
+        return NextResponse.json(transformedPosts, { status: 200 });
 
     } catch (error) {
         console.error('Error fetching posts:', error);

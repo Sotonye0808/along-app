@@ -192,13 +192,20 @@ export async function searchPosts(query: string, currentUserId?: string) {
                         verified: true,
                         location: true
                     }
+                },
+                _count: {
+                    select: {
+                        postComments: true,
+                        postLikes: true,
+                        postBookmarks: true
+                    }
                 }
             },
             take: 50
         });
 
         // Rank posts
-        const rankedPosts = posts.map((post: any) => {
+        const rankedPosts = (posts || []).map((post: any) => {
             let score = 0;
 
             // Title relevance
@@ -217,7 +224,7 @@ export async function searchPosts(query: string, currentUserId?: string) {
             }
 
             // Engagement (likes, comments, bookmarks)
-            const engagementScore = post.likes + (post.comments * 2) + (post.bookmarks * 1.5);
+            const engagementScore = post.likes + (post._count.postComments * 2) + (post._count.postBookmarks * 1.5);
             score += Math.min(engagementScore * 0.1, 50);
 
             // Recency (newer posts get slight boost)
@@ -235,8 +242,22 @@ export async function searchPosts(query: string, currentUserId?: string) {
         // Sort by score
         rankedPosts.sort((a: any, b: any) => b.score - a.score);
 
-        // Take top 20
-        const results = rankedPosts.slice(0, 20).map(({ score, ...post }: any) => post);
+        // Take top 20 and transform to frontend interface
+        const results = rankedPosts.slice(0, 20).map(({ score, ...post }: any) => ({
+            id: post.id,
+            userId: post.userId,
+            title: post.title,
+            routes: post.routes as unknown as Route[],
+            images: post.images,
+            tags: post.tags,
+            likes: post.likes,
+            dislikes: post.dislikes,
+            comments: post._count.postComments,
+            bookmarks: post._count.postBookmarks,
+            views: post.views,
+            createdAt: post.createdAt.toISOString(),
+            updatedAt: post.updatedAt.toISOString(),
+        }));
 
         // Cache results
         await cache.set(cacheKey, results, CACHE_TTL.search);

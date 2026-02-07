@@ -73,7 +73,7 @@ export default function ProfilePage() {
     try {
       // Fetch all posts and filter by user
       const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-      const userPosts = postsResponse.data.filter(
+      const userPosts = (postsResponse.data || []).filter(
         (post) => post.userId === currentUser.id
       );
 
@@ -517,7 +517,9 @@ export default function ProfilePage() {
       notification.open({
         key,
         message: "Post deleted",
-        description: `Undo within ${countdown} second${countdown !== 1 ? 's' : ''}`,
+        description: `Undo within ${countdown} second${
+          countdown !== 1 ? "s" : ""
+        }`,
         duration: 0.1,
         btn: (
           <button
@@ -543,7 +545,8 @@ export default function ProfilePage() {
         clearInterval(interval);
         notification.destroy(key);
         if (!undoClicked) {
-          api.delete(`${API_ENDPOINTS.POSTS}/${postId}`)
+          api
+            .delete(`${API_ENDPOINTS.POSTS}/${postId}`)
             .then(() => {
               setPosts((prev) => prev.filter((p) => p.id !== postId));
               message.success("Post deleted permanently");

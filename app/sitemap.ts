@@ -68,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
         const posts = postsResponse.ok ? (await postsResponse.json()) as Post[] : [];
 
-        const postRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
+        const postRoutes: MetadataRoute.Sitemap = (posts || []).map((post) => ({
             url: `${baseUrl}/posts/${post.id}`,
             lastModified: new Date(post.updatedAt),
             changeFrequency: 'weekly' as const,

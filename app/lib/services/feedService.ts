@@ -68,6 +68,13 @@ export async function getPersonalizedFeed(
                         verified: true,
                         location: true
                     }
+                },
+                _count: {
+                    select: {
+                        postComments: true,
+                        postLikes: true,
+                        postBookmarks: true
+                    }
                 }
             }
         });
@@ -116,12 +123,33 @@ export async function getPersonalizedFeed(
         // Enrich posts with user interaction state
         const enrichedPosts = await enrichPostsWithUserState(scoredPosts, userId);
 
+        // Transform to match frontend Post interface
+        const transformedPosts = (enrichedPosts || []).map(post => ({
+            id: post.id,
+            userId: post.userId,
+            title: post.title,
+            routes: post.routes as unknown as Route[],
+            images: post.images,
+            tags: post.tags,
+            likes: post.likes,
+            dislikes: post.dislikes,
+            comments: post._count?.postComments || 0,
+            bookmarks: post._count?.postBookmarks || 0,
+            views: post.views,
+            createdAt: post.createdAt.toISOString(),
+            updatedAt: post.updatedAt.toISOString(),
+            // Include enrichment flags
+            isLiked: post.isLiked,
+            isDisliked: post.isDisliked,
+            isBookmarked: post.isBookmarked,
+        }));
+
         // Determine next cursor
         const hasMore = posts.length > limit;
         const nextCursor = hasMore ? posts[limit - 1].id : null;
 
         const result = {
-            data: enrichedPosts,
+            data: transformedPosts,
             nextCursor,
             hasMore
         };
@@ -172,18 +200,25 @@ export async function getTrendingPosts(limit: number = 20) {
                         verified: true,
                         location: true
                     }
+                },
+                _count: {
+                    select: {
+                        postComments: true,
+                        postLikes: true,
+                        postBookmarks: true
+                    }
                 }
             }
         });
 
         // Calculate trending score for each post
         const now = new Date();
-        const scoredPosts = posts.map((post: any) => {
+        const scoredPosts = (posts || []).map((post: any) => {
             const ageInHours = (now.getTime() - new Date(post.createdAt).getTime()) / (1000 * 60 * 60);
             const engagementScore =
                 post.likes +
-                (post.comments * 2) +
-                (post.bookmarks * 1.5);
+                (post._count.postComments * 2) +
+                (post._count.postBookmarks * 1.5);
 
             const trendingScore = engagementScore / Math.max(ageInHours, 1);
 
@@ -196,8 +231,22 @@ export async function getTrendingPosts(limit: number = 20) {
         // Sort by trending score
         scoredPosts.sort((a: any, b: any) => b.trendingScore - a.trendingScore);
 
-        // Take top posts
-        const trendingPosts = scoredPosts.slice(0, limit);
+        // Take top posts and transform to frontend interface
+        const trendingPosts = scoredPosts.slice(0, limit).map(post => ({
+            id: post.id,
+            userId: post.userId,
+            title: post.title,
+            routes: post.routes as unknown as Route[],
+            images: post.images,
+            tags: post.tags,
+            likes: post.likes,
+            dislikes: post.dislikes,
+            comments: post._count.postComments,
+            bookmarks: post._count.postBookmarks,
+            views: post.views,
+            createdAt: post.createdAt.toISOString(),
+            updatedAt: post.updatedAt.toISOString(),
+        }));
 
         // Cache the result
         await cache.set(cacheKey, trendingPosts, CACHE_TTL.trending);
@@ -264,7 +313,7 @@ export async function getUserFavoriteTags(userId: string): Promise<string[]> {
  */
 async function enrichPostsWithUserState(posts: any[], userId: string) {
     try {
-        const postIds = posts.map(p => p.id);
+        const postIds = (posts || []).map(p => p.id);
 
         // Get user's likes
         const likes = await prisma.like.findMany({
@@ -285,7 +334,7 @@ async function enrichPostsWithUserState(posts: any[], userId: string) {
         const likeMap = new Map(likes.map((l: any) => [l.postId, l.type]));
         const bookmarkSet = new Set(bookmarks.map((b: any) => b.postId));
 
-        return posts.map(post => ({
+        return (posts || []).map(post => ({
             ...post,
             isLiked: likeMap.get(post.id) === 'LIKE',
             isDisliked: likeMap.get(post.id) === 'DISLIKE',

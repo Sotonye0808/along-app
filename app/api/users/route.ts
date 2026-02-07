@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         const nextCursor = hasMore ? results[results.length - 1].id : null;
 
         // Transform to match frontend expectations
-        const transformedUsers = results.map((user) => ({
+        const transformedUsers = (results || []).map((user) => ({
             id: user.id,
             userName: user.userName,
             firstName: user.firstName,
@@ -87,11 +87,7 @@ export async function GET(request: NextRequest) {
             createdAt: user.createdAt.toISOString(),
         }));
 
-        return NextResponse.json({
-            users: transformedUsers,
-            nextCursor,
-            hasMore,
-        });
+        return NextResponse.json(transformedUsers);
     } catch (error) {
         console.error('Error fetching users:', error);
         return NextResponse.json(

@@ -32,13 +32,13 @@ export async function authenticateRequest(request: NextRequest): Promise<string 
         // Verify JWT token
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as { userId: string };
 
-        // Verify user exists and is verified
+        // Verify user exists
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
-            select: { id: true, verified: true }
+            select: { id: true }
         });
 
-        if (!user || !user.verified) {
+        if (!user) {
             return null;
         }
 

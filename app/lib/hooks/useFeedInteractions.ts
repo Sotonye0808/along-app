@@ -38,13 +38,13 @@ export function useFeedInteractions(currentUser: User | null) {
             const postsRes = await api.get<Post[]>(API_ENDPOINTS.POSTS);
 
             // Check each post for user's interactions
-            for (const post of postsRes.data) {
+            for (const post of (postsRes.data || [])) {
                 // Check if user liked this post
                 try {
                     const likeRes = await api.get<Like[]>(
                         `${API_ENDPOINTS.POSTS}/${post.id}/likes`
                     );
-                    const userLike = likeRes.data.find(
+                    const userLike = (likeRes.data || []).find(
                         (like) => like.userId === currentUser.id && like.type === "like"
                     );
                     if (userLike) likes.add(post.id);
@@ -57,7 +57,7 @@ export function useFeedInteractions(currentUser: User | null) {
                     const dislikeRes = await api.get<Like[]>(
                         `${API_ENDPOINTS.POSTS}/${post.id}/dislikes`
                     );
-                    const userDislike = dislikeRes.data.find(
+                    const userDislike = (dislikeRes.data || []).find(
                         (dislike) =>
                             dislike.userId === currentUser.id && dislike.type === "dislike"
                     );
@@ -71,7 +71,7 @@ export function useFeedInteractions(currentUser: User | null) {
                     const bookmarkRes = await api.get<Bookmark[]>(
                         `${API_ENDPOINTS.POSTS}/${post.id}/bookmarks`
                     );
-                    const userBookmark = bookmarkRes.data.find(
+                    const userBookmark = (bookmarkRes.data || []).find(
                         (bookmark) => bookmark.userId === currentUser.id
                     );
                     if (userBookmark) bookmarks.add(post.id);

@@ -18,11 +18,11 @@ export function useComments(currentUser: User | null) {
             const commentsResponse = await api.get<PostComment[]>(
                 API_ENDPOINTS.POST_COMMENTS(postId)
             );
-            const postComments = commentsResponse.data;
+            const postComments = commentsResponse.data || [];
 
             // Fetch users for comment authors
             const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
-            const usersData = usersResponse.data;
+            const usersData = usersResponse.data || [];
 
             const commentsWithAuthors = combineCommentsWithAuthors(
                 postComments,

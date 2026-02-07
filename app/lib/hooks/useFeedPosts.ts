@@ -18,11 +18,11 @@ export function useFeedPosts() {
         try {
             // Fetch posts
             const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-            const postsData = postsResponse.data;
+            const postsData = postsResponse.data || [];
 
             // Fetch users
             const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
-            const usersData = usersResponse.data;
+            const usersData = usersResponse.data || [];
 
             // Combine posts with authors
             const postsWithAuthors = combinePostsWithAuthors(postsData, usersData);
@@ -39,7 +39,7 @@ export function useFeedPosts() {
     const checkForNewPosts = useCallback(async (currentPostCount: number): Promise<boolean> => {
         try {
             const response = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-            return response.data.length > currentPostCount;
+            return (response.data || []).length > currentPostCount;
         } catch (error) {
             console.error("Failed to check for new posts:", error);
             return false;

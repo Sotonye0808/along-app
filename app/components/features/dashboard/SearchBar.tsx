@@ -84,7 +84,9 @@ export function SearchBar() {
         )
         .slice(0, 5)
         .map((post) => {
-          const author = usersResponse.data.find((u) => u.id === post.userId);
+          const author = (usersResponse.data || []).find(
+            (u) => u.id === post.userId
+          );
           return {
             type: "post" as const,
             id: post.id,
@@ -99,7 +101,7 @@ export function SearchBar() {
 
       // Search tags
       const allTags = new Set<string>();
-      postsResponse.data.forEach((post) => {
+      (postsResponse.data || []).forEach((post) => {
         post.tags.forEach((tag) => {
           if (tag.toLowerCase().includes(searchLower)) {
             allTags.add(tag);
@@ -110,7 +112,7 @@ export function SearchBar() {
       const matchingTags = Array.from(allTags)
         .slice(0, 3)
         .map((tag) => {
-          const postsWithTag = postsResponse.data.filter((post) =>
+          const postsWithTag = (postsResponse.data || []).filter((post) =>
             post.tags.includes(tag)
           );
           return {

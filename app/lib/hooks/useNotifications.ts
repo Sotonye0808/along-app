@@ -30,12 +30,19 @@ export function useNotifications(userId?: string): UseNotificationsReturn {
 
         setLoading(true);
         try {
+            // Don't pass userId in query - it comes from auth cookie/header
             const response = await api.get<AppNotification[]>(
-                `${API_ENDPOINTS.NOTIFICATIONS}?userId=${userId}&_sort=createdAt&_order=desc&_limit=10`
+                `${API_ENDPOINTS.NOTIFICATIONS}?_sort=createdAt&_order=desc&_limit=10`
             );
-            setNotifications(response.data);
-        } catch (error) {
-            console.error("Failed to fetch notifications:", error);
+            setNotifications(response.data || []);
+        } catch (error: any) {
+            // Handle authentication errors silently
+            if (error.response?.status === 401) {
+                console.warn("Authentication expired. User needs to log in again.");
+                setNotifications([]);
+            } else {
+                console.error("Failed to fetch notifications:", error);
+            }
         } finally {
             setLoading(false);
         }
