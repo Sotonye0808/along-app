@@ -1,9 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Spin, App } from "antd";
-import { UserProfile, EditProfileModal } from "@/components/features/profile";
-import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+import { Spin, App, Skeleton, Card } from "antd";
+import { UserProfile } from "@/components/features/profile";
+const EditProfileModal = lazy(() =>
+  import("@/components/features/profile/EditProfileModal").then((mod) => ({
+    default: mod.EditProfileModal,
+  }))
+);
+const ShareRouteModal = lazy(() =>
+  import("@/components/features/posts/ShareRouteModal").then((mod) => ({
+    default: mod.ShareRouteModal,
+  }))
+);
 import { useAuth } from "../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -64,7 +73,7 @@ export default function ProfilePage() {
     try {
       // Fetch all posts and filter by user
       const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-      const userPosts = postsResponse.data.filter(
+      const userPosts = (postsResponse.data || []).filter(
         (post) => post.userId === currentUser.id
       );
 
@@ -502,42 +511,68 @@ export default function ProfilePage() {
     const { notification } = App.useApp();
     const key = `delete-post-${postId}`;
     let undoClicked = false;
+    let countdown = 10;
 
-    notification.open({
-      key,
-      message: "Post deleted",
-      description: "Undo within 10 seconds",
-      duration: 10,
-      btn: (
-        <button
-          className="px-3 py-1 bg-[#00623B] text-white rounded hover:bg-[#004d2e] text-sm"
-          onClick={() => {
-            undoClicked = true;
-            notification.destroy(key);
-            message.info("Deletion cancelled");
-          }}>
-          Undo
-        </button>
-      ),
-      onClose: async () => {
+    const updateNotification = () => {
+      notification.open({
+        key,
+        message: "Post deleted",
+        description: `Undo within ${countdown} second${
+          countdown !== 1 ? "s" : ""
+        }`,
+        duration: 0.1,
+        btn: (
+          <button
+            className="px-3 py-1 bg-[#00623B] text-white rounded hover:bg-[#004d2e] text-sm"
+            onClick={() => {
+              undoClicked = true;
+              notification.destroy(key);
+              message.info("Deletion cancelled");
+            }}>
+            Undo
+          </button>
+        ),
+      });
+    };
+
+    updateNotification();
+
+    const interval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        updateNotification();
+      } else {
+        clearInterval(interval);
+        notification.destroy(key);
         if (!undoClicked) {
-          try {
-            await api.delete(`${API_ENDPOINTS.POSTS}/${postId}`);
-            setPosts((prev) => prev.filter((p) => p.id !== postId));
-            message.success("Post deleted permanently");
-          } catch (error) {
-            console.error("Failed to delete post:", error);
-            message.error("Failed to delete post");
-          }
+          api
+            .delete(`${API_ENDPOINTS.POSTS}/${postId}`)
+            .then(() => {
+              setPosts((prev) => prev.filter((p) => p.id !== postId));
+              message.success("Post deleted permanently");
+            })
+            .catch((error) => {
+              console.error("Failed to delete post:", error);
+              message.error("Failed to delete post");
+            });
         }
-      },
-    });
+      }
+    }, 1000);
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <Spin size="large" />
+      <div className="max-w-4xl mx-auto p-4">
+        <Card>
+          <Skeleton active avatar paragraph={{ rows: 2 }} />
+        </Card>
+        <div className="mt-6 space-y-4">
+          {[1, 2, 3].map((n) => (
+            <Card key={n}>
+              <Skeleton active paragraph={{ rows: 3 }} />
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -545,7 +580,9 @@ export default function ProfilePage() {
   if (!user || !currentUser) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
-        <p className="text-gray-500">Please login to view your profile</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          Please login to view your profile
+        </p>
       </div>
     );
   }
@@ -574,25 +611,31 @@ export default function ProfilePage() {
         onDeleteComment={handleDeleteComment}
       />
 
-      <EditProfileModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        user={user}
-        onSave={handleUpdateProfile}
-        isAuthenticated={true}
-      />
+      {editModalOpen && (
+        <Suspense fallback={<Spin size="large" fullscreen />}>
+          <EditProfileModal
+            open={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            user={user}
+            onSave={handleUpdateProfile}
+            isAuthenticated={true}
+          />
+        </Suspense>
+      )}
 
       {postToEdit && (
-        <ShareRouteModal
-          open={editPostModalOpen}
-          onClose={() => {
-            setEditPostModalOpen(false);
-            setPostToEdit(null);
-          }}
-          onSubmit={handleUpdatePost}
-          editMode={true}
-          postToEdit={postToEdit}
-        />
+        <Suspense fallback={<Spin size="large" fullscreen />}>
+          <ShareRouteModal
+            open={editPostModalOpen}
+            onClose={() => {
+              setEditPostModalOpen(false);
+              setPostToEdit(null);
+            }}
+            onSubmit={handleUpdatePost}
+            editMode={true}
+            postToEdit={postToEdit}
+          />
+        </Suspense>
       )}
     </>
   );

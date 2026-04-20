@@ -57,7 +57,9 @@ export default function BookmarksPage() {
 
       // Fetch all users
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
-      const usersMap = new Map(usersResponse.data.map((u) => [u.id, u]));
+      const usersMap = new Map(
+        (usersResponse.data || []).map((u) => [u.id, u])
+      );
 
       // Filter posts that user has bookmarked
       const bookmarkedPostIds = user.bookmarks || [];
@@ -312,7 +314,9 @@ export default function BookmarksPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Saved Routes</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+        Saved Routes
+      </h1>
 
       {bookmarkedPosts.length === 0 ? (
         <div className="flex justify-center items-center min-h-[40vh]">
@@ -323,7 +327,7 @@ export default function BookmarksPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {bookmarkedPosts.map((post) => (
+          {(bookmarkedPosts || []).map((post) => (
             <PostCard
               key={post.id}
               post={post}

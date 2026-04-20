@@ -2,6 +2,154 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* CSS Variables for theme colors */
+  :root {
+    --color-primary: #00623b;
+    --color-primary-light: #00a862;
+    --color-bg-base: #ffffff;
+    --color-bg-elevated: #f7f7f7;
+    --color-bg-card: #ffffff;
+    --color-text-base: #232323;
+    --color-text-secondary: #6b7280;
+    --color-text-muted: #9ca3af;
+    --color-border: #e5e7eb;
+    --color-border-light: #f3f4f6;
+    --color-success: #a4f4e7;
+    --color-warning: #f4c790;
+    --color-error: #e4626f;
+  }
+
+  @keyframes slide-down {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
+  .dark {
+    --color-primary: #00a862;
+    --color-primary-light: #00d17a;
+    --color-bg-base: #0f0f0f;
+    --color-bg-elevated: #1a1a1a;
+    --color-bg-card: #1f1f1f;
+    --color-text-base: #f5f5f5;
+    --color-text-secondary: #d1d5db;
+    --color-text-muted: #9ca3af;
+    --color-border: #2d2d2d;
+    --color-border-light: #262626;
+    --color-success: #34d399;
+    --color-warning: #fbbf24;
+    --color-error: #ef4444;
+  }
+
+  /* Apply global color scheme */
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-base);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Focus visible styles for keyboard navigation */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-[#00623B] dark:ring-[#00a862] ring-offset-2 dark:ring-offset-gray-900;
+  }
+
+  /* Skip to main content link for accessibility */
+  .skip-to-main {
+    @apply absolute -top-full left-0 bg-[#00623B] dark:bg-[#00a862] text-white px-4 py-2 z-50 transition-all;
+  }
+
+  .skip-to-main:focus {
+    @apply top-0;
+  }
+}
+
+@layer components {
+  /* Smooth card hover effects */
+  .ant-card {
+    @apply transition-shadow duration-300 ease-in-out;
+  }
+
+  /* Smooth modal animations */
+  .ant-modal {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Smooth button hover effects */
+  .ant-btn {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .ant-btn:hover:not(:disabled) {
+    @apply transform scale-105;
+  }
+
+  /* Smooth dropdown animations */
+  .ant-dropdown {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Smooth tag animations */
+  .ant-tag {
+    @apply transition-all duration-150 ease-in-out;
+  }
+
+  /* Fade in animation for page content */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  /* Slide down animation for notifications */
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -100%);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  .animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    @apply scroll-smooth;
+  }
+}
+
 body {
   /* @apply bg-white; */
   font-family: "Inter", Roboto, system-ui, -apple-system, BlinkMacSystemFont,
@@ -100,8 +248,4 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   cursor: pointer;
   font-size: 14px;
   pointer-events: auto;
-}
-
-.anticon, .overwrite-anticon-color {
-  color: unset;
 }

@@ -8,6 +8,7 @@ import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
 import { useAuth } from "../../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { generatePersonSchema } from "@/lib/utils/structuredData";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -54,7 +55,9 @@ export default function UserProfilePage() {
     try {
       // Find user by username
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
-      const foundUser = usersResponse.data.find((u) => u.userName === username);
+      const foundUser = (usersResponse.data || []).find(
+        (u) => u.userName === username
+      );
 
       if (!foundUser) {
         message.error("User not found");
@@ -84,12 +87,12 @@ export default function UserProfilePage() {
       const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
 
-      const targetUser = usersResponse.data.find(
+      const targetUser = (usersResponse.data || []).find(
         (u) => u.userName === username
       );
       if (!targetUser) return;
 
-      const userPosts = postsResponse.data.filter(
+      const userPosts = (postsResponse.data || []).filter(
         (post) => post.userId === targetUser.id
       );
 
@@ -478,36 +481,53 @@ export default function UserProfilePage() {
     const { notification } = App.useApp();
     const key = `delete-post-${postId}`;
     let undoClicked = false;
+    let countdown = 10;
 
-    notification.open({
-      key,
-      message: "Post deleted",
-      description: "Undo within 10 seconds",
-      duration: 10,
-      btn: (
-        <button
-          className="px-3 py-1 bg-[#00623B] text-white rounded hover:bg-[#004d2e] text-sm"
-          onClick={() => {
-            undoClicked = true;
-            notification.destroy(key);
-            message.info("Deletion cancelled");
-          }}>
-          Undo
-        </button>
-      ),
-      onClose: async () => {
+    const updateNotification = () => {
+      notification.open({
+        key,
+        message: "Post deleted",
+        description: `Undo within ${countdown} second${
+          countdown !== 1 ? "s" : ""
+        }`,
+        duration: 0.1,
+        btn: (
+          <button
+            className="px-3 py-1 bg-[#00623B] text-white rounded hover:bg-[#004d2e] text-sm"
+            onClick={() => {
+              undoClicked = true;
+              notification.destroy(key);
+              message.info("Deletion cancelled");
+            }}>
+            Undo
+          </button>
+        ),
+      });
+    };
+
+    updateNotification();
+
+    const interval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        updateNotification();
+      } else {
+        clearInterval(interval);
+        notification.destroy(key);
         if (!undoClicked) {
-          try {
-            await api.delete(`${API_ENDPOINTS.POSTS}/${postId}`);
-            setPosts((prev) => prev.filter((p) => p.id !== postId));
-            message.success("Post deleted permanently");
-          } catch (error) {
-            console.error("Failed to delete post:", error);
-            message.error("Failed to delete post");
-          }
+          api
+            .delete(`${API_ENDPOINTS.POSTS}/${postId}`)
+            .then(() => {
+              setPosts((prev) => prev.filter((p) => p.id !== postId));
+              message.success("Post deleted permanently");
+            })
+            .catch((error) => {
+              console.error("Failed to delete post:", error);
+              message.error("Failed to delete post");
+            });
         }
-      },
-    });
+      }
+    }, 1000);
   };
 
   if (loading) {
@@ -522,8 +542,17 @@ export default function UserProfilePage() {
     return null;
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const personSchema = generatePersonSchema(user, baseUrl);
+
   return (
     <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
+
       <UserProfile
         user={user}
         isOwnProfile={isOwnProfile}

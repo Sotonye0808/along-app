@@ -122,6 +122,16 @@ declare global {
         email: string;
         code: string;
     }
+
+    interface SearchResult {
+      type: "user" | "post" | "tag";
+      id: string;
+      title: string;
+      subtitle?: string;
+      avatar?: string;
+      link: string;
+      metadata?: string;
+    }
 }
 
 export { }

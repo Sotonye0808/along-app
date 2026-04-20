@@ -14,6 +14,7 @@ import { useAuth } from "../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
 import { formatDate } from "@/lib/utils/format";
+import { NotificationSettings } from "@/app/components/features/pwa";
 
 export default function NotificationsPage() {
   const { user: currentUser, isAuthenticated } = useAuth();
@@ -157,9 +158,11 @@ export default function NotificationsPage() {
     <div className="max-w-4xl mx-auto p-4 md:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Notifications
+          </h1>
           {unreadCount > 0 && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
             </p>
           )}
@@ -174,8 +177,13 @@ export default function NotificationsPage() {
         )}
       </div>
 
+      {/* Push Notification Settings */}
+      <div className="mb-6">
+        <NotificationSettings />
+      </div>
+
       {notifications.length === 0 ? (
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <Empty
             description="No notifications yet"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -193,16 +201,16 @@ export default function NotificationsPage() {
               }`}
               styles={{ body: { padding: "16px" } }}>
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-lg">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-lg">
                   {getNotificationIcon(notification.type)}
                 </div>
                 <div
                   className="flex-1 min-w-0"
                   onClick={() => handleNotificationClick(notification)}>
-                  <p className="text-gray-800 text-sm md:text-base">
+                  <p className="text-gray-800 dark:text-gray-200 text-sm md:text-base">
                     {notification.message}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {formatDate(notification.createdAt)}
                   </p>
                 </div>
@@ -214,7 +222,7 @@ export default function NotificationsPage() {
                     e.stopPropagation();
                     deleteNotification(notification.id);
                   }}
-                  className="text-gray-400 hover:text-red-500"
+                  className="text-gray-400 dark:text-gray-500 hover:text-red-500"
                   danger
                 />
               </div>

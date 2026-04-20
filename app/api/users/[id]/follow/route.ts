@@ -1,95 +1,125 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/data/database";
+import { prisma } from '@/lib/db/prisma';
+import { requireAuth, authenticateRequest } from '@/lib/utils/auth-server';
+import { rateLimitByUser } from '@/lib/utils/rateLimiter';
+import { cache, CACHE_KEYS } from '@/lib/cache/redis';
 
-// POST /api/users/:id/follow - Follow/Unfollow a user
+/**
+ * POST /api/users/[id]/follow
+ * Follow or unfollow a user
+ * Requires authentication
+ */
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const { id: targetUserId } = await params;
+        const authUser = await requireAuth(request);
 
-        // Check if request has a body
-        const contentType = request.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
+        // Rate limiting
+        const rateLimit = await rateLimitByUser(authUser, {
+            maxRequests: 100,
+            windowSeconds: 3600, // 100 follows per hour
+        });
+
+        if (!rateLimit.success) {
             return NextResponse.json(
-                { error: 'Content-Type must be application/json' },
-                { status: 400 }
+                { error: 'Rate limit exceeded' },
+                { status: 429, headers: { 'Retry-After': String(rateLimit.reset) } }
             );
         }
 
-        let userId: string;
-        try {
-            const body = await request.json();
-            userId = body.userId;
-        } catch (error) {
-            return NextResponse.json(
-                { error: 'Invalid JSON body' },
-                { status: 400 }
-            );
-        }
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: "userId is required" },
-                { status: 400 }
-            );
-        }
-
-        if (userId === targetUserId) {
+        // Cannot follow yourself
+        if (authUser === targetUserId) {
             return NextResponse.json(
                 { error: "Cannot follow yourself" },
                 { status: 400 }
             );
         }
 
-        const currentUser = await db.getUserById(userId);
-        const targetUser = await db.getUserById(targetUserId);
+        // Check if target user exists
+        const targetUser = await prisma.user.findUnique({
+            where: { id: targetUserId },
+            select: { id: true, firstName: true, lastName: true },
+        });
 
-        if (!currentUser || !targetUser) {
+        if (!targetUser) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
         // Check if already following
-        const isFollowing = currentUser.following?.includes(targetUserId) || false;
+        const existingFollow = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: authUser,
+                    followingId: targetUserId,
+                },
+            },
+        });
 
-        if (isFollowing) {
-            // Unfollow
-            const updatedCurrentUser = db.updateUser(userId, {
-                following: currentUser.following?.filter((id) => id !== targetUserId),
+        if (existingFollow) {
+            // Unfollow: Delete the follow relationship
+            await prisma.follow.delete({
+                where: {
+                    followerId_followingId: {
+                        followerId: authUser,
+                        followingId: targetUserId,
+                    },
+                },
             });
 
-            const updatedTargetUser = db.updateUser(targetUserId, {
-                followers: (targetUser.followers || 0) - 1,
-            });
+            // Invalidate caches
+            await Promise.all([
+                cache.del(CACHE_KEYS.userProfile(authUser)),
+                cache.del(CACHE_KEYS.userProfile(targetUserId)),
+                cache.del(CACHE_KEYS.userSuggestions(authUser)),
+            ]);
 
             return NextResponse.json({
                 message: "Unfollowed successfully",
                 isFollowing: false,
-                user: updatedTargetUser,
             });
         } else {
-            // Follow
-            const updatedCurrentUser = db.updateUser(userId, {
-                following: [...(currentUser.following || []), targetUserId],
+            // Follow: Create the follow relationship
+            await prisma.$transaction(async (tx) => {
+                // Create follow relationship
+                await tx.follow.create({
+                    data: {
+                        followerId: authUser,
+                        followingId: targetUserId,
+                    },
+                });
+
+                // Create notification
+                const notification = await tx.notification.create({
+                    data: {
+                        type: 'FOLLOW',
+                        actorId: authUser,
+                        message: `started following you`,
+                    },
+                });
+
+                // Create notification recipient
+                await tx.notificationRecipient.create({
+                    data: {
+                        notificationId: notification.id,
+                        userId: targetUserId,
+                        read: false,
+                    },
+                });
             });
 
-            const updatedTargetUser = db.updateUser(targetUserId, {
-                followers: (targetUser.followers || 0) + 1,
-            });
-
-            // Create notification
-            db.createNotification({
-                userId: targetUserId,
-                type: "follow",
-                message: `${currentUser.firstName} ${currentUser.lastName} started following you`,
-                read: false,
-            });
+            // Invalidate caches
+            await Promise.all([
+                cache.del(CACHE_KEYS.userProfile(authUser)),
+                cache.del(CACHE_KEYS.userProfile(targetUserId)),
+                cache.del(CACHE_KEYS.userSuggestions(authUser)),
+            ]);
 
             return NextResponse.json({
                 message: "Followed successfully",
                 isFollowing: true,
-                user: updatedTargetUser,
             });
         }
     } catch (error) {
@@ -101,32 +131,35 @@ export async function POST(
     }
 }
 
-// GET /api/users/:id/follow - Check if current user follows target user
+/**
+ * GET /api/users/[id]/follow
+ * Check if current user follows target user
+ * Requires authentication
+ */
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const { id: targetUserId } = await params;
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get("userId");
+        const authUser = await authenticateRequest(request);
 
-        if (!userId) {
-            return NextResponse.json(
-                { error: "userId is required" },
-                { status: 400 }
-            );
+        // If not authenticated, return false
+        if (!authUser) {
+            return NextResponse.json({ isFollowing: false });
         }
 
-        const currentUser = await db.getUserById(userId);
+        // Check if follow relationship exists
+        const follow = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: authUser,
+                    followingId: targetUserId,
+                },
+            },
+        });
 
-        if (!currentUser) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-
-        const isFollowing = currentUser.following?.includes(targetUserId) || false;
-
-        return NextResponse.json({ isFollowing });
+        return NextResponse.json({ isFollowing: !!follow });
     } catch (error) {
         console.error("Check follow error:", error);
         return NextResponse.json(

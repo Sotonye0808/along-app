@@ -1,12 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/data/database';
+import { prisma } from '@/lib/db/prisma';
+import { cache } from '@/lib/cache/redis';
+import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 
-// Import the same OTP store from register route
-// In production, use a shared cache like Redis
+// Import the same OTP store from register route (fallback)
 const otpStore = new Map<string, { code: string; expiresAt: number }>();
 
 export async function POST(request: NextRequest) {
     try {
+        // Rate limit check (5 OTP verifications per 15 minutes per IP)
+        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 5, windowSeconds: 900 });
+
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many verification attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
+            );
+        }
+
         const body: OtpVerification = await request.json();
         const { email, code } = body;
 
@@ -18,8 +33,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Get stored OTP
-        const storedOTP = otpStore.get(email);
+        // Get stored OTP from Redis cache first, then fallback to in-memory
+        let storedOTP: { code: string; expiresAt: number } | null = null;
+
+        const cachedOTP = await cache.get<string>(`otp:${email}`);
+        if (cachedOTP) {
+            storedOTP = JSON.parse(cachedOTP);
+        } else {
+            storedOTP = otpStore.get(email) || null;
+        }
 
         if (!storedOTP) {
             return NextResponse.json(
@@ -30,6 +52,7 @@ export async function POST(request: NextRequest) {
 
         // Check if OTP expired
         if (Date.now() > storedOTP.expiresAt) {
+            await cache.del(`otp:${email}`);
             otpStore.delete(email);
             return NextResponse.json(
                 { error: 'Verification code has expired' },
@@ -46,7 +69,17 @@ export async function POST(request: NextRequest) {
         }
 
         // Mark user as verified
-        const user = await db.getUserByEmail(email);
+        const user = await prisma.user.update({
+            where: { email },
+            data: { verified: true },
+            select: {
+                id: true,
+                userName: true,
+                email: true,
+                verified: true
+            }
+        });
+
         if (!user) {
             return NextResponse.json(
                 { error: 'User not found' },
@@ -54,9 +87,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        await db.updateUser(user.id, { verified: true });
-
-        // Clear OTP
+        // Clear OTP from both cache and memory
+        await cache.del(`otp:${email}`);
         otpStore.delete(email);
 
         return NextResponse.json({

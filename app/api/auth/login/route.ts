@@ -1,28 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/data/database';
+import { prisma } from '@/lib/db/prisma';
+import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { validateLoginData } from '@/lib/utils/validation';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-// Generate mock JWT tokens (in production, use actual JWT library)
+// Generate JWT tokens
 function generateTokens(userId: string) {
-    const accessToken = `mock-access-token-${userId}-${Date.now()}`;
-    const refreshToken = `mock-refresh-token-${userId}-${Date.now()}`;
+    const accessToken = jwt.sign(
+        { userId },
+        process.env.JWT_ACCESS_SECRET!,
+        { expiresIn: '15m' }
+    );
+
+    const refreshToken = jwt.sign(
+        { userId },
+        process.env.JWT_REFRESH_SECRET!,
+        { expiresIn: '7d' }
+    );
+
     return { accessToken, refreshToken };
 }
 
 export async function POST(request: NextRequest) {
     try {
-        const body: LoginCredentials = await request.json();
-        const { email, password } = body;
+        // Rate limit check (10 login attempts per 15 minutes per IP)
+        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 10, windowSeconds: 900 });
 
-        // Validate required fields
-        if (!email || !password) {
+        if (!rateLimit.success) {
             return NextResponse.json(
-                { error: 'Email and password are required' },
+                { error: 'Too many login attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
+            );
+        }
+
+        const body: LoginCredentials = await request.json();
+
+        // Validate input data
+        const validation = validateLoginData(body);
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: validation.error.issues[0]?.message || 'Invalid input data' },
                 { status: 400 }
             );
         }
 
-        // Find user by email
-        const user = await db.getUserByEmail(email);
+        const { email, password } = body;
+
+        // Find user by email with password
+        const user = await prisma.user.findUnique({
+            where: { email },
+            select: {
+                id: true,
+                userName: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                password: true,
+                avatar: true,
+                bio: true,
+                verified: true,
+                location: true,
+                createdAt: true,
+                _count: {
+                    select: {
+                        followers: true,
+                        following: true,
+                        posts: true
+                    }
+                }
+            }
+        });
 
         if (!user) {
             return NextResponse.json(
@@ -31,8 +83,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Verify password (in production, use bcrypt.compare)
-        if (user.password !== password) {
+        // Verify password with bcrypt
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
             return NextResponse.json(
                 { error: 'Invalid email or password' },
                 { status: 401 }
@@ -53,9 +107,18 @@ export async function POST(request: NextRequest) {
         // Remove password from response
         const { password: _, ...userWithoutPassword } = user;
 
+        // Transform response to match frontend interface
+        const responseUser = {
+            ...userWithoutPassword,
+            followers: user._count.followers,
+            following: [], // Will be populated by a separate call if needed
+            likes: [], // Will be populated by a separate call if needed
+            bookmarks: [] // Will be populated by a separate call if needed
+        };
+
         // Create response with tokens
         const response = NextResponse.json({
-            user: userWithoutPassword,
+            user: responseUser,
             accessToken,
             refreshToken,
         });

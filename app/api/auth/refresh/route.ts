@@ -1,13 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/data/database';
+import { prisma } from '@/lib/db/prisma';
+import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import jwt from 'jsonwebtoken';
 
-// Generate mock JWT tokens
+// Generate new access token
 function generateAccessToken(userId: string) {
-    return `mock-access-token-${userId}-${Date.now()}`;
+    return jwt.sign(
+        { userId },
+        process.env.JWT_ACCESS_SECRET!,
+        { expiresIn: '15m' }
+    );
 }
 
 export async function POST(request: NextRequest) {
     try {
+        // Rate limit check (20 refresh attempts per hour per IP)
+        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 20, windowSeconds: 3600 });
+
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many token refresh attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
+            );
+        }
+
         // Get refresh token from cookie
         const refreshToken = request.cookies.get('refreshToken')?.value;
 
@@ -18,23 +38,39 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // In production, verify and decode the JWT token
-        // For mock, extract userId from token format: mock-refresh-token-{userId}-{timestamp}
-        const userId = refreshToken.split('-')[3];
-
-        if (!userId) {
+        // Verify and decode the JWT refresh token
+        let decoded: { userId: string };
+        try {
+            decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as { userId: string };
+        } catch (error) {
             return NextResponse.json(
-                { error: 'Invalid refresh token' },
+                { error: 'Invalid or expired refresh token' },
                 { status: 401 }
             );
         }
 
-        // Verify user exists
-        const user = await db.getUserById(userId);
+        const { userId } = decoded;
+
+        // Verify user exists and is verified
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                verified: true
+            }
+        });
+
         if (!user) {
             return NextResponse.json(
                 { error: 'User not found' },
                 { status: 404 }
+            );
+        }
+
+        if (!user.verified) {
+            return NextResponse.json(
+                { error: 'User account not verified' },
+                { status: 403 }
             );
         }
 
@@ -59,7 +95,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Token refresh error:', error);
         return NextResponse.json(
-            { error: 'Token refresh failed. Please log in again.' },
+            { error: 'Token refresh failed. Please try again.' },
             { status: 500 }
         );
     }

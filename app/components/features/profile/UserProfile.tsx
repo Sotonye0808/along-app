@@ -14,6 +14,10 @@ import { PostCard } from "@/components/features/posts/PostCard";
 import { CommentSection } from "@/components/features/posts/CommentSection";
 import { formatDate } from "@/lib/utils/format";
 import { APP_ROUTES } from "@/lib/constants";
+import {
+  useProfileComments,
+  useProfileSharing,
+} from "@/lib/hooks/useProfileInteractions";
 
 interface UserProfileProps {
   user: User;
@@ -60,10 +64,10 @@ export function UserProfile({
   onShare,
   onEdit,
   onDelete,
-  onLikeComment,
-  onDislikeComment,
-  onEditComment,
-  onDeleteComment,
+  onLikeComment: onLikeCommentProp,
+  onDislikeComment: onDislikeCommentProp,
+  onEditComment: onEditCommentProp,
+  onDeleteComment: onDeleteCommentProp,
   userInteractions = {
     likes: new Set(),
     dislikes: new Set(),
@@ -71,12 +75,28 @@ export function UserProfile({
   },
 }: UserProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
-  const [commentModalOpen, setCommentModalOpen] = useState(false);
-  const [selectedComment, setSelectedComment] = useState<
-    (PostComment & { author: User; post: Post }) | null
-  >(null);
-  const { message, modal } = App.useApp();
+  const { modal } = App.useApp();
   const router = useRouter();
+
+  // Use custom hooks for comment and sharing functionality
+  const {
+    commentModalOpen,
+    selectedComment,
+    openCommentModal,
+    closeCommentModal,
+    likeComment: hookLikeComment,
+    dislikeComment: hookDislikeComment,
+    editComment: hookEditComment,
+    deleteComment: hookDeleteComment,
+  } = useProfileComments(currentUserId);
+
+  const { shareProfile } = useProfileSharing();
+
+  // Use prop handlers if provided, otherwise use hook handlers
+  const handleLikeComment = onLikeCommentProp || hookLikeComment;
+  const handleDislikeComment = onDislikeCommentProp || hookDislikeComment;
+  const handleEditComment = onEditCommentProp || hookEditComment;
+  const handleDeleteComment = onDeleteCommentProp || hookDeleteComment;
 
   const handleFollowClick = () => {
     if (!isAuthenticated) {
@@ -96,26 +116,7 @@ export function UserProfile({
   };
 
   const handleCopyProfileLink = () => {
-    const profileUrl = `${window.location.origin}/profile/${user.userName}`;
-
-    if (navigator.share) {
-      navigator
-        .share({
-          title: `${user.firstName} ${user.lastName} on Along`,
-          text: `Check out ${user.firstName}'s profile on Along!`,
-          url: profileUrl,
-        })
-        .catch((error) => {
-          // User cancelled or share failed
-          if (error.name !== "AbortError") {
-            navigator.clipboard.writeText(profileUrl);
-            message.success("Profile link copied to clipboard!");
-          }
-        });
-    } else {
-      navigator.clipboard.writeText(profileUrl);
-      message.success("Profile link copied to clipboard!");
-    }
+    shareProfile(user);
   };
 
   const tabItems = [
@@ -134,7 +135,7 @@ export function UserProfile({
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
           ) : (
-            posts.map((post) => (
+            (posts || []).map((post) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -201,7 +202,9 @@ export function UserProfile({
                             <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                           </svg>
                         }
-                        onClick={() => onLikeComment?.(comment.id)}
+                        onClick={() =>
+                          handleLikeComment?.(comment.id, comment.postId)
+                        }
                         className="text-gray-600 hover:text-[#00623B]">
                         {comment.likes > 0 && comment.likes}
                       </Button>
@@ -216,17 +219,16 @@ export function UserProfile({
                             <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
                           </svg>
                         }
-                        onClick={() => onDislikeComment?.(comment.id)}
+                        onClick={() =>
+                          handleDislikeComment?.(comment.id, comment.postId)
+                        }
                         className="text-gray-600 hover:text-red-500">
                         {comment.dislikes > 0 && comment.dislikes}
                       </Button>
                       <Button
                         type="link"
                         size="small"
-                        onClick={() => {
-                          setSelectedComment(comment);
-                          setCommentModalOpen(true);
-                        }}
+                        onClick={() => router.push(`/posts/${comment.postId}`)}
                         className="text-[#00623B]">
                         View Thread
                       </Button>
@@ -252,8 +254,8 @@ export function UserProfile({
               size={120}
               src={user.avatar}
               className="border-4 border-[#00623B]">
-              {user.firstName[0]}
-              {user.lastName[0]}
+              {user.firstName?.[0] || ""}
+              {user.lastName?.[0] || ""}
             </Avatar>
           </div>
 
@@ -366,18 +368,22 @@ export function UserProfile({
       {selectedComment && (
         <CommentSection
           open={commentModalOpen}
-          onClose={() => {
-            setCommentModalOpen(false);
-            setSelectedComment(null);
-          }}
+          onClose={closeCommentModal}
           postId={selectedComment.postId}
           comments={comments.filter((c) => c.postId === selectedComment.postId)}
           currentUser={currentUserId ? ({ id: currentUserId } as User) : null}
           onAddComment={async () => {}}
-          onLikeComment={onLikeComment}
-          onDislikeComment={onDislikeComment}
-          onEditComment={onEditComment}
-          onDeleteComment={onDeleteComment}
+          onLikeComment={(commentId) =>
+            handleLikeComment(commentId, selectedComment.postId)
+          }
+          onDislikeComment={(commentId) =>
+            handleDislikeComment(commentId, selectedComment.postId)
+          }
+          onEditComment={handleEditComment}
+          onDeleteComment={handleDeleteComment}
+          onShowLoginModal={() => {
+            router.push(APP_ROUTES.LOGIN);
+          }}
         />
       )}
     </div>

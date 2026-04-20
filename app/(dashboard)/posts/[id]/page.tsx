@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Spin, App, Button } from "antd";
+import { Spin, App, Button, Skeleton, Card } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useRouter, useParams } from "next/navigation";
 import { PostCard } from "@/components/features/posts/PostCard";
@@ -9,6 +9,7 @@ import { CommentSection } from "@/components/features/posts/CommentSection";
 import { useAuth } from "../../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { generateArticleSchema } from "@/lib/utils/structuredData";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -16,7 +17,7 @@ interface PostWithAuthor extends Post {
 
 export default function PostPage() {
   const params = useParams();
-  const postId = params.id as string;
+  const postId = params?.id as string;
   const { user: currentUser, isAuthenticated } = useAuth();
   const [post, setPost] = useState<PostWithAuthor | null>(null);
   const [comments, setComments] = useState<(PostComment & { author: User })[]>(
@@ -34,13 +35,14 @@ export default function PostPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (postId) {
-      fetchPost();
-      if (currentUser) {
-        fetchUserInteractions();
-      }
-    }
-  }, [postId, currentUser]);
+    if (!postId) return;
+    fetchPost();
+  }, [postId]);
+
+  useEffect(() => {
+    if (!currentUser || !postId) return;
+    fetchUserInteractions();
+  }, [currentUser, postId]);
 
   const fetchPost = async () => {
     try {
@@ -233,7 +235,7 @@ export default function PostPage() {
       );
 
       const commentsWithAuthors = await Promise.all(
-        commentsRes.data.map(async (comment) => {
+        (commentsRes.data || []).map(async (comment) => {
           const authorRes = await api.get<User>(
             `${API_ENDPOINTS.USERS}/${comment.userId}`
           );
@@ -322,6 +324,62 @@ export default function PostPage() {
     }
   };
 
+  const handleLikeComment = async (commentId: string) => {
+    if (!currentUser || !postId) {
+      message.warning("Please login to like comments");
+      return;
+    }
+
+    // Optimistic update
+    setComments((prev) =>
+      prev.map((c) => (c.id === commentId ? { ...c, likes: c.likes + 1 } : c))
+    );
+
+    try {
+      await api.post(API_ENDPOINTS.POST_COMMENT_LIKE(postId, commentId), {
+        userId: currentUser.id,
+        type: "like",
+      });
+    } catch (error) {
+      console.error("Failed to like comment:", error);
+      message.error("Failed to update like");
+      // Rollback
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, likes: c.likes - 1 } : c))
+      );
+    }
+  };
+
+  const handleDislikeComment = async (commentId: string) => {
+    if (!currentUser || !postId) {
+      message.warning("Please login to dislike comments");
+      return;
+    }
+
+    // Optimistic update
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId ? { ...c, dislikes: c.dislikes + 1 } : c
+      )
+    );
+
+    try {
+      await api.post(API_ENDPOINTS.POST_COMMENT_DISLIKE(postId, commentId), {
+        userId: currentUser.id,
+        type: "dislike",
+      });
+    } catch (error) {
+      console.error("Failed to dislike comment:", error);
+      message.error("Failed to update dislike");
+      // Rollback
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, dislikes: c.dislikes - 1 } : c
+        )
+      );
+    }
+  };
+
   const handleBookmark = async (postId: string) => {
     if (!currentUser) {
       message.warning("Please login to bookmark posts");
@@ -393,16 +451,27 @@ export default function PostPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <Spin size="large" />
+      <div className="max-w-3xl mx-auto p-4">
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => router.back()}
+          className="mb-4">
+          Back
+        </Button>
+        <Card>
+          <Skeleton active avatar paragraph={{ rows: 6 }} />
+        </Card>
       </div>
     );
   }
 
-  if (!post) {
+  if (!postId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <p className="text-gray-500 text-lg">Post not found</p>
+        <p className="text-gray-500 dark:text-gray-400 text-lg">
+          Invalid post ID
+        </p>
         <Button
           type="primary"
           onClick={() => router.push("/home")}
@@ -413,8 +482,33 @@ export default function PostPage() {
     );
   }
 
+  if (!post) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <p className="text-gray-500 dark:text-gray-400 text-lg">
+          Post not found
+        </p>
+        <Button
+          type="primary"
+          onClick={() => router.push("/home")}
+          className="bg-[#00623B]">
+          Back to Feed
+        </Button>
+      </div>
+    );
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const articleSchema = generateArticleSchema(post, post.author, baseUrl);
+
   return (
     <div className="max-w-3xl mx-auto p-4">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+
       <Button
         type="text"
         icon={<ArrowLeftOutlined />}
@@ -449,8 +543,22 @@ export default function PostPage() {
           comments={comments}
           currentUser={currentUser}
           onAddComment={handleAddComment}
+          onLikeComment={handleLikeComment}
+          onDislikeComment={handleDislikeComment}
           onEditComment={handleEditComment}
           onDeleteComment={handleDeleteComment}
+          onShowLoginModal={() => {
+            modal.confirm({
+              title: "Login Required",
+              content:
+                "You need to be logged in to interact with comments. Would you like to login now?",
+              okText: "Login",
+              cancelText: "Cancel",
+              onOk: () => {
+                router.push("/login");
+              },
+            });
+          }}
         />
       )}
     </div>

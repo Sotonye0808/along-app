@@ -1,0 +1,219 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User Model
+model User {
+  id        String   @id @default(cuid())
+  userName  String   @unique
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  avatar    String?
+  bio       String?
+  location  String?
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  posts                Post[]
+  comments             Comment[]
+  likes                Like[]
+  bookmarks            Bookmark[]
+  notifications        NotificationRecipient[]
+  notificationsAsActor Notification[]          @relation("NotificationActor")
+  activities           UserActivity[]
+
+  // Self-referential many-to-many for following
+  following Follow[] @relation("UserFollowing")
+  followers Follow[] @relation("UserFollowers")
+
+  @@index([userName])
+  @@index([email])
+  @@index([createdAt])
+}
+
+// Follow Model (Self-referential many-to-many)
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@index([createdAt])
+}
+
+// Post Model
+model Post {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  routes    Json // Array of Route objects
+  images    String[] // Array of Cloudinary URLs
+  tags      String[]
+  likes     Int      @default(0)
+  dislikes  Int      @default(0)
+  comments  Int      @default(0)
+  bookmarks Int      @default(0)
+  views     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user           User[]
+  postComments   Comment[]
+  postLikes      Like[]
+  postBookmarks  Bookmark[]
+  notifications  Notification[]
+  userActivities UserActivity[]
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@index([tags])
+}
+
+// Comment Model
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  text      String
+  likes     Int      @default(0)
+  dislikes  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@index([postId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Like Model
+model Like {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  type      LikeType
+  createdAt DateTime @default(now())
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum LikeType {
+  LIKE
+  DISLIKE
+}
+
+// Bookmark Model
+model Bookmark {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Notification Model
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  actorId   String // User who triggered the notification
+  postId    String?
+  commentId String?
+  message   String
+  createdAt DateTime         @default(now())
+
+  // Relations
+  actor      User                    @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  post       Post?                   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment    Comment?                @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  recipients NotificationRecipient[]
+
+  @@index([actorId])
+  @@index([createdAt(sort: Desc)])
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  MENTION
+}
+
+// NotificationRecipient Model (Many-to-many between Notification and User)
+model NotificationRecipient {
+  id             String   @id @default(cuid())
+  notificationId String
+  userId         String
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  // Relations
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, userId])
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+// UserActivity Model (For feed algorithm)
+model UserActivity {
+  id        String       @id @default(cuid())
+  userId    String
+  type      ActivityType
+  postId    String?
+  tagId     String?
+  score     Float        @default(1.0)
+  createdAt DateTime     @default(now())
+
+  // Relations
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([type])
+}
+
+enum ActivityType {
+  VIEW
+  LIKE
+  COMMENT
+  BOOKMARK
+  SHARE
+}

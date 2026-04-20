@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import {
   Card,
   Avatar,
@@ -31,6 +31,7 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import Link from "next/link";
+import Image from "next/image";
 import { formatDate, formatNumber } from "@/lib/utils/format";
 
 interface PostCardProps {
@@ -68,7 +69,7 @@ const statusConfig = {
   },
   unverified: {
     icon: ExclamationCircleOutlined,
-    color: "text-gray-500",
+    color: "text-gray-500 dark:text-gray-400",
     tooltip: "Unverified Route",
   },
   pending: {
@@ -83,7 +84,7 @@ const statusConfig = {
   },
 };
 
-export function PostCard({
+export const PostCard = memo(function PostCard({
   post,
   author,
   currentUserId,
@@ -102,8 +103,24 @@ export function PostCard({
 }: PostCardProps) {
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loadingAction, setLoadingAction] = useState<
+    "like" | "dislike" | "bookmark" | "share" | "follow" | null
+  >(null);
 
   const isOwnPost = currentUserId === post.userId;
+
+  const handleActionWithLoading = async (
+    action: "like" | "dislike" | "bookmark" | "share" | "follow",
+    callback?: (...args: any[]) => void,
+    ...args: any[]
+  ) => {
+    setLoadingAction(action);
+    try {
+      await callback?.(...args);
+    } finally {
+      setLoadingAction(null);
+    }
+  };
 
   const menuItems: MenuProps["items"] = [
     ...(isOwnPost
@@ -169,7 +186,7 @@ export function PostCard({
           <div className="flex-1">
             <div className="flex items-center justify-between gap-2 mb-2">
               <Link href={`/profile/${author.userName}`}>
-                <h3 className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 hover:text-[#00623B] dark:hover:text-[#00a862] cursor-pointer">
                   {author.firstName} {author.lastName}
                 </h3>
               </Link>
@@ -177,17 +194,23 @@ export function PostCard({
                 <Button
                   type={isFollowing ? "default" : "primary"}
                   size="small"
-                  onClick={() => onFollow(author.id)}
+                  onClick={() =>
+                    handleActionWithLoading("follow", onFollow, author.id)
+                  }
+                  loading={loadingAction === "follow"}
+                  disabled={
+                    loadingAction !== null && loadingAction !== "follow"
+                  }
                   className={
                     isFollowing
-                      ? "border-[#00623B] text-[#00623B] text-sm hover:bg-gray-50"
+                      ? "border-[#00623B] dark:border-[#00a862] text-[#00623B] dark:text-[#00a862] text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                       : "bg-[#00623B] hover:bg-[#004d2e]"
                   }>
                   {isFollowing ? "Following" : "Follow"}
                 </Button>
               )}
             </div>
-            <div className="flex items-center justify-between gap-2 text-xs text-gray-500">
+            <div className="flex items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400">
               <span>@{author.userName}</span>
               <span>•</span>
               <span>{formatDate(post.createdAt)}</span>
@@ -200,35 +223,39 @@ export function PostCard({
       </div>
 
       {/* Post Title */}
-      <h2 className="text-xl font-bold text-gray-900 mb-4">{post.title}</h2>
+      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        {post.title}
+      </h2>
 
       {/* Routes */}
-      <div className="space-y-4 mb-4">
+      <div className="space-y-1 mb-4">
         {post.routes.map((route, index) => {
           const StatusIcon = statusConfig[route.status].icon;
           return (
             <div key={route.id} className="flex gap-3">
               {/* Route number indicator */}
               <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-[#00623B] text-white flex items-center justify-center font-semibold text-sm">
+                <div className="w-8 h-8 mb-1 rounded-full bg-[#00623B] text-white flex items-center justify-center font-semibold text-sm">
                   {index + 1}
                 </div>
                 {index < post.routes.length - 1 && (
-                  <div className="w-0.5 h-full bg-gray-300 my-1 flex-1" />
+                  <div className="w-0.5 h-full bg-gray-300 dark:bg-gray-600 my-1 flex-1" />
                 )}
               </div>
 
               {/* Route content */}
               <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
-                  <p className="text-gray-800 flex-1">{route.text}</p>
+                <div className="flex items-start justify-between">
+                  <p className="text-gray-800 dark:text-gray-200 flex-1">
+                      {route.text}
+                  </p>
                   <Tooltip
-                    className={`overwrite-anticon-color ${
+                    className={`${
                       statusConfig[route.status].color
                     }`}
                     title={statusConfig[route.status].tooltip}>
                     <StatusIcon
-                      className={`text-sm ml-2 overwrite-anticon-color ${
+                      className={`text-sm ml-2 ${
                         statusConfig[route.status].color
                       }`}
                     />
@@ -290,10 +317,14 @@ export function PostCard({
               key={index}
               className="relative aspect-video rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => handleImageClick(index)}>
-              <img
+              <Image
                 src={image}
                 alt={`${post.title} - Image ${index + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover"
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
               />
               {index === 3 && post.images.length > 4 && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -346,7 +377,10 @@ export function PostCard({
       <Divider className="my-3" />
 
       {/* Post Actions */}
-      <div className="flex items-center justify-between text-gray-600">
+      <div
+        className="flex items-center justify-between text-gray-600 dark:text-gray-400"
+        role="group"
+        aria-label="Post actions">
         <Space>
           <Button
             type="text"
@@ -357,8 +391,16 @@ export function PostCard({
                 <LikeOutlined />
               )
             }
-            onClick={() => onLike?.(post.id)}
-            className={isLiked ? "text-[#00623B]" : ""}>
+            onClick={() => handleActionWithLoading("like", onLike, post.id)}
+            loading={loadingAction === "like"}
+            disabled={loadingAction !== null && loadingAction !== "like"}
+            className={isLiked ? "text-[#00623B]" : ""}
+            aria-label={
+              isLiked
+                ? `Unlike post. ${post.likes} likes`
+                : `Like post. ${post.likes} likes`
+            }
+            aria-pressed={isLiked}>
             {formatNumber(post.likes)}
           </Button>
 
@@ -371,15 +413,27 @@ export function PostCard({
                 <DislikeOutlined />
               )
             }
-            onClick={() => onDislike?.(post.id)}
-            className={isDisliked ? "text-red-500" : ""}>
+            onClick={() =>
+              handleActionWithLoading("dislike", onDislike, post.id)
+            }
+            loading={loadingAction === "dislike"}
+            disabled={loadingAction !== null && loadingAction !== "dislike"}
+            className={isDisliked ? "text-red-500" : ""}
+            aria-label={
+              isDisliked
+                ? `Remove dislike. ${post.dislikes} dislikes`
+                : `Dislike post. ${post.dislikes} dislikes`
+            }
+            aria-pressed={isDisliked}>
             {formatNumber(post.dislikes)}
           </Button>
 
           <Button
             type="text"
             icon={<CommentOutlined />}
-            onClick={() => onComment?.(post.id)}>
+            onClick={() => onComment?.(post.id)}
+            disabled={loadingAction !== null}
+            aria-label={`View comments. ${post.comments} comments`}>
             {formatNumber(post.comments)}
           </Button>
         </Space>
@@ -394,15 +448,25 @@ export function PostCard({
                 <BookOutlined />
               )
             }
-            onClick={() => onBookmark?.(post.id)}
+            onClick={() =>
+              handleActionWithLoading("bookmark", onBookmark, post.id)
+            }
+            loading={loadingAction === "bookmark"}
+            disabled={loadingAction !== null && loadingAction !== "bookmark"}
             className={isBookmarked ? "text-[#00623B]" : ""}
+            aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
+            aria-pressed={isBookmarked}
           />
           <Button
             type="text"
             icon={<ShareAltOutlined />}
-            onClick={() => onShare?.(post.id)}></Button>
+            onClick={() => handleActionWithLoading("share", onShare, post.id)}
+            loading={loadingAction === "share"}
+            disabled={loadingAction !== null && loadingAction !== "share"}
+            aria-label="Share post"
+          />
         </Space>
       </div>
     </Card>
   );
-}
+});

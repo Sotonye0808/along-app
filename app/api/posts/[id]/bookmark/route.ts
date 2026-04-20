@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/data/database';
+import { prisma } from '@/lib/db/prisma';
+import { requireAuth } from '@/lib/utils/auth-server';
+import { rateLimitByUser } from '@/lib/utils/rateLimiter';
 
 // GET /api/posts/[id]/bookmark - Check if user has bookmarked this post
 export async function GET(
@@ -8,23 +10,32 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+        const userId = await requireAuth(request);
 
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Missing userId' },
-                { status: 400 }
-            );
-        }
-
-        const bookmark = await db.getBookmark(id, userId);
+        const bookmark = await prisma.bookmark.findUnique({
+            where: {
+                postId_userId: {
+                    postId: id,
+                    userId
+                }
+            },
+            select: {
+                id: true,
+                createdAt: true
+            }
+        });
 
         return NextResponse.json(
             { data: bookmark },
             { status: 200 }
         );
     } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') {
+            return NextResponse.json(
+                { error: 'Authentication required' },
+                { status: 401 }
+            );
+        }
         console.error('Error checking bookmark:', error);
         return NextResponse.json(
             { error: 'Failed to check bookmark' },
@@ -40,35 +51,89 @@ export async function POST(
 ) {
     try {
         const { id } = await params;
-        const body = await request.json();
-        const { userId } = body;
+        const userId = await requireAuth(request);
 
-        if (!userId) {
+        // Rate limit check (100 bookmarks per hour per user)
+        const rateLimit = await rateLimitByUser(userId, { maxRequests: 100, windowSeconds: 3600 });
+
+        if (!rateLimit.success) {
             return NextResponse.json(
-                { error: 'Missing userId' },
-                { status: 400 }
+                { error: 'Too many bookmark actions. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
+            );
+        }
+
+        // Verify post exists
+        const post = await prisma.post.findUnique({
+            where: { id },
+            select: { id: true }
+        });
+
+        if (!post) {
+            return NextResponse.json(
+                { error: 'Post not found' },
+                { status: 404 }
             );
         }
 
         // Check if bookmark already exists
-        const existingBookmark = await db.getBookmark(id, userId);
+        const existingBookmark = await prisma.bookmark.findUnique({
+            where: {
+                postId_userId: {
+                    postId: id,
+                    userId
+                }
+            }
+        });
 
         if (existingBookmark) {
             // Remove bookmark
-            await db.deleteBookmark(id, userId);
+            await prisma.bookmark.delete({
+                where: {
+                    postId_userId: {
+                        postId: id,
+                        userId
+                    }
+                }
+            });
             return NextResponse.json(
                 { message: 'Bookmark removed', action: 'removed' },
                 { status: 200 }
             );
         } else {
-            // Create bookmark
-            await db.createBookmark({ postId: id, userId });
+            // Add bookmark
+            await prisma.bookmark.create({
+                data: {
+                    postId: id,
+                    userId
+                }
+            });
+
+            // Track user activity
+            await prisma.userActivity.create({
+                data: {
+                    userId,
+                    type: 'BOOKMARK',
+                    postId: id,
+                    score: 3
+                }
+            }).catch(err => console.error('Failed to track activity:', err));
+
             return NextResponse.json(
-                { message: 'Bookmark created', action: 'created' },
+                { message: 'Bookmark added', action: 'added' },
                 { status: 201 }
             );
         }
     } catch (error) {
+        if (error instanceof Error && error.message === 'Unauthorized') {
+            return NextResponse.json(
+                { error: 'Authentication required' },
+                { status: 401 }
+            );
+        }
         console.error('Error toggling bookmark:', error);
         return NextResponse.json(
             { error: 'Failed to toggle bookmark' },

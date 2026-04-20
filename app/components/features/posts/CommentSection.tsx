@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import {
   Modal,
   Input,
@@ -36,9 +36,10 @@ interface CommentSectionProps {
   onDislikeComment?: (commentId: string) => void;
   onEditComment?: (commentId: string, newText: string) => Promise<void>;
   onDeleteComment?: (commentId: string) => Promise<void>;
+  onShowLoginModal?: () => void;
 }
 
-export function CommentSection({
+export const CommentSection = memo(function CommentSection({
   open,
   onClose,
   postId,
@@ -49,6 +50,7 @@ export function CommentSection({
   onDislikeComment,
   onEditComment,
   onDeleteComment,
+  onShowLoginModal,
 }: CommentSectionProps) {
   const { message, notification } = App.useApp();
   const [commentText, setCommentText] = useState("");
@@ -102,36 +104,53 @@ export function CommentSection({
 
     const key = `delete-comment-${commentId}`;
     let undoClicked = false;
+    let countdown = 10;
 
-    notification.open({
-      key,
-      message: "Comment deleted",
-      description: "Undo within 10 seconds",
-      duration: 10,
-      btn: (
-        <Button
-          type="primary"
-          size="small"
-          onClick={() => {
-            undoClicked = true;
-            notification.destroy(key);
-            message.info("Deletion cancelled");
-          }}>
-          Undo
-        </Button>
-      ),
-      onClose: async () => {
+    const updateNotification = () => {
+      notification.open({
+        key,
+        message: "Comment deleted",
+        description: `Undo within ${countdown} second${
+          countdown !== 1 ? "s" : ""
+        }`,
+        duration: null,
+        btn: (
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => {
+              undoClicked = true;
+              notification.destroy(key);
+              clearInterval(interval);
+              message.info("Deletion cancelled");
+            }}>
+            Undo
+          </Button>
+        ),
+      });
+    };
+
+    updateNotification();
+
+    const interval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        updateNotification();
+      } else {
+        clearInterval(interval);
+        notification.destroy(key);
         if (!undoClicked) {
-          try {
-            await onDeleteComment(commentId);
-            message.success("Comment deleted permanently");
-          } catch (error) {
-            console.error("Failed to delete comment:", error);
-            message.error("Failed to delete comment");
-          }
+          onDeleteComment(commentId)
+            .then(() => {
+              message.success("Comment deleted permanently");
+            })
+            .catch((error) => {
+              console.error("Failed to delete comment:", error);
+              message.error("Failed to delete comment");
+            });
         }
-      },
-    });
+      }
+    }, 1000);
   };
 
   return (
@@ -145,12 +164,18 @@ export function CommentSection({
       onCancel={onClose}
       footer={null}
       width={600}>
-      <div className="max-h-[60vh] overflow-y-auto">
+      <div
+        className="max-h-[60vh] overflow-y-auto"
+        role="region"
+        aria-label="Comments section">
         {/* Add Comment */}
         {currentUser && (
-          <div className="sticky top-0 bg-white z-10 pb-4 mb-4 border-b">
+          <div className="sticky top-0 bg-transparent z-10 pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex gap-3">
-              <Avatar src={currentUser.avatar} size={40}>
+              <Avatar
+                src={currentUser.avatar}
+                size={40}
+                alt={`${currentUser.firstName} ${currentUser.lastName}`}>
                 {currentUser.firstName[0]}
                 {currentUser.lastName[0]}
               </Avatar>
@@ -166,6 +191,7 @@ export function CommentSection({
                     e.preventDefault();
                     handleSubmit();
                   }}
+                  aria-label="Write a comment"
                 />
                 <div className="flex justify-end mt-2">
                   <Button
@@ -174,7 +200,8 @@ export function CommentSection({
                     onClick={handleSubmit}
                     loading={loading}
                     disabled={!commentText.trim()}
-                    className="bg-[#00623B]">
+                    className="bg-[#00623B]"
+                    aria-label="Submit comment">
                     Comment
                   </Button>
                 </div>
@@ -191,10 +218,13 @@ export function CommentSection({
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4" role="list" aria-label="List of comments">
             {comments.map((comment) => (
-              <div key={comment.id} className="flex gap-3">
-                <Avatar src={comment.author.avatar} size={40}>
+              <div key={comment.id} className="flex gap-3" role="listitem">
+                <Avatar
+                  src={comment.author.avatar}
+                  size={40}
+                  alt={`${comment.author.firstName} ${comment.author.lastName}`}>
                   {comment.author.firstName[0]}
                   {comment.author.lastName[0]}
                 </Avatar>
@@ -227,17 +257,17 @@ export function CommentSection({
                   ) : (
                     // View Mode
                     <>
-                      <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="bg-gray-50 dark:bg-gray-900/60 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900">
+                            <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
                               {comment.author.firstName}{" "}
                               {comment.author.lastName}
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               @{comment.author.userName}
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
                               • {formatDate(comment.createdAt)}
                             </span>
                           </div>
@@ -266,12 +296,14 @@ export function CommentSection({
                                 type="text"
                                 size="small"
                                 icon={<MoreOutlined />}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                               />
                             </Dropdown>
                           )}
                         </div>
-                        <p className="text-gray-800 text-sm">{comment.text}</p>
+                        <p className="text-gray-800 dark:text-gray-200 text-sm">
+                          {comment.text}
+                        </p>
                       </div>
 
                       {/* Comment Actions */}
@@ -280,14 +312,26 @@ export function CommentSection({
                           type="text"
                           size="small"
                           icon={<LikeOutlined />}
-                          onClick={() => onLikeComment?.(comment.id)}>
+                          onClick={() => {
+                            if (!currentUser && onShowLoginModal) {
+                              onShowLoginModal();
+                            } else {
+                              onLikeComment?.(comment.id);
+                            }
+                          }}>
                           {comment.likes > 0 && formatNumber(comment.likes)}
                         </Button>
                         <Button
                           type="text"
                           size="small"
                           icon={<DislikeOutlined />}
-                          onClick={() => onDislikeComment?.(comment.id)}>
+                          onClick={() => {
+                            if (!currentUser && onShowLoginModal) {
+                              onShowLoginModal();
+                            } else {
+                              onDislikeComment?.(comment.id);
+                            }
+                          }}>
                           {comment.dislikes > 0 &&
                             formatNumber(comment.dislikes)}
                         </Button>
@@ -302,4 +346,4 @@ export function CommentSection({
       </div>
     </Modal>
   );
-}
+});

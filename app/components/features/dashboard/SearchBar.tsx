@@ -10,16 +10,6 @@ import { formatNumber } from "@/lib/utils/format";
 
 const { Search } = Input;
 
-interface SearchResult {
-  type: "user" | "post" | "tag";
-  id: string;
-  title: string;
-  subtitle?: string;
-  avatar?: string;
-  link: string;
-  metadata?: string;
-}
-
 export function SearchBar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -94,7 +84,9 @@ export function SearchBar() {
         )
         .slice(0, 5)
         .map((post) => {
-          const author = usersResponse.data.find((u) => u.id === post.userId);
+          const author = (usersResponse.data || []).find(
+            (u) => u.id === post.userId
+          );
           return {
             type: "post" as const,
             id: post.id,
@@ -109,7 +101,7 @@ export function SearchBar() {
 
       // Search tags
       const allTags = new Set<string>();
-      postsResponse.data.forEach((post) => {
+      (postsResponse.data || []).forEach((post) => {
         post.tags.forEach((tag) => {
           if (tag.toLowerCase().includes(searchLower)) {
             allTags.add(tag);
@@ -120,7 +112,7 @@ export function SearchBar() {
       const matchingTags = Array.from(allTags)
         .slice(0, 3)
         .map((tag) => {
-          const postsWithTag = postsResponse.data.filter((post) =>
+          const postsWithTag = (postsResponse.data || []).filter((post) =>
             post.tags.includes(tag)
           );
           return {
@@ -189,7 +181,7 @@ export function SearchBar() {
         );
       case "tag":
         return (
-          <div className="w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center text-gray-600">
+          <div className="w-10 h-10 rounded-md bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300">
             #
           </div>
         );
@@ -203,11 +195,11 @@ export function SearchBar() {
         value={query}
         onChange={handleSearchChange}
         onFocus={() => query && setShowResults(true)}
-        prefix={<SearchOutlined className="text-gray-400" />}
+        prefix={<SearchOutlined className="text-gray-400 dark:text-gray-500" />}
         suffix={
           query && (
             <CloseOutlined
-              className="text-gray-400 cursor-pointer hover:text-gray-600"
+              className="text-gray-400 dark:text-gray-500 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300"
               onClick={handleClear}
             />
           )
@@ -218,7 +210,7 @@ export function SearchBar() {
 
       {/* Search Results Dropdown */}
       {showResults && (query || results.length > 0) && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[500px] overflow-y-auto z-[9999]">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-[500px] overflow-y-auto z-[9999]">
           {loading ? (
             <div className="flex justify-center items-center py-8">
               <Spin />
@@ -235,7 +227,7 @@ export function SearchBar() {
               {/* Users Section */}
               {results.filter((r) => r.type === "user").length > 0 && (
                 <div className="mb-2">
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                     Users
                   </div>
                   {results
@@ -245,18 +237,18 @@ export function SearchBar() {
                         key={result.id}
                         href={result.link}
                         onClick={handleResultClick}
-                        className="block px-4 py-3 hover:bg-gray-50 transition-colors">
+                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <div className="flex items-center gap-3">
                           {getResultIcon(result)}
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 truncate">
+                            <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
                               {result.title}
                             </div>
-                            <div className="text-sm text-gray-500 truncate">
+                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
                               {result.subtitle}
                             </div>
                             {result.metadata && (
-                              <div className="text-xs text-gray-400 mt-1">
+                              <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                                 📍 {result.metadata}
                               </div>
                             )}
@@ -270,7 +262,7 @@ export function SearchBar() {
               {/* Posts Section */}
               {results.filter((r) => r.type === "post").length > 0 && (
                 <div className="mb-2">
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                     Posts
                   </div>
                   {results
@@ -280,19 +272,19 @@ export function SearchBar() {
                         key={result.id}
                         href={result.link}
                         onClick={handleResultClick}
-                        className="block px-4 py-3 hover:bg-gray-50 transition-colors">
+                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <div className="flex items-center gap-3">
                           {getResultIcon(result)}
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 truncate">
+                            <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
                               {result.title}
                             </div>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-sm text-gray-500">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
                                 {result.subtitle}
                               </span>
                               {result.metadata && (
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
                                   • {result.metadata}
                                 </span>
                               )}
@@ -307,7 +299,7 @@ export function SearchBar() {
               {/* Tags Section */}
               {results.filter((r) => r.type === "tag").length > 0 && (
                 <div>
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                     Tags
                   </div>
                   {results
@@ -317,14 +309,14 @@ export function SearchBar() {
                         key={result.id}
                         href={result.link}
                         onClick={handleResultClick}
-                        className="block px-4 py-3 hover:bg-gray-50 transition-colors">
+                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <div className="flex items-center gap-3">
                           {getResultIcon(result)}
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-[#00623B]">
+                            <div className="font-medium text-[#00623B] dark:text-[#00a862]">
                               {result.title}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
                               {result.subtitle}
                             </div>
                           </div>

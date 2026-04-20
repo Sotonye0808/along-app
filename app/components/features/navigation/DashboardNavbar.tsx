@@ -13,13 +13,18 @@ import {
 } from "@ant-design/icons";
 import { Badge } from "antd";
 import { APP_ROUTES } from "@/lib/constants";
+import { useNotifications } from "@/lib/hooks/useNotifications";
 
 interface NavItem {
   href: string;
   icon: React.ReactNode;
   label: string;
-  badge?: number;
+  badgeKey?: string;
   showOnMobile?: boolean;
+}
+
+interface DashboardNavbarProps {
+  userId?: string;
 }
 
 const navItems: NavItem[] = [
@@ -30,34 +35,36 @@ const navItems: NavItem[] = [
     showOnMobile: true,
   },
   {
+    href: APP_ROUTES.BOOKMARKS,
+    icon: <BookOutlined />,
+    label: "Bookmarks",
+    showOnMobile: true,
+  },
+  /* {
     href: APP_ROUTES.EXPLORE,
     icon: <CompassOutlined />,
     label: "Explore",
     showOnMobile: true,
   },
+  // REDUNDANT
   {
     href: "/notifications",
     icon: <BellOutlined />,
     label: "Notifications",
-    badge: 3,
+    badgeKey: "notifications",
     showOnMobile: false,
-  },
-  {
-    href: APP_ROUTES.BOOKMARKS,
-    icon: <BookOutlined />,
-    label: "Bookmarks",
-    showOnMobile: true,
   },
   {
     href: APP_ROUTES.MARKETPLACE,
     icon: <ShoppingOutlined />,
     label: "Marketplace",
     showOnMobile: true,
-  },
+  }, */
 ];
 
-export function DashboardNavbar() {
+export function DashboardNavbar({ userId }: DashboardNavbarProps) {
   const pathname = usePathname();
+ 
 
   const isActive = (href: string) => {
     if (href === APP_ROUTES.DASHBOARD) {
@@ -69,7 +76,7 @@ export function DashboardNavbar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <nav className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-screen md:w-20 md:bg-white md:border-r md:border-gray-200 md:py-4 md:items-center md:gap-6 z-40">
+      <nav className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-screen md:w-20 md:bg-white dark:md:bg-gray-900 md:border-r md:border-gray-200 dark:md:border-gray-800 md:py-4 md:items-center md:gap-6 z-40 transition-colors duration-200">
         {navItems.map((item) => {
           const active = isActive(item.href);
 
@@ -79,11 +86,11 @@ export function DashboardNavbar() {
               href={item.href}
               className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all ${
                 active
-                  ? "bg-[#00623B] text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-[#00623B] dark:bg-[#00a862] text-white shadow-md"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#00623B] dark:hover:text-[#00a862]"
               }`}
               title={item.label}>
-              <Badge count={item.badge} size="small" offset={[10, -5]}>
+              <Badge size="small" offset={[10, -5]}>
                 <span className="text-2xl">{item.icon}</span>
               </Badge>
             </Link>
@@ -92,7 +99,7 @@ export function DashboardNavbar() {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 flex justify-around items-center z-40">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-2 px-4 flex justify-around items-center z-40 transition-colors duration-200">
         {navItems
           .filter((item) => item.showOnMobile)
           .map((item) => {
@@ -103,9 +110,11 @@ export function DashboardNavbar() {
                 key={item.href}
                 href={item.href}
                 className={`flex flex-col items-center justify-center gap-1 py-2 px-4 rounded-lg transition-all ${
-                  active ? "text-[#00623B]" : "text-gray-600"
+                  active
+                    ? "text-[#00623B] dark:text-[#00a862]"
+                    : "text-gray-600 dark:text-gray-400"
                 }`}>
-                <Badge count={item.badge} size="small" offset={[5, 0]}>
+                <Badge size="small" offset={[5, 0]}>
                   <span className="text-2xl">{item.icon}</span>
                 </Badge>
                 <span className="text-xs font-medium">{item.label}</span>
