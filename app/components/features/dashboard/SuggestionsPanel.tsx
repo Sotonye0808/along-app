@@ -31,7 +31,7 @@ export function SuggestionsPanel() {
   const calculateSuggestionScore = (
     user: User,
     currentUser: User | null,
-    allPosts: Post[]
+    allPosts: Post[],
   ): SuggestionScore => {
     let score = 0;
     const reasons: string[] = [];
@@ -66,10 +66,10 @@ export function SuggestionsPanel() {
 
       // Check if current user interacted with this user's posts
       const hasLikedUserPosts = userPosts.some((post) =>
-        currentUserLikes.includes(post.id)
+        currentUserLikes.includes(post.id),
       );
       const hasBookmarkedUserPosts = userPosts.some((post) =>
-        currentUserBookmarks.includes(post.id)
+        currentUserBookmarks.includes(post.id),
       );
 
       if (hasLikedUserPosts) {
@@ -83,12 +83,12 @@ export function SuggestionsPanel() {
 
       // Check for common tags (20 points)
       const currentUserPosts = allPosts.filter(
-        (p) => p.userId === currentUser.id
+        (p) => p.userId === currentUser.id,
       );
       const currentUserTags = new Set(currentUserPosts.flatMap((p) => p.tags));
       const userTags = new Set(userPosts.flatMap((p) => p.tags));
       const commonTags = Array.from(currentUserTags).filter((tag) =>
-        userTags.has(tag)
+        userTags.has(tag),
       );
 
       if (commonTags.length > 0) {
@@ -100,7 +100,7 @@ export function SuggestionsPanel() {
       const currentUserFollowing = new Set(currentUser.following || []);
       const userFollowing = new Set(user.following || []);
       const mutualCount = Array.from(currentUserFollowing).filter((id) =>
-        userFollowing.has(id)
+        userFollowing.has(id),
       ).length;
 
       if (mutualCount > 0) {
@@ -129,16 +129,16 @@ export function SuggestionsPanel() {
       const currentUserFollowing = new Set(currentUser?.following || []);
       const candidateUsers = (usersResponse.data || []).filter(
         (user) =>
-          user.id !== currentUser?.id && !currentUserFollowing.has(user.id)
+          user.id !== currentUser?.id && !currentUserFollowing.has(user.id),
       );
 
       // Calculate scores for each user
       // Handle both array response and wrapped {data: []} response
-      const allPosts = Array.isArray(postsResponse.data) 
-        ? postsResponse.data 
-        : (postsResponse.data || []);
+      const allPosts = Array.isArray(postsResponse.data)
+        ? postsResponse.data
+        : postsResponse.data || [];
       const scoredUsers = candidateUsers.map((user) =>
-        calculateSuggestionScore(user, currentUser, allPosts)
+        calculateSuggestionScore(user, currentUser, allPosts),
       );
 
       // Sort by score and take top 5
@@ -178,8 +178,8 @@ export function SuggestionsPanel() {
         prev.map((user) =>
           user.id === userId
             ? { ...user, followers: (user.followers || 0) + 1 }
-            : user
-        )
+            : user,
+        ),
       );
 
       // Make API call with userId in body
@@ -198,8 +198,8 @@ export function SuggestionsPanel() {
         prev.map((user) =>
           user.id === userId
             ? { ...user, followers: (user.followers || 0) - 1 }
-            : user
-        )
+            : user,
+        ),
       );
     }
   };
@@ -217,8 +217,7 @@ export function SuggestionsPanel() {
   return (
     <Card
       title={<div className="font-semibold">Suggested for you</div>}
-      className="h-fit"
-      variant="outlined">
+      className="h-fit">
       {suggestedUsers.length === 0 ? (
         <Empty
           description="No suggestions"

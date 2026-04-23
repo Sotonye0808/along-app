@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "target": "es2015",
     "allowJs": true,
     "skipLibCheck": true,
@@ -15,34 +11,22 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "downlevelIteration": true,
-    "typeRoots": [
-      "node_modules/@types",
-      "./app/lib/types"
-    ],
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@/app/*": [
-        "./app/*"
-      ],
-      "@/lib/*": [
-        "./app/lib/*"
-      ],
-      "@/components/*": [
-        "./app/components/*"
-      ],
-      "@/public/*": [
-        "./public/*"
-      ]
+      "@/*": ["./*"],
+      "@/app/*": ["./app/*"],
+      "@/lib/*": ["./app/lib/*"],
+      "@/components/*": ["./app/components/*"],
+      "@/public/*": ["./public/*"],
+      "antd": ["./node_modules/antd/es/index.d.ts"],
+      "antd/es/*": ["./node_modules/antd/es/*"]
     }
   },
   "include": [
@@ -52,11 +36,7 @@
     ".next/types/**/*.ts",
     "./app/lib/types/types/**/*.d.ts",
     "./app/lib/types/interfaces/**/*.d.ts",
-    ".next\\dev/types/**/*.ts",
-    ".next\\dev/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

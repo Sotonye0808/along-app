@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 type Props = {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const username = params.username;
+  const { username } = await params;
 
   try {
     // Fetch all users to find the one with matching username
@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/users`,
       {
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {

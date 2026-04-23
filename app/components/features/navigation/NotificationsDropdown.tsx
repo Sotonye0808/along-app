@@ -133,7 +133,7 @@ export function NotificationsDropdown({ userId }: NotificationsDropdownProps) {
 
   return (
     <Dropdown
-      popupRender={() => dropdownContent}
+      dropdownRender={() => dropdownContent}
       trigger={["click"]}
       open={dropdownOpen}
       onOpenChange={setDropdownOpen}

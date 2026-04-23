@@ -168,9 +168,7 @@ export const PostCard = memo(function PostCard({
   };
 
   return (
-    <Card
-      className="mb-4 hover:shadow-md transition-shadow"
-      variant="borderless">
+    <Card className="mb-4 hover:shadow-md transition-shadow">
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -247,12 +245,10 @@ export const PostCard = memo(function PostCard({
               <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <p className="text-gray-800 dark:text-gray-200 flex-1">
-                      {route.text}
+                    {route.text}
                   </p>
                   <Tooltip
-                    className={`${
-                      statusConfig[route.status].color
-                    }`}
+                    className={`${statusConfig[route.status].color}`}
                     title={statusConfig[route.status].tooltip}>
                     <StatusIcon
                       className={`text-sm ml-2 ${
@@ -309,8 +305,8 @@ export const PostCard = memo(function PostCard({
             post.images.length === 1
               ? "grid-cols-1"
               : post.images.length === 2
-              ? "grid-cols-2"
-              : "grid-cols-2"
+                ? "grid-cols-2"
+                : "grid-cols-2"
           }`}>
           {post.images.slice(0, 4).map((image, index) => (
             <div

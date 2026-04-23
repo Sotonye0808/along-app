@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const postId = params.id;
+  const { id: postId } = await params;
 
   try {
     // Fetch post data for metadata
@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }/api/posts/${postId}`,
       {
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }/api/users/${post.userId}`,
       {
         cache: "no-store",
-      }
+      },
     );
 
     const author = authorResponse.ok
