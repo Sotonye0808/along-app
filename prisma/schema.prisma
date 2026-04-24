@@ -10,20 +10,65 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum RewardTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum BugStatus {
+  OPEN
+  TRIAGED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum BugCategory {
+  UI
+  ROUTING
+  AUTH
+  PERFORMANCE
+  DATA
+  NOTIFICATIONS
+  OTHER
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // User Model
 model User {
-  id        String   @id @default(cuid())
-  userName  String   @unique
-  firstName String
-  lastName  String
-  email     String   @unique
-  password  String
-  avatar    String?
-  bio       String?
-  location  String?
-  verified  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String     @id @default(cuid())
+  userName     String     @unique
+  firstName    String
+  lastName     String
+  email        String     @unique
+  password     String
+  avatar       String?
+  bio          String?
+  location     String?
+  verified     Boolean    @default(false)
+  role         UserRole   @default(USER)
+  rewardPoints Int        @default(0)
+  rewardTier   RewardTier @default(BRONZE)
+  inviteCode   String?    @unique
+  invitedById  String?
+  googleId     String?    @unique
+  avatarConfig Json?
+  lastKnownLat Float?
+  lastKnownLng Float?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   // Relations
   posts                Post[]
@@ -33,13 +78,24 @@ model User {
   notifications        NotificationRecipient[]
   notificationsAsActor Notification[]          @relation("NotificationActor")
   activities           UserActivity[]
+  bugReports           BugReport[]             @relation("BugReporter")
+  reviewedBugReports   BugReport[]             @relation("BugReviewer")
+  authoredReviews      UserReview[]            @relation("ReviewAuthor")
+  receivedReviews      UserReview[]            @relation("ReviewTarget")
+
+  invitedBy    User?  @relation("UserInvites", fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedUsers User[] @relation("UserInvites")
 
   // Self-referential many-to-many for following
-  following Follow[] @relation("UserFollowing")
-  followers Follow[] @relation("UserFollowers")
+  following       Follow[]         @relation("UserFollowing")
+  followers       Follow[]         @relation("UserFollowers")
+  analyticsEvents AnalyticsEvent[]
 
   @@index([userName])
   @@index([email])
+  @@index([role])
+  @@index([rewardTier])
+  @@index([invitedById])
   @@index([createdAt])
 }
 
@@ -61,29 +117,48 @@ model Follow {
 
 // Post Model
 model Post {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  routes    Json // Array of Route objects
-  images    String[] // Array of Cloudinary URLs
-  tags      String[]
-  likes     Int      @default(0)
-  dislikes  Int      @default(0)
-  comments  Int      @default(0)
-  bookmarks Int      @default(0)
-  views     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String
+  title           String
+  routes          Json // Array of Route objects
+  images          String[] // Array of Cloudinary URLs
+  tags            String[]
+  likes           Int      @default(0)
+  dislikes        Int      @default(0)
+  comments        Int      @default(0)
+  bookmarks       Int      @default(0)
+  validityScore   Int      @default(0)
+  validityTier    String?
+  startLat        Float?
+  startLng        Float?
+  endLat          Float?
+  endLng          Float?
+  region          String?
+  totalDistanceKm Float?
+  estimatedMins   Int?
+  isPlatformGen   Boolean  @default(false)
+  views           Int      @default(0)
+  shares          Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relations
-  user           User[]
-  postComments   Comment[]
-  postLikes      Like[]
-  postBookmarks  Bookmark[]
-  notifications  Notification[]
-  userActivities UserActivity[]
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postComments    Comment[]
+  postLikes       Like[]
+  postBookmarks   Bookmark[]
+  notifications   Notification[]
+  userActivities  UserActivity[]
+  analyticsEvents AnalyticsEvent[]
+  bugReports      BugReport[]
 
   @@index([userId])
+  @@index([validityScore])
+  @@index([validityTier])
+  @@index([isPlatformGen])
+  @@index([region])
+  @@index([startLat, startLng])
+  @@index([endLat, endLng])
   @@index([createdAt(sort: Desc)])
   @@index([tags])
 }
@@ -216,4 +291,80 @@ enum ActivityType {
   COMMENT
   BOOKMARK
   SHARE
+}
+
+model SiteConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model BugReport {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  category    BugCategory
+  status      BugStatus   @default(OPEN)
+  reporterId  String
+  reviewerId  String?
+  postId      String?
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  resolvedAt  DateTime?
+
+  reporter User  @relation("BugReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("BugReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  post     Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([reporterId])
+  @@index([reviewerId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt(sort: Desc)])
+}
+
+model UserReview {
+  id         String       @id @default(cuid())
+  reviewerId String
+  revieweeId String
+  rating     Int
+  comment    String?
+  status     ReviewStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  reviewer User @relation("ReviewAuthor", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewee User @relation("ReviewTarget", fields: [revieweeId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewerId, revieweeId])
+  @@index([reviewerId])
+  @@index([revieweeId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  eventName String
+  userId    String?
+  postId    String?
+  region    String?
+  payload   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([eventName])
+  @@index([userId])
+  @@index([postId])
+  @@index([region])
+  @@index([createdAt(sort: Desc)])
 }

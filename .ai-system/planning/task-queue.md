@@ -72,7 +72,7 @@
 
 - [x] 0.1 — Update all dependencies
 - [x] 0.2 — Migrate Tailwind v4
-- [ ] 0.3 — Create all config files
+- [x] 0.3 — Create all config files
 - [ ] 0.4 — Create all Universal Components
 - [ ] 0.5 — Implement global services (ModalService, ToastService, UndoService, OfflineQueue)
 - [ ] 0.6 — Update Prisma schema

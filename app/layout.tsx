@@ -2,9 +2,17 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AntdProvider } from "./providers/AntdProvider";
 import { AuthProvider } from "./providers/AuthProvider";
+import { CookieConsentProvider } from "./providers/CookieConsentProvider";
+import { GlobalModalProvider } from "./providers/GlobalModalProvider";
+import { GlobalToastProvider } from "./providers/GlobalToastProvider";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
 import { InstallPrompt } from "./components/features/pwa";
+import {
+  CookieConsent,
+  GlobalConfirmModal,
+  GlobalUndoToast,
+} from "./components/ui";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -35,7 +43,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   ),
   openGraph: {
     type: "website",
@@ -91,12 +99,21 @@ export default function RootLayout({
       <body className={inter.className}>
         <ServiceWorkerRegistration />
         <ThemeProvider>
-          <AntdProvider>
-            <AuthProvider>
-              {children}
-              <InstallPrompt />
-            </AuthProvider>
-          </AntdProvider>
+          <CookieConsentProvider>
+            <GlobalToastProvider>
+              <GlobalModalProvider>
+                <AntdProvider>
+                  <AuthProvider>
+                    {children}
+                    <InstallPrompt />
+                    <CookieConsent />
+                    <GlobalConfirmModal />
+                    <GlobalUndoToast />
+                  </AuthProvider>
+                </AntdProvider>
+              </GlobalModalProvider>
+            </GlobalToastProvider>
+          </CookieConsentProvider>
         </ThemeProvider>
       </body>
     </html>
