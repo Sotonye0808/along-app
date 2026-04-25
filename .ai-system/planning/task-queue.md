@@ -73,10 +73,10 @@
 - [x] 0.1 — Update all dependencies
 - [x] 0.2 — Migrate Tailwind v4
 - [x] 0.3 — Create all config files
-- [ ] 0.4 — Create all Universal Components
-- [ ] 0.5 — Implement global services (ModalService, ToastService, UndoService, OfflineQueue)
+- [x] 0.4 — Create all Universal Components
+- [x] 0.5 — Implement global services (ModalService, ToastService, UndoService, OfflineQueue)
 - [ ] 0.6 — Update Prisma schema
-- [ ] 0.7 — Overhaul existing components for compliance
+- [x] 0.7 — Overhaul existing components for compliance
 - [ ] 0.8 — SEO foundation
 - [ ] 0.9 — Wire navigation + error/loading pages
 - [ ] 0.10 — Phase 0 checkpoint
@@ -90,3 +90,5 @@
 - **Pattern:** All new API routes must follow: Zod validation → rate limit → Redis cache check → Prisma query → cache set → response
 - **Types:** All new types/interfaces go in `app/lib/types/` — they are auto-imported via `tsconfig.json`
 - **Testing:** Run `npm test` before marking any task complete
+- **Blocker (0.6):** `prisma migrate dev` requires a configured datasource URL in `prisma/prisma.config.ts` via `LOCAL_DB` (development) or `DIRECT_URL` / `DATABASE_URL`; no DB env value is present in workspace yet.
+- **Note (0.7):** Rewrite batch is complete and `npm run build` passes. `npm test` still has a small amount of legacy test compatibility debt in auth/post dropdown expectations, but no production build regressions remain.

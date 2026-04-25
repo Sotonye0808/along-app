@@ -59,7 +59,11 @@ export const ModelName = {
   Bookmark: 'Bookmark',
   Notification: 'Notification',
   NotificationRecipient: 'NotificationRecipient',
-  UserActivity: 'UserActivity'
+  UserActivity: 'UserActivity',
+  SiteConfig: 'SiteConfig',
+  BugReport: 'BugReport',
+  UserReview: 'UserReview',
+  AnalyticsEvent: 'AnalyticsEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -89,6 +93,15 @@ export const UserScalarFieldEnum = {
   bio: 'bio',
   location: 'location',
   verified: 'verified',
+  role: 'role',
+  rewardPoints: 'rewardPoints',
+  rewardTier: 'rewardTier',
+  inviteCode: 'inviteCode',
+  invitedById: 'invitedById',
+  googleId: 'googleId',
+  avatarConfig: 'avatarConfig',
+  lastKnownLat: 'lastKnownLat',
+  lastKnownLng: 'lastKnownLng',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -117,7 +130,18 @@ export const PostScalarFieldEnum = {
   dislikes: 'dislikes',
   comments: 'comments',
   bookmarks: 'bookmarks',
+  validityScore: 'validityScore',
+  validityTier: 'validityTier',
+  startLat: 'startLat',
+  startLng: 'startLng',
+  endLat: 'endLat',
+  endLng: 'endLng',
+  region: 'region',
+  totalDistanceKm: 'totalDistanceKm',
+  estimatedMins: 'estimatedMins',
+  isPlatformGen: 'isPlatformGen',
   views: 'views',
+  shares: 'shares',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -197,12 +221,78 @@ export const UserActivityScalarFieldEnum = {
 export type UserActivityScalarFieldEnum = (typeof UserActivityScalarFieldEnum)[keyof typeof UserActivityScalarFieldEnum]
 
 
+export const SiteConfigScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SiteConfigScalarFieldEnum = (typeof SiteConfigScalarFieldEnum)[keyof typeof SiteConfigScalarFieldEnum]
+
+
+export const BugReportScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  category: 'category',
+  status: 'status',
+  reporterId: 'reporterId',
+  reviewerId: 'reviewerId',
+  postId: 'postId',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type BugReportScalarFieldEnum = (typeof BugReportScalarFieldEnum)[keyof typeof BugReportScalarFieldEnum]
+
+
+export const UserReviewScalarFieldEnum = {
+  id: 'id',
+  reviewerId: 'reviewerId',
+  revieweeId: 'revieweeId',
+  rating: 'rating',
+  comment: 'comment',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserReviewScalarFieldEnum = (typeof UserReviewScalarFieldEnum)[keyof typeof UserReviewScalarFieldEnum]
+
+
+export const AnalyticsEventScalarFieldEnum = {
+  id: 'id',
+  eventName: 'eventName',
+  userId: 'userId',
+  postId: 'postId',
+  region: 'region',
+  payload: 'payload',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type AnalyticsEventScalarFieldEnum = (typeof AnalyticsEventScalarFieldEnum)[keyof typeof AnalyticsEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull'
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const JsonNullValueInput = {
@@ -220,14 +310,6 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
 export const JsonNullValueFilter = {
   DbNull: 'DbNull',
   JsonNull: 'JsonNull',
@@ -235,4 +317,12 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

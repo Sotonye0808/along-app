@@ -230,3 +230,41 @@ Repository contains a large pre-existing lint backlog (no-explicit-any, hook-rul
 
 **Implications:**
 Ant Design imports resolve reliably; code now uses API-compatible props for pinned version.
+
+---
+
+## Prisma 7 Datasource URL via prisma.config.ts
+
+**Decision:** Keep Prisma datasource URL resolution in `prisma/prisma.config.ts` and require `LOCAL_DB` for development migrations.
+**Date:** 2026-04-25
+**Made by:** AI agent
+
+**Reason:**
+Prisma 7 migration commands (`prisma migrate dev`) require `datasource.url` to resolve at runtime from Prisma config. In this project, development mode selects `env('LOCAL_DB')`.
+
+**Alternatives Considered:**
+
+- Hardcode connection URL in config: rejected for security and environment portability.
+- Switch development branch to `DATABASE_URL` only: rejected to avoid changing established environment contract.
+
+**Implications:**
+Task 0.6 cannot be completed until a valid `LOCAL_DB` value is provided in environment configuration. `prisma generate` can still succeed without active DB connectivity.
+
+---
+
+## Phase 0 Component Rewrites Use Direct Imports
+
+**Decision:** Prefer direct imports from individual UI/config modules in rewritten components instead of barrel imports.
+**Date:** 2026-04-25
+**Made by:** AI agent
+
+**Reason:**
+The UI/config barrels pulled in unrelated modules that triggered Jest ESM resolution issues through cache/redis dependencies, even when the rewritten component only needed a few utilities.
+
+**Alternatives Considered:**
+
+- Keep barrel imports and mock transitive dependencies in tests: rejected because it broadens the dependency surface and hides real module coupling.
+- Rewrite every barrel to be test-only safe: rejected as too disruptive for Phase 0 velocity.
+
+**Implications:**
+New rewrites should import only the exact UI/config modules they need. This keeps production bundles and tests more predictable.

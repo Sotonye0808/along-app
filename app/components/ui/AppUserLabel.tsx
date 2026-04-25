@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import type { AvatarConfig } from "@/lib/config";
+import type { AvatarConfig } from "@/lib/config/avatar";
 import { AppAvatar } from "./AppAvatar";
 
 export interface UserLabelUser {

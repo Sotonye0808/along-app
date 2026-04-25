@@ -30,11 +30,12 @@ export const REGISTER_FIELDS: FieldConfig[] = [
     { name: "userName", label: "Username", type: "text", required: true, minLength: 3, maxLength: 20 },
     { name: "email", label: "Email", type: "email", required: true },
     { name: "password", label: "Password", type: "password", required: true, minLength: 8 },
+    { name: "confirmPassword", label: "Confirm Password", type: "password", required: true, minLength: 8 },
 ];
 
 export const LOGIN_FIELDS: FieldConfig[] = [
-    { name: "email", label: "Email", type: "email", required: true },
-    { name: "password", label: "Password", type: "password", required: true },
+    { name: "email", label: "Email", type: "email", required: true, placeholder: "youremail@example.com" },
+    { name: "password", label: "Password", type: "password", required: true, minLength: 8, placeholder: "Enter your password" },
 ];
 
 export const EDIT_PROFILE_FIELDS: FieldConfig[] = [

@@ -1,30 +1,18 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import {
-  Modal,
-  Button,
-  Input,
-  Tag,
-  Upload,
-  Space,
-  Avatar,
-  Select,
-  InputNumber,
-  App,
-} from "antd";
-import {
-  PlusOutlined,
-  BoldOutlined,
-  ItalicOutlined,
-  UnderlineOutlined,
-  StrikethroughOutlined,
-  PictureOutlined,
-  LinkOutlined,
-  DeleteOutlined,
-  CloseOutlined,
-} from "@ant-design/icons";
+import React, { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { App, Upload } from "antd";
 import type { UploadFile } from "antd";
+import { Link2, Plus, Trash2, X } from "lucide-react";
+import { VEHICLE_REGISTRY } from "@/lib/config/vehicles";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppInput } from "@/components/ui/AppInput";
+import { AppModal } from "@/components/ui/AppModal";
+import { AppProgress } from "@/components/ui/AppProgress";
+import { AppSelect } from "@/components/ui/AppSelect";
+import { AppTag } from "@/components/ui/AppTag";
+import { AppTextarea } from "@/components/ui/AppTextarea";
 
 interface ShareRouteModalProps {
   open: boolean;
@@ -38,14 +26,22 @@ interface RouteInput extends Omit<Route, "id"> {
   tempId: string;
 }
 
-const vehicleOptions: { label: string; value: VehicleType; emoji: string }[] = [
-  { label: "Taxi", value: "taxi", emoji: "🚕" },
-  { label: "Bike", value: "bike", emoji: "🏍️" },
-  { label: "Keke", value: "keke", emoji: "🛺" },
-  { label: "Bus", value: "bus", emoji: "🚌" },
-  { label: "Trekking", value: "trekking", emoji: "🚶" },
-  { label: "Car", value: "car", emoji: "🚗" },
-];
+interface DraftLink {
+  url: string;
+  text: string;
+}
+
+function createInitialRoute(order: number): RouteInput {
+  return {
+    tempId: `${Date.now()}-${order}`,
+    text: "",
+    links: [],
+    order,
+    vehicles: [],
+    fare: 0,
+    status: "unverified",
+  };
+}
 
 export function ShareRouteModal({
   open,
@@ -55,34 +51,24 @@ export function ShareRouteModal({
   postToEdit,
 }: ShareRouteModalProps) {
   const [title, setTitle] = useState("");
-  const [routes, setRoutes] = useState<RouteInput[]>([
-    {
-      tempId: "1",
-      text: "",
-      links: [],
-      order: 1,
-      vehicles: [],
-      fare: 0,
-      status: "unverified",
-    },
-  ]);
+  const [routes, setRoutes] = useState<RouteInput[]>([createInitialRoute(1)]);
+  const [tagsInput, setTagsInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [loading, setLoading] = useState(false);
-  const [linkModalOpen, setLinkModalOpen] = useState(false);
-  const [currentRouteIndex, setCurrentRouteIndex] = useState<number | null>(
-    null
-  );
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkText, setLinkText] = useState("");
 
-  const textAreaRefs = useRef<Record<string, any | null>>({});
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [linkTargetRoute, setLinkTargetRoute] = useState<string | null>(null);
+  const [draftLink, setDraftLink] = useState<DraftLink>({ url: "", text: "" });
+
   const { message } = App.useApp();
 
-  // Load post data for editing
-  React.useEffect(() => {
-    if (editMode && postToEdit && open) {
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    if (editMode && postToEdit) {
       setTitle(postToEdit.title);
       setRoutes(
         postToEdit.routes.map((route) => ({
@@ -93,238 +79,186 @@ export function ShareRouteModal({
           vehicles: route.vehicles,
           fare: route.fare,
           status: route.status,
-        }))
+        })),
       );
       setTags(postToEdit.tags);
       setFileList(
-        postToEdit.images.map((img, idx) => ({
-          uid: `img-${idx}`,
-          name: `image-${idx}`,
+        postToEdit.images.map((src, index) => ({
+          uid: `${postToEdit.id}-${index}`,
+          name: `image-${index + 1}`,
           status: "done",
-          url: img,
-          thumbUrl: img,
-        }))
+          url: src,
+          thumbUrl: src,
+        })),
       );
-    } else if (!open) {
-      // Reset form when modal closes
-      setTitle("");
-      setRoutes([
-        {
-          tempId: "1",
-          text: "",
-          links: [],
-          order: 1,
-          vehicles: [],
-          fare: 0,
-          status: "unverified",
-        },
-      ]);
-      setTags([]);
-      setFileList([]);
-    }
-  }, [editMode, postToEdit, open]);
-
-  const handleRouteChange = (
-    tempId: string,
-    field: keyof RouteInput,
-    value: any
-  ) => {
-    setRoutes((prev) =>
-      prev.map((route) =>
-        route.tempId === tempId ? { ...route, [field]: value } : route
-      )
-    );
-
-    // Auto-add new route if this is the last one and has content
-    const currentRoute = routes.find((r) => r.tempId === tempId);
-    const isLastRoute = routes[routes.length - 1].tempId === tempId;
-
-    if (isLastRoute && field === "text" && value.trim().length > 0) {
-      setRoutes((prev) => [
-        ...prev,
-        {
-          tempId: Date.now().toString(),
-          text: "",
-          links: [],
-          order: prev.length + 1,
-          vehicles: [],
-          fare: 0,
-          status: "unverified",
-        },
-      ]);
-    }
-  };
-
-  const handleRemoveRoute = (tempId: string) => {
-    if (routes.length > 1) {
-      setRoutes((prev) => prev.filter((route) => route.tempId !== tempId));
-    }
-  };
-
-  const applyFormatting = (tempId: string, format: string) => {
-    const textarea = textAreaRefs.current[tempId]?.resizableTextArea?.textArea;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textarea.value.substring(start, end);
-
-    if (!selectedText) {
-      message.info("Please select text to format");
       return;
     }
 
-    let formattedText = "";
-    let offset = 0;
+    setTitle("");
+    setRoutes([createInitialRoute(1)]);
+    setTags([]);
+    setTagsInput("");
+    setFileList([]);
+  }, [open, editMode, postToEdit]);
 
-    switch (format) {
-      case "bold":
-        formattedText = `**${selectedText}**`;
-        offset = 2;
-        break;
-      case "italic":
-        formattedText = `*${selectedText}*`;
-        offset = 1;
-        break;
-      case "underline":
-        formattedText = `__${selectedText}__`;
-        offset = 2;
-        break;
-      case "strikethrough":
-        formattedText = `~~${selectedText}~~`;
-        offset = 2;
-        break;
-      default:
-        return;
-    }
+  const completionPercent = useMemo(() => {
+    const checks = [
+      title.trim().length > 3,
+      routes.some((route) => route.text.trim().length > 10),
+      tags.length > 0,
+    ];
 
-    const newText =
-      textarea.value.substring(0, start) +
-      formattedText +
-      textarea.value.substring(end);
+    const completed = checks.filter(Boolean).length;
+    return Math.round((completed / checks.length) * 100);
+  }, [title, routes, tags]);
 
-    handleRouteChange(tempId, "text", newText);
+  const vehicleOptions = useMemo(
+    () =>
+      Object.values(VEHICLE_REGISTRY).map((vehicle) => ({
+        value: vehicle.key,
+        label: (
+          <span className="inline-flex items-center gap-2">
+            <vehicle.icon size={14} aria-hidden="true" />
+            {vehicle.label}
+          </span>
+        ),
+      })),
+    [],
+  );
 
-    // Set cursor position after formatting
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(
-        start + offset,
-        start + offset + selectedText.length
-      );
-    }, 0);
-  };
-
-  const handleAddTag = () => {
-    if (tagInput && !tags.includes(tagInput.toLowerCase())) {
-      setTags([...tags, tagInput.toLowerCase()]);
-      setTagInput("");
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
-
-  const handleAddLink = () => {
-    if (currentRouteIndex !== null && linkUrl && linkText) {
-      setRoutes((prev) =>
-        prev.map((route, index) =>
-          index === currentRouteIndex
-            ? {
-                ...route,
-                links: [...route.links, { url: linkUrl, text: linkText }],
-              }
-            : route
-        )
-      );
-      setLinkModalOpen(false);
-      setLinkUrl("");
-      setLinkText("");
-      setCurrentRouteIndex(null);
-      message.success("Link added!");
-    }
-  };
-
-  const handleRemoveLink = (routeTempId: string, linkIndex: number) => {
+  function updateRoute(
+    routeTempId: string,
+    updater: (route: RouteInput) => RouteInput,
+  ): void {
     setRoutes((prev) =>
       prev.map((route) =>
-        route.tempId === routeTempId
-          ? {
-              ...route,
-              links: route.links.filter((_, i) => i !== linkIndex),
-            }
-          : route
-      )
+        route.tempId === routeTempId ? updater(route) : route,
+      ),
     );
-  };
+  }
 
-  const handleImageUpload = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+  function addRoute(): void {
+    setRoutes((prev) => [...prev, createInitialRoute(prev.length + 1)]);
+  }
+
+  function removeRoute(routeTempId: string): void {
+    setRoutes((prev) => {
+      const filtered = prev.filter((route) => route.tempId !== routeTempId);
+      return filtered.length > 0
+        ? filtered.map((route, index) => ({ ...route, order: index + 1 }))
+        : [createInitialRoute(1)];
+    });
+  }
+
+  function addTagsFromInput(): void {
+    const nextTags = tagsInput
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase())
+      .filter((tag) => tag.length > 0)
+      .filter((tag) => !tags.includes(tag));
+
+    if (nextTags.length === 0) {
+      return;
+    }
+
+    setTags((prev) => [...prev, ...nextTags]);
+    setTagsInput("");
+  }
+
+  function removeTag(tag: string): void {
+    setTags((prev) => prev.filter((entry) => entry !== tag));
+  }
+
+  async function handleBeforeUpload(
+    file: File,
+  ): Promise<false | typeof Upload.LIST_IGNORE> {
+    if (!file.type.startsWith("image/")) {
+      message.error("Only image files are supported.");
+      return Upload.LIST_IGNORE;
+    }
+
+    if (file.size / 1024 / 1024 > 5) {
+      message.error("Image must be smaller than 5MB.");
+      return Upload.LIST_IGNORE;
+    }
+
+    const reader = new FileReader();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
       reader.onload = () => {
         if (typeof reader.result === "string") {
           resolve(reader.result);
-        } else {
-          reject(new Error("Failed to convert image to base64"));
+          return;
         }
+        reject(new Error("Failed to read image file."));
       };
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error("Failed to read image file."));
       reader.readAsDataURL(file);
     });
-  };
 
-  const handleBeforeUpload = async (file: File) => {
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      message.error("You can only upload image files!");
-      return Upload.LIST_IGNORE;
-    }
+    const newUpload: UploadFile = {
+      uid: `${Date.now()}-${file.name}`,
+      name: file.name,
+      status: "done",
+      url: dataUrl,
+      thumbUrl: dataUrl,
+    };
 
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
-      message.error("Image must be smaller than 5MB!");
-      return Upload.LIST_IGNORE;
-    }
+    setFileList((prev) => [...prev, newUpload]);
+    return false;
+  }
 
-    try {
-      const base64 = await handleImageUpload(file);
-      const newFile: UploadFile = {
-        uid: `${Date.now()}-${file.name}`,
-        name: file.name,
-        status: "done",
-        url: base64,
-        thumbUrl: base64,
-      };
-      setFileList((prev) => [...prev, newFile]);
-    } catch (error) {
-      message.error("Failed to upload image");
-      console.error(error);
-    }
+  function openAddLinkModal(routeTempId: string): void {
+    setLinkTargetRoute(routeTempId);
+    setDraftLink({ url: "", text: "" });
+    setLinkModalOpen(true);
+  }
 
-    return false; // Prevent default upload behavior
-  };
-
-  const handleSubmit = async () => {
-    if (!title.trim()) {
-      message.error("Please add a title");
+  function addLinkToRoute(): void {
+    if (!linkTargetRoute || !draftLink.url.trim() || !draftLink.text.trim()) {
+      message.error("Add both link text and URL.");
       return;
     }
 
-    const validRoutes = routes.filter((r) => r.text.trim().length > 0);
+    updateRoute(linkTargetRoute, (route) => ({
+      ...route,
+      links: [
+        ...route.links,
+        { text: draftLink.text.trim(), url: draftLink.url.trim() },
+      ],
+    }));
+
+    setLinkModalOpen(false);
+    setLinkTargetRoute(null);
+    setDraftLink({ url: "", text: "" });
+  }
+
+  function removeLink(routeTempId: string, linkIndex: number): void {
+    updateRoute(routeTempId, (route) => ({
+      ...route,
+      links: route.links.filter((_, index) => index !== linkIndex),
+    }));
+  }
+
+  async function handleSubmit(): Promise<void> {
+    if (!title.trim()) {
+      message.error("Please add a route title.");
+      return;
+    }
+
+    const validRoutes = routes.filter((route) => route.text.trim().length > 0);
     if (validRoutes.length === 0) {
-      message.error("Please add at least one route");
+      message.error("Please add at least one route segment.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const postData: Partial<Post> = {
+      await onSubmit({
         ...(editMode && postToEdit ? { id: postToEdit.id } : {}),
         title: title.trim(),
         routes: validRoutes.map((route, index) => ({
-          id: editMode ? route.tempId : `r${Date.now()}-${index}`,
+          id: editMode ? route.tempId : `${Date.now()}-${index}`,
           text: route.text,
           links: route.links,
           order: index + 1,
@@ -332,326 +266,266 @@ export function ShareRouteModal({
           fare: route.fare,
           status: route.status,
         })),
-        images: fileList.map((file) => file.url || file.thumbUrl || ""),
+        images: fileList
+          .map((file) => file.url || file.thumbUrl || "")
+          .filter((value) => value.length > 0),
         tags,
-        ...(editMode ? { updatedAt: new Date().toISOString() } : {}),
-      };
+      });
 
-      await onSubmit(postData);
-
-      // Reset form
-      setTitle("");
-      setRoutes([
-        {
-          tempId: "1",
-          text: "",
-          links: [],
-          order: 1,
-          vehicles: [],
-          fare: 0,
-          status: "unverified",
-        },
-      ]);
-      setTags([]);
-      setFileList([]);
       message.success(
-        editMode ? "Post updated successfully!" : "Post created successfully!"
+        editMode ? "Route updated successfully." : "Route posted successfully.",
       );
       onClose();
     } catch (error) {
       message.error(
-        editMode ? "Failed to update post" : "Failed to create post"
+        editMode ? "Failed to update route." : "Failed to post route.",
       );
       console.error(error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const visibleRoutes = routes.filter((route, index) => {
-    if (index === 0) return true;
-    return routes[index - 1].text.trim() !== "";
-  });
+  }
 
   return (
     <>
-      <Modal
-        title={
-          <div className="text-xl font-bold">
-            {editMode ? "Edit route" : "Share a route"}
-          </div>
-        }
+      <AppModal
         open={open}
-        onCancel={onClose}
-        width={700}
-        footer={null}
-        className="share-route-modal">
-        <div className="space-y-4 mt-6">
-          {/* Title */}
-          <div className="flex items-center justify-between gap-4">
-            <Input
-              placeholder="Give your route a catchy title..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              size="large"
-              maxLength={100}
-              className="text-lg font-semibold"
-            />
-            <Button type="link" className="text-[#00623B]">
-              Drafts
-            </Button>
+        onClose={onClose}
+        size="lg"
+        title={editMode ? "Edit route" : "Share a route"}
+        subtitle="Build a clear, trusted route report"
+        footer={null}>
+        <div className="space-y-4">
+          <div>
+            <div className="mb-2 flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
+              <span>Draft completion</span>
+              <span>{completionPercent}%</span>
+            </div>
+            <AppProgress percent={completionPercent} />
           </div>
 
-          {/* Routes */}
-          <div className="max-h-[50vh] overflow-y-auto space-y-4 pr-2">
-            {visibleRoutes.map((route, index) => (
-              <div key={route.tempId} className="flex gap-3">
-                <Avatar className="bg-[#00623B] shrink-0 mt-1">
-                  {index + 1}
-                </Avatar>
-                <div className="flex-1 space-y-2">
-                  {/* Formatting buttons */}
-                  <div className="flex gap-1">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<BoldOutlined />}
-                      onClick={() => applyFormatting(route.tempId, "bold")}
-                      title="Bold (Markdown: **text**)"
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<ItalicOutlined />}
-                      onClick={() => applyFormatting(route.tempId, "italic")}
-                      title="Italic (Markdown: *text*)"
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<UnderlineOutlined />}
-                      onClick={() => applyFormatting(route.tempId, "underline")}
-                      title="Underline (Markdown: __text__)"
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<StrikethroughOutlined />}
-                      onClick={() =>
-                        applyFormatting(route.tempId, "strikethrough")
-                      }
-                      title="Strikethrough (Markdown: ~~text~~)"
+          <AppInput
+            placeholder="Give your route a clear title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            maxLength={100}
+          />
+
+          <div className="max-h-[48vh] space-y-3 overflow-y-auto pr-1">
+            {routes.map((route, index) => (
+              <div
+                key={route.tempId}
+                className="rounded-[var(--radius-card)] border border-[var(--color-border)] p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-[var(--color-text-primary)]">
+                    Segment {index + 1}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <AppButton
+                      variant="ghost"
+                      size="sm"
+                      icon={Link2}
+                      onClick={() => openAddLinkModal(route.tempId)}>
+                      Link
+                    </AppButton>
+                    <AppButton
+                      variant="ghost"
+                      size="sm"
+                      icon={Trash2}
+                      onClick={() => removeRoute(route.tempId)}
+                      ariaLabel={`Remove segment ${index + 1}`}
                     />
                   </div>
+                </div>
 
-                  <div className="relative">
-                    <Input.TextArea
-                      ref={(el) => {
-                        textAreaRefs.current[route.tempId] = el;
-                      }}
-                      placeholder={
-                        index === 0 ? "Where we dey go?" : "Where next?"
-                      }
-                      value={route.text}
-                      onChange={(e) =>
-                        handleRouteChange(route.tempId, "text", e.target.value)
-                      }
-                      maxLength={index === 0 ? 300 : 200}
-                      autoSize={{ minRows: 2, maxRows: 6 }}
-                      className="resize-none"
-                    />
-                    {routes.length > 1 && (
-                      <Button
-                        type="text"
-                        danger
-                        size="small"
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleRemoveRoute(route.tempId)}
-                        className="absolute top-2 right-2"
-                      />
-                    )}
-                  </div>
+                <div className="space-y-2">
+                  <AppTextarea
+                    placeholder={
+                      index === 0 ? "Where does the trip start?" : "Where next?"
+                    }
+                    value={route.text}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      updateRoute(route.tempId, (prev) => ({
+                        ...prev,
+                        text: value,
+                      }));
+                    }}
+                    autoSize={{ minRows: 2, maxRows: 6 }}
+                    maxLength={index === 0 ? 300 : 220}
+                  />
 
-                  {/* Vehicle selection and fare */}
-                  <div className="flex gap-2 flex-wrap items-center">
-                    <Select
+                  <div className="flex flex-wrap items-center gap-2">
+                    <AppSelect<VehicleType[]>
                       mode="multiple"
-                      placeholder="Select vehicles"
                       value={route.vehicles}
-                      onChange={(value) =>
-                        handleRouteChange(route.tempId, "vehicles", value)
-                      }
-                      style={{ minWidth: 200 }}
-                      size="small"
-                      maxTagCount={3}>
-                      {vehicleOptions.map((option) => (
-                        <Select.Option key={option.value} value={option.value}>
-                          {option.emoji} {option.label}
-                        </Select.Option>
-                      ))}
-                    </Select>
-
-                    <InputNumber
-                      placeholder="Fare (₦)"
-                      value={route.fare || undefined}
-                      onChange={(value) =>
-                        handleRouteChange(route.tempId, "fare", value || 0)
-                      }
-                      min={0}
-                      prefix="₦"
-                      style={{ width: 120 }}
-                      size="small"
+                      options={vehicleOptions}
+                      placeholder="Transport mode"
+                      onChange={(value) => {
+                        updateRoute(route.tempId, (prev) => ({
+                          ...prev,
+                          vehicles: value as VehicleType[],
+                        }));
+                      }}
+                      className="min-w-[220px]"
                     />
 
-                    <Button
-                      type="link"
-                      icon={<LinkOutlined />}
-                      size="small"
-                      onClick={() => {
-                        setCurrentRouteIndex(index);
-                        setLinkModalOpen(true);
-                      }}>
-                      Add link
-                    </Button>
+                    <AppInput
+                      type="number"
+                      min={0}
+                      value={route.fare}
+                      onChange={(event) => {
+                        const fare = Number(event.target.value || 0);
+                        updateRoute(route.tempId, (prev) => ({
+                          ...prev,
+                          fare: Number.isNaN(fare) ? 0 : fare,
+                        }));
+                      }}
+                      placeholder="Fare (NGN)"
+                      className="w-[160px]"
+                    />
                   </div>
 
-                  {/* Links display */}
-                  {route.links.length > 0 && (
+                  {route.links.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {route.links.map((link, linkIndex) => (
-                        <Tag
-                          key={linkIndex}
-                          closable
-                          onClose={() =>
-                            handleRemoveLink(route.tempId, linkIndex)
-                          }
-                          icon={<LinkOutlined />}
-                          color="blue">
-                          <a
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600">
-                            {link.text}
-                          </a>
-                        </Tag>
+                        <AppTag
+                          key={`${route.tempId}-${link.url}-${linkIndex}`}
+                          label={link.text}
+                          icon={Link2}
+                          variant="info"
+                          size="sm"
+                          removable
+                          onRemove={() => removeLink(route.tempId, linkIndex)}
+                        />
                       ))}
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Images */}
-          {fileList.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {fileList.map((file) => (
-                <div key={file.uid} className="relative">
-                  <img
-                    src={file.thumbUrl || file.url}
-                    alt="preview"
-                    className="w-20 h-20 object-cover rounded"
-                  />
-                  <Button
-                    type="primary"
-                    danger
-                    size="small"
-                    icon={<CloseOutlined />}
-                    className="absolute -top-2 -right-2 w-6 h-6 p-0 flex items-center justify-center rounded-full"
-                    onClick={() =>
-                      setFileList(fileList.filter((f) => f.uid !== file.uid))
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <AppButton variant="secondary" icon={Plus} onClick={addRoute}>
+            Add another segment
+          </AppButton>
 
-          {/* Tags */}
           <div className="space-y-2">
             <div className="flex gap-2">
-              <Input
-                placeholder="Add tags (e.g., lagos, budget-travel)"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onPressEnter={handleAddTag}
-                prefix="#"
-                size="small"
+              <AppInput
+                value={tagsInput}
+                onChange={(event) => setTagsInput(event.target.value)}
+                onPressEnter={addTagsFromInput}
+                placeholder="Add tags separated by commas"
               />
-              <Button onClick={handleAddTag} size="small">
-                Add
-              </Button>
+              <AppButton variant="secondary" onClick={addTagsFromInput}>
+                Add tags
+              </AppButton>
             </div>
-            {tags.length > 0 && (
+            {tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <Tag
+                  <AppTag
                     key={tag}
-                    closable
-                    onClose={() => handleRemoveTag(tag)}
-                    color="green">
-                    #{tag}
-                  </Tag>
+                    label={`#${tag}`}
+                    variant="primary"
+                    size="sm"
+                    removable
+                    onRemove={() => removeTag(tag)}
+                  />
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t">
-            <Space>
-              <Upload
-                listType="picture"
-                fileList={fileList}
-                onChange={({ fileList }) => setFileList(fileList)}
-                beforeUpload={handleBeforeUpload}
-                showUploadList={false}
-                accept="image/*"
-                multiple>
-                <Button icon={<PictureOutlined />} size="small">
-                  Images
-                </Button>
-              </Upload>
-            </Space>
+          <div className="space-y-2">
+            <Upload
+              beforeUpload={handleBeforeUpload}
+              showUploadList={false}
+              multiple
+              accept="image/*">
+              <AppButton variant="ghost">Upload images</AppButton>
+            </Upload>
 
-            <Button
-              type="primary"
-              size="large"
-              loading={loading}
-              onClick={handleSubmit}
-              className="bg-[#00623B] hover:bg-[#004d2e]">
-              {editMode ? "Update" : "Post"}
-            </Button>
+            {fileList.length > 0 ? (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {fileList.map((file) => {
+                  const src = file.thumbUrl || file.url;
+                  if (!src) {
+                    return null;
+                  }
+
+                  return (
+                    <div
+                      key={file.uid}
+                      className="relative overflow-hidden rounded-md border border-[var(--color-border)]">
+                      <div className="relative aspect-square w-full">
+                        <Image
+                          src={src}
+                          alt={file.name}
+                          fill
+                          sizes="160px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <AppButton
+                        variant="icon"
+                        icon={X}
+                        ariaLabel={`Remove ${file.name}`}
+                        className="!absolute !right-1 !top-1 !bg-white/85"
+                        onClick={() => {
+                          setFileList((prev) =>
+                            prev.filter((entry) => entry.uid !== file.uid),
+                          );
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="flex items-center justify-end gap-2 border-t border-[var(--color-border)] pt-3">
+            <AppButton variant="ghost" onClick={onClose} disabled={loading}>
+              Cancel
+            </AppButton>
+            <AppButton onClick={() => void handleSubmit()} loading={loading}>
+              {editMode ? "Update route" : "Post route"}
+            </AppButton>
           </div>
         </div>
-      </Modal>
+      </AppModal>
 
-      {/* Link Modal */}
-      <Modal
-        title="Add Link"
+      <AppModal
         open={linkModalOpen}
-        onCancel={() => {
-          setLinkModalOpen(false);
-          setLinkUrl("");
-          setLinkText("");
-        }}
-        onOk={handleAddLink}
-        okText="Add Link">
-        <div className="space-y-4 mt-4">
-          <Input
-            placeholder="Link URL"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            prefix={<LinkOutlined />}
+        onClose={() => setLinkModalOpen(false)}
+        title="Add route link"
+        footer={
+          <div className="flex justify-end gap-2">
+            <AppButton variant="ghost" onClick={() => setLinkModalOpen(false)}>
+              Cancel
+            </AppButton>
+            <AppButton onClick={addLinkToRoute}>Add link</AppButton>
+          </div>
+        }>
+        <div className="space-y-3">
+          <AppInput
+            value={draftLink.url}
+            onChange={(event) =>
+              setDraftLink((prev) => ({ ...prev, url: event.target.value }))
+            }
+            placeholder="https://example.com"
           />
-          <Input
-            placeholder="Link text"
-            value={linkText}
-            onChange={(e) => setLinkText(e.target.value)}
+          <AppInput
+            value={draftLink.text}
+            onChange={(event) =>
+              setDraftLink((prev) => ({ ...prev, text: event.target.value }))
+            }
+            placeholder="Link label"
           />
         </div>
-      </Modal>
+      </AppModal>
     </>
   );
 }

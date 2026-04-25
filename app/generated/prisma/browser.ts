@@ -62,3 +62,23 @@ export type NotificationRecipient = Prisma.NotificationRecipientModel
  * 
  */
 export type UserActivity = Prisma.UserActivityModel
+/**
+ * Model SiteConfig
+ * 
+ */
+export type SiteConfig = Prisma.SiteConfigModel
+/**
+ * Model BugReport
+ * 
+ */
+export type BugReport = Prisma.BugReportModel
+/**
+ * Model UserReview
+ * 
+ */
+export type UserReview = Prisma.UserReviewModel
+/**
+ * Model AnalyticsEvent
+ * 
+ */
+export type AnalyticsEvent = Prisma.AnalyticsEventModel

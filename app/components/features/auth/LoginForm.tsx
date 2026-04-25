@@ -1,121 +1,78 @@
 "use client";
 
 import React, { useState } from "react";
-import { Form, Input, Button, Divider, App } from "antd";
-import {
-  MailOutlined,
-  LockOutlined,
-  GoogleOutlined,
-  AppleOutlined,
-} from "@ant-design/icons";
 import Link from "next/link";
+import { App } from "antd";
+import { Apple, Chrome } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL, API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
+import { APP_ROUTES } from "@/lib/constants";
+import { LOGIN_FIELDS } from "@/lib/config/forms";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { AppButton } from "@/components/ui/AppButton";
+import { ConfigDrivenForm } from "@/components/ui/ConfigDrivenForm";
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
-  const [form] = Form.useForm();
   const router = useRouter();
   const { message } = App.useApp();
   const { login } = useAuth();
 
-  const handleSubmit = async (values: LoginCredentials) => {
+  async function handleSubmit(values: LoginCredentials): Promise<void> {
     setLoading(true);
-
     try {
       await login(values.email, values.password);
-      message.success("Login successful! Redirecting...");
+      message.success("Login successful. Redirecting...");
       router.push(APP_ROUTES.DASHBOARD);
-    } catch (error: any) {
-      const errorMessage = error.message || "Login failed. Please try again.";
-      message.error(errorMessage);
+    } catch (error) {
+      const maybeError = error as { message?: string };
+      message.error(maybeError.message || "Login failed. Please try again.");
       console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleOAuthLogin = (provider: "google" | "apple") => {
+  function handleOAuthLogin(provider: "google" | "apple"): void {
     message.info(`${provider} login will be implemented soon`);
-  };
+  }
 
   return (
     <div className="w-full max-w-md">
-      <h1 className="text-3xl font-semibold mb-2">Sign in</h1>
-      <p className="text-gray-600 mb-8">Welcome back to Along</p>
+      <h1 className="mb-2 text-3xl font-semibold">Sign in</h1>
+      <p className="mb-8 text-[var(--color-text-secondary)]">
+        Welcome back to Along
+      </p>
 
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        autoComplete="on"
-        size="large">
-        <Form.Item
-          name="email"
-          rules={[
-            { required: true, message: "Please enter your email" },
-            { type: "email", message: "Please enter a valid email" },
-          ]}>
-          <Input
-            prefix={<MailOutlined className="text-gray-400" />}
-            placeholder="youremail@example.com"
-            autoComplete="email"
-          />
-        </Form.Item>
+      <ConfigDrivenForm<LoginCredentials>
+        fields={LOGIN_FIELDS}
+        submitLabel={loading ? "Signing in..." : "Sign In"}
+        loading={loading}
+        onSubmit={(values) => handleSubmit(values)}
+      />
 
-        <Form.Item
-          name="password"
-          rules={[
-            { required: true, message: "Please enter your password" },
-            { min: 8, message: "Password must be at least 8 characters" },
-          ]}>
-          <Input.Password
-            prefix={<LockOutlined className="text-gray-400" />}
-            placeholder="Enter your password"
-            autoComplete="current-password"
-          />
-        </Form.Item>
+      <div className="mb-6 mt-4 grid grid-cols-2 gap-3">
+        <AppButton
+          variant="secondary"
+          icon={Chrome}
+          onClick={() => handleOAuthLogin("google")}>
+          Google
+        </AppButton>
+        <AppButton
+          variant="secondary"
+          icon={Apple}
+          onClick={() => handleOAuthLogin("apple")}>
+          Apple
+        </AppButton>
+      </div>
 
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={loading}
-            block
-            className="h-11">
-            {loading ? "Signing in..." : "Sign In"}
-          </Button>
-        </Form.Item>
-
-        <Divider plain>OR</Divider>
-
-        <div className="flex gap-4 mb-6">
-          <Button
-            icon={<GoogleOutlined />}
-            onClick={() => handleOAuthLogin("google")}
-            block
-            className="h-11">
-            Google
-          </Button>
-          <Button
-            icon={<AppleOutlined />}
-            onClick={() => handleOAuthLogin("apple")}
-            block
-            className="h-11">
-            Apple
-          </Button>
-        </div>
-
-        <div className="text-center text-gray-600">
-          Don&apos;t have an account?{" "}
-          <Link
-            href={APP_ROUTES.REGISTER}
-            className="text-[#00623B] hover:underline font-medium">
-            Sign Up
-          </Link>
-        </div>
-      </Form>
+      <div className="text-center text-[var(--color-text-secondary)]">
+        Don&apos;t have an account?{" "}
+        <Link
+          href={APP_ROUTES.REGISTER}
+          className="font-medium text-[var(--color-primary)] hover:underline">
+          Sign Up
+        </Link>
+      </div>
     </div>
   );
 }

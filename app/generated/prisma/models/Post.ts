@@ -31,7 +31,15 @@ export type PostAvgAggregateOutputType = {
   dislikes: number | null
   comments: number | null
   bookmarks: number | null
+  validityScore: number | null
+  startLat: number | null
+  startLng: number | null
+  endLat: number | null
+  endLng: number | null
+  totalDistanceKm: number | null
+  estimatedMins: number | null
   views: number | null
+  shares: number | null
 }
 
 export type PostSumAggregateOutputType = {
@@ -39,7 +47,15 @@ export type PostSumAggregateOutputType = {
   dislikes: number | null
   comments: number | null
   bookmarks: number | null
+  validityScore: number | null
+  startLat: number | null
+  startLng: number | null
+  endLat: number | null
+  endLng: number | null
+  totalDistanceKm: number | null
+  estimatedMins: number | null
   views: number | null
+  shares: number | null
 }
 
 export type PostMinAggregateOutputType = {
@@ -50,7 +66,18 @@ export type PostMinAggregateOutputType = {
   dislikes: number | null
   comments: number | null
   bookmarks: number | null
+  validityScore: number | null
+  validityTier: string | null
+  startLat: number | null
+  startLng: number | null
+  endLat: number | null
+  endLng: number | null
+  region: string | null
+  totalDistanceKm: number | null
+  estimatedMins: number | null
+  isPlatformGen: boolean | null
   views: number | null
+  shares: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -63,7 +90,18 @@ export type PostMaxAggregateOutputType = {
   dislikes: number | null
   comments: number | null
   bookmarks: number | null
+  validityScore: number | null
+  validityTier: string | null
+  startLat: number | null
+  startLng: number | null
+  endLat: number | null
+  endLng: number | null
+  region: string | null
+  totalDistanceKm: number | null
+  estimatedMins: number | null
+  isPlatformGen: boolean | null
   views: number | null
+  shares: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -79,7 +117,18 @@ export type PostCountAggregateOutputType = {
   dislikes: number
   comments: number
   bookmarks: number
+  validityScore: number
+  validityTier: number
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  region: number
+  totalDistanceKm: number
+  estimatedMins: number
+  isPlatformGen: number
   views: number
+  shares: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -91,7 +140,15 @@ export type PostAvgAggregateInputType = {
   dislikes?: true
   comments?: true
   bookmarks?: true
+  validityScore?: true
+  startLat?: true
+  startLng?: true
+  endLat?: true
+  endLng?: true
+  totalDistanceKm?: true
+  estimatedMins?: true
   views?: true
+  shares?: true
 }
 
 export type PostSumAggregateInputType = {
@@ -99,7 +156,15 @@ export type PostSumAggregateInputType = {
   dislikes?: true
   comments?: true
   bookmarks?: true
+  validityScore?: true
+  startLat?: true
+  startLng?: true
+  endLat?: true
+  endLng?: true
+  totalDistanceKm?: true
+  estimatedMins?: true
   views?: true
+  shares?: true
 }
 
 export type PostMinAggregateInputType = {
@@ -110,7 +175,18 @@ export type PostMinAggregateInputType = {
   dislikes?: true
   comments?: true
   bookmarks?: true
+  validityScore?: true
+  validityTier?: true
+  startLat?: true
+  startLng?: true
+  endLat?: true
+  endLng?: true
+  region?: true
+  totalDistanceKm?: true
+  estimatedMins?: true
+  isPlatformGen?: true
   views?: true
+  shares?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -123,7 +199,18 @@ export type PostMaxAggregateInputType = {
   dislikes?: true
   comments?: true
   bookmarks?: true
+  validityScore?: true
+  validityTier?: true
+  startLat?: true
+  startLng?: true
+  endLat?: true
+  endLng?: true
+  region?: true
+  totalDistanceKm?: true
+  estimatedMins?: true
+  isPlatformGen?: true
   views?: true
+  shares?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -139,7 +226,18 @@ export type PostCountAggregateInputType = {
   dislikes?: true
   comments?: true
   bookmarks?: true
+  validityScore?: true
+  validityTier?: true
+  startLat?: true
+  startLng?: true
+  endLat?: true
+  endLng?: true
+  region?: true
+  totalDistanceKm?: true
+  estimatedMins?: true
+  isPlatformGen?: true
   views?: true
+  shares?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -242,7 +340,18 @@ export type PostGroupByOutputType = {
   dislikes: number
   comments: number
   bookmarks: number
+  validityScore: number
+  validityTier: string | null
+  startLat: number | null
+  startLng: number | null
+  endLat: number | null
+  endLng: number | null
+  region: string | null
+  totalDistanceKm: number | null
+  estimatedMins: number | null
+  isPlatformGen: boolean
   views: number
+  shares: number
   createdAt: Date
   updatedAt: Date
   _count: PostCountAggregateOutputType | null
@@ -281,15 +390,28 @@ export type PostWhereInput = {
   dislikes?: Prisma.IntFilter<"Post"> | number
   comments?: Prisma.IntFilter<"Post"> | number
   bookmarks?: Prisma.IntFilter<"Post"> | number
+  validityScore?: Prisma.IntFilter<"Post"> | number
+  validityTier?: Prisma.StringNullableFilter<"Post"> | string | null
+  startLat?: Prisma.FloatNullableFilter<"Post"> | number | null
+  startLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  endLat?: Prisma.FloatNullableFilter<"Post"> | number | null
+  endLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  region?: Prisma.StringNullableFilter<"Post"> | string | null
+  totalDistanceKm?: Prisma.FloatNullableFilter<"Post"> | number | null
+  estimatedMins?: Prisma.IntNullableFilter<"Post"> | number | null
+  isPlatformGen?: Prisma.BoolFilter<"Post"> | boolean
   views?: Prisma.IntFilter<"Post"> | number
+  shares?: Prisma.IntFilter<"Post"> | number
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
-  user?: Prisma.UserListRelationFilter
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   postComments?: Prisma.CommentListRelationFilter
   postLikes?: Prisma.LikeListRelationFilter
   postBookmarks?: Prisma.BookmarkListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   userActivities?: Prisma.UserActivityListRelationFilter
+  analyticsEvents?: Prisma.AnalyticsEventListRelationFilter
+  bugReports?: Prisma.BugReportListRelationFilter
 }
 
 export type PostOrderByWithRelationInput = {
@@ -303,15 +425,28 @@ export type PostOrderByWithRelationInput = {
   dislikes?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   bookmarks?: Prisma.SortOrder
+  validityScore?: Prisma.SortOrder
+  validityTier?: Prisma.SortOrderInput | Prisma.SortOrder
+  startLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  startLng?: Prisma.SortOrderInput | Prisma.SortOrder
+  endLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  endLng?: Prisma.SortOrderInput | Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
+  totalDistanceKm?: Prisma.SortOrderInput | Prisma.SortOrder
+  estimatedMins?: Prisma.SortOrderInput | Prisma.SortOrder
+  isPlatformGen?: Prisma.SortOrder
   views?: Prisma.SortOrder
+  shares?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByRelationAggregateInput
+  user?: Prisma.UserOrderByWithRelationInput
   postComments?: Prisma.CommentOrderByRelationAggregateInput
   postLikes?: Prisma.LikeOrderByRelationAggregateInput
   postBookmarks?: Prisma.BookmarkOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   userActivities?: Prisma.UserActivityOrderByRelationAggregateInput
+  analyticsEvents?: Prisma.AnalyticsEventOrderByRelationAggregateInput
+  bugReports?: Prisma.BugReportOrderByRelationAggregateInput
 }
 
 export type PostWhereUniqueInput = Prisma.AtLeast<{
@@ -328,15 +463,28 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   dislikes?: Prisma.IntFilter<"Post"> | number
   comments?: Prisma.IntFilter<"Post"> | number
   bookmarks?: Prisma.IntFilter<"Post"> | number
+  validityScore?: Prisma.IntFilter<"Post"> | number
+  validityTier?: Prisma.StringNullableFilter<"Post"> | string | null
+  startLat?: Prisma.FloatNullableFilter<"Post"> | number | null
+  startLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  endLat?: Prisma.FloatNullableFilter<"Post"> | number | null
+  endLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  region?: Prisma.StringNullableFilter<"Post"> | string | null
+  totalDistanceKm?: Prisma.FloatNullableFilter<"Post"> | number | null
+  estimatedMins?: Prisma.IntNullableFilter<"Post"> | number | null
+  isPlatformGen?: Prisma.BoolFilter<"Post"> | boolean
   views?: Prisma.IntFilter<"Post"> | number
+  shares?: Prisma.IntFilter<"Post"> | number
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
-  user?: Prisma.UserListRelationFilter
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   postComments?: Prisma.CommentListRelationFilter
   postLikes?: Prisma.LikeListRelationFilter
   postBookmarks?: Prisma.BookmarkListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   userActivities?: Prisma.UserActivityListRelationFilter
+  analyticsEvents?: Prisma.AnalyticsEventListRelationFilter
+  bugReports?: Prisma.BugReportListRelationFilter
 }, "id">
 
 export type PostOrderByWithAggregationInput = {
@@ -350,7 +498,18 @@ export type PostOrderByWithAggregationInput = {
   dislikes?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   bookmarks?: Prisma.SortOrder
+  validityScore?: Prisma.SortOrder
+  validityTier?: Prisma.SortOrderInput | Prisma.SortOrder
+  startLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  startLng?: Prisma.SortOrderInput | Prisma.SortOrder
+  endLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  endLng?: Prisma.SortOrderInput | Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
+  totalDistanceKm?: Prisma.SortOrderInput | Prisma.SortOrder
+  estimatedMins?: Prisma.SortOrderInput | Prisma.SortOrder
+  isPlatformGen?: Prisma.SortOrder
   views?: Prisma.SortOrder
+  shares?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PostCountOrderByAggregateInput
@@ -374,14 +533,24 @@ export type PostScalarWhereWithAggregatesInput = {
   dislikes?: Prisma.IntWithAggregatesFilter<"Post"> | number
   comments?: Prisma.IntWithAggregatesFilter<"Post"> | number
   bookmarks?: Prisma.IntWithAggregatesFilter<"Post"> | number
+  validityScore?: Prisma.IntWithAggregatesFilter<"Post"> | number
+  validityTier?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  startLat?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
+  startLng?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
+  endLat?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
+  endLng?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
+  region?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  totalDistanceKm?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
+  estimatedMins?: Prisma.IntNullableWithAggregatesFilter<"Post"> | number | null
+  isPlatformGen?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   views?: Prisma.IntWithAggregatesFilter<"Post"> | number
+  shares?: Prisma.IntWithAggregatesFilter<"Post"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
 }
 
 export type PostCreateInput = {
   id?: string
-  userId: string
   title: string
   routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostCreateimagesInput | string[]
@@ -390,15 +559,28 @@ export type PostCreateInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserCreateNestedManyWithoutPostsInput
+  user: Prisma.UserCreateNestedOneWithoutPostsInput
   postComments?: Prisma.CommentCreateNestedManyWithoutPostInput
   postLikes?: Prisma.LikeCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateInput = {
@@ -412,20 +594,31 @@ export type PostUncheckedCreateInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserUncheckedCreateNestedManyWithoutPostsInput
   postComments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   postLikes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostUpdateimagesInput | string[]
@@ -434,15 +627,28 @@ export type PostUpdateInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateManyWithoutPostsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   postComments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateInput = {
@@ -456,15 +662,27 @@ export type PostUncheckedUpdateInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUncheckedUpdateManyWithoutPostsNestedInput
   postComments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUncheckedUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateManyInput = {
@@ -478,14 +696,24 @@ export type PostCreateManyInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type PostUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostUpdateimagesInput | string[]
@@ -494,7 +722,18 @@ export type PostUpdateManyMutationInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -510,7 +749,18 @@ export type PostUncheckedUpdateManyInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -544,7 +794,18 @@ export type PostCountOrderByAggregateInput = {
   dislikes?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   bookmarks?: Prisma.SortOrder
+  validityScore?: Prisma.SortOrder
+  validityTier?: Prisma.SortOrder
+  startLat?: Prisma.SortOrder
+  startLng?: Prisma.SortOrder
+  endLat?: Prisma.SortOrder
+  endLng?: Prisma.SortOrder
+  region?: Prisma.SortOrder
+  totalDistanceKm?: Prisma.SortOrder
+  estimatedMins?: Prisma.SortOrder
+  isPlatformGen?: Prisma.SortOrder
   views?: Prisma.SortOrder
+  shares?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -554,7 +815,15 @@ export type PostAvgOrderByAggregateInput = {
   dislikes?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   bookmarks?: Prisma.SortOrder
+  validityScore?: Prisma.SortOrder
+  startLat?: Prisma.SortOrder
+  startLng?: Prisma.SortOrder
+  endLat?: Prisma.SortOrder
+  endLng?: Prisma.SortOrder
+  totalDistanceKm?: Prisma.SortOrder
+  estimatedMins?: Prisma.SortOrder
   views?: Prisma.SortOrder
+  shares?: Prisma.SortOrder
 }
 
 export type PostMaxOrderByAggregateInput = {
@@ -565,7 +834,18 @@ export type PostMaxOrderByAggregateInput = {
   dislikes?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   bookmarks?: Prisma.SortOrder
+  validityScore?: Prisma.SortOrder
+  validityTier?: Prisma.SortOrder
+  startLat?: Prisma.SortOrder
+  startLng?: Prisma.SortOrder
+  endLat?: Prisma.SortOrder
+  endLng?: Prisma.SortOrder
+  region?: Prisma.SortOrder
+  totalDistanceKm?: Prisma.SortOrder
+  estimatedMins?: Prisma.SortOrder
+  isPlatformGen?: Prisma.SortOrder
   views?: Prisma.SortOrder
+  shares?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -578,7 +858,18 @@ export type PostMinOrderByAggregateInput = {
   dislikes?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   bookmarks?: Prisma.SortOrder
+  validityScore?: Prisma.SortOrder
+  validityTier?: Prisma.SortOrder
+  startLat?: Prisma.SortOrder
+  startLng?: Prisma.SortOrder
+  endLat?: Prisma.SortOrder
+  endLng?: Prisma.SortOrder
+  region?: Prisma.SortOrder
+  totalDistanceKm?: Prisma.SortOrder
+  estimatedMins?: Prisma.SortOrder
+  isPlatformGen?: Prisma.SortOrder
   views?: Prisma.SortOrder
+  shares?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -588,7 +879,15 @@ export type PostSumOrderByAggregateInput = {
   dislikes?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   bookmarks?: Prisma.SortOrder
+  validityScore?: Prisma.SortOrder
+  startLat?: Prisma.SortOrder
+  startLng?: Prisma.SortOrder
+  endLat?: Prisma.SortOrder
+  endLng?: Prisma.SortOrder
+  totalDistanceKm?: Prisma.SortOrder
+  estimatedMins?: Prisma.SortOrder
   views?: Prisma.SortOrder
+  shares?: Prisma.SortOrder
 }
 
 export type PostScalarRelationFilter = {
@@ -604,12 +903,14 @@ export type PostNullableScalarRelationFilter = {
 export type PostCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.PostCreateWithoutUserInput, Prisma.PostUncheckedCreateWithoutUserInput> | Prisma.PostCreateWithoutUserInput[] | Prisma.PostUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.PostCreateOrConnectWithoutUserInput | Prisma.PostCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.PostCreateManyUserInputEnvelope
   connect?: Prisma.PostWhereUniqueInput | Prisma.PostWhereUniqueInput[]
 }
 
 export type PostUncheckedCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.PostCreateWithoutUserInput, Prisma.PostUncheckedCreateWithoutUserInput> | Prisma.PostCreateWithoutUserInput[] | Prisma.PostUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.PostCreateOrConnectWithoutUserInput | Prisma.PostCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.PostCreateManyUserInputEnvelope
   connect?: Prisma.PostWhereUniqueInput | Prisma.PostWhereUniqueInput[]
 }
 
@@ -617,6 +918,7 @@ export type PostUpdateManyWithoutUserNestedInput = {
   create?: Prisma.XOR<Prisma.PostCreateWithoutUserInput, Prisma.PostUncheckedCreateWithoutUserInput> | Prisma.PostCreateWithoutUserInput[] | Prisma.PostUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.PostCreateOrConnectWithoutUserInput | Prisma.PostCreateOrConnectWithoutUserInput[]
   upsert?: Prisma.PostUpsertWithWhereUniqueWithoutUserInput | Prisma.PostUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.PostCreateManyUserInputEnvelope
   set?: Prisma.PostWhereUniqueInput | Prisma.PostWhereUniqueInput[]
   disconnect?: Prisma.PostWhereUniqueInput | Prisma.PostWhereUniqueInput[]
   delete?: Prisma.PostWhereUniqueInput | Prisma.PostWhereUniqueInput[]
@@ -630,6 +932,7 @@ export type PostUncheckedUpdateManyWithoutUserNestedInput = {
   create?: Prisma.XOR<Prisma.PostCreateWithoutUserInput, Prisma.PostUncheckedCreateWithoutUserInput> | Prisma.PostCreateWithoutUserInput[] | Prisma.PostUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.PostCreateOrConnectWithoutUserInput | Prisma.PostCreateOrConnectWithoutUserInput[]
   upsert?: Prisma.PostUpsertWithWhereUniqueWithoutUserInput | Prisma.PostUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.PostCreateManyUserInputEnvelope
   set?: Prisma.PostWhereUniqueInput | Prisma.PostWhereUniqueInput[]
   disconnect?: Prisma.PostWhereUniqueInput | Prisma.PostWhereUniqueInput[]
   delete?: Prisma.PostWhereUniqueInput | Prisma.PostWhereUniqueInput[]
@@ -657,8 +960,8 @@ export type PostUpdatetagsInput = {
   push?: string | string[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
   increment?: number
   decrement?: number
   multiply?: number
@@ -739,9 +1042,40 @@ export type PostUpdateOneWithoutUserActivitiesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutUserActivitiesInput, Prisma.PostUpdateWithoutUserActivitiesInput>, Prisma.PostUncheckedUpdateWithoutUserActivitiesInput>
 }
 
+export type PostCreateNestedOneWithoutBugReportsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutBugReportsInput, Prisma.PostUncheckedCreateWithoutBugReportsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutBugReportsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneWithoutBugReportsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutBugReportsInput, Prisma.PostUncheckedCreateWithoutBugReportsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutBugReportsInput
+  upsert?: Prisma.PostUpsertWithoutBugReportsInput
+  disconnect?: Prisma.PostWhereInput | boolean
+  delete?: Prisma.PostWhereInput | boolean
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutBugReportsInput, Prisma.PostUpdateWithoutBugReportsInput>, Prisma.PostUncheckedUpdateWithoutBugReportsInput>
+}
+
+export type PostCreateNestedOneWithoutAnalyticsEventsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutAnalyticsEventsInput, Prisma.PostUncheckedCreateWithoutAnalyticsEventsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutAnalyticsEventsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneWithoutAnalyticsEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutAnalyticsEventsInput, Prisma.PostUncheckedCreateWithoutAnalyticsEventsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutAnalyticsEventsInput
+  upsert?: Prisma.PostUpsertWithoutAnalyticsEventsInput
+  disconnect?: Prisma.PostWhereInput | boolean
+  delete?: Prisma.PostWhereInput | boolean
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutAnalyticsEventsInput, Prisma.PostUpdateWithoutAnalyticsEventsInput>, Prisma.PostUncheckedUpdateWithoutAnalyticsEventsInput>
+}
+
 export type PostCreateWithoutUserInput = {
   id?: string
-  userId: string
   title: string
   routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostCreateimagesInput | string[]
@@ -750,7 +1084,18 @@ export type PostCreateWithoutUserInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   postComments?: Prisma.CommentCreateNestedManyWithoutPostInput
@@ -758,11 +1103,12 @@ export type PostCreateWithoutUserInput = {
   postBookmarks?: Prisma.BookmarkCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutUserInput = {
   id?: string
-  userId: string
   title: string
   routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostCreateimagesInput | string[]
@@ -771,7 +1117,18 @@ export type PostUncheckedCreateWithoutUserInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   postComments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
@@ -779,11 +1136,18 @@ export type PostUncheckedCreateWithoutUserInput = {
   postBookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutUserInput = {
   where: Prisma.PostWhereUniqueInput
   create: Prisma.XOR<Prisma.PostCreateWithoutUserInput, Prisma.PostUncheckedCreateWithoutUserInput>
+}
+
+export type PostCreateManyUserInputEnvelope = {
+  data: Prisma.PostCreateManyUserInput | Prisma.PostCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type PostUpsertWithWhereUniqueWithoutUserInput = {
@@ -816,14 +1180,24 @@ export type PostScalarWhereInput = {
   dislikes?: Prisma.IntFilter<"Post"> | number
   comments?: Prisma.IntFilter<"Post"> | number
   bookmarks?: Prisma.IntFilter<"Post"> | number
+  validityScore?: Prisma.IntFilter<"Post"> | number
+  validityTier?: Prisma.StringNullableFilter<"Post"> | string | null
+  startLat?: Prisma.FloatNullableFilter<"Post"> | number | null
+  startLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  endLat?: Prisma.FloatNullableFilter<"Post"> | number | null
+  endLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  region?: Prisma.StringNullableFilter<"Post"> | string | null
+  totalDistanceKm?: Prisma.FloatNullableFilter<"Post"> | number | null
+  estimatedMins?: Prisma.IntNullableFilter<"Post"> | number | null
+  isPlatformGen?: Prisma.BoolFilter<"Post"> | boolean
   views?: Prisma.IntFilter<"Post"> | number
+  shares?: Prisma.IntFilter<"Post"> | number
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
 }
 
 export type PostCreateWithoutPostCommentsInput = {
   id?: string
-  userId: string
   title: string
   routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostCreateimagesInput | string[]
@@ -832,14 +1206,27 @@ export type PostCreateWithoutPostCommentsInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserCreateNestedManyWithoutPostsInput
+  user: Prisma.UserCreateNestedOneWithoutPostsInput
   postLikes?: Prisma.LikeCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutPostCommentsInput = {
@@ -853,14 +1240,26 @@ export type PostUncheckedCreateWithoutPostCommentsInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserUncheckedCreateNestedManyWithoutPostsInput
   postLikes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutPostCommentsInput = {
@@ -881,7 +1280,6 @@ export type PostUpdateToOneWithWhereWithoutPostCommentsInput = {
 
 export type PostUpdateWithoutPostCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostUpdateimagesInput | string[]
@@ -890,14 +1288,27 @@ export type PostUpdateWithoutPostCommentsInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateManyWithoutPostsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   postLikes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutPostCommentsInput = {
@@ -911,19 +1322,30 @@ export type PostUncheckedUpdateWithoutPostCommentsInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUncheckedUpdateManyWithoutPostsNestedInput
   postLikes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUncheckedUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateWithoutPostLikesInput = {
   id?: string
-  userId: string
   title: string
   routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostCreateimagesInput | string[]
@@ -932,14 +1354,27 @@ export type PostCreateWithoutPostLikesInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserCreateNestedManyWithoutPostsInput
+  user: Prisma.UserCreateNestedOneWithoutPostsInput
   postComments?: Prisma.CommentCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutPostLikesInput = {
@@ -953,14 +1388,26 @@ export type PostUncheckedCreateWithoutPostLikesInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserUncheckedCreateNestedManyWithoutPostsInput
   postComments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutPostLikesInput = {
@@ -981,7 +1428,6 @@ export type PostUpdateToOneWithWhereWithoutPostLikesInput = {
 
 export type PostUpdateWithoutPostLikesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostUpdateimagesInput | string[]
@@ -990,14 +1436,27 @@ export type PostUpdateWithoutPostLikesInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateManyWithoutPostsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   postComments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutPostLikesInput = {
@@ -1011,19 +1470,30 @@ export type PostUncheckedUpdateWithoutPostLikesInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUncheckedUpdateManyWithoutPostsNestedInput
   postComments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUncheckedUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateWithoutPostBookmarksInput = {
   id?: string
-  userId: string
   title: string
   routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostCreateimagesInput | string[]
@@ -1032,14 +1502,27 @@ export type PostCreateWithoutPostBookmarksInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserCreateNestedManyWithoutPostsInput
+  user: Prisma.UserCreateNestedOneWithoutPostsInput
   postComments?: Prisma.CommentCreateNestedManyWithoutPostInput
   postLikes?: Prisma.LikeCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutPostBookmarksInput = {
@@ -1053,14 +1536,26 @@ export type PostUncheckedCreateWithoutPostBookmarksInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserUncheckedCreateNestedManyWithoutPostsInput
   postComments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   postLikes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutPostBookmarksInput = {
@@ -1081,7 +1576,6 @@ export type PostUpdateToOneWithWhereWithoutPostBookmarksInput = {
 
 export type PostUpdateWithoutPostBookmarksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostUpdateimagesInput | string[]
@@ -1090,14 +1584,27 @@ export type PostUpdateWithoutPostBookmarksInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateManyWithoutPostsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   postComments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutPostBookmarksInput = {
@@ -1111,19 +1618,30 @@ export type PostUncheckedUpdateWithoutPostBookmarksInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUncheckedUpdateManyWithoutPostsNestedInput
   postComments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUncheckedUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateWithoutNotificationsInput = {
   id?: string
-  userId: string
   title: string
   routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostCreateimagesInput | string[]
@@ -1132,14 +1650,27 @@ export type PostCreateWithoutNotificationsInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserCreateNestedManyWithoutPostsInput
+  user: Prisma.UserCreateNestedOneWithoutPostsInput
   postComments?: Prisma.CommentCreateNestedManyWithoutPostInput
   postLikes?: Prisma.LikeCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutNotificationsInput = {
@@ -1153,14 +1684,26 @@ export type PostUncheckedCreateWithoutNotificationsInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserUncheckedCreateNestedManyWithoutPostsInput
   postComments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   postLikes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPostInput
   userActivities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutNotificationsInput = {
@@ -1181,7 +1724,6 @@ export type PostUpdateToOneWithWhereWithoutNotificationsInput = {
 
 export type PostUpdateWithoutNotificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostUpdateimagesInput | string[]
@@ -1190,14 +1732,27 @@ export type PostUpdateWithoutNotificationsInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateManyWithoutPostsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   postComments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutNotificationsInput = {
@@ -1211,19 +1766,30 @@ export type PostUncheckedUpdateWithoutNotificationsInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUncheckedUpdateManyWithoutPostsNestedInput
   postComments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUncheckedUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateWithoutUserActivitiesInput = {
   id?: string
-  userId: string
   title: string
   routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostCreateimagesInput | string[]
@@ -1232,14 +1798,27 @@ export type PostCreateWithoutUserActivitiesInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserCreateNestedManyWithoutPostsInput
+  user: Prisma.UserCreateNestedOneWithoutPostsInput
   postComments?: Prisma.CommentCreateNestedManyWithoutPostInput
   postLikes?: Prisma.LikeCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutUserActivitiesInput = {
@@ -1253,14 +1832,26 @@ export type PostUncheckedCreateWithoutUserActivitiesInput = {
   dislikes?: number
   comments?: number
   bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
   views?: number
+  shares?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserUncheckedCreateNestedManyWithoutPostsInput
   postComments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   postLikes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   postBookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPostInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutUserActivitiesInput = {
@@ -1281,7 +1872,6 @@ export type PostUpdateToOneWithWhereWithoutUserActivitiesInput = {
 
 export type PostUpdateWithoutUserActivitiesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostUpdateimagesInput | string[]
@@ -1290,14 +1880,27 @@ export type PostUpdateWithoutUserActivitiesInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateManyWithoutPostsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   postComments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutUserActivitiesInput = {
@@ -1311,19 +1914,112 @@ export type PostUncheckedUpdateWithoutUserActivitiesInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUncheckedUpdateManyWithoutPostsNestedInput
   postComments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutPostNestedInput
 }
 
-export type PostUpdateWithoutUserInput = {
+export type PostCreateWithoutBugReportsInput = {
+  id?: string
+  title: string
+  routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostCreateimagesInput | string[]
+  tags?: Prisma.PostCreatetagsInput | string[]
+  likes?: number
+  dislikes?: number
+  comments?: number
+  bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
+  views?: number
+  shares?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutPostsInput
+  postComments?: Prisma.CommentCreateNestedManyWithoutPostInput
+  postLikes?: Prisma.LikeCreateNestedManyWithoutPostInput
+  postBookmarks?: Prisma.BookmarkCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  userActivities?: Prisma.UserActivityCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutPostInput
+}
+
+export type PostUncheckedCreateWithoutBugReportsInput = {
+  id?: string
+  userId: string
+  title: string
+  routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostCreateimagesInput | string[]
+  tags?: Prisma.PostCreatetagsInput | string[]
+  likes?: number
+  dislikes?: number
+  comments?: number
+  bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
+  views?: number
+  shares?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  postComments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
+  postLikes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
+  postBookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  userActivities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutPostInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutPostInput
+}
+
+export type PostCreateOrConnectWithoutBugReportsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutBugReportsInput, Prisma.PostUncheckedCreateWithoutBugReportsInput>
+}
+
+export type PostUpsertWithoutBugReportsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutBugReportsInput, Prisma.PostUncheckedUpdateWithoutBugReportsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutBugReportsInput, Prisma.PostUncheckedCreateWithoutBugReportsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutBugReportsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutBugReportsInput, Prisma.PostUncheckedUpdateWithoutBugReportsInput>
+}
+
+export type PostUpdateWithoutBugReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   images?: Prisma.PostUpdateimagesInput | string[]
@@ -1332,17 +2028,30 @@ export type PostUpdateWithoutUserInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   postComments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   postLikes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   postBookmarks?: Prisma.BookmarkUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutPostNestedInput
 }
 
-export type PostUncheckedUpdateWithoutUserInput = {
+export type PostUncheckedUpdateWithoutBugReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1353,7 +2062,18 @@ export type PostUncheckedUpdateWithoutUserInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   postComments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
@@ -1361,9 +2081,125 @@ export type PostUncheckedUpdateWithoutUserInput = {
   postBookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPostNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
   userActivities?: Prisma.UserActivityUncheckedUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutPostNestedInput
 }
 
-export type PostUncheckedUpdateManyWithoutUserInput = {
+export type PostCreateWithoutAnalyticsEventsInput = {
+  id?: string
+  title: string
+  routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostCreateimagesInput | string[]
+  tags?: Prisma.PostCreatetagsInput | string[]
+  likes?: number
+  dislikes?: number
+  comments?: number
+  bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
+  views?: number
+  shares?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutPostsInput
+  postComments?: Prisma.CommentCreateNestedManyWithoutPostInput
+  postLikes?: Prisma.LikeCreateNestedManyWithoutPostInput
+  postBookmarks?: Prisma.BookmarkCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  userActivities?: Prisma.UserActivityCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutPostInput
+}
+
+export type PostUncheckedCreateWithoutAnalyticsEventsInput = {
+  id?: string
+  userId: string
+  title: string
+  routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostCreateimagesInput | string[]
+  tags?: Prisma.PostCreatetagsInput | string[]
+  likes?: number
+  dislikes?: number
+  comments?: number
+  bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
+  views?: number
+  shares?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  postComments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
+  postLikes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
+  postBookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  userActivities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutPostInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutPostInput
+}
+
+export type PostCreateOrConnectWithoutAnalyticsEventsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutAnalyticsEventsInput, Prisma.PostUncheckedCreateWithoutAnalyticsEventsInput>
+}
+
+export type PostUpsertWithoutAnalyticsEventsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutAnalyticsEventsInput, Prisma.PostUncheckedUpdateWithoutAnalyticsEventsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutAnalyticsEventsInput, Prisma.PostUncheckedCreateWithoutAnalyticsEventsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutAnalyticsEventsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutAnalyticsEventsInput, Prisma.PostUncheckedUpdateWithoutAnalyticsEventsInput>
+}
+
+export type PostUpdateWithoutAnalyticsEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostUpdateimagesInput | string[]
+  tags?: Prisma.PostUpdatetagsInput | string[]
+  likes?: Prisma.IntFieldUpdateOperationsInput | number
+  dislikes?: Prisma.IntFieldUpdateOperationsInput | number
+  comments?: Prisma.IntFieldUpdateOperationsInput | number
+  bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
+  postComments?: Prisma.CommentUpdateManyWithoutPostNestedInput
+  postLikes?: Prisma.LikeUpdateManyWithoutPostNestedInput
+  postBookmarks?: Prisma.BookmarkUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  userActivities?: Prisma.UserActivityUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateWithoutAnalyticsEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1374,7 +2210,142 @@ export type PostUncheckedUpdateManyWithoutUserInput = {
   dislikes?: Prisma.IntFieldUpdateOperationsInput | number
   comments?: Prisma.IntFieldUpdateOperationsInput | number
   bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  postComments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
+  postLikes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
+  postBookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  userActivities?: Prisma.UserActivityUncheckedUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutPostNestedInput
+}
+
+export type PostCreateManyUserInput = {
+  id?: string
+  title: string
+  routes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostCreateimagesInput | string[]
+  tags?: Prisma.PostCreatetagsInput | string[]
+  likes?: number
+  dislikes?: number
+  comments?: number
+  bookmarks?: number
+  validityScore?: number
+  validityTier?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  region?: string | null
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  isPlatformGen?: boolean
+  views?: number
+  shares?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PostUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostUpdateimagesInput | string[]
+  tags?: Prisma.PostUpdatetagsInput | string[]
+  likes?: Prisma.IntFieldUpdateOperationsInput | number
+  dislikes?: Prisma.IntFieldUpdateOperationsInput | number
+  comments?: Prisma.IntFieldUpdateOperationsInput | number
+  bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  postComments?: Prisma.CommentUpdateManyWithoutPostNestedInput
+  postLikes?: Prisma.LikeUpdateManyWithoutPostNestedInput
+  postBookmarks?: Prisma.BookmarkUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  userActivities?: Prisma.UserActivityUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostUpdateimagesInput | string[]
+  tags?: Prisma.PostUpdatetagsInput | string[]
+  likes?: Prisma.IntFieldUpdateOperationsInput | number
+  dislikes?: Prisma.IntFieldUpdateOperationsInput | number
+  comments?: Prisma.IntFieldUpdateOperationsInput | number
+  bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  postComments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
+  postLikes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
+  postBookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  userActivities?: Prisma.UserActivityUncheckedUpdateManyWithoutPostNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutPostNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  routes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  images?: Prisma.PostUpdateimagesInput | string[]
+  tags?: Prisma.PostUpdatetagsInput | string[]
+  likes?: Prisma.IntFieldUpdateOperationsInput | number
+  dislikes?: Prisma.IntFieldUpdateOperationsInput | number
+  comments?: Prisma.IntFieldUpdateOperationsInput | number
+  bookmarks?: Prisma.IntFieldUpdateOperationsInput | number
+  validityScore?: Prisma.IntFieldUpdateOperationsInput | number
+  validityTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isPlatformGen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  views?: Prisma.IntFieldUpdateOperationsInput | number
+  shares?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1385,21 +2356,23 @@ export type PostUncheckedUpdateManyWithoutUserInput = {
  */
 
 export type PostCountOutputType = {
-  user: number
   postComments: number
   postLikes: number
   postBookmarks: number
   notifications: number
   userActivities: number
+  analyticsEvents: number
+  bugReports: number
 }
 
 export type PostCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | PostCountOutputTypeCountUserArgs
   postComments?: boolean | PostCountOutputTypeCountPostCommentsArgs
   postLikes?: boolean | PostCountOutputTypeCountPostLikesArgs
   postBookmarks?: boolean | PostCountOutputTypeCountPostBookmarksArgs
   notifications?: boolean | PostCountOutputTypeCountNotificationsArgs
   userActivities?: boolean | PostCountOutputTypeCountUserActivitiesArgs
+  analyticsEvents?: boolean | PostCountOutputTypeCountAnalyticsEventsArgs
+  bugReports?: boolean | PostCountOutputTypeCountBugReportsArgs
 }
 
 /**
@@ -1410,13 +2383,6 @@ export type PostCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the PostCountOutputType
    */
   select?: Prisma.PostCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * PostCountOutputType without action
- */
-export type PostCountOutputTypeCountUserArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UserWhereInput
 }
 
 /**
@@ -1454,6 +2420,20 @@ export type PostCountOutputTypeCountUserActivitiesArgs<ExtArgs extends runtime.T
   where?: Prisma.UserActivityWhereInput
 }
 
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountAnalyticsEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AnalyticsEventWhereInput
+}
+
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountBugReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BugReportWhereInput
+}
+
 
 export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1466,15 +2446,28 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   dislikes?: boolean
   comments?: boolean
   bookmarks?: boolean
+  validityScore?: boolean
+  validityTier?: boolean
+  startLat?: boolean
+  startLng?: boolean
+  endLat?: boolean
+  endLng?: boolean
+  region?: boolean
+  totalDistanceKm?: boolean
+  estimatedMins?: boolean
+  isPlatformGen?: boolean
   views?: boolean
+  shares?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.Post$userArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   postComments?: boolean | Prisma.Post$postCommentsArgs<ExtArgs>
   postLikes?: boolean | Prisma.Post$postLikesArgs<ExtArgs>
   postBookmarks?: boolean | Prisma.Post$postBookmarksArgs<ExtArgs>
   notifications?: boolean | Prisma.Post$notificationsArgs<ExtArgs>
   userActivities?: boolean | Prisma.Post$userActivitiesArgs<ExtArgs>
+  analyticsEvents?: boolean | Prisma.Post$analyticsEventsArgs<ExtArgs>
+  bugReports?: boolean | Prisma.Post$bugReportsArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
@@ -1489,9 +2482,21 @@ export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   dislikes?: boolean
   comments?: boolean
   bookmarks?: boolean
+  validityScore?: boolean
+  validityTier?: boolean
+  startLat?: boolean
+  startLng?: boolean
+  endLat?: boolean
+  endLng?: boolean
+  region?: boolean
+  totalDistanceKm?: boolean
+  estimatedMins?: boolean
+  isPlatformGen?: boolean
   views?: boolean
+  shares?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
 export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1505,9 +2510,21 @@ export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   dislikes?: boolean
   comments?: boolean
   bookmarks?: boolean
+  validityScore?: boolean
+  validityTier?: boolean
+  startLat?: boolean
+  startLng?: boolean
+  endLat?: boolean
+  endLng?: boolean
+  region?: boolean
+  totalDistanceKm?: boolean
+  estimatedMins?: boolean
+  isPlatformGen?: boolean
   views?: boolean
+  shares?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
 export type PostSelectScalar = {
@@ -1521,33 +2538,52 @@ export type PostSelectScalar = {
   dislikes?: boolean
   comments?: boolean
   bookmarks?: boolean
+  validityScore?: boolean
+  validityTier?: boolean
+  startLat?: boolean
+  startLng?: boolean
+  endLat?: boolean
+  endLng?: boolean
+  region?: boolean
+  totalDistanceKm?: boolean
+  estimatedMins?: boolean
+  isPlatformGen?: boolean
   views?: boolean
+  shares?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "routes" | "images" | "tags" | "likes" | "dislikes" | "comments" | "bookmarks" | "views" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "routes" | "images" | "tags" | "likes" | "dislikes" | "comments" | "bookmarks" | "validityScore" | "validityTier" | "startLat" | "startLng" | "endLat" | "endLng" | "region" | "totalDistanceKm" | "estimatedMins" | "isPlatformGen" | "views" | "shares" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.Post$userArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   postComments?: boolean | Prisma.Post$postCommentsArgs<ExtArgs>
   postLikes?: boolean | Prisma.Post$postLikesArgs<ExtArgs>
   postBookmarks?: boolean | Prisma.Post$postBookmarksArgs<ExtArgs>
   notifications?: boolean | Prisma.Post$notificationsArgs<ExtArgs>
   userActivities?: boolean | Prisma.Post$userActivitiesArgs<ExtArgs>
+  analyticsEvents?: boolean | Prisma.Post$analyticsEventsArgs<ExtArgs>
+  bugReports?: boolean | Prisma.Post$bugReportsArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type PostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type PostIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type PostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type PostIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
 
 export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Post"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>[]
+    user: Prisma.$UserPayload<ExtArgs>
     postComments: Prisma.$CommentPayload<ExtArgs>[]
     postLikes: Prisma.$LikePayload<ExtArgs>[]
     postBookmarks: Prisma.$BookmarkPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     userActivities: Prisma.$UserActivityPayload<ExtArgs>[]
+    analyticsEvents: Prisma.$AnalyticsEventPayload<ExtArgs>[]
+    bugReports: Prisma.$BugReportPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1560,7 +2596,18 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     dislikes: number
     comments: number
     bookmarks: number
+    validityScore: number
+    validityTier: string | null
+    startLat: number | null
+    startLng: number | null
+    endLat: number | null
+    endLng: number | null
+    region: string | null
+    totalDistanceKm: number | null
+    estimatedMins: number | null
+    isPlatformGen: boolean
     views: number
+    shares: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["post"]>
@@ -1957,12 +3004,14 @@ readonly fields: PostFieldRefs;
  */
 export interface Prisma__PostClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.Post$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$userArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   postComments<T extends Prisma.Post$postCommentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$postCommentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   postLikes<T extends Prisma.Post$postLikesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$postLikesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LikePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   postBookmarks<T extends Prisma.Post$postBookmarksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$postBookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookmarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.Post$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userActivities<T extends Prisma.Post$userActivitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$userActivitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  analyticsEvents<T extends Prisma.Post$analyticsEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$analyticsEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnalyticsEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bugReports<T extends Prisma.Post$bugReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$bugReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BugReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2002,7 +3051,18 @@ export interface PostFieldRefs {
   readonly dislikes: Prisma.FieldRef<"Post", 'Int'>
   readonly comments: Prisma.FieldRef<"Post", 'Int'>
   readonly bookmarks: Prisma.FieldRef<"Post", 'Int'>
+  readonly validityScore: Prisma.FieldRef<"Post", 'Int'>
+  readonly validityTier: Prisma.FieldRef<"Post", 'String'>
+  readonly startLat: Prisma.FieldRef<"Post", 'Float'>
+  readonly startLng: Prisma.FieldRef<"Post", 'Float'>
+  readonly endLat: Prisma.FieldRef<"Post", 'Float'>
+  readonly endLng: Prisma.FieldRef<"Post", 'Float'>
+  readonly region: Prisma.FieldRef<"Post", 'String'>
+  readonly totalDistanceKm: Prisma.FieldRef<"Post", 'Float'>
+  readonly estimatedMins: Prisma.FieldRef<"Post", 'Int'>
+  readonly isPlatformGen: Prisma.FieldRef<"Post", 'Boolean'>
   readonly views: Prisma.FieldRef<"Post", 'Int'>
+  readonly shares: Prisma.FieldRef<"Post", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Post", 'DateTime'>
 }
@@ -2254,6 +3314,10 @@ export type PostCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.PostCreateManyInput | Prisma.PostCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PostIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -2324,6 +3388,10 @@ export type PostUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many Posts to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PostIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -2390,30 +3458,6 @@ export type PostDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Posts to delete.
    */
   limit?: number
-}
-
-/**
- * Post.user
- */
-export type Post$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
-  orderBy?: Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[]
-  cursor?: Prisma.UserWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.UserScalarFieldEnum | Prisma.UserScalarFieldEnum[]
 }
 
 /**
@@ -2534,6 +3578,54 @@ export type Post$userActivitiesArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.UserActivityScalarFieldEnum | Prisma.UserActivityScalarFieldEnum[]
+}
+
+/**
+ * Post.analyticsEvents
+ */
+export type Post$analyticsEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AnalyticsEvent
+   */
+  select?: Prisma.AnalyticsEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AnalyticsEvent
+   */
+  omit?: Prisma.AnalyticsEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AnalyticsEventInclude<ExtArgs> | null
+  where?: Prisma.AnalyticsEventWhereInput
+  orderBy?: Prisma.AnalyticsEventOrderByWithRelationInput | Prisma.AnalyticsEventOrderByWithRelationInput[]
+  cursor?: Prisma.AnalyticsEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AnalyticsEventScalarFieldEnum | Prisma.AnalyticsEventScalarFieldEnum[]
+}
+
+/**
+ * Post.bugReports
+ */
+export type Post$bugReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BugReport
+   */
+  select?: Prisma.BugReportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BugReport
+   */
+  omit?: Prisma.BugReportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BugReportInclude<ExtArgs> | null
+  where?: Prisma.BugReportWhereInput
+  orderBy?: Prisma.BugReportOrderByWithRelationInput | Prisma.BugReportOrderByWithRelationInput[]
+  cursor?: Prisma.BugReportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BugReportScalarFieldEnum | Prisma.BugReportScalarFieldEnum[]
 }
 
 /**

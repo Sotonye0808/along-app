@@ -20,8 +20,22 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  rewardPoints: number | null
+  lastKnownLat: number | null
+  lastKnownLng: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  rewardPoints: number | null
+  lastKnownLat: number | null
+  lastKnownLng: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -35,6 +49,14 @@ export type UserMinAggregateOutputType = {
   bio: string | null
   location: string | null
   verified: boolean | null
+  role: $Enums.UserRole | null
+  rewardPoints: number | null
+  rewardTier: $Enums.RewardTier | null
+  inviteCode: string | null
+  invitedById: string | null
+  googleId: string | null
+  lastKnownLat: number | null
+  lastKnownLng: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +72,14 @@ export type UserMaxAggregateOutputType = {
   bio: string | null
   location: string | null
   verified: boolean | null
+  role: $Enums.UserRole | null
+  rewardPoints: number | null
+  rewardTier: $Enums.RewardTier | null
+  inviteCode: string | null
+  invitedById: string | null
+  googleId: string | null
+  lastKnownLat: number | null
+  lastKnownLng: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,11 +95,32 @@ export type UserCountAggregateOutputType = {
   bio: number
   location: number
   verified: number
+  role: number
+  rewardPoints: number
+  rewardTier: number
+  inviteCode: number
+  invitedById: number
+  googleId: number
+  avatarConfig: number
+  lastKnownLat: number
+  lastKnownLng: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type UserAvgAggregateInputType = {
+  rewardPoints?: true
+  lastKnownLat?: true
+  lastKnownLng?: true
+}
+
+export type UserSumAggregateInputType = {
+  rewardPoints?: true
+  lastKnownLat?: true
+  lastKnownLng?: true
+}
 
 export type UserMinAggregateInputType = {
   id?: true
@@ -82,6 +133,14 @@ export type UserMinAggregateInputType = {
   bio?: true
   location?: true
   verified?: true
+  role?: true
+  rewardPoints?: true
+  rewardTier?: true
+  inviteCode?: true
+  invitedById?: true
+  googleId?: true
+  lastKnownLat?: true
+  lastKnownLng?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -97,6 +156,14 @@ export type UserMaxAggregateInputType = {
   bio?: true
   location?: true
   verified?: true
+  role?: true
+  rewardPoints?: true
+  rewardTier?: true
+  inviteCode?: true
+  invitedById?: true
+  googleId?: true
+  lastKnownLat?: true
+  lastKnownLng?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +179,15 @@ export type UserCountAggregateInputType = {
   bio?: true
   location?: true
   verified?: true
+  role?: true
+  rewardPoints?: true
+  rewardTier?: true
+  inviteCode?: true
+  invitedById?: true
+  googleId?: true
+  avatarConfig?: true
+  lastKnownLat?: true
+  lastKnownLng?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -155,6 +231,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -185,6 +273,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -200,9 +290,20 @@ export type UserGroupByOutputType = {
   bio: string | null
   location: string | null
   verified: boolean
+  role: $Enums.UserRole
+  rewardPoints: number
+  rewardTier: $Enums.RewardTier
+  inviteCode: string | null
+  invitedById: string | null
+  googleId: string | null
+  avatarConfig: runtime.JsonValue | null
+  lastKnownLat: number | null
+  lastKnownLng: number | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -236,6 +337,15 @@ export type UserWhereInput = {
   bio?: Prisma.StringNullableFilter<"User"> | string | null
   location?: Prisma.StringNullableFilter<"User"> | string | null
   verified?: Prisma.BoolFilter<"User"> | boolean
+  role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
+  rewardPoints?: Prisma.IntFilter<"User"> | number
+  rewardTier?: Prisma.EnumRewardTierFilter<"User"> | $Enums.RewardTier
+  inviteCode?: Prisma.StringNullableFilter<"User"> | string | null
+  invitedById?: Prisma.StringNullableFilter<"User"> | string | null
+  googleId?: Prisma.StringNullableFilter<"User"> | string | null
+  avatarConfig?: Prisma.JsonNullableFilter<"User">
+  lastKnownLat?: Prisma.FloatNullableFilter<"User"> | number | null
+  lastKnownLng?: Prisma.FloatNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   posts?: Prisma.PostListRelationFilter
@@ -245,8 +355,15 @@ export type UserWhereInput = {
   notifications?: Prisma.NotificationRecipientListRelationFilter
   notificationsAsActor?: Prisma.NotificationListRelationFilter
   activities?: Prisma.UserActivityListRelationFilter
+  bugReports?: Prisma.BugReportListRelationFilter
+  reviewedBugReports?: Prisma.BugReportListRelationFilter
+  authoredReviews?: Prisma.UserReviewListRelationFilter
+  receivedReviews?: Prisma.UserReviewListRelationFilter
+  invitedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  invitedUsers?: Prisma.UserListRelationFilter
   following?: Prisma.FollowListRelationFilter
   followers?: Prisma.FollowListRelationFilter
+  analyticsEvents?: Prisma.AnalyticsEventListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -260,6 +377,15 @@ export type UserOrderByWithRelationInput = {
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   verified?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  rewardPoints?: Prisma.SortOrder
+  rewardTier?: Prisma.SortOrder
+  inviteCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  invitedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  googleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarConfig?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastKnownLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastKnownLng?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   posts?: Prisma.PostOrderByRelationAggregateInput
@@ -269,14 +395,23 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.NotificationRecipientOrderByRelationAggregateInput
   notificationsAsActor?: Prisma.NotificationOrderByRelationAggregateInput
   activities?: Prisma.UserActivityOrderByRelationAggregateInput
+  bugReports?: Prisma.BugReportOrderByRelationAggregateInput
+  reviewedBugReports?: Prisma.BugReportOrderByRelationAggregateInput
+  authoredReviews?: Prisma.UserReviewOrderByRelationAggregateInput
+  receivedReviews?: Prisma.UserReviewOrderByRelationAggregateInput
+  invitedBy?: Prisma.UserOrderByWithRelationInput
+  invitedUsers?: Prisma.UserOrderByRelationAggregateInput
   following?: Prisma.FollowOrderByRelationAggregateInput
   followers?: Prisma.FollowOrderByRelationAggregateInput
+  analyticsEvents?: Prisma.AnalyticsEventOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   userName?: string
   email?: string
+  inviteCode?: string
+  googleId?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
@@ -287,6 +422,13 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   bio?: Prisma.StringNullableFilter<"User"> | string | null
   location?: Prisma.StringNullableFilter<"User"> | string | null
   verified?: Prisma.BoolFilter<"User"> | boolean
+  role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
+  rewardPoints?: Prisma.IntFilter<"User"> | number
+  rewardTier?: Prisma.EnumRewardTierFilter<"User"> | $Enums.RewardTier
+  invitedById?: Prisma.StringNullableFilter<"User"> | string | null
+  avatarConfig?: Prisma.JsonNullableFilter<"User">
+  lastKnownLat?: Prisma.FloatNullableFilter<"User"> | number | null
+  lastKnownLng?: Prisma.FloatNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   posts?: Prisma.PostListRelationFilter
@@ -296,9 +438,16 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationRecipientListRelationFilter
   notificationsAsActor?: Prisma.NotificationListRelationFilter
   activities?: Prisma.UserActivityListRelationFilter
+  bugReports?: Prisma.BugReportListRelationFilter
+  reviewedBugReports?: Prisma.BugReportListRelationFilter
+  authoredReviews?: Prisma.UserReviewListRelationFilter
+  receivedReviews?: Prisma.UserReviewListRelationFilter
+  invitedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  invitedUsers?: Prisma.UserListRelationFilter
   following?: Prisma.FollowListRelationFilter
   followers?: Prisma.FollowListRelationFilter
-}, "id" | "userName" | "email">
+  analyticsEvents?: Prisma.AnalyticsEventListRelationFilter
+}, "id" | "userName" | "email" | "inviteCode" | "googleId">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -311,11 +460,22 @@ export type UserOrderByWithAggregationInput = {
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   verified?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  rewardPoints?: Prisma.SortOrder
+  rewardTier?: Prisma.SortOrder
+  inviteCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  invitedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  googleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarConfig?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastKnownLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastKnownLng?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -332,6 +492,15 @@ export type UserScalarWhereWithAggregatesInput = {
   bio?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   location?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   verified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
+  rewardPoints?: Prisma.IntWithAggregatesFilter<"User"> | number
+  rewardTier?: Prisma.EnumRewardTierWithAggregatesFilter<"User"> | $Enums.RewardTier
+  inviteCode?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  invitedById?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  googleId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  avatarConfig?: Prisma.JsonNullableWithAggregatesFilter<"User">
+  lastKnownLat?: Prisma.FloatNullableWithAggregatesFilter<"User"> | number | null
+  lastKnownLng?: Prisma.FloatNullableWithAggregatesFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -347,6 +516,14 @@ export type UserCreateInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -356,8 +533,15 @@ export type UserCreateInput = {
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -371,6 +555,15 @@ export type UserUncheckedCreateInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -380,8 +573,14 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -395,6 +594,14 @@ export type UserUpdateInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -404,8 +611,15 @@ export type UserUpdateInput = {
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -419,6 +633,15 @@ export type UserUncheckedUpdateInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -428,8 +651,14 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -443,6 +672,15 @@ export type UserCreateManyInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -458,6 +696,14 @@ export type UserUpdateManyMutationInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -473,8 +719,32 @@ export type UserUncheckedUpdateManyInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
+}
+
+export type UserListRelationFilter = {
+  every?: Prisma.UserWhereInput
+  some?: Prisma.UserWhereInput
+  none?: Prisma.UserWhereInput
+}
+
+export type UserOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -488,8 +758,23 @@ export type UserCountOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   location?: Prisma.SortOrder
   verified?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  rewardPoints?: Prisma.SortOrder
+  rewardTier?: Prisma.SortOrder
+  inviteCode?: Prisma.SortOrder
+  invitedById?: Prisma.SortOrder
+  googleId?: Prisma.SortOrder
+  avatarConfig?: Prisma.SortOrder
+  lastKnownLat?: Prisma.SortOrder
+  lastKnownLng?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  rewardPoints?: Prisma.SortOrder
+  lastKnownLat?: Prisma.SortOrder
+  lastKnownLng?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -503,6 +788,14 @@ export type UserMaxOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   location?: Prisma.SortOrder
   verified?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  rewardPoints?: Prisma.SortOrder
+  rewardTier?: Prisma.SortOrder
+  inviteCode?: Prisma.SortOrder
+  invitedById?: Prisma.SortOrder
+  googleId?: Prisma.SortOrder
+  lastKnownLat?: Prisma.SortOrder
+  lastKnownLng?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -518,8 +811,22 @@ export type UserMinOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   location?: Prisma.SortOrder
   verified?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  rewardPoints?: Prisma.SortOrder
+  rewardTier?: Prisma.SortOrder
+  inviteCode?: Prisma.SortOrder
+  invitedById?: Prisma.SortOrder
+  googleId?: Prisma.SortOrder
+  lastKnownLat?: Prisma.SortOrder
+  lastKnownLng?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  rewardPoints?: Prisma.SortOrder
+  lastKnownLat?: Prisma.SortOrder
+  lastKnownLng?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -527,14 +834,24 @@ export type UserScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput
 }
 
-export type UserListRelationFilter = {
-  every?: Prisma.UserWhereInput
-  some?: Prisma.UserWhereInput
-  none?: Prisma.UserWhereInput
+export type UserCreateNestedOneWithoutInvitedUsersInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitedUsersInput, Prisma.UserUncheckedCreateWithoutInvitedUsersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitedUsersInput
+  connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
+export type UserCreateNestedManyWithoutInvitedByInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitedByInput, Prisma.UserUncheckedCreateWithoutInvitedByInput> | Prisma.UserCreateWithoutInvitedByInput[] | Prisma.UserUncheckedCreateWithoutInvitedByInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitedByInput | Prisma.UserCreateOrConnectWithoutInvitedByInput[]
+  createMany?: Prisma.UserCreateManyInvitedByInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUncheckedCreateNestedManyWithoutInvitedByInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitedByInput, Prisma.UserUncheckedCreateWithoutInvitedByInput> | Prisma.UserCreateWithoutInvitedByInput[] | Prisma.UserUncheckedCreateWithoutInvitedByInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitedByInput | Prisma.UserCreateOrConnectWithoutInvitedByInput[]
+  createMany?: Prisma.UserCreateManyInvitedByInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -549,8 +866,70 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type EnumUserRoleFieldUpdateOperationsInput = {
+  set?: $Enums.UserRole
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type EnumRewardTierFieldUpdateOperationsInput = {
+  set?: $Enums.RewardTier
+}
+
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserUpdateOneWithoutInvitedUsersNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitedUsersInput, Prisma.UserUncheckedCreateWithoutInvitedUsersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitedUsersInput
+  upsert?: Prisma.UserUpsertWithoutInvitedUsersInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvitedUsersInput, Prisma.UserUpdateWithoutInvitedUsersInput>, Prisma.UserUncheckedUpdateWithoutInvitedUsersInput>
+}
+
+export type UserUpdateManyWithoutInvitedByNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitedByInput, Prisma.UserUncheckedCreateWithoutInvitedByInput> | Prisma.UserCreateWithoutInvitedByInput[] | Prisma.UserUncheckedCreateWithoutInvitedByInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitedByInput | Prisma.UserCreateOrConnectWithoutInvitedByInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutInvitedByInput | Prisma.UserUpsertWithWhereUniqueWithoutInvitedByInput[]
+  createMany?: Prisma.UserCreateManyInvitedByInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutInvitedByInput | Prisma.UserUpdateWithWhereUniqueWithoutInvitedByInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutInvitedByInput | Prisma.UserUpdateManyWithWhereWithoutInvitedByInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserUncheckedUpdateManyWithoutInvitedByNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitedByInput, Prisma.UserUncheckedCreateWithoutInvitedByInput> | Prisma.UserCreateWithoutInvitedByInput[] | Prisma.UserUncheckedCreateWithoutInvitedByInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitedByInput | Prisma.UserCreateOrConnectWithoutInvitedByInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutInvitedByInput | Prisma.UserUpsertWithWhereUniqueWithoutInvitedByInput[]
+  createMany?: Prisma.UserCreateManyInvitedByInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutInvitedByInput | Prisma.UserUpdateWithWhereUniqueWithoutInvitedByInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutInvitedByInput | Prisma.UserUpdateManyWithWhereWithoutInvitedByInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
 }
 
 export type UserCreateNestedOneWithoutFollowingInput = {
@@ -581,42 +960,18 @@ export type UserUpdateOneRequiredWithoutFollowersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFollowersInput, Prisma.UserUpdateWithoutFollowersInput>, Prisma.UserUncheckedUpdateWithoutFollowersInput>
 }
 
-export type UserCreateNestedManyWithoutPostsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput> | Prisma.UserCreateWithoutPostsInput[] | Prisma.UserUncheckedCreateWithoutPostsInput[]
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput | Prisma.UserCreateOrConnectWithoutPostsInput[]
-  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+export type UserCreateNestedOneWithoutPostsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput
+  connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUncheckedCreateNestedManyWithoutPostsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput> | Prisma.UserCreateWithoutPostsInput[] | Prisma.UserUncheckedCreateWithoutPostsInput[]
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput | Prisma.UserCreateOrConnectWithoutPostsInput[]
-  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-}
-
-export type UserUpdateManyWithoutPostsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput> | Prisma.UserCreateWithoutPostsInput[] | Prisma.UserUncheckedCreateWithoutPostsInput[]
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput | Prisma.UserCreateOrConnectWithoutPostsInput[]
-  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutPostsInput | Prisma.UserUpsertWithWhereUniqueWithoutPostsInput[]
-  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  update?: Prisma.UserUpdateWithWhereUniqueWithoutPostsInput | Prisma.UserUpdateWithWhereUniqueWithoutPostsInput[]
-  updateMany?: Prisma.UserUpdateManyWithWhereWithoutPostsInput | Prisma.UserUpdateManyWithWhereWithoutPostsInput[]
-  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
-}
-
-export type UserUncheckedUpdateManyWithoutPostsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput> | Prisma.UserCreateWithoutPostsInput[] | Prisma.UserUncheckedCreateWithoutPostsInput[]
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput | Prisma.UserCreateOrConnectWithoutPostsInput[]
-  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutPostsInput | Prisma.UserUpsertWithWhereUniqueWithoutPostsInput[]
-  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
-  update?: Prisma.UserUpdateWithWhereUniqueWithoutPostsInput | Prisma.UserUpdateWithWhereUniqueWithoutPostsInput[]
-  updateMany?: Prisma.UserUpdateManyWithWhereWithoutPostsInput | Prisma.UserUpdateManyWithWhereWithoutPostsInput[]
-  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+export type UserUpdateOneRequiredWithoutPostsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput
+  upsert?: Prisma.UserUpsertWithoutPostsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPostsInput, Prisma.UserUpdateWithoutPostsInput>, Prisma.UserUncheckedUpdateWithoutPostsInput>
 }
 
 export type UserCreateNestedOneWithoutCommentsInput = {
@@ -703,6 +1058,377 @@ export type UserUpdateOneRequiredWithoutActivitiesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutActivitiesInput, Prisma.UserUpdateWithoutActivitiesInput>, Prisma.UserUncheckedUpdateWithoutActivitiesInput>
 }
 
+export type UserCreateNestedOneWithoutBugReportsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBugReportsInput, Prisma.UserUncheckedCreateWithoutBugReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBugReportsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReviewedBugReportsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedBugReportsInput, Prisma.UserUncheckedCreateWithoutReviewedBugReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedBugReportsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBugReportsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBugReportsInput, Prisma.UserUncheckedCreateWithoutBugReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBugReportsInput
+  upsert?: Prisma.UserUpsertWithoutBugReportsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBugReportsInput, Prisma.UserUpdateWithoutBugReportsInput>, Prisma.UserUncheckedUpdateWithoutBugReportsInput>
+}
+
+export type UserUpdateOneWithoutReviewedBugReportsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedBugReportsInput, Prisma.UserUncheckedCreateWithoutReviewedBugReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedBugReportsInput
+  upsert?: Prisma.UserUpsertWithoutReviewedBugReportsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewedBugReportsInput, Prisma.UserUpdateWithoutReviewedBugReportsInput>, Prisma.UserUncheckedUpdateWithoutReviewedBugReportsInput>
+}
+
+export type UserCreateNestedOneWithoutAuthoredReviewsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAuthoredReviewsInput, Prisma.UserUncheckedCreateWithoutAuthoredReviewsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuthoredReviewsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReceivedReviewsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReceivedReviewsInput, Prisma.UserUncheckedCreateWithoutReceivedReviewsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReceivedReviewsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAuthoredReviewsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAuthoredReviewsInput, Prisma.UserUncheckedCreateWithoutAuthoredReviewsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuthoredReviewsInput
+  upsert?: Prisma.UserUpsertWithoutAuthoredReviewsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuthoredReviewsInput, Prisma.UserUpdateWithoutAuthoredReviewsInput>, Prisma.UserUncheckedUpdateWithoutAuthoredReviewsInput>
+}
+
+export type UserUpdateOneRequiredWithoutReceivedReviewsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReceivedReviewsInput, Prisma.UserUncheckedCreateWithoutReceivedReviewsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReceivedReviewsInput
+  upsert?: Prisma.UserUpsertWithoutReceivedReviewsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReceivedReviewsInput, Prisma.UserUpdateWithoutReceivedReviewsInput>, Prisma.UserUncheckedUpdateWithoutReceivedReviewsInput>
+}
+
+export type UserCreateNestedOneWithoutAnalyticsEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAnalyticsEventsInput, Prisma.UserUncheckedCreateWithoutAnalyticsEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnalyticsEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutAnalyticsEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAnalyticsEventsInput, Prisma.UserUncheckedCreateWithoutAnalyticsEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnalyticsEventsInput
+  upsert?: Prisma.UserUpsertWithoutAnalyticsEventsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAnalyticsEventsInput, Prisma.UserUpdateWithoutAnalyticsEventsInput>, Prisma.UserUncheckedUpdateWithoutAnalyticsEventsInput>
+}
+
+export type UserCreateWithoutInvitedUsersInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutInvitedUsersInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutInvitedUsersInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitedUsersInput, Prisma.UserUncheckedCreateWithoutInvitedUsersInput>
+}
+
+export type UserCreateWithoutInvitedByInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutInvitedByInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutInvitedByInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitedByInput, Prisma.UserUncheckedCreateWithoutInvitedByInput>
+}
+
+export type UserCreateManyInvitedByInputEnvelope = {
+  data: Prisma.UserCreateManyInvitedByInput | Prisma.UserCreateManyInvitedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserUpsertWithoutInvitedUsersInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInvitedUsersInput, Prisma.UserUncheckedUpdateWithoutInvitedUsersInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitedUsersInput, Prisma.UserUncheckedCreateWithoutInvitedUsersInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInvitedUsersInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInvitedUsersInput, Prisma.UserUncheckedUpdateWithoutInvitedUsersInput>
+}
+
+export type UserUpdateWithoutInvitedUsersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInvitedUsersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUpsertWithWhereUniqueWithoutInvitedByInput = {
+  where: Prisma.UserWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInvitedByInput, Prisma.UserUncheckedUpdateWithoutInvitedByInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitedByInput, Prisma.UserUncheckedCreateWithoutInvitedByInput>
+}
+
+export type UserUpdateWithWhereUniqueWithoutInvitedByInput = {
+  where: Prisma.UserWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInvitedByInput, Prisma.UserUncheckedUpdateWithoutInvitedByInput>
+}
+
+export type UserUpdateManyWithWhereWithoutInvitedByInput = {
+  where: Prisma.UserScalarWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutInvitedByInput>
+}
+
+export type UserScalarWhereInput = {
+  AND?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+  OR?: Prisma.UserScalarWhereInput[]
+  NOT?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+  id?: Prisma.StringFilter<"User"> | string
+  userName?: Prisma.StringFilter<"User"> | string
+  firstName?: Prisma.StringFilter<"User"> | string
+  lastName?: Prisma.StringFilter<"User"> | string
+  email?: Prisma.StringFilter<"User"> | string
+  password?: Prisma.StringFilter<"User"> | string
+  avatar?: Prisma.StringNullableFilter<"User"> | string | null
+  bio?: Prisma.StringNullableFilter<"User"> | string | null
+  location?: Prisma.StringNullableFilter<"User"> | string | null
+  verified?: Prisma.BoolFilter<"User"> | boolean
+  role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
+  rewardPoints?: Prisma.IntFilter<"User"> | number
+  rewardTier?: Prisma.EnumRewardTierFilter<"User"> | $Enums.RewardTier
+  inviteCode?: Prisma.StringNullableFilter<"User"> | string | null
+  invitedById?: Prisma.StringNullableFilter<"User"> | string | null
+  googleId?: Prisma.StringNullableFilter<"User"> | string | null
+  avatarConfig?: Prisma.JsonNullableFilter<"User">
+  lastKnownLat?: Prisma.FloatNullableFilter<"User"> | number | null
+  lastKnownLng?: Prisma.FloatNullableFilter<"User"> | number | null
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+}
+
 export type UserCreateWithoutFollowingInput = {
   id?: string
   userName: string
@@ -714,6 +1440,14 @@ export type UserCreateWithoutFollowingInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -723,7 +1457,14 @@ export type UserCreateWithoutFollowingInput = {
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowingInput = {
@@ -737,6 +1478,15 @@ export type UserUncheckedCreateWithoutFollowingInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -746,7 +1496,13 @@ export type UserUncheckedCreateWithoutFollowingInput = {
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowingInput = {
@@ -765,6 +1521,14 @@ export type UserCreateWithoutFollowersInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -774,7 +1538,14 @@ export type UserCreateWithoutFollowersInput = {
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowersInput = {
@@ -788,6 +1559,15 @@ export type UserUncheckedCreateWithoutFollowersInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -797,7 +1577,13 @@ export type UserUncheckedCreateWithoutFollowersInput = {
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowersInput = {
@@ -827,6 +1613,14 @@ export type UserUpdateWithoutFollowingInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -836,7 +1630,14 @@ export type UserUpdateWithoutFollowingInput = {
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -850,6 +1651,15 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -859,7 +1669,13 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutFollowersInput = {
@@ -884,6 +1700,14 @@ export type UserUpdateWithoutFollowersInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -893,7 +1717,14 @@ export type UserUpdateWithoutFollowersInput = {
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -907,6 +1738,15 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -916,7 +1756,13 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPostsInput = {
@@ -930,6 +1776,14 @@ export type UserCreateWithoutPostsInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   comments?: Prisma.CommentCreateNestedManyWithoutUserInput
@@ -938,8 +1792,15 @@ export type UserCreateWithoutPostsInput = {
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPostsInput = {
@@ -953,6 +1814,15 @@ export type UserUncheckedCreateWithoutPostsInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
@@ -961,8 +1831,14 @@ export type UserUncheckedCreateWithoutPostsInput = {
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPostsInput = {
@@ -970,38 +1846,91 @@ export type UserCreateOrConnectWithoutPostsInput = {
   create: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
 }
 
-export type UserUpsertWithWhereUniqueWithoutPostsInput = {
-  where: Prisma.UserWhereUniqueInput
+export type UserUpsertWithoutPostsInput = {
   update: Prisma.XOR<Prisma.UserUpdateWithoutPostsInput, Prisma.UserUncheckedUpdateWithoutPostsInput>
   create: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
+  where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateWithWhereUniqueWithoutPostsInput = {
-  where: Prisma.UserWhereUniqueInput
+export type UserUpdateToOneWithWhereWithoutPostsInput = {
+  where?: Prisma.UserWhereInput
   data: Prisma.XOR<Prisma.UserUpdateWithoutPostsInput, Prisma.UserUncheckedUpdateWithoutPostsInput>
 }
 
-export type UserUpdateManyWithWhereWithoutPostsInput = {
-  where: Prisma.UserScalarWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutPostsInput>
+export type UserUpdateWithoutPostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
-export type UserScalarWhereInput = {
-  AND?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
-  OR?: Prisma.UserScalarWhereInput[]
-  NOT?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
-  id?: Prisma.StringFilter<"User"> | string
-  userName?: Prisma.StringFilter<"User"> | string
-  firstName?: Prisma.StringFilter<"User"> | string
-  lastName?: Prisma.StringFilter<"User"> | string
-  email?: Prisma.StringFilter<"User"> | string
-  password?: Prisma.StringFilter<"User"> | string
-  avatar?: Prisma.StringNullableFilter<"User"> | string | null
-  bio?: Prisma.StringNullableFilter<"User"> | string | null
-  location?: Prisma.StringNullableFilter<"User"> | string | null
-  verified?: Prisma.BoolFilter<"User"> | boolean
-  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+export type UserUncheckedUpdateWithoutPostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommentsInput = {
@@ -1015,6 +1944,14 @@ export type UserCreateWithoutCommentsInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -1023,8 +1960,15 @@ export type UserCreateWithoutCommentsInput = {
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommentsInput = {
@@ -1038,6 +1982,15 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -1046,8 +1999,14 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommentsInput = {
@@ -1077,6 +2036,14 @@ export type UserUpdateWithoutCommentsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -1085,8 +2052,15 @@ export type UserUpdateWithoutCommentsInput = {
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -1100,6 +2074,15 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -1108,8 +2091,14 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLikesInput = {
@@ -1123,6 +2112,14 @@ export type UserCreateWithoutLikesInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -1131,8 +2128,15 @@ export type UserCreateWithoutLikesInput = {
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLikesInput = {
@@ -1146,6 +2150,15 @@ export type UserUncheckedCreateWithoutLikesInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -1154,8 +2167,14 @@ export type UserUncheckedCreateWithoutLikesInput = {
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLikesInput = {
@@ -1185,6 +2204,14 @@ export type UserUpdateWithoutLikesInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -1193,8 +2220,15 @@ export type UserUpdateWithoutLikesInput = {
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLikesInput = {
@@ -1208,6 +2242,15 @@ export type UserUncheckedUpdateWithoutLikesInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -1216,8 +2259,14 @@ export type UserUncheckedUpdateWithoutLikesInput = {
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBookmarksInput = {
@@ -1231,6 +2280,14 @@ export type UserCreateWithoutBookmarksInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -1239,8 +2296,15 @@ export type UserCreateWithoutBookmarksInput = {
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBookmarksInput = {
@@ -1254,6 +2318,15 @@ export type UserUncheckedCreateWithoutBookmarksInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -1262,8 +2335,14 @@ export type UserUncheckedCreateWithoutBookmarksInput = {
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBookmarksInput = {
@@ -1293,6 +2372,14 @@ export type UserUpdateWithoutBookmarksInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -1301,8 +2388,15 @@ export type UserUpdateWithoutBookmarksInput = {
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBookmarksInput = {
@@ -1316,6 +2410,15 @@ export type UserUncheckedUpdateWithoutBookmarksInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -1324,8 +2427,14 @@ export type UserUncheckedUpdateWithoutBookmarksInput = {
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsAsActorInput = {
@@ -1339,6 +2448,14 @@ export type UserCreateWithoutNotificationsAsActorInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -1347,8 +2464,15 @@ export type UserCreateWithoutNotificationsAsActorInput = {
   bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsAsActorInput = {
@@ -1362,6 +2486,15 @@ export type UserUncheckedCreateWithoutNotificationsAsActorInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -1370,8 +2503,14 @@ export type UserUncheckedCreateWithoutNotificationsAsActorInput = {
   bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsAsActorInput = {
@@ -1401,6 +2540,14 @@ export type UserUpdateWithoutNotificationsAsActorInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -1409,8 +2556,15 @@ export type UserUpdateWithoutNotificationsAsActorInput = {
   bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsAsActorInput = {
@@ -1424,6 +2578,15 @@ export type UserUncheckedUpdateWithoutNotificationsAsActorInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -1432,8 +2595,14 @@ export type UserUncheckedUpdateWithoutNotificationsAsActorInput = {
   bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1447,6 +2616,14 @@ export type UserCreateWithoutNotificationsInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -1455,8 +2632,15 @@ export type UserCreateWithoutNotificationsInput = {
   bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1470,6 +2654,15 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -1478,8 +2671,14 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1509,6 +2708,14 @@ export type UserUpdateWithoutNotificationsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -1517,8 +2724,15 @@ export type UserUpdateWithoutNotificationsInput = {
   bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1532,6 +2746,15 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -1540,8 +2763,14 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutActivitiesInput = {
@@ -1555,6 +2784,14 @@ export type UserCreateWithoutActivitiesInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostCreateNestedManyWithoutUserInput
@@ -1563,8 +2800,15 @@ export type UserCreateWithoutActivitiesInput = {
   bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutActivitiesInput = {
@@ -1578,6 +2822,15 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
   bio?: string | null
   location?: string | null
   verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
@@ -1586,8 +2839,14 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
   bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
   notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutActivitiesInput = {
@@ -1617,6 +2876,14 @@ export type UserUpdateWithoutActivitiesInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUpdateManyWithoutUserNestedInput
@@ -1625,8 +2892,15 @@ export type UserUpdateWithoutActivitiesInput = {
   bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivitiesInput = {
@@ -1640,6 +2914,15 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
@@ -1648,11 +2931,190 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
   bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
-export type UserUpdateWithoutPostsInput = {
+export type UserCreateWithoutBugReportsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutBugReportsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutBugReportsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBugReportsInput, Prisma.UserUncheckedCreateWithoutBugReportsInput>
+}
+
+export type UserCreateWithoutReviewedBugReportsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutReviewedBugReportsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutReviewedBugReportsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedBugReportsInput, Prisma.UserUncheckedCreateWithoutReviewedBugReportsInput>
+}
+
+export type UserUpsertWithoutBugReportsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBugReportsInput, Prisma.UserUncheckedUpdateWithoutBugReportsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBugReportsInput, Prisma.UserUncheckedCreateWithoutBugReportsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBugReportsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBugReportsInput, Prisma.UserUncheckedUpdateWithoutBugReportsInput>
+}
+
+export type UserUpdateWithoutBugReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userName?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1663,19 +3125,34 @@ export type UserUpdateWithoutPostsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutUserNestedInput
   comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
   likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
 }
 
-export type UserUncheckedUpdateWithoutPostsInput = {
+export type UserUncheckedUpdateWithoutBugReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userName?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1686,19 +3163,45 @@ export type UserUncheckedUpdateWithoutPostsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
   notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
-export type UserUncheckedUpdateManyWithoutPostsInput = {
+export type UserUpsertWithoutReviewedBugReportsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewedBugReportsInput, Prisma.UserUncheckedUpdateWithoutReviewedBugReportsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedBugReportsInput, Prisma.UserUncheckedCreateWithoutReviewedBugReportsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewedBugReportsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewedBugReportsInput, Prisma.UserUncheckedUpdateWithoutReviewedBugReportsInput>
+}
+
+export type UserUpdateWithoutReviewedBugReportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userName?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1709,6 +3212,693 @@ export type UserUncheckedUpdateManyWithoutPostsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewedBugReportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAuthoredReviewsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAuthoredReviewsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAuthoredReviewsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAuthoredReviewsInput, Prisma.UserUncheckedCreateWithoutAuthoredReviewsInput>
+}
+
+export type UserCreateWithoutReceivedReviewsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutReceivedReviewsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutReceivedReviewsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReceivedReviewsInput, Prisma.UserUncheckedCreateWithoutReceivedReviewsInput>
+}
+
+export type UserUpsertWithoutAuthoredReviewsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAuthoredReviewsInput, Prisma.UserUncheckedUpdateWithoutAuthoredReviewsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAuthoredReviewsInput, Prisma.UserUncheckedCreateWithoutAuthoredReviewsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAuthoredReviewsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAuthoredReviewsInput, Prisma.UserUncheckedUpdateWithoutAuthoredReviewsInput>
+}
+
+export type UserUpdateWithoutAuthoredReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAuthoredReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUpsertWithoutReceivedReviewsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReceivedReviewsInput, Prisma.UserUncheckedUpdateWithoutReceivedReviewsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReceivedReviewsInput, Prisma.UserUncheckedCreateWithoutReceivedReviewsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReceivedReviewsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReceivedReviewsInput, Prisma.UserUncheckedUpdateWithoutReceivedReviewsInput>
+}
+
+export type UserUpdateWithoutReceivedReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReceivedReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAnalyticsEventsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewCreateNestedManyWithoutRevieweeInput
+  invitedBy?: Prisma.UserCreateNestedOneWithoutInvitedUsersInput
+  invitedUsers?: Prisma.UserCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+}
+
+export type UserUncheckedCreateWithoutAnalyticsEventsInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  invitedById?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationRecipientUncheckedCreateNestedManyWithoutUserInput
+  notificationsAsActor?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  activities?: Prisma.UserActivityUncheckedCreateNestedManyWithoutUserInput
+  bugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReporterInput
+  reviewedBugReports?: Prisma.BugReportUncheckedCreateNestedManyWithoutReviewerInput
+  authoredReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutReviewerInput
+  receivedReviews?: Prisma.UserReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  invitedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutInvitedByInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+}
+
+export type UserCreateOrConnectWithoutAnalyticsEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAnalyticsEventsInput, Prisma.UserUncheckedCreateWithoutAnalyticsEventsInput>
+}
+
+export type UserUpsertWithoutAnalyticsEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAnalyticsEventsInput, Prisma.UserUncheckedUpdateWithoutAnalyticsEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAnalyticsEventsInput, Prisma.UserUncheckedCreateWithoutAnalyticsEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAnalyticsEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAnalyticsEventsInput, Prisma.UserUncheckedUpdateWithoutAnalyticsEventsInput>
+}
+
+export type UserUpdateWithoutAnalyticsEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedBy?: Prisma.UserUpdateOneWithoutInvitedUsersNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAnalyticsEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+}
+
+export type UserCreateManyInvitedByInput = {
+  id?: string
+  userName: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  avatar?: string | null
+  bio?: string | null
+  location?: string | null
+  verified?: boolean
+  role?: $Enums.UserRole
+  rewardPoints?: number
+  rewardTier?: $Enums.RewardTier
+  inviteCode?: string | null
+  googleId?: string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: number | null
+  lastKnownLng?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserUpdateWithoutInvitedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInvitedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationRecipientUncheckedUpdateManyWithoutUserNestedInput
+  notificationsAsActor?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  activities?: Prisma.UserActivityUncheckedUpdateManyWithoutUserNestedInput
+  bugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReporterNestedInput
+  reviewedBugReports?: Prisma.BugReportUncheckedUpdateManyWithoutReviewerNestedInput
+  authoredReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  receivedReviews?: Prisma.UserReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  invitedUsers?: Prisma.UserUncheckedUpdateManyWithoutInvitedByNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  analyticsEvents?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateManyWithoutInvitedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  rewardPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTier?: Prisma.EnumRewardTierFieldUpdateOperationsInput | $Enums.RewardTier
+  inviteCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastKnownLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  lastKnownLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1726,8 +3916,14 @@ export type UserCountOutputType = {
   notifications: number
   notificationsAsActor: number
   activities: number
+  bugReports: number
+  reviewedBugReports: number
+  authoredReviews: number
+  receivedReviews: number
+  invitedUsers: number
   following: number
   followers: number
+  analyticsEvents: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1738,8 +3934,14 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   notificationsAsActor?: boolean | UserCountOutputTypeCountNotificationsAsActorArgs
   activities?: boolean | UserCountOutputTypeCountActivitiesArgs
+  bugReports?: boolean | UserCountOutputTypeCountBugReportsArgs
+  reviewedBugReports?: boolean | UserCountOutputTypeCountReviewedBugReportsArgs
+  authoredReviews?: boolean | UserCountOutputTypeCountAuthoredReviewsArgs
+  receivedReviews?: boolean | UserCountOutputTypeCountReceivedReviewsArgs
+  invitedUsers?: boolean | UserCountOutputTypeCountInvitedUsersArgs
   following?: boolean | UserCountOutputTypeCountFollowingArgs
   followers?: boolean | UserCountOutputTypeCountFollowersArgs
+  analyticsEvents?: boolean | UserCountOutputTypeCountAnalyticsEventsArgs
 }
 
 /**
@@ -1804,6 +4006,41 @@ export type UserCountOutputTypeCountActivitiesArgs<ExtArgs extends runtime.Types
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountBugReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BugReportWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewedBugReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BugReportWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAuthoredReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserReviewWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReceivedReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserReviewWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInvitedUsersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountFollowingArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FollowWhereInput
 }
@@ -1813,6 +4050,13 @@ export type UserCountOutputTypeCountFollowingArgs<ExtArgs extends runtime.Types.
  */
 export type UserCountOutputTypeCountFollowersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FollowWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAnalyticsEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AnalyticsEventWhereInput
 }
 
 
@@ -1827,6 +4071,15 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   bio?: boolean
   location?: boolean
   verified?: boolean
+  role?: boolean
+  rewardPoints?: boolean
+  rewardTier?: boolean
+  inviteCode?: boolean
+  invitedById?: boolean
+  googleId?: boolean
+  avatarConfig?: boolean
+  lastKnownLat?: boolean
+  lastKnownLng?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   posts?: boolean | Prisma.User$postsArgs<ExtArgs>
@@ -1836,8 +4089,15 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   notificationsAsActor?: boolean | Prisma.User$notificationsAsActorArgs<ExtArgs>
   activities?: boolean | Prisma.User$activitiesArgs<ExtArgs>
+  bugReports?: boolean | Prisma.User$bugReportsArgs<ExtArgs>
+  reviewedBugReports?: boolean | Prisma.User$reviewedBugReportsArgs<ExtArgs>
+  authoredReviews?: boolean | Prisma.User$authoredReviewsArgs<ExtArgs>
+  receivedReviews?: boolean | Prisma.User$receivedReviewsArgs<ExtArgs>
+  invitedBy?: boolean | Prisma.User$invitedByArgs<ExtArgs>
+  invitedUsers?: boolean | Prisma.User$invitedUsersArgs<ExtArgs>
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
   followers?: boolean | Prisma.User$followersArgs<ExtArgs>
+  analyticsEvents?: boolean | Prisma.User$analyticsEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1852,8 +4112,18 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   bio?: boolean
   location?: boolean
   verified?: boolean
+  role?: boolean
+  rewardPoints?: boolean
+  rewardTier?: boolean
+  inviteCode?: boolean
+  invitedById?: boolean
+  googleId?: boolean
+  avatarConfig?: boolean
+  lastKnownLat?: boolean
+  lastKnownLng?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  invitedBy?: boolean | Prisma.User$invitedByArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1867,8 +4137,18 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   bio?: boolean
   location?: boolean
   verified?: boolean
+  role?: boolean
+  rewardPoints?: boolean
+  rewardTier?: boolean
+  inviteCode?: boolean
+  invitedById?: boolean
+  googleId?: boolean
+  avatarConfig?: boolean
+  lastKnownLat?: boolean
+  lastKnownLng?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  invitedBy?: boolean | Prisma.User$invitedByArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -1882,11 +4162,20 @@ export type UserSelectScalar = {
   bio?: boolean
   location?: boolean
   verified?: boolean
+  role?: boolean
+  rewardPoints?: boolean
+  rewardTier?: boolean
+  inviteCode?: boolean
+  invitedById?: boolean
+  googleId?: boolean
+  avatarConfig?: boolean
+  lastKnownLat?: boolean
+  lastKnownLng?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userName" | "firstName" | "lastName" | "email" | "password" | "avatar" | "bio" | "location" | "verified" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userName" | "firstName" | "lastName" | "email" | "password" | "avatar" | "bio" | "location" | "verified" | "role" | "rewardPoints" | "rewardTier" | "inviteCode" | "invitedById" | "googleId" | "avatarConfig" | "lastKnownLat" | "lastKnownLng" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   posts?: boolean | Prisma.User$postsArgs<ExtArgs>
   comments?: boolean | Prisma.User$commentsArgs<ExtArgs>
@@ -1895,12 +4184,23 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   notificationsAsActor?: boolean | Prisma.User$notificationsAsActorArgs<ExtArgs>
   activities?: boolean | Prisma.User$activitiesArgs<ExtArgs>
+  bugReports?: boolean | Prisma.User$bugReportsArgs<ExtArgs>
+  reviewedBugReports?: boolean | Prisma.User$reviewedBugReportsArgs<ExtArgs>
+  authoredReviews?: boolean | Prisma.User$authoredReviewsArgs<ExtArgs>
+  receivedReviews?: boolean | Prisma.User$receivedReviewsArgs<ExtArgs>
+  invitedBy?: boolean | Prisma.User$invitedByArgs<ExtArgs>
+  invitedUsers?: boolean | Prisma.User$invitedUsersArgs<ExtArgs>
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
   followers?: boolean | Prisma.User$followersArgs<ExtArgs>
+  analyticsEvents?: boolean | Prisma.User$analyticsEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  invitedBy?: boolean | Prisma.User$invitedByArgs<ExtArgs>
+}
+export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  invitedBy?: boolean | Prisma.User$invitedByArgs<ExtArgs>
+}
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
@@ -1912,8 +4212,15 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$NotificationRecipientPayload<ExtArgs>[]
     notificationsAsActor: Prisma.$NotificationPayload<ExtArgs>[]
     activities: Prisma.$UserActivityPayload<ExtArgs>[]
+    bugReports: Prisma.$BugReportPayload<ExtArgs>[]
+    reviewedBugReports: Prisma.$BugReportPayload<ExtArgs>[]
+    authoredReviews: Prisma.$UserReviewPayload<ExtArgs>[]
+    receivedReviews: Prisma.$UserReviewPayload<ExtArgs>[]
+    invitedBy: Prisma.$UserPayload<ExtArgs> | null
+    invitedUsers: Prisma.$UserPayload<ExtArgs>[]
     following: Prisma.$FollowPayload<ExtArgs>[]
     followers: Prisma.$FollowPayload<ExtArgs>[]
+    analyticsEvents: Prisma.$AnalyticsEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1926,6 +4233,15 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     bio: string | null
     location: string | null
     verified: boolean
+    role: $Enums.UserRole
+    rewardPoints: number
+    rewardTier: $Enums.RewardTier
+    inviteCode: string | null
+    invitedById: string | null
+    googleId: string | null
+    avatarConfig: runtime.JsonValue | null
+    lastKnownLat: number | null
+    lastKnownLng: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -2329,8 +4645,15 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notificationsAsActor<T extends Prisma.User$notificationsAsActorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsAsActorArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activities<T extends Prisma.User$activitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bugReports<T extends Prisma.User$bugReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bugReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BugReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewedBugReports<T extends Prisma.User$reviewedBugReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewedBugReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BugReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  authoredReviews<T extends Prisma.User$authoredReviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$authoredReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  receivedReviews<T extends Prisma.User$receivedReviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invitedBy<T extends Prisma.User$invitedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  invitedUsers<T extends Prisma.User$invitedUsersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitedUsersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   following<T extends Prisma.User$followingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   followers<T extends Prisma.User$followersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  analyticsEvents<T extends Prisma.User$analyticsEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$analyticsEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnalyticsEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2370,6 +4693,15 @@ export interface UserFieldRefs {
   readonly bio: Prisma.FieldRef<"User", 'String'>
   readonly location: Prisma.FieldRef<"User", 'String'>
   readonly verified: Prisma.FieldRef<"User", 'Boolean'>
+  readonly role: Prisma.FieldRef<"User", 'UserRole'>
+  readonly rewardPoints: Prisma.FieldRef<"User", 'Int'>
+  readonly rewardTier: Prisma.FieldRef<"User", 'RewardTier'>
+  readonly inviteCode: Prisma.FieldRef<"User", 'String'>
+  readonly invitedById: Prisma.FieldRef<"User", 'String'>
+  readonly googleId: Prisma.FieldRef<"User", 'String'>
+  readonly avatarConfig: Prisma.FieldRef<"User", 'Json'>
+  readonly lastKnownLat: Prisma.FieldRef<"User", 'Float'>
+  readonly lastKnownLng: Prisma.FieldRef<"User", 'Float'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -2621,6 +4953,10 @@ export type UserCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.UserCreateManyInput | Prisma.UserCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -2691,6 +5027,10 @@ export type UserUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many Users to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -2928,6 +5268,145 @@ export type User$activitiesArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * User.bugReports
+ */
+export type User$bugReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BugReport
+   */
+  select?: Prisma.BugReportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BugReport
+   */
+  omit?: Prisma.BugReportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BugReportInclude<ExtArgs> | null
+  where?: Prisma.BugReportWhereInput
+  orderBy?: Prisma.BugReportOrderByWithRelationInput | Prisma.BugReportOrderByWithRelationInput[]
+  cursor?: Prisma.BugReportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BugReportScalarFieldEnum | Prisma.BugReportScalarFieldEnum[]
+}
+
+/**
+ * User.reviewedBugReports
+ */
+export type User$reviewedBugReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BugReport
+   */
+  select?: Prisma.BugReportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BugReport
+   */
+  omit?: Prisma.BugReportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BugReportInclude<ExtArgs> | null
+  where?: Prisma.BugReportWhereInput
+  orderBy?: Prisma.BugReportOrderByWithRelationInput | Prisma.BugReportOrderByWithRelationInput[]
+  cursor?: Prisma.BugReportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BugReportScalarFieldEnum | Prisma.BugReportScalarFieldEnum[]
+}
+
+/**
+ * User.authoredReviews
+ */
+export type User$authoredReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserReview
+   */
+  select?: Prisma.UserReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserReview
+   */
+  omit?: Prisma.UserReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserReviewInclude<ExtArgs> | null
+  where?: Prisma.UserReviewWhereInput
+  orderBy?: Prisma.UserReviewOrderByWithRelationInput | Prisma.UserReviewOrderByWithRelationInput[]
+  cursor?: Prisma.UserReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserReviewScalarFieldEnum | Prisma.UserReviewScalarFieldEnum[]
+}
+
+/**
+ * User.receivedReviews
+ */
+export type User$receivedReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserReview
+   */
+  select?: Prisma.UserReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserReview
+   */
+  omit?: Prisma.UserReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserReviewInclude<ExtArgs> | null
+  where?: Prisma.UserReviewWhereInput
+  orderBy?: Prisma.UserReviewOrderByWithRelationInput | Prisma.UserReviewOrderByWithRelationInput[]
+  cursor?: Prisma.UserReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserReviewScalarFieldEnum | Prisma.UserReviewScalarFieldEnum[]
+}
+
+/**
+ * User.invitedBy
+ */
+export type User$invitedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * User.invitedUsers
+ */
+export type User$invitedUsersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+  orderBy?: Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[]
+  cursor?: Prisma.UserWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserScalarFieldEnum | Prisma.UserScalarFieldEnum[]
+}
+
+/**
  * User.following
  */
 export type User$followingArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2973,6 +5452,30 @@ export type User$followersArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.FollowScalarFieldEnum | Prisma.FollowScalarFieldEnum[]
+}
+
+/**
+ * User.analyticsEvents
+ */
+export type User$analyticsEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AnalyticsEvent
+   */
+  select?: Prisma.AnalyticsEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AnalyticsEvent
+   */
+  omit?: Prisma.AnalyticsEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AnalyticsEventInclude<ExtArgs> | null
+  where?: Prisma.AnalyticsEventWhereInput
+  orderBy?: Prisma.AnalyticsEventOrderByWithRelationInput | Prisma.AnalyticsEventOrderByWithRelationInput[]
+  cursor?: Prisma.AnalyticsEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AnalyticsEventScalarFieldEnum | Prisma.AnalyticsEventScalarFieldEnum[]
 }
 
 /**

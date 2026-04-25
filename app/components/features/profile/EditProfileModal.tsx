@@ -1,13 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Modal, Form, Input, Upload, App, Avatar, Button } from "antd";
-import { UploadOutlined, EnvironmentOutlined } from "@ant-design/icons";
-import type { RcFile, UploadFile } from "antd/es/upload/interface";
+import React, { useEffect, useMemo, useState } from "react";
+import { App, Upload } from "antd";
+import type { RcFile } from "antd/es/upload/interface";
+import { Crosshair } from "lucide-react";
+import { EDIT_PROFILE_FIELDS } from "@/lib/config/forms";
 import {
   getCurrentLocation,
   isGeolocationAvailable,
 } from "@/lib/utils/geolocation";
+import { AppAvatar } from "@/components/ui/AppAvatar";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppModal } from "@/components/ui/AppModal";
+import { ConfigDrivenForm } from "@/components/ui/ConfigDrivenForm";
 
 interface EditProfileModalProps {
   open: boolean;
@@ -24,92 +29,77 @@ export function EditProfileModal({
   onSave,
   isAuthenticated = true,
 }: EditProfileModalProps) {
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<string | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<string | undefined>(undefined);
+  const [draftValues, setDraftValues] = useState<Record<string, unknown>>({});
+  const [formVersion, setFormVersion] = useState(0);
+
   const { message, modal } = App.useApp();
 
   useEffect(() => {
-    if (open) {
-      form.setFieldsValue({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        userName: user.userName,
-        bio: user.bio || "",
-        location: user.location || "",
-      });
-      setAvatarFile(user.avatar || null);
+    if (!open) {
+      return;
     }
-  }, [open, user, form]);
 
-  const handleAvatarChange = (file: RcFile) => {
-    // Convert to base64 for mock backend
+    setDraftValues({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      userName: user.userName,
+      bio: user.bio || "",
+      location: user.location || "",
+    });
+    setAvatarFile(user.avatar);
+    setFormVersion((prev) => prev + 1);
+  }, [open, user]);
+
+  const previewUser = useMemo(
+    () => ({
+      userName: String(draftValues.userName || user.userName),
+      firstName: String(draftValues.firstName || user.firstName),
+      avatar: avatarFile,
+      verified: user.verified,
+    }),
+    [
+      draftValues.userName,
+      draftValues.firstName,
+      avatarFile,
+      user.userName,
+      user.firstName,
+      user.verified,
+    ],
+  );
+
+  function handleBeforeUpload(file: RcFile): false | typeof Upload.LIST_IGNORE {
+    if (!file.type.startsWith("image/")) {
+      message.error("Only image files are supported.");
+      return Upload.LIST_IGNORE;
+    }
+
+    if (file.size / 1024 / 1024 > 2) {
+      message.error("Image must be smaller than 2MB.");
+      return Upload.LIST_IGNORE;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatarFile(reader.result as string);
+      if (typeof reader.result === "string") {
+        setAvatarFile(reader.result);
+      }
     };
     reader.readAsDataURL(file);
-
-    // Prevent default upload behavior
     return false;
-  };
+  }
 
-  const handleBeforeUpload = (file: RcFile) => {
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      message.error("You can only upload image files!");
-      return Upload.LIST_IGNORE;
-    }
-
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      message.error("Image must be smaller than 2MB!");
-      return Upload.LIST_IGNORE;
-    }
-
-    handleAvatarChange(file);
-    return false;
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      setLoading(true);
-
-      const updatedData: Partial<User> = {
-        ...values,
-        avatar: avatarFile || user.avatar,
-      };
-
-      await onSave(updatedData);
-      message.success("Profile updated successfully!");
-      onClose();
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-      message.error("Failed to update profile. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    form.resetFields();
-    setAvatarFile(user.avatar || null);
-    onClose();
-  };
-
-  const handleUseCurrentLocation = async () => {
-    // Prompt guest users to create account
+  async function handleUseCurrentLocation(): Promise<void> {
     if (!isAuthenticated) {
       modal.confirm({
-        title: "Create an Account",
+        title: "Create an account",
         content:
-          "You need to create an account to use your current location. This helps personalize your experience and show you relevant routes near you.",
+          "You need an account to use live location for profile personalization.",
         okText: "Sign Up",
         cancelText: "Cancel",
         onOk: () => {
-          // Redirect to registration page
           window.location.href = "/register";
         },
       });
@@ -117,143 +107,89 @@ export function EditProfileModal({
     }
 
     if (!isGeolocationAvailable()) {
-      message.error("Geolocation is not supported by your browser");
+      message.error("Geolocation is not supported by this browser.");
       return;
     }
 
     setGettingLocation(true);
-
     try {
       const location = await getCurrentLocation();
-      form.setFieldsValue({ location: location.formatted });
-      message.success("Location detected successfully!");
-    } catch (error: any) {
-      console.error("Failed to get location:", error);
-      message.error(error.message || "Failed to get current location");
+      setDraftValues((prev) => ({ ...prev, location: location.formatted }));
+      setFormVersion((prev) => prev + 1);
+      message.success("Location detected successfully.");
+    } catch (error) {
+      const maybeError = error as { message?: string };
+      message.error(maybeError.message || "Failed to get current location.");
     } finally {
       setGettingLocation(false);
     }
-  };
+  }
+
+  async function handleSubmit(values: Record<string, unknown>): Promise<void> {
+    setLoading(true);
+    try {
+      await onSave({
+        firstName: String(values.firstName || ""),
+        lastName: String(values.lastName || ""),
+        userName: String(values.userName || ""),
+        bio: String(values.bio || ""),
+        location: String(values.location || ""),
+        avatar: avatarFile || user.avatar,
+      });
+      message.success("Profile updated successfully.");
+      onClose();
+    } catch (error) {
+      message.error("Failed to update profile. Please try again.");
+      console.error("Profile update error:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <Modal
-      title="Edit Profile"
+    <AppModal
       open={open}
-      onOk={handleSubmit}
-      onCancel={handleCancel}
-      okText="Save Changes"
-      cancelText="Cancel"
-      confirmLoading={loading}
-      width={600}
-      okButtonProps={{
-        className: "bg-[#00623B] hover:bg-[#004d2e]",
-      }}>
-      <Form form={form} layout="vertical" className="mt-4">
-        {/* Avatar Upload */}
-        <Form.Item label="Profile Picture">
-          <div className="flex items-center gap-4">
-            <Avatar
-              size={80}
-              src={avatarFile}
-              className="border-2 border-[#00623B]">
-              {user.firstName[0]}
-              {user.lastName[0]}
-            </Avatar>
+      onClose={onClose}
+      title="Edit profile"
+      subtitle="Update your public identity"
+      size="default"
+      footer={null}>
+      <div className="space-y-4">
+        <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] p-3">
+          <div className="mb-3 flex items-center gap-3">
+            <AppAvatar user={previewUser} size={80} linkToProfile={false} />
             <Upload
               accept="image/*"
               showUploadList={false}
               beforeUpload={handleBeforeUpload}
               maxCount={1}>
-              <button
-                type="button"
-                className="px-4 py-2 border border-gray-300 rounded-md hover:border-[#00623B] hover:text-[#00623B] transition-colors">
-                <UploadOutlined className="mr-2" />
-                Change Picture
-              </button>
+              <AppButton variant="secondary">Change picture</AppButton>
             </Upload>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Recommended: Square image, at least 400x400px
+          <p className="text-xs text-[var(--color-text-secondary)]">
+            Recommended: square image, at least 400x400.
           </p>
-        </Form.Item>
+        </div>
 
-        {/* First Name */}
-        <Form.Item
-          label="First Name"
-          name="firstName"
-          rules={[
-            { required: true, message: "Please enter your first name" },
-            { min: 2, message: "First name must be at least 2 characters" },
-          ]}>
-          <Input placeholder="Enter your first name" />
-        </Form.Item>
+        <ConfigDrivenForm<Record<string, unknown>>
+          key={formVersion}
+          fields={EDIT_PROFILE_FIELDS}
+          initialValues={draftValues}
+          submitLabel={loading ? "Saving..." : "Save changes"}
+          loading={loading}
+          onSubmit={(values) => handleSubmit(values)}
+        />
 
-        {/* Last Name */}
-        <Form.Item
-          label="Last Name"
-          name="lastName"
-          rules={[
-            { required: true, message: "Please enter your last name" },
-            { min: 2, message: "Last name must be at least 2 characters" },
-          ]}>
-          <Input placeholder="Enter your last name" />
-        </Form.Item>
-
-        {/* Username */}
-        <Form.Item
-          label="Username"
-          name="userName"
-          rules={[
-            { required: true, message: "Please enter a username" },
-            {
-              pattern: /^[a-zA-Z0-9_]+$/,
-              message:
-                "Username can only contain letters, numbers, and underscores",
-            },
-            { min: 3, message: "Username must be at least 3 characters" },
-          ]}>
-          <Input placeholder="Enter your username" prefix="@" />
-        </Form.Item>
-
-        {/* Bio */}
-        <Form.Item
-          label="Bio"
-          name="bio"
-          rules={[
-            { max: 160, message: "Bio must be less than 160 characters" },
-          ]}>
-          <Input.TextArea
-            placeholder="Tell us about yourself..."
-            rows={4}
-            showCount
-            maxLength={160}
-          />
-        </Form.Item>
-
-        {/* Location */}
-        <Form.Item
-          label="Location"
-          rules={[
-            { max: 50, message: "Location must be less than 50 characters" },
-          ]}>
-          <div className="flex gap-2">
-            <Form.Item name="location" noStyle>
-              <Input placeholder="e.g., Lagos, Nigeria" className="flex-1" />
-            </Form.Item>
-            <Button
-              icon={<EnvironmentOutlined />}
-              onClick={handleUseCurrentLocation}
-              loading={gettingLocation}
-              title="Use current location"
-              className="flex-shrink-0">
-              Use Current
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Click "Use Current" to automatically detect your location
-          </p>
-        </Form.Item>
-      </Form>
-    </Modal>
+        <div className="border-t border-[var(--color-border)] pt-2">
+          <AppButton
+            variant="ghost"
+            icon={Crosshair}
+            onClick={() => void handleUseCurrentLocation()}
+            loading={gettingLocation}>
+            Use current location
+          </AppButton>
+        </div>
+      </div>
+    </AppModal>
   );
 }

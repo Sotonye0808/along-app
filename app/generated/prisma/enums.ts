@@ -9,6 +9,57 @@
 * 🟢 You can import this file directly.
 */
 
+export const UserRole = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+} as const
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const RewardTier = {
+  BRONZE: 'BRONZE',
+  SILVER: 'SILVER',
+  GOLD: 'GOLD',
+  PLATINUM: 'PLATINUM'
+} as const
+
+export type RewardTier = (typeof RewardTier)[keyof typeof RewardTier]
+
+
+export const BugStatus = {
+  OPEN: 'OPEN',
+  TRIAGED: 'TRIAGED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED'
+} as const
+
+export type BugStatus = (typeof BugStatus)[keyof typeof BugStatus]
+
+
+export const BugCategory = {
+  UI: 'UI',
+  ROUTING: 'ROUTING',
+  AUTH: 'AUTH',
+  PERFORMANCE: 'PERFORMANCE',
+  DATA: 'DATA',
+  NOTIFICATIONS: 'NOTIFICATIONS',
+  OTHER: 'OTHER'
+} as const
+
+export type BugCategory = (typeof BugCategory)[keyof typeof BugCategory]
+
+
+export const ReviewStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type ReviewStatus = (typeof ReviewStatus)[keyof typeof ReviewStatus]
+
+
 export const LikeType = {
   LIKE: 'LIKE',
   DISLIKE: 'DISLIKE'

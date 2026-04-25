@@ -4,8 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { Avatar } from "antd";
 import { CheckCircle } from "lucide-react";
-import type { AvatarConfig } from "@/lib/config";
-import { getFallbackAvatarUrl } from "@/lib/config";
+import type { AvatarConfig } from "@/lib/config/avatar";
+import { getFallbackAvatarUrl } from "@/lib/config/avatar";
 
 export interface AvatarUser {
   userName: string;

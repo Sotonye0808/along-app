@@ -1,88 +1,53 @@
 "use client";
 
-import React, { useState, memo } from "react";
-import {
-  Card,
-  Avatar,
-  Button,
-  Dropdown,
-  Image as AntImage,
-  Tag,
-  Space,
-  Divider,
-  Tooltip,
-} from "antd";
-import {
-  LikeOutlined,
-  DislikeOutlined,
-  CommentOutlined,
-  ShareAltOutlined,
-  BookOutlined,
-  MoreOutlined,
-  LikeFilled,
-  DislikeFilled,
-  BookFilled,
-  EnvironmentOutlined,
-  DollarOutlined,
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  ClockCircleOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
-import type { MenuProps } from "antd";
-import Link from "next/link";
+import React, { memo, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import {
+  Bookmark,
+  BookmarkCheck,
+  DollarSign,
+  Ellipsis,
+  ExternalLink,
+  MapPin,
+  MessageCircle,
+  Share2,
+  ThumbsDown,
+  ThumbsUp,
+  UserMinus,
+  UserPlus,
+} from "lucide-react";
 import { formatDate, formatNumber } from "@/lib/utils/format";
+import { ROUTE_STATUS_REGISTRY } from "@/lib/config/routeStatus";
+import { VEHICLE_REGISTRY } from "@/lib/config/vehicles";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppCard } from "@/components/ui/AppCard";
+import { AppDropdown } from "@/components/ui/AppDropdown";
+import { AppModal } from "@/components/ui/AppModal";
+import { AppTag } from "@/components/ui/AppTag";
+import { AppTooltip } from "@/components/ui/AppTooltip";
+import { AppUserLabel } from "@/components/ui/AppUserLabel";
+import { TrustBadge } from "@/components/ui/TrustBadge";
 
 interface PostCardProps {
   post: Post;
   author: User;
   currentUserId?: string;
-  onLike?: (postId: string) => void;
-  onDislike?: (postId: string) => void;
+  onLike?: (postId: string) => void | Promise<void>;
+  onDislike?: (postId: string) => void | Promise<void>;
   onComment?: (postId: string) => void;
-  onBookmark?: (postId: string) => void;
-  onShare?: (postId: string) => void;
+  onBookmark?: (postId: string) => void | Promise<void>;
+  onShare?: (postId: string) => void | Promise<void>;
   onEdit?: (post: Post) => void;
   onDelete?: (postId: string) => void;
-  onFollow?: (userId: string) => void;
+  onFollow?: (userId: string) => void | Promise<void>;
   isLiked?: boolean;
   isDisliked?: boolean;
   isBookmarked?: boolean;
   isFollowing?: boolean;
 }
 
-const vehicleIcons: Record<VehicleType, string> = {
-  taxi: "🚕",
-  bike: "🏍️",
-  keke: "🛺",
-  bus: "🚌",
-  trekking: "🚶",
-  car: "🚗",
-};
-
-const statusConfig = {
-  verified: {
-    icon: CheckCircleOutlined,
-    color: "text-green-500",
-    tooltip: "Verified Route",
-  },
-  unverified: {
-    icon: ExclamationCircleOutlined,
-    color: "text-gray-500 dark:text-gray-400",
-    tooltip: "Unverified Route",
-  },
-  pending: {
-    icon: ClockCircleOutlined,
-    color: "text-yellow-500",
-    tooltip: "Pending Verification",
-  },
-  rejected: {
-    icon: CloseCircleOutlined,
-    color: "text-red-500",
-    tooltip: "Rejected Route",
-  },
-};
+type ActionName = "like" | "dislike" | "bookmark" | "share" | "follow";
 
 export const PostCard = memo(function PostCard({
   post,
@@ -101,368 +66,355 @@ export const PostCard = memo(function PostCard({
   isBookmarked = false,
   isFollowing = false,
 }: PostCardProps) {
-  const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [loadingAction, setLoadingAction] = useState<
-    "like" | "dislike" | "bookmark" | "share" | "follow" | null
-  >(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [loadingAction, setLoadingAction] = useState<ActionName | null>(null);
 
   const isOwnPost = currentUserId === post.userId;
+  const validityScore =
+    typeof (post as Post & { validityScore?: number }).validityScore ===
+    "number"
+      ? (post as Post & { validityScore: number }).validityScore
+      : null;
 
-  const handleActionWithLoading = async (
-    action: "like" | "dislike" | "bookmark" | "share" | "follow",
-    callback?: (...args: any[]) => void,
-    ...args: any[]
-  ) => {
+  const menuItems = useMemo(() => {
+    const items = [] as {
+      key: string;
+      label: React.ReactNode;
+      danger?: boolean;
+      onClick?: () => void;
+    }[];
+
+    if (isOwnPost) {
+      items.push(
+        {
+          key: "edit",
+          label: "Edit post",
+          onClick: () => onEdit?.(post),
+        },
+        {
+          key: "delete",
+          label: "Delete post",
+          danger: true,
+          onClick: () => onDelete?.(post.id),
+        },
+      );
+    }
+
+    items.push(
+      {
+        key: "report",
+        label: "Report post",
+      },
+      {
+        key: "hide",
+        label: "Hide this post",
+      },
+    );
+
+    if (!isOwnPost) {
+      items.push({
+        key: "follow",
+        label: isFollowing
+          ? `Unfollow @${author.userName}`
+          : `Follow @${author.userName}`,
+        onClick: () => {
+          void handleAction("follow", () => onFollow?.(author.id));
+        },
+      });
+    }
+
+    return items;
+  }, [
+    isOwnPost,
+    isFollowing,
+    author.userName,
+    author.id,
+    onEdit,
+    post,
+    onDelete,
+    onFollow,
+  ]);
+
+  async function handleAction(
+    action: ActionName,
+    callback: (() => void | Promise<void>) | undefined,
+  ): Promise<void> {
+    if (!callback) {
+      return;
+    }
+
     setLoadingAction(action);
     try {
-      await callback?.(...args);
+      await callback();
     } finally {
       setLoadingAction(null);
     }
-  };
-
-  const menuItems: MenuProps["items"] = [
-    ...(isOwnPost
-      ? [
-          {
-            key: "edit",
-            label: "Edit post",
-            onClick: () => onEdit?.(post),
-          },
-          {
-            key: "delete",
-            label: "Delete post",
-            danger: true,
-            onClick: () => onDelete?.(post.id),
-          },
-          {
-            type: "divider" as const,
-          },
-        ]
-      : []),
-    {
-      key: "report",
-      label: "Report post",
-    },
-    {
-      key: "hide",
-      label: "Hide this post",
-    },
-    ...(!isOwnPost
-      ? [
-          {
-            key: "follow",
-            label: isFollowing
-              ? `Unfollow @${author.userName}`
-              : `Follow @${author.userName}`,
-            onClick: () => onFollow?.(author.id),
-          },
-        ]
-      : []),
-  ];
-
-  const handleImageClick = (index: number) => {
-    setCurrentImageIndex(index);
-    setImagePreviewOpen(true);
-  };
+  }
 
   return (
-    <Card className="mb-4 hover:shadow-md transition-shadow">
-      {/* Post Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <Link href={`/profile/${author.userName}`}>
-            <Avatar
-              size={48}
-              src={author.avatar}
-              className="cursor-pointer hover:opacity-80 transition-opacity">
-              {author.firstName[0]}
-              {author.lastName[0]}
-            </Avatar>
-          </Link>
-          <div className="flex-1">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <Link href={`/profile/${author.userName}`}>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 hover:text-[#00623B] dark:hover:text-[#00a862] cursor-pointer">
-                  {author.firstName} {author.lastName}
-                </h3>
-              </Link>
-              {!isOwnPost && onFollow && (
-                <Button
-                  type={isFollowing ? "default" : "primary"}
-                  size="small"
-                  onClick={() =>
-                    handleActionWithLoading("follow", onFollow, author.id)
-                  }
-                  loading={loadingAction === "follow"}
-                  disabled={
-                    loadingAction !== null && loadingAction !== "follow"
-                  }
-                  className={
-                    isFollowing
-                      ? "border-[#00623B] dark:border-[#00a862] text-[#00623B] dark:text-[#00a862] text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-                      : "bg-[#00623B] hover:bg-[#004d2e]"
-                  }>
-                  {isFollowing ? "Following" : "Follow"}
-                </Button>
-              )}
-            </div>
-            <div className="flex items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <span>@{author.userName}</span>
-              <span>•</span>
-              <span>{formatDate(post.createdAt)}</span>
-            </div>
+    <AppCard variant="default" hover className="mb-4">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <AppUserLabel
+            user={{
+              userName: author.userName,
+              firstName: author.firstName,
+              lastName: author.lastName,
+              avatar: author.avatar,
+              verified: author.verified,
+            }}
+            avatarSize={40}
+          />
+          <div className="text-xs text-[var(--color-text-secondary)]">
+            {formatDate(post.createdAt)}
           </div>
         </div>
-        <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-          <Button type="text" icon={<MoreOutlined />} />
-        </Dropdown>
+
+        <div className="flex items-center gap-2">
+          {!isOwnPost && onFollow ? (
+            <AppButton
+              variant={isFollowing ? "secondary" : "primary"}
+              size="sm"
+              icon={isFollowing ? UserMinus : UserPlus}
+              loading={loadingAction === "follow"}
+              disabled={loadingAction !== null && loadingAction !== "follow"}
+              onClick={() => {
+                void handleAction("follow", () => onFollow(author.id));
+              }}>
+              {isFollowing ? "Following" : "Follow"}
+            </AppButton>
+          ) : null}
+
+          <AppDropdown
+            items={menuItems}
+            placement="bottomRight"
+            trigger={["click"]}>
+            <AppButton
+              variant="icon"
+              icon={Ellipsis}
+              ariaLabel="More options"
+            />
+          </AppDropdown>
+        </div>
       </div>
 
-      {/* Post Title */}
-      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+      <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-primary)]">
         {post.title}
       </h2>
 
-      {/* Routes */}
-      <div className="space-y-1 mb-4">
+      {validityScore !== null ? (
+        <div className="mb-3">
+          <TrustBadge score={validityScore} />
+        </div>
+      ) : null}
+
+      <div className="mb-4 space-y-3">
         {post.routes.map((route, index) => {
-          const StatusIcon = statusConfig[route.status].icon;
+          const statusConfig = ROUTE_STATUS_REGISTRY[route.status];
+          const StatusIcon = statusConfig.icon;
+
           return (
             <div key={route.id} className="flex gap-3">
-              {/* Route number indicator */}
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 mb-1 rounded-full bg-[#00623B] text-white flex items-center justify-center font-semibold text-sm">
+              <div className="flex w-8 flex-col items-center">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-white">
                   {index + 1}
                 </div>
-                {index < post.routes.length - 1 && (
-                  <div className="w-0.5 h-full bg-gray-300 dark:bg-gray-600 my-1 flex-1" />
-                )}
+                {index < post.routes.length - 1 ? (
+                  <div className="mt-1 h-full w-0.5 flex-1 bg-[var(--color-border)]" />
+                ) : null}
               </div>
 
-              {/* Route content */}
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <p className="text-gray-800 dark:text-gray-200 flex-1">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm text-[var(--color-text-primary)]">
                     {route.text}
                   </p>
-                  <Tooltip
-                    className={`${statusConfig[route.status].color}`}
-                    title={statusConfig[route.status].tooltip}>
-                    <StatusIcon
-                      className={`text-sm ml-2 ${
-                        statusConfig[route.status].color
-                      }`}
-                    />
-                  </Tooltip>
+                  <AppTooltip title={statusConfig.description}>
+                    <span
+                      className="inline-flex items-center gap-1 text-xs"
+                      style={{ color: statusConfig.colorToken }}>
+                      <StatusIcon size={14} aria-hidden="true" />
+                      {statusConfig.label}
+                    </span>
+                  </AppTooltip>
                 </div>
 
-                {/* Vehicle types and fare */}
-                {route.vehicles && route.vehicles.length > 0 && (
-                  <div className="flex items-center gap-2 mb-2">
-                    <Space size={4}>
-                      {route.vehicles.map((vehicle) => (
-                        <span key={vehicle} className="text-xl" title={vehicle}>
-                          {vehicleIcons[vehicle]}
-                        </span>
-                      ))}
-                    </Space>
-                    {route.fare && (
-                      <Tag icon={<DollarOutlined />} color="green">
-                        ₦{formatNumber(route.fare)}
-                      </Tag>
-                    )}
+                {route.vehicles.length > 0 || route.fare ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {route.vehicles.map((vehicleKey) => {
+                      const config = VEHICLE_REGISTRY[vehicleKey];
+                      return (
+                        <AppTag
+                          key={`${route.id}-${vehicleKey}`}
+                          label={config.label}
+                          icon={config.icon}
+                          size="sm"
+                          variant="default"
+                        />
+                      );
+                    })}
+                    {route.fare ? (
+                      <AppTag
+                        label={`N${formatNumber(route.fare)}`}
+                        icon={DollarSign}
+                        size="sm"
+                        variant="success"
+                      />
+                    ) : null}
                   </div>
-                )}
+                ) : null}
 
-                {/* Links */}
-                {route.links && route.links.length > 0 && (
+                {route.links.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {route.links.map((link) => (
                       <a
-                        key={link.url}
+                        key={`${route.id}-${link.url}`}
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-[#00623B] hover:underline flex items-center gap-1">
-                        <EnvironmentOutlined />
+                        className="inline-flex items-center gap-1 text-sm text-[var(--color-primary)] hover:underline">
+                        <MapPin size={14} aria-hidden="true" />
                         {link.text}
+                        <ExternalLink size={12} aria-hidden="true" />
                       </a>
                     ))}
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Images */}
-      {post.images && post.images.length > 0 && (
+      {post.images.length > 0 ? (
         <div
-          className={`grid gap-2 mb-4 ${
-            post.images.length === 1
-              ? "grid-cols-1"
-              : post.images.length === 2
-                ? "grid-cols-2"
-                : "grid-cols-2"
+          className={`mb-4 grid gap-2 ${
+            post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
           }`}>
           {post.images.slice(0, 4).map((image, index) => (
-            <div
-              key={index}
-              className="relative aspect-video rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => handleImageClick(index)}>
+            <button
+              key={`${post.id}-image-${index}`}
+              type="button"
+              className="relative aspect-video overflow-hidden rounded-lg"
+              onClick={() => setPreviewImage(image)}>
               <Image
                 src={image}
-                alt={`${post.title} - Image ${index + 1}`}
-                fill
+                alt={`${post.title} image ${index + 1}`}
+                width={1200}
+                height={675}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover"
-                placeholder="blur"
-                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+                className="h-full w-full object-cover"
               />
-              {index === 3 && post.images.length > 4 && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <span className="text-white text-2xl font-bold">
-                    +{post.images.length - 4}
-                  </span>
-                </div>
-              )}
-            </div>
+              {index === 3 && post.images.length > 4 ? (
+                <span className="absolute inset-0 flex items-center justify-center bg-black/50 text-lg font-semibold text-white">
+                  +{post.images.length - 4}
+                </span>
+              ) : null}
+            </button>
           ))}
         </div>
-      )}
+      ) : null}
 
-      {/* Image Preview Modal */}
-      <AntImage.PreviewGroup
-        preview={{
-          visible: imagePreviewOpen,
-          onVisibleChange: setImagePreviewOpen,
-          current: currentImageIndex,
-          onChange: (current) => setCurrentImageIndex(current),
-        }}>
-        {post.images?.map((image, index) => (
-          <AntImage
-            key={index}
-            src={image}
-            style={{ display: "none" }}
-            alt={`${post.title} - Image ${index + 1}`}
-          />
-        ))}
-      </AntImage.PreviewGroup>
-
-      {/* Tags */}
-      {post.tags && post.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
+      {post.tags.length > 0 ? (
+        <div className="mb-4 flex flex-wrap gap-2">
           {post.tags.map((tag) => (
-            <Tag
-              key={tag}
-              className="cursor-pointer hover:opacity-80"
-              onClick={() => {
-                // Navigate to home/explore with tag search
-                const searchParams = new URLSearchParams({ q: tag });
-                window.location.href = `/home?${searchParams.toString()}`;
-              }}>
-              #{tag}
-            </Tag>
+            <Link
+              key={`${post.id}-${tag}`}
+              href={`/home?q=${encodeURIComponent(tag)}`}>
+              <AppTag label={`#${tag}`} size="sm" variant="primary" />
+            </Link>
           ))}
         </div>
-      )}
+      ) : null}
 
-      <Divider className="my-3" />
+      <div className="border-t border-[var(--color-border)] pt-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <AppButton
+              variant="ghost"
+              icon={ThumbsUp}
+              size="sm"
+              className={isLiked ? "!text-[var(--color-primary)]" : ""}
+              loading={loadingAction === "like"}
+              disabled={loadingAction !== null && loadingAction !== "like"}
+              onClick={() => {
+                void handleAction("like", () => onLike?.(post.id));
+              }}
+              ariaLabel="Like post">
+              {formatNumber(post.likes)}
+            </AppButton>
 
-      {/* Post Actions */}
-      <div
-        className="flex items-center justify-between text-gray-600 dark:text-gray-400"
-        role="group"
-        aria-label="Post actions">
-        <Space>
-          <Button
-            type="text"
-            icon={
-              isLiked ? (
-                <LikeFilled className="text-[#00623B]" />
-              ) : (
-                <LikeOutlined />
-              )
-            }
-            onClick={() => handleActionWithLoading("like", onLike, post.id)}
-            loading={loadingAction === "like"}
-            disabled={loadingAction !== null && loadingAction !== "like"}
-            className={isLiked ? "text-[#00623B]" : ""}
-            aria-label={
-              isLiked
-                ? `Unlike post. ${post.likes} likes`
-                : `Like post. ${post.likes} likes`
-            }
-            aria-pressed={isLiked}>
-            {formatNumber(post.likes)}
-          </Button>
+            <AppButton
+              variant="ghost"
+              icon={ThumbsDown}
+              size="sm"
+              className={isDisliked ? "!text-[var(--color-error-text)]" : ""}
+              loading={loadingAction === "dislike"}
+              disabled={loadingAction !== null && loadingAction !== "dislike"}
+              onClick={() => {
+                void handleAction("dislike", () => onDislike?.(post.id));
+              }}
+              ariaLabel="Dislike post">
+              {formatNumber(post.dislikes)}
+            </AppButton>
 
-          <Button
-            type="text"
-            icon={
-              isDisliked ? (
-                <DislikeFilled className="text-red-500" />
-              ) : (
-                <DislikeOutlined />
-              )
-            }
-            onClick={() =>
-              handleActionWithLoading("dislike", onDislike, post.id)
-            }
-            loading={loadingAction === "dislike"}
-            disabled={loadingAction !== null && loadingAction !== "dislike"}
-            className={isDisliked ? "text-red-500" : ""}
-            aria-label={
-              isDisliked
-                ? `Remove dislike. ${post.dislikes} dislikes`
-                : `Dislike post. ${post.dislikes} dislikes`
-            }
-            aria-pressed={isDisliked}>
-            {formatNumber(post.dislikes)}
-          </Button>
+            <AppButton
+              variant="ghost"
+              icon={MessageCircle}
+              size="sm"
+              disabled={loadingAction !== null}
+              onClick={() => onComment?.(post.id)}
+              ariaLabel="View comments">
+              {formatNumber(post.comments)}
+            </AppButton>
+          </div>
 
-          <Button
-            type="text"
-            icon={<CommentOutlined />}
-            onClick={() => onComment?.(post.id)}
-            disabled={loadingAction !== null}
-            aria-label={`View comments. ${post.comments} comments`}>
-            {formatNumber(post.comments)}
-          </Button>
-        </Space>
-
-        <Space>
-          <Button
-            type="text"
-            icon={
-              isBookmarked ? (
-                <BookFilled className="text-[#00623B]" />
-              ) : (
-                <BookOutlined />
-              )
-            }
-            onClick={() =>
-              handleActionWithLoading("bookmark", onBookmark, post.id)
-            }
-            loading={loadingAction === "bookmark"}
-            disabled={loadingAction !== null && loadingAction !== "bookmark"}
-            className={isBookmarked ? "text-[#00623B]" : ""}
-            aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
-            aria-pressed={isBookmarked}
-          />
-          <Button
-            type="text"
-            icon={<ShareAltOutlined />}
-            onClick={() => handleActionWithLoading("share", onShare, post.id)}
-            loading={loadingAction === "share"}
-            disabled={loadingAction !== null && loadingAction !== "share"}
-            aria-label="Share post"
-          />
-        </Space>
+          <div className="flex items-center gap-1">
+            <AppButton
+              variant="ghost"
+              icon={isBookmarked ? BookmarkCheck : Bookmark}
+              size="sm"
+              loading={loadingAction === "bookmark"}
+              disabled={loadingAction !== null && loadingAction !== "bookmark"}
+              onClick={() => {
+                void handleAction("bookmark", () => onBookmark?.(post.id));
+              }}
+              ariaLabel="Bookmark post"
+            />
+            <AppButton
+              variant="ghost"
+              icon={Share2}
+              size="sm"
+              loading={loadingAction === "share"}
+              disabled={loadingAction !== null && loadingAction !== "share"}
+              onClick={() => {
+                void handleAction("share", () => onShare?.(post.id));
+              }}
+              ariaLabel="Share post"
+            />
+          </div>
+        </div>
       </div>
-    </Card>
+
+      <AppModal
+        open={previewImage !== null}
+        onClose={() => setPreviewImage(null)}
+        title={post.title}
+        size="lg"
+        footer={null}>
+        {previewImage ? (
+          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+            <Image
+              src={previewImage}
+              alt={post.title}
+              width={1200}
+              height={675}
+              sizes="100vw"
+              className="h-full w-full object-contain"
+            />
+          </div>
+        ) : null}
+      </AppModal>
+    </AppCard>
   );
 });

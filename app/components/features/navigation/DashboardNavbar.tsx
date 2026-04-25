@@ -1,126 +1,124 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  HomeOutlined,
-  CompassOutlined,
-  BellOutlined,
-  BookOutlined,
-  ShoppingOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Badge } from "antd";
-import { APP_ROUTES } from "@/lib/constants";
+  filterNavItems,
+  type NavigationItem,
+  type UserRole,
+} from "@/lib/config/navigation";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { useNotifications } from "@/lib/hooks/useNotifications";
-
-interface NavItem {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  badgeKey?: string;
-  showOnMobile?: boolean;
-}
 
 interface DashboardNavbarProps {
   userId?: string;
 }
 
-const navItems: NavItem[] = [
-  {
-    href: APP_ROUTES.DASHBOARD,
-    icon: <HomeOutlined />,
-    label: "Feed",
-    showOnMobile: true,
-  },
-  {
-    href: APP_ROUTES.BOOKMARKS,
-    icon: <BookOutlined />,
-    label: "Bookmarks",
-    showOnMobile: true,
-  },
-  /* {
-    href: APP_ROUTES.EXPLORE,
-    icon: <CompassOutlined />,
-    label: "Explore",
-    showOnMobile: true,
-  },
-  // REDUNDANT
-  {
-    href: "/notifications",
-    icon: <BellOutlined />,
-    label: "Notifications",
-    badgeKey: "notifications",
-    showOnMobile: false,
-  },
-  {
-    href: APP_ROUTES.MARKETPLACE,
-    icon: <ShoppingOutlined />,
-    label: "Marketplace",
-    showOnMobile: true,
-  }, */
-];
+function getRoleFromUser(user: User | null): UserRole {
+  const candidateRole = (user as (User & { role?: string }) | null)?.role;
+  if (candidateRole === "admin") {
+    return "admin";
+  }
+  if (candidateRole === "guest") {
+    return "guest";
+  }
+  return "user";
+}
+
+function isActivePath(pathname: string | null, href: string): boolean {
+  if (!pathname) {
+    return false;
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function renderNavLink(
+  item: NavigationItem,
+  pathname: string | null,
+  unreadCount: number,
+  compact = false,
+): React.ReactElement {
+  const active = isActivePath(pathname, item.href);
+  const Icon = item.icon;
+  const showNotificationDot = item.key === "notifications" && unreadCount > 0;
+
+  return (
+    <Link
+      key={item.key}
+      href={item.href}
+      className={[
+        "relative inline-flex items-center gap-2 rounded-xl transition-colors",
+        compact ? "h-12 w-12 justify-center" : "px-3 py-2",
+        active
+          ? "bg-[var(--color-primary)] text-white"
+          : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)]",
+      ].join(" ")}
+      title={item.label}
+      aria-current={active ? "page" : undefined}>
+      <Icon size={20} aria-hidden="true" />
+      {!compact ? (
+        <span className="text-sm font-medium">{item.label}</span>
+      ) : null}
+      {showNotificationDot ? (
+        <span
+          className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--color-error)]"
+          aria-label={`${unreadCount} unread notifications`}
+        />
+      ) : null}
+    </Link>
+  );
+}
 
 export function DashboardNavbar({ userId }: DashboardNavbarProps) {
   const pathname = usePathname();
- 
+  const { user, isAuthenticated } = useAuth();
+  const role = getRoleFromUser(isAuthenticated ? user : null);
 
-  const isActive = (href: string) => {
-    if (href === APP_ROUTES.DASHBOARD) {
-      return pathname === href;
-    }
-    return pathname?.startsWith(href);
-  };
+  const { unreadCount } = useNotifications(userId || "");
+
+  const { primarySidebarItems, adminSidebarItems, bottomItems } =
+    useMemo(() => {
+      const sidebarItems = filterNavItems(role, { sidebarOnly: true });
+      const itemsForBottom = filterNavItems(role, { bottomNavOnly: true });
+
+      return {
+        primarySidebarItems: sidebarItems.filter(
+          (item) => !(item.roles.length === 1 && item.roles[0] === "admin"),
+        ),
+        adminSidebarItems: sidebarItems.filter(
+          (item) => item.roles.length === 1 && item.roles[0] === "admin",
+        ),
+        bottomItems: itemsForBottom,
+      };
+    }, [role]);
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <nav className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-screen md:w-20 md:bg-white dark:md:bg-gray-900 md:border-r md:border-gray-200 dark:md:border-gray-800 md:py-4 md:items-center md:gap-6 z-40 transition-colors duration-200">
-        {navItems.map((item) => {
-          const active = isActive(item.href);
+      <nav className="fixed left-0 top-0 z-40 hidden h-screen w-20 flex-col items-center border-r border-[var(--color-border)] bg-[var(--color-bg-base)] py-4 md:flex">
+        <div className="flex w-full flex-1 flex-col items-center gap-3">
+          {primarySidebarItems.map((item) =>
+            renderNavLink(item, pathname, unreadCount, true),
+          )}
+        </div>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all ${
-                active
-                  ? "bg-[#00623B] dark:bg-[#00a862] text-white shadow-md"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#00623B] dark:hover:text-[#00a862]"
-              }`}
-              title={item.label}>
-              <Badge size="small" offset={[10, -5]}>
-                <span className="text-2xl">{item.icon}</span>
-              </Badge>
-            </Link>
-          );
-        })}
+        {adminSidebarItems.length > 0 ? (
+          <div className="mt-4 w-full border-t border-[var(--color-border)] pt-4">
+            <div className="mb-2 px-2 text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
+              Admin
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              {adminSidebarItems.map((item) =>
+                renderNavLink(item, pathname, unreadCount, true),
+              )}
+            </div>
+          </div>
+        ) : null}
       </nav>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-2 px-4 flex justify-around items-center z-40 transition-colors duration-200">
-        {navItems
-          .filter((item) => item.showOnMobile)
-          .map((item) => {
-            const active = isActive(item.href);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 py-2 px-4 rounded-lg transition-all ${
-                  active
-                    ? "text-[#00623B] dark:text-[#00a862]"
-                    : "text-gray-600 dark:text-gray-400"
-                }`}>
-                <Badge size="small" offset={[5, 0]}>
-                  <span className="text-2xl">{item.icon}</span>
-                </Badge>
-                <span className="text-xs font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-[var(--color-border)] bg-[var(--color-bg-base)] px-2 py-2 md:hidden">
+        {bottomItems.map((item) => renderNavLink(item, pathname, unreadCount))}
       </nav>
     </>
   );

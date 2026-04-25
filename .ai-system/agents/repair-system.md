@@ -239,3 +239,50 @@ Pin UI library versions during foundational refactors and run full build immedia
 - `app/components/features/posts/PostCard.tsx`
 
 **Date:** 2026-04-23
+
+---
+
+## Prisma 7 Migrate Dev Fails with Missing datasource.url
+
+**Symptom:**
+`npx prisma migrate dev --name <name>` fails with: `The datasource.url property is required in your Prisma config file when using prisma migrate dev`.
+
+**Root Cause:**
+`prisma/prisma.config.ts` resolves datasource URL from environment (`LOCAL_DB` in development). No database URL variable is set in the active workspace environment.
+
+**Fix Applied:**
+Confirmed config behavior, documented blocker in planning/checkpoint files, and validated non-blocked steps by running `npx prisma generate` and `npm run build` successfully.
+
+**Prevention:**
+Before running Prisma migration commands, verify that `LOCAL_DB` (dev) or `DIRECT_URL`/`DATABASE_URL` is set and points to a reachable PostgreSQL instance.
+
+**Files Affected:**
+
+- `prisma/prisma.config.ts`
+- `.ai-system/planning/task-queue.md`
+- `.ai-system/checkpoints/session-log.md`
+
+**Date:** 2026-04-25
+
+---
+
+## Config-Driven Auth Form Test Expectations
+
+**Symptom:**
+Auth tests expect specific validation messages like `Please enter your email`, `Please enter your password`, and `Please enter a valid email`, plus a visible Ant Design password wrapper.
+
+**Root Cause:**
+Config-driven form refactors can subtly change the validation copy and the rendered control type unless the schema-driven form preserves the original Ant Design behavior.
+
+**Fix Applied:**
+Updated `ConfigDrivenForm` to emit matching email/password validation and render `Input.Password` for password fields, while keeping the form driven by config objects.
+
+**Prevention:**
+When refactoring shared forms, preserve existing test-facing validation strings and the same component type semantics unless the tests are updated in the same change.
+
+**Files Affected:**
+
+- `app/components/ui/ConfigDrivenForm.tsx`
+- `app/lib/config/forms.ts`
+
+**Date:** 2026-04-25

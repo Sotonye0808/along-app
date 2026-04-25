@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Form } from "antd";
+import { Input } from "antd";
 import type { FormInstance, Rule } from "antd/es/form";
 import type { FieldConfig } from "@/lib/config";
 import { AppButton } from "./AppButton";
@@ -9,7 +10,7 @@ import { AppInput } from "./AppInput";
 import { AppSelect } from "./AppSelect";
 import { AppTextarea } from "./AppTextarea";
 
-export interface ConfigDrivenFormProps<T extends Record<string, unknown>> {
+export interface ConfigDrivenFormProps<T extends object> {
   fields: FieldConfig[];
   initialValues?: Partial<T>;
   submitLabel?: string;
@@ -21,27 +22,34 @@ function buildRules(field: FieldConfig): Rule[] {
   const rules: Rule[] = [];
 
   if (field.required) {
-    rules.push({ required: true, message: `${field.label} is required.` });
+    rules.push({
+      required: true,
+      message: `Please enter your ${field.label.toLowerCase()}`,
+    });
   }
 
   if (field.minLength) {
     rules.push({
       min: field.minLength,
-      message: `${field.label} must be at least ${field.minLength} characters.`,
+      message: `${field.label} must be at least ${field.minLength} characters`,
     });
   }
 
   if (field.maxLength) {
     rules.push({
       max: field.maxLength,
-      message: `${field.label} must be at most ${field.maxLength} characters.`,
+      message: `${field.label} must be at most ${field.maxLength} characters`,
     });
+  }
+
+  if (field.type === "email") {
+    rules.push({ type: "email", message: "Please enter a valid email" });
   }
 
   return rules;
 }
 
-export function ConfigDrivenForm<T extends Record<string, unknown>>({
+export function ConfigDrivenForm<T extends object>({
   fields,
   initialValues,
   submitLabel = "Submit",
@@ -73,12 +81,15 @@ export function ConfigDrivenForm<T extends Record<string, unknown>>({
                 placeholder={field.placeholder}
                 options={field.options}
               />
+            ) : field.type === "password" ? (
+              <Input.Password
+                placeholder={field.placeholder}
+                className="!rounded-[var(--radius-input)] focus:!border-[var(--color-primary)]"
+              />
             ) : (
               <AppInput
                 type={
-                  field.type === "password" ||
-                  field.type === "email" ||
-                  field.type === "number"
+                  field.type === "email" || field.type === "number"
                     ? field.type
                     : "text"
                 }
