@@ -286,3 +286,27 @@ When refactoring shared forms, preserve existing test-facing validation strings 
 - `app/lib/config/forms.ts`
 
 **Date:** 2026-04-25
+
+---
+
+## Mixed Mock/JWT Auth Verification Drift
+
+**Symptom:**
+`/api/auth/verify` can reject valid sessions or behave inconsistently because it parses a mock token format while login/refresh issue real JWTs.
+
+**Root Cause:**
+Auth routes evolved at different times: login/refresh used JWT + Prisma, but verify still used mock token parsing and in-memory-era assumptions.
+
+**Fix Applied:**
+Updated `app/api/auth/verify/route.ts` to verify JWT access token and load user via Prisma; added rate limiting. Removed in-memory OTP fallback from `app/api/auth/register/route.ts` and `app/api/auth/verify-otp/route.ts`, keeping Redis-backed OTP persistence only.
+
+**Prevention:**
+When migrating API routes, treat each route family (`auth`, `posts`, `users`, `notifications`) as an atomic unit and verify all routes in the family use the same token + persistence model.
+
+**Files Affected:**
+
+- `app/api/auth/verify/route.ts`
+- `app/api/auth/register/route.ts`
+- `app/api/auth/verify-otp/route.ts`
+
+**Date:** 2026-04-26

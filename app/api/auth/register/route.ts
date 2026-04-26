@@ -5,9 +5,6 @@ import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 import { validateRegisterData } from '@/lib/utils/validation';
 import bcrypt from 'bcryptjs';
 
-// In-memory OTP storage (in production, use Redis or similar)
-const otpStore = new Map<string, { code: string; expiresAt: number }>();
-
 // Generate 6-digit OTP
 function generateOTP(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -103,7 +100,6 @@ export async function POST(request: NextRequest) {
 
         // Store OTP in cache (10 minute TTL)
         await cache.set(`otp:${email}`, JSON.stringify({ code: otpCode, expiresAt }), 600);
-        otpStore.set(email, { code: otpCode, expiresAt }); // Keep in-memory fallback
 
         // Log OTP for testing (in production, send via email/SMS)
         console.log(`OTP for ${email}: ${otpCode}`);

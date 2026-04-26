@@ -268,3 +268,41 @@ The UI/config barrels pulled in unrelated modules that triggered Jest ESM resolu
 
 **Implications:**
 New rewrites should import only the exact UI/config modules they need. This keeps production bundles and tests more predictable.
+
+---
+
+## Auth Verify Uses JWT + Prisma Only
+
+**Decision:** Remove mock token parsing and in-memory OTP fallbacks from auth API routes; enforce JWT verification and Prisma-backed user verification with Redis-only OTP persistence.
+**Date:** 2026-04-26
+**Made by:** AI agent
+
+**Reason:**
+Auth route migration task requires production-grade data flow consistency. Mock token parsing in `auth/verify` and in-memory OTP fallback in registration/OTP verification created non-deterministic behavior across instances and violated the migration objective.
+
+**Alternatives Considered:**
+
+- Keep in-memory fallback in parallel with Redis: rejected because it can drift between instances and mask cache failures.
+- Keep mock token format in `auth/verify` until later: rejected because login/refresh were already JWT-based and this created inconsistent auth semantics.
+
+**Implications:**
+Auth routes now rely on JWT cookie verification and Prisma user existence checks consistently. Remaining mock route debt is isolated to two post comment-reaction endpoints and can be migrated as the next focused slice.
+
+---
+
+## Comment Reaction Endpoints Use Prisma Counters
+
+**Decision:** Replace `app/lib/data/database` usage in post comment like/dislike routes with direct Prisma `comment` counter updates, and add zod param validation + `rateLimitByIP` in the same change.
+**Date:** 2026-04-26
+**Made by:** AI agent
+
+**Reason:**
+The route audit showed the final mock dependencies were isolated to comment reactions. Migrating these endpoints closes the data-source migration objective for auth/posts/users/notifications route families while also aligning route hardening standards.
+
+**Alternatives Considered:**
+
+- Introduce a separate comment-reaction model before migration: rejected because current schema uses counter fields on `Comment` and this change was intended to be non-breaking.
+- Defer validation/rate-limit hardening to a later pass: rejected because it creates avoidable rework and inconsistent route quality.
+
+**Implications:**
+All API route handlers are now Prisma-backed or utility-only. Next work should focus on cross-route consistency (Zod coverage, cursor pagination, Redis strategy, Prisma error mapping) instead of datasource migration.

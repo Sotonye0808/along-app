@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { cache } from '@/lib/cache/redis';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
-
-// Import the same OTP store from register route (fallback)
-const otpStore = new Map<string, { code: string; expiresAt: number }>();
+import { verifyOtpSchema } from '@/lib/utils/validation';
 
 export async function POST(request: NextRequest) {
     try {
@@ -22,30 +20,34 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const body: OtpVerification = await request.json();
-        const { email, code } = body;
+        const body = await request.json();
+        const validation = verifyOtpSchema.safeParse(body);
 
-        // Validate required fields
-        if (!email || !code) {
+        if (!validation.success) {
             return NextResponse.json(
-                { error: 'Email and code are required' },
+                { error: validation.error.issues[0]?.message || 'Invalid verification payload' },
                 { status: 400 }
             );
         }
 
-        // Get stored OTP from Redis cache first, then fallback to in-memory
-        let storedOTP: { code: string; expiresAt: number } | null = null;
+        const { email, code } = validation.data;
 
+        // OTP is stored in Redis-backed cache only.
         const cachedOTP = await cache.get<string>(`otp:${email}`);
-        if (cachedOTP) {
-            storedOTP = JSON.parse(cachedOTP);
-        } else {
-            storedOTP = otpStore.get(email) || null;
-        }
-
-        if (!storedOTP) {
+        if (!cachedOTP) {
             return NextResponse.json(
                 { error: 'No verification code found for this email' },
+                { status: 400 }
+            );
+        }
+
+        let storedOTP: { code: string; expiresAt: number };
+        try {
+            storedOTP = JSON.parse(cachedOTP) as { code: string; expiresAt: number };
+        } catch {
+            await cache.del(`otp:${email}`);
+            return NextResponse.json(
+                { error: 'Verification data is invalid. Please request a new code.' },
                 { status: 400 }
             );
         }
@@ -53,7 +55,6 @@ export async function POST(request: NextRequest) {
         // Check if OTP expired
         if (Date.now() > storedOTP.expiresAt) {
             await cache.del(`otp:${email}`);
-            otpStore.delete(email);
             return NextResponse.json(
                 { error: 'Verification code has expired' },
                 { status: 400 }
@@ -89,7 +90,6 @@ export async function POST(request: NextRequest) {
 
         // Clear OTP from both cache and memory
         await cache.del(`otp:${email}`);
-        otpStore.delete(email);
 
         return NextResponse.json({
             message: 'Account verified successfully',

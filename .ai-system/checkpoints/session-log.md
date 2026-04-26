@@ -205,3 +205,49 @@ Move to Phase 0 Task 0.10 and capture the phase checkpoint, then revisit Prisma 
 
 - `npm run build` now passes cleanly.
 - `prisma migrate dev` is still blocked separately by the missing `LOCAL_DB` / `DATABASE_URL` configuration in `prisma/prisma.config.ts`.
+
+---
+
+## Session 7 — 2026-04-26
+
+**Completed:**
+Executed high-velocity continuation across Phase 0 closure and Sprint migration tasks. Migrated auth verification away from mock token parsing to JWT+Prisma, removed in-memory OTP fallback from auth registration/OTP verification, completed a full API route audit, and captured remaining mock route debt in a dedicated index report.
+
+**Files Modified:**
+
+- `app/api/auth/verify/route.ts` — replaced mock token parsing with JWT verification and Prisma user lookup; added rate limiting
+- `app/api/auth/register/route.ts` — removed in-memory OTP map fallback and kept Redis-backed cache storage
+- `app/api/auth/verify-otp/route.ts` — removed in-memory fallback, added `verifyOtpSchema` validation, retained Redis-only OTP workflow
+- `.ai-system/index/api-route-audit.md` — new full route audit matrix and summary
+- `.ai-system/planning/task-queue.md` — marked API audit and auth migration tasks complete; added notes for remaining mock routes and Phase 0.10 status
+
+**Next Task:**
+Migrate `app/api/posts/[id]/comments/[commentId]/like/route.ts` and `app/api/posts/[id]/comments/[commentId]/dislike/route.ts` from `app/lib/data/database` to Prisma, then add zod validation + rate limiting.
+
+**Notes / Blockers:**
+
+- `npm run build` passes after auth migration changes.
+- Phase 0.10 checkpoint command sequence was run (`npm run build`, `npx tsc --noEmit`, `npm test -- --passWithNoTests`, `npx next lint`), but repository-wide legacy Jest/Lint debt still blocks full checkpoint closure.
+- Prisma migration task 0.6 remains blocked by missing `LOCAL_DB` / `DATABASE_URL` environment configuration.
+
+---
+
+## Session 8 — 2026-04-26
+
+**Completed:**
+Migrated the final mock post-comment reaction endpoints to Prisma and added route-level hardening (zod param validation and `rateLimitByIP`) for both like/dislike handlers. Re-ran production build verification and updated API audit + sprint tracker to reflect that auth/posts/users/notifications route families are now fully Prisma-backed.
+
+**Files Modified:**
+
+- `app/api/posts/[id]/comments/[commentId]/like/route.ts` — migrated from `app/lib/data/database` to Prisma comment updates; added zod param validation + IP rate limiting
+- `app/api/posts/[id]/comments/[commentId]/dislike/route.ts` — migrated from `app/lib/data/database` to Prisma comment updates; added zod param validation + IP rate limiting
+- `.ai-system/index/api-route-audit.md` — updated counts and route matrix after post reaction migration
+- `.ai-system/planning/task-queue.md` — marked posts/users/notifications migration tasks complete
+
+**Next Task:**
+Continue with API hardening tasks: add standardized Zod validation to all remaining route handlers, then implement/normalize cursor pagination and Prisma error-code mapping.
+
+**Notes / Blockers:**
+
+- `npm run build` passes after these migrations.
+- Full Phase 0.10 closure remains blocked by existing repository-wide test/lint debt, not by newly migrated routes.

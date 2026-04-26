@@ -1,14 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/data/database';
+import { z } from 'zod';
+import { prisma } from '@/lib/db/prisma';
+import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+
+const commentParamsSchema = z.object({
+  id: z.string().cuid('Invalid post ID'),
+  commentId: z.string().cuid('Invalid comment ID'),
+});
 
 // POST /api/posts/[id]/comments/[commentId]/like - Like a comment
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; commentId: string }> }
 ) {
-  const { commentId } = await params;
+  const rawParams = await params;
+  const parsedParams = commentParamsSchema.safeParse(rawParams);
+
+  if (!parsedParams.success) {
+    return NextResponse.json(
+      { error: parsedParams.error.issues[0]?.message || 'Invalid route parameters' },
+      { status: 400 }
+    );
+  }
+
+  const { id, commentId } = parsedParams.data;
+
   try {
-    const comment = await db.likeComment(commentId);
+    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 200, windowSeconds: 3600 });
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'Too many reaction actions. Please try again later.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.reset) },
+        }
+      );
+    }
+
+    const existingComment = await prisma.comment.findFirst({
+      where: {
+        id: commentId,
+        postId: id,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!existingComment) {
+      return NextResponse.json(
+        { error: 'Comment not found' },
+        { status: 404 }
+      );
+    }
+
+    const comment = await prisma.comment.update({
+      where: { id: commentId },
+      data: {
+        likes: {
+          increment: 1,
+        },
+      },
+      select: {
+        id: true,
+        postId: true,
+        likes: true,
+        dislikes: true,
+      },
+    });
+
     if (!comment) {
       return NextResponse.json(
         { error: 'Comment not found' },
@@ -30,9 +92,65 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; commentId: string }> }
 ) {
-  const { commentId } = await params;
+  const rawParams = await params;
+  const parsedParams = commentParamsSchema.safeParse(rawParams);
+
+  if (!parsedParams.success) {
+    return NextResponse.json(
+      { error: parsedParams.error.issues[0]?.message || 'Invalid route parameters' },
+      { status: 400 }
+    );
+  }
+
+  const { id, commentId } = parsedParams.data;
+
   try {
-    const comment = await db.unlikeComment(commentId);
+    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 200, windowSeconds: 3600 });
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'Too many reaction actions. Please try again later.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.reset) },
+        }
+      );
+    }
+
+    const existingComment = await prisma.comment.findFirst({
+      where: {
+        id: commentId,
+        postId: id,
+      },
+      select: {
+        id: true,
+        likes: true,
+      },
+    });
+
+    if (!existingComment) {
+      return NextResponse.json(
+        { error: 'Comment not found' },
+        { status: 404 }
+      );
+    }
+
+    const comment = await prisma.comment.update({
+      where: { id: commentId },
+      data: {
+        likes: {
+          decrement: existingComment.likes > 0 ? 1 : 0,
+        },
+      },
+      select: {
+        id: true,
+        postId: true,
+        likes: true,
+        dislikes: true,
+      },
+    });
+
     if (!comment) {
       return NextResponse.json(
         { error: 'Comment not found' },

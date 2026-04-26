@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 import { cache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import { Prisma } from '@/app/generated/prisma/client';
+import { z } from 'zod';
+
+const usersQuerySchema = z.object({
+    search: z.string().max(100).optional().default(''),
+    limit: z.coerce.number().int().min(1).max(50).optional().default(20),
+    cursor: z.string().cuid().optional().nullable(),
+});
 
 /**
  * GET /api/users
@@ -25,9 +33,32 @@ export async function GET(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url);
-        const search = searchParams.get('search') || '';
-        const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
-        const cursor = searchParams.get('cursor');
+        const parsedQuery = usersQuerySchema.safeParse({
+            search: searchParams.get('search') ?? undefined,
+            limit: searchParams.get('limit') ?? undefined,
+            cursor: searchParams.get('cursor'),
+        });
+
+        if (!parsedQuery.success) {
+            return NextResponse.json(
+                { error: parsedQuery.error.issues[0]?.message || 'Invalid query parameters' },
+                { status: 400 }
+            );
+        }
+
+        const { search, limit, cursor } = parsedQuery.data;
+
+        const cacheKey = `${CACHE_KEYS.searchResults(search || 'all-users', 'users')}:${cursor || 'initial'}:${limit}`;
+        const cached = await cache.get<string>(cacheKey);
+
+        if (cached) {
+            const parsedCache = JSON.parse(cached) as { data: User[]; nextCursor: string | null };
+            const response = NextResponse.json(parsedCache.data, { status: 200 });
+            if (parsedCache.nextCursor) {
+                response.headers.set('x-next-cursor', parsedCache.nextCursor);
+            }
+            return response;
+        }
 
         // Build where clause for search
         const whereClause = search
@@ -87,8 +118,33 @@ export async function GET(request: NextRequest) {
             createdAt: user.createdAt.toISOString(),
         }));
 
-        return NextResponse.json(transformedUsers);
+        const payload = {
+            data: transformedUsers,
+            nextCursor,
+        };
+
+        await cache.set(cacheKey, JSON.stringify(payload), CACHE_TTL.search);
+
+        const response = NextResponse.json(transformedUsers, { status: 200 });
+        if (nextCursor) {
+            response.headers.set('x-next-cursor', nextCursor);
+        }
+
+        return response;
     } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return NextResponse.json(
+                    { error: 'User resource not found' },
+                    { status: 404 }
+                );
+            }
+            return NextResponse.json(
+                { error: 'Database request failed' },
+                { status: 400 }
+            );
+        }
+
         console.error('Error fetching users:', error);
         return NextResponse.json(
             { error: 'Failed to fetch users' },

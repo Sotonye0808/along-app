@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/data/database';
+import jwt from 'jsonwebtoken';
+import { prisma } from '@/lib/db/prisma';
+import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 
 export async function GET(request: NextRequest) {
     try {
+        // Rate limit check (60 auth verification attempts per hour per IP)
+        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 60, windowSeconds: 3600 });
+
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many verification requests. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
+            );
+        }
+
         // Get access token from cookie
         const accessToken = request.cookies.get('accessToken')?.value;
 
@@ -13,9 +29,17 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // In production, verify and decode the JWT token
-        // For mock, extract userId from token format: mock-access-token-{userId}-{timestamp}
-        const userId = accessToken.split('-')[3];
+        let decoded: { userId: string };
+        try {
+            decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!) as { userId: string };
+        } catch {
+            return NextResponse.json(
+                { error: 'Invalid or expired token' },
+                { status: 401 }
+            );
+        }
+
+        const userId = decoded.userId;
 
         if (!userId) {
             return NextResponse.json(
@@ -25,7 +49,27 @@ export async function GET(request: NextRequest) {
         }
 
         // Verify user exists
-        const user = await db.getUserById(userId);
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                userName: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                avatar: true,
+                bio: true,
+                verified: true,
+                location: true,
+                createdAt: true,
+                _count: {
+                    select: {
+                        followers: true,
+                    },
+                },
+            },
+        });
+
         if (!user) {
             return NextResponse.json(
                 { error: 'User not found' },
@@ -33,12 +77,17 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
+        const responseUser = {
+            ...user,
+            followers: user._count.followers,
+            following: [],
+            likes: [],
+            bookmarks: [],
+        };
 
         return NextResponse.json({
             authenticated: true,
-            user: userWithoutPassword,
+            user: responseUser,
         });
     } catch (error) {
         console.error('Token verification error:', error);

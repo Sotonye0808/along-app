@@ -8,11 +8,11 @@
 
 > **Section summary:** Tasks actively being worked on. Migrate all API routes to use Prisma and implement Redis caching and rate limiting.
 
-- [ ] Audit all `app/api/` routes and identify which still use mock/in-memory data
-- [ ] Migrate `app/api/auth/` routes to use Prisma (login, register, logout, OTP)
-- [ ] Migrate `app/api/posts/` routes to use Prisma (CRUD, likes, comments, bookmarks)
-- [ ] Migrate `app/api/users/` routes to use Prisma (profile, follow, unfollow)
-- [ ] Migrate `app/api/notifications/` routes to use Prisma
+- [x] Audit all `app/api/` routes and identify which still use mock/in-memory data
+- [x] Migrate `app/api/auth/` routes to use Prisma (login, register, logout, OTP)
+- [x] Migrate `app/api/posts/` routes to use Prisma (CRUD, likes, comments, bookmarks)
+- [x] Migrate `app/api/users/` routes to use Prisma (profile, follow, unfollow)
+- [x] Migrate `app/api/notifications/` routes to use Prisma
 - [ ] Add Zod validation schemas to all API route handlers
 - [ ] Add Redis caching to all GET endpoints (posts list, user profile, notifications)
 - [ ] Implement cursor-based pagination on all list endpoints
@@ -93,3 +93,5 @@
 - **Blocker (0.6):** `prisma migrate dev` requires a configured datasource URL in `prisma/prisma.config.ts` via `LOCAL_DB` (development) or `DIRECT_URL` / `DATABASE_URL`; no DB env value is present in workspace yet.
 - **Note (0.7):** Rewrite batch is complete and `npm run build` passes. `npm test` still has a small amount of legacy test compatibility debt in auth/post dropdown expectations, but no production build regressions remain.
 - **Note (0.8/0.9):** SEO helpers, root metadata, structured data wiring, sitemap/robots cleanup, and route-level loading/error shells are complete. The remaining build blocker was a server/client boundary issue in `app/not-found.tsx`; converting it to a client component resolved the prerender failure on `/` and the production build now passes.
+- **Note (API audit):** Route audit report is recorded at `.ai-system/index/api-route-audit.md`. All `app/api/**/route.ts` handlers are now Prisma-backed or non-DB utility handlers.
+- **Note (0.10 status):** Checkpoint command sequence was executed (`build`, `tsc`, `test`, `lint`). `npm run build` passes; repository-wide legacy Jest/Lint debt still prevents full 0.10 closure until dedicated cleanup.
