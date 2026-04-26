@@ -8,7 +8,9 @@ import { ShareRouteModal } from "@/components/features/posts/ShareRouteModal";
 import { useAuth } from "../../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { StructuredData } from "@/components/ui/StructuredData";
 import { generatePersonSchema } from "@/lib/utils/structuredData";
+import { getSiteUrl } from "@/lib/utils/metadata";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -56,7 +58,7 @@ export default function UserProfilePage() {
       // Find user by username
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
       const foundUser = (usersResponse.data || []).find(
-        (u) => u.userName === username
+        (u) => u.userName === username,
       );
 
       if (!foundUser) {
@@ -88,12 +90,12 @@ export default function UserProfilePage() {
       const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
 
       const targetUser = (usersResponse.data || []).find(
-        (u) => u.userName === username
+        (u) => u.userName === username,
       );
       if (!targetUser) return;
 
       const userPosts = (postsResponse.data || []).filter(
-        (post) => post.userId === targetUser.id
+        (post) => post.userId === targetUser.id,
       );
 
       const usersData = usersResponse.data;
@@ -133,7 +135,7 @@ export default function UserProfilePage() {
       for (const post of allPosts) {
         try {
           const commentsResponse = await api.get<PostComment[]>(
-            API_ENDPOINTS.POST_COMMENTS(post.id)
+            API_ENDPOINTS.POST_COMMENTS(post.id),
           );
 
           const postComments = commentsResponse.data
@@ -177,7 +179,7 @@ export default function UserProfilePage() {
       for (const post of postsResponse.data) {
         try {
           const likeCheck = await api.get<Like | null>(
-            `${API_ENDPOINTS.POST_LIKE(post.id)}?userId=${currentUser.id}`
+            `${API_ENDPOINTS.POST_LIKE(post.id)}?userId=${currentUser.id}`,
           );
 
           if (likeCheck.data) {
@@ -189,7 +191,7 @@ export default function UserProfilePage() {
           }
 
           const bookmarkCheck = await api.get<Bookmark | null>(
-            `${API_ENDPOINTS.POST_BOOKMARK(post.id)}?userId=${currentUser.id}`
+            `${API_ENDPOINTS.POST_BOOKMARK(post.id)}?userId=${currentUser.id}`,
           );
 
           if (bookmarkCheck.data) {
@@ -222,7 +224,7 @@ export default function UserProfilePage() {
                 ? (prev.followers || 0) + 1
                 : (prev.followers || 1) - 1,
             }
-          : null
+          : null,
       );
 
       await api.post(API_ENDPOINTS.USER_FOLLOW(userId), {
@@ -233,7 +235,7 @@ export default function UserProfilePage() {
       message.success(
         newFollowingState
           ? `You are now following ${user?.firstName}`
-          : `You unfollowed ${user?.firstName}`
+          : `You unfollowed ${user?.firstName}`,
       );
     } catch (error) {
       console.error("Failed to follow/unfollow user:", error);
@@ -260,8 +262,8 @@ export default function UserProfilePage() {
       newLikes.delete(postId);
       setPosts((prev) =>
         prev.map((post) =>
-          post.id === postId ? { ...post, likes: post.likes - 1 } : post
-        )
+          post.id === postId ? { ...post, likes: post.likes - 1 } : post,
+        ),
       );
     } else {
       newLikes.add(postId);
@@ -271,14 +273,14 @@ export default function UserProfilePage() {
           prev.map((post) =>
             post.id === postId
               ? { ...post, likes: post.likes + 1, dislikes: post.dislikes - 1 }
-              : post
-          )
+              : post,
+          ),
         );
       } else {
         setPosts((prev) =>
           prev.map((post) =>
-            post.id === postId ? { ...post, likes: post.likes + 1 } : post
-          )
+            post.id === postId ? { ...post, likes: post.likes + 1 } : post,
+          ),
         );
       }
     }
@@ -324,8 +326,8 @@ export default function UserProfilePage() {
       newDislikes.delete(postId);
       setPosts((prev) =>
         prev.map((post) =>
-          post.id === postId ? { ...post, dislikes: post.dislikes - 1 } : post
-        )
+          post.id === postId ? { ...post, dislikes: post.dislikes - 1 } : post,
+        ),
       );
     } else {
       newDislikes.add(postId);
@@ -335,14 +337,16 @@ export default function UserProfilePage() {
           prev.map((post) =>
             post.id === postId
               ? { ...post, dislikes: post.dislikes + 1, likes: post.likes - 1 }
-              : post
-          )
+              : post,
+          ),
         );
       } else {
         setPosts((prev) =>
           prev.map((post) =>
-            post.id === postId ? { ...post, dislikes: post.dislikes + 1 } : post
-          )
+            post.id === postId
+              ? { ...post, dislikes: post.dislikes + 1 }
+              : post,
+          ),
         );
       }
     }
@@ -391,8 +395,8 @@ export default function UserProfilePage() {
         prev.map((post) =>
           post.id === postId
             ? { ...post, bookmarks: (post.bookmarks || 1) - 1 }
-            : post
-        )
+            : post,
+        ),
       );
     } else {
       newBookmarks.add(postId);
@@ -400,8 +404,8 @@ export default function UserProfilePage() {
         prev.map((post) =>
           post.id === postId
             ? { ...post, bookmarks: (post.bookmarks || 0) + 1 }
-            : post
-        )
+            : post,
+        ),
       );
     }
 
@@ -463,8 +467,8 @@ export default function UserProfilePage() {
       // Update the post in the local state
       setPosts((prev) =>
         prev.map((p) =>
-          p.id === postData.id ? ({ ...p, ...postData } as PostWithAuthor) : p
-        )
+          p.id === postData.id ? ({ ...p, ...postData } as PostWithAuthor) : p,
+        ),
       );
 
       message.success("Post updated successfully!");
@@ -542,16 +546,11 @@ export default function UserProfilePage() {
     return null;
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const personSchema = generatePersonSchema(user, baseUrl);
+  const personSchema = generatePersonSchema(user, getSiteUrl());
 
   return (
     <>
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
-      />
+      <StructuredData data={personSchema} />
 
       <UserProfile
         user={user}

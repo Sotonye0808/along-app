@@ -174,3 +174,34 @@ Resume Phase 0 Task 0.8 (SEO foundation) or, if a DB URL becomes available, retu
 
 - `npm run build` passes after the rewrite batch.
 - `npm test` still reports a few legacy auth/post test expectation mismatches, but no production compile/type regressions remain.
+
+---
+
+## Session 6 — 2026-04-26
+
+**Completed:**
+Finished Phase 0 SEO and route-shell work. Added shared SEO metadata helpers, restored root page metadata/JSON-LD wiring, updated dynamic detail page metadata, cleaned up sitemap/robots generation, and added app-level loading/error boundaries. Resolved the root prerender crash by converting `app/not-found.tsx` into a client component so Lucide icon props stay inside the client tree.
+
+**Files Modified:**
+
+- `app/lib/utils/metadata.ts` — shared metadata helper for site URL and page metadata
+- `app/page.tsx` — restored root metadata and JSON-LD structured data
+- `app/(dashboard)/posts/[id]/page.tsx` — dynamic post metadata and structured data
+- `app/(dashboard)/profile/[username]/page.tsx` — dynamic profile metadata and structured data
+- `app/sitemap.ts` — skipped local-host sitemap fetches during build
+- `app/robots.ts` — SEO crawler directives cleanup
+- `app/error.tsx` — route error boundary
+- `app/global-error.tsx` — global error boundary
+- `app/loading.tsx` — app loading shell
+- `app/(dashboard)/loading.tsx` — dashboard loading shell
+- `app/(admin)/loading.tsx` — admin loading shell
+- `app/not-found.tsx` — converted to a client component to avoid server/client prop serialization issues
+- `.ai-system/planning/task-queue.md` — marked 0.8 and 0.9 complete
+
+**Next Task:**
+Move to Phase 0 Task 0.10 and capture the phase checkpoint, then revisit Prisma migration setup if a datasource URL becomes available.
+
+**Notes / Blockers:**
+
+- `npm run build` now passes cleanly.
+- `prisma migrate dev` is still blocked separately by the missing `LOCAL_DB` / `DATABASE_URL` configuration in `prisma/prisma.config.ts`.

@@ -8,11 +8,10 @@ import { GlobalToastProvider } from "./providers/GlobalToastProvider";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
 import { InstallPrompt } from "./components/features/pwa";
-import {
-  CookieConsent,
-  GlobalConfirmModal,
-  GlobalUndoToast,
-} from "./components/ui";
+import { CookieConsent } from "./components/ui/CookieConsent";
+import { GlobalConfirmModal } from "./components/ui/GlobalConfirmModal";
+import { GlobalUndoToast } from "./components/ui/GlobalUndoToast";
+import { DEFAULT_OG_IMAGE, SITE_NAME, getSiteUrl } from "./lib/utils/metadata";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -42,9 +41,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  ),
+  metadataBase: new URL(getSiteUrl()),
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -55,7 +52,7 @@ export const metadata: Metadata = {
     siteName: "Along",
     images: [
       {
-        url: "/assets/images/og-image.png",
+        url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
         alt: "Along - Share Your Travel Routes",

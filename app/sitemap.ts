@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/utils/metadata';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://deploy-preview-6--along1.netlify.app/" || 'http://localhost:3000';
+    const baseUrl = getSiteUrl();
 
     // Static routes
     const staticRoutes: MetadataRoute.Sitemap = [
@@ -61,10 +62,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ];
 
+    const isLocalHost =
+        baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1");
+
+    if (isLocalHost) {
+        return staticRoutes;
+    }
+
     try {
         // Fetch all posts for dynamic routes
         const postsResponse = await fetch(`${baseUrl}/api/posts`, {
-            next: { revalidate: 3600 }, // Revalidate every hour
+            next: { revalidate: 3600 },
         });
         const posts = postsResponse.ok ? (await postsResponse.json()) as Post[] : [];
 
@@ -77,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         // Fetch all users for dynamic profile routes
         const usersResponse = await fetch(`${baseUrl}/api/users`, {
-            next: { revalidate: 3600 }, // Revalidate every hour
+            next: { revalidate: 3600 },
         });
         const users = usersResponse.ok ? (await usersResponse.json()) as User[] : [];
 
@@ -89,8 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }));
 
         return [...staticRoutes, ...postRoutes, ...userRoutes];
-    } catch (error) {
-        console.error('Error generating sitemap:', error);
+    } catch {
         return staticRoutes;
     }
 }

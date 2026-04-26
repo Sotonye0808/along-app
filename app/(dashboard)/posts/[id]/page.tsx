@@ -9,7 +9,9 @@ import { CommentSection } from "@/components/features/posts/CommentSection";
 import { useAuth } from "../../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { StructuredData } from "@/components/ui/StructuredData";
 import { generateArticleSchema } from "@/lib/utils/structuredData";
+import { getSiteUrl } from "@/lib/utils/metadata";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -21,7 +23,7 @@ export default function PostPage() {
   const { user: currentUser, isAuthenticated } = useAuth();
   const [post, setPost] = useState<PostWithAuthor | null>(null);
   const [comments, setComments] = useState<(PostComment & { author: User })[]>(
-    []
+    [],
   );
   const [loading, setLoading] = useState(true);
   const [commentModalOpen, setCommentModalOpen] = useState(false);
@@ -49,7 +51,7 @@ export default function PostPage() {
       setLoading(true);
       const postRes = await api.get<Post>(`${API_ENDPOINTS.POSTS}/${postId}`);
       const authorRes = await api.get<User>(
-        `${API_ENDPOINTS.USERS}/${postRes.data.userId}`
+        `${API_ENDPOINTS.USERS}/${postRes.data.userId}`,
       );
 
       setPost({
@@ -75,7 +77,7 @@ export default function PostPage() {
 
       // Check if user has liked/disliked this post
       const likeCheck = await api.get<{ data: Like | null }>(
-        `${API_ENDPOINTS.POST_LIKE(postId)}?userId=${currentUser.id}`
+        `${API_ENDPOINTS.POST_LIKE(postId)}?userId=${currentUser.id}`,
       );
 
       if (likeCheck.data.data) {
@@ -88,7 +90,7 @@ export default function PostPage() {
 
       // Check if user has bookmarked this post
       const bookmarkCheck = await api.get<{ data: Bookmark | null }>(
-        `${API_ENDPOINTS.POST_BOOKMARK(postId)}?userId=${currentUser.id}`
+        `${API_ENDPOINTS.POST_BOOKMARK(postId)}?userId=${currentUser.id}`,
       );
 
       if (bookmarkCheck.data.data) {
@@ -129,7 +131,7 @@ export default function PostPage() {
         setPost((prev) =>
           prev
             ? { ...prev, likes: prev.likes + 1, dislikes: prev.dislikes - 1 }
-            : null
+            : null,
         );
       } else {
         setPost((prev) => (prev ? { ...prev, likes: prev.likes + 1 } : null));
@@ -174,7 +176,7 @@ export default function PostPage() {
     if (wasDisliked) {
       newDislikes.delete(postId);
       setPost((prev) =>
-        prev ? { ...prev, dislikes: prev.dislikes - 1 } : null
+        prev ? { ...prev, dislikes: prev.dislikes - 1 } : null,
       );
     } else {
       newDislikes.add(postId);
@@ -183,11 +185,11 @@ export default function PostPage() {
         setPost((prev) =>
           prev
             ? { ...prev, dislikes: prev.dislikes + 1, likes: prev.likes - 1 }
-            : null
+            : null,
         );
       } else {
         setPost((prev) =>
-          prev ? { ...prev, dislikes: prev.dislikes + 1 } : null
+          prev ? { ...prev, dislikes: prev.dislikes + 1 } : null,
         );
       }
     }
@@ -231,19 +233,19 @@ export default function PostPage() {
 
     try {
       const commentsRes = await api.get<PostComment[]>(
-        API_ENDPOINTS.POST_COMMENTS(postId)
+        API_ENDPOINTS.POST_COMMENTS(postId),
       );
 
       const commentsWithAuthors = await Promise.all(
         (commentsRes.data || []).map(async (comment) => {
           const authorRes = await api.get<User>(
-            `${API_ENDPOINTS.USERS}/${comment.userId}`
+            `${API_ENDPOINTS.USERS}/${comment.userId}`,
           );
           return {
             ...comment,
             author: authorRes.data,
           };
-        })
+        }),
       );
 
       setComments(commentsWithAuthors);
@@ -277,7 +279,7 @@ export default function PostPage() {
 
       // Update comment count
       setPost((prev) =>
-        prev ? { ...prev, comments: prev.comments + 1 } : null
+        prev ? { ...prev, comments: prev.comments + 1 } : null,
       );
 
       message.success("Comment added");
@@ -298,8 +300,8 @@ export default function PostPage() {
 
       setComments((prev) =>
         prev.map((comment) =>
-          comment.id === commentId ? { ...comment, text: newText } : comment
-        )
+          comment.id === commentId ? { ...comment, text: newText } : comment,
+        ),
       );
     } catch (error) {
       console.error("Failed to update comment:", error);
@@ -316,7 +318,7 @@ export default function PostPage() {
       setComments((prev) => prev.filter((comment) => comment.id !== commentId));
 
       setPost((prev) =>
-        prev ? { ...prev, comments: prev.comments - 1 } : null
+        prev ? { ...prev, comments: prev.comments - 1 } : null,
       );
     } catch (error) {
       console.error("Failed to delete comment:", error);
@@ -332,7 +334,7 @@ export default function PostPage() {
 
     // Optimistic update
     setComments((prev) =>
-      prev.map((c) => (c.id === commentId ? { ...c, likes: c.likes + 1 } : c))
+      prev.map((c) => (c.id === commentId ? { ...c, likes: c.likes + 1 } : c)),
     );
 
     try {
@@ -345,7 +347,9 @@ export default function PostPage() {
       message.error("Failed to update like");
       // Rollback
       setComments((prev) =>
-        prev.map((c) => (c.id === commentId ? { ...c, likes: c.likes - 1 } : c))
+        prev.map((c) =>
+          c.id === commentId ? { ...c, likes: c.likes - 1 } : c,
+        ),
       );
     }
   };
@@ -359,8 +363,8 @@ export default function PostPage() {
     // Optimistic update
     setComments((prev) =>
       prev.map((c) =>
-        c.id === commentId ? { ...c, dislikes: c.dislikes + 1 } : c
-      )
+        c.id === commentId ? { ...c, dislikes: c.dislikes + 1 } : c,
+      ),
     );
 
     try {
@@ -374,8 +378,8 @@ export default function PostPage() {
       // Rollback
       setComments((prev) =>
         prev.map((c) =>
-          c.id === commentId ? { ...c, dislikes: c.dislikes - 1 } : c
-        )
+          c.id === commentId ? { ...c, dislikes: c.dislikes - 1 } : c,
+        ),
       );
     }
   };
@@ -392,12 +396,12 @@ export default function PostPage() {
     if (wasBookmarked) {
       newBookmarks.delete(postId);
       setPost((prev) =>
-        prev ? { ...prev, bookmarks: (prev.bookmarks || 0) - 1 } : null
+        prev ? { ...prev, bookmarks: (prev.bookmarks || 0) - 1 } : null,
       );
     } else {
       newBookmarks.add(postId);
       setPost((prev) =>
-        prev ? { ...prev, bookmarks: (prev.bookmarks || 0) + 1 } : null
+        prev ? { ...prev, bookmarks: (prev.bookmarks || 0) + 1 } : null,
       );
     }
 
@@ -409,7 +413,7 @@ export default function PostPage() {
     try {
       if (wasBookmarked) {
         await api.delete(
-          `${API_ENDPOINTS.POST_BOOKMARK(postId)}?userId=${currentUser.id}`
+          `${API_ENDPOINTS.POST_BOOKMARK(postId)}?userId=${currentUser.id}`,
         );
         message.success("Removed from bookmarks");
       } else {
@@ -499,15 +503,16 @@ export default function PostPage() {
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const articleSchema = generateArticleSchema(post, post.author, baseUrl);
+  const currentBaseUrl = getSiteUrl();
+  const articleSchema = generateArticleSchema(
+    post,
+    post.author,
+    currentBaseUrl,
+  );
 
   return (
     <div className="max-w-3xl mx-auto p-4">
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
+      <StructuredData data={articleSchema} />
 
       <Button
         type="text"

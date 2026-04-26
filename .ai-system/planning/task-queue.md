@@ -77,8 +77,8 @@
 - [x] 0.5 — Implement global services (ModalService, ToastService, UndoService, OfflineQueue)
 - [ ] 0.6 — Update Prisma schema
 - [x] 0.7 — Overhaul existing components for compliance
-- [ ] 0.8 — SEO foundation
-- [ ] 0.9 — Wire navigation + error/loading pages
+- [x] 0.8 — SEO foundation
+- [x] 0.9 — Wire navigation + error/loading pages
 - [ ] 0.10 — Phase 0 checkpoint
 
 ---
@@ -92,3 +92,4 @@
 - **Testing:** Run `npm test` before marking any task complete
 - **Blocker (0.6):** `prisma migrate dev` requires a configured datasource URL in `prisma/prisma.config.ts` via `LOCAL_DB` (development) or `DIRECT_URL` / `DATABASE_URL`; no DB env value is present in workspace yet.
 - **Note (0.7):** Rewrite batch is complete and `npm run build` passes. `npm test` still has a small amount of legacy test compatibility debt in auth/post dropdown expectations, but no production build regressions remain.
+- **Note (0.8/0.9):** SEO helpers, root metadata, structured data wiring, sitemap/robots cleanup, and route-level loading/error shells are complete. The remaining build blocker was a server/client boundary issue in `app/not-found.tsx`; converting it to a client component resolved the prerender failure on `/` and the production build now passes.

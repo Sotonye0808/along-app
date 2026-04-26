@@ -1,18 +1,31 @@
-import Link from "next/link";
-import { APP_ROUTES } from "@/lib/constants";
+import type { Metadata } from "next";
+import {
+  buildMetadata,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  getSiteUrl,
+} from "@/lib/utils/metadata";
 import {
   generateOrganizationSchema,
   generateWebSiteSchema,
 } from "@/lib/utils/structuredData";
 
+export const metadata: Metadata = {
+  ...buildMetadata({
+    title: `${SITE_NAME} - Share Your Travel Routes`,
+    description: `${SITE_DESCRIPTION} Connect with fellow travelers, bookmark routes, and plan your next adventure.`,
+    pathname: "/",
+    keywords: ["travel", "routes", "community", "Along", "map", "transit"],
+  }),
+};
+
 export default function HomePage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getSiteUrl();
   const organizationSchema = generateOrganizationSchema(baseUrl);
   const websiteSchema = generateWebSiteSchema(baseUrl);
 
   return (
     <>
-      {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -42,13 +55,11 @@ export default function HomePage() {
           </div>
 
           <div className="mx-auto my-8">
-            <Link
-              href={APP_ROUTES.DASHBOARD}
-              className={
-                "text-[#00623B] font-semibold hover:underline hover:text-[#00623B]"
-              }>
+            <a
+              href="/home"
+              className="text-[#00623B] font-semibold hover:underline hover:text-[#00623B]">
               Visit as guest
-            </Link>
+            </a>
           </div>
         </div>
       </div>
