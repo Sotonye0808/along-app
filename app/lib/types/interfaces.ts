@@ -1,5 +1,12 @@
 // Core Types
 declare global {
+    interface AvatarConfig {
+        style: string;
+        seed: string;
+        backgroundColor?: string;
+        radius?: number;
+    }
+
     interface User {
         id: string;
         userName: string;
@@ -8,6 +15,7 @@ declare global {
         email: string;
         password?: string;
         avatar?: string;
+        avatarConfig?: AvatarConfig | null;
         bio?: string;
         followers?: number;
         following?: string[];
@@ -16,6 +24,9 @@ declare global {
         createdAt: string;
         verified?: boolean;
         location?: string;
+        role?: "USER" | "ADMIN";
+        rewardPoints?: number;
+        rewardTier?: "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
     }
 
     interface Link {
@@ -44,6 +55,18 @@ declare global {
         dislikes: number;
         comments: number;
         bookmarks?: number;
+        validityScore: number;
+        validityTier?: string;
+        isPlatformGen?: boolean;
+        region?: string;
+        startLat?: number;
+        startLng?: number;
+        endLat?: number;
+        endLng?: number;
+        totalDistanceKm?: number;
+        estimatedMins?: number;
+        views?: number;
+        shares?: number;
         createdAt: string;
         updatedAt: string;
     }

@@ -23,17 +23,19 @@
 
 ## Up Next
 
-> **Section summary:** Tasks planned for the next sprint. Not yet started.
+> **Section summary:** Phase 1 tasks currently in progress.
 
-- [ ] Implement notifications feature end-to-end (API + UI)
-- [ ] Implement search feature (users, posts, tags) with proper DB queries
-- [ ] Add UserActivity tracking for the feed algorithm
-- [ ] Implement real feed algorithm using UserActivity scores
-- [ ] Add proper loading skeletons for all dashboard pages
-- [ ] Implement comprehensive error boundaries across all route groups
-- [ ] Consolidate duplicate config files (`postcss.config.js` and `postcss.config.mjs`)
-- [ ] Add unit tests for all `app/lib/utils/` functions
-- [ ] Add integration tests for critical API routes
+- [x] 1.1 — ValidityEngine + TrustBadge
+- [x] 1.2 — DraftingCoachService + DraftingCoach component
+- [ ] 1.3 — DiceBear AvatarEditor + UserAvatar
+- [ ] 1.4 — Google OAuth
+- [ ] 1.5 — Bug Report system
+- [ ] 1.6 — Admin pages group
+- [ ] 1.7 — Confirmations + Undo
+- [ ] 1.8 — User tagging in comments (@mentions)
+- [ ] 1.9 — Subtle links full-codebase audit
+- [ ] 1.10 — Privacy & Terms pages
+- [ ] 1.11 — Phase 1 checkpoint
 
 ---
 
@@ -68,18 +70,19 @@
 
 > **Authority:** `.ai-system/planning/along_copilot_plan_v2.md`
 
-## Current Phase: 0 — Foundation
+## Current Phase: 1 — Core Product
 
-- [x] 0.1 — Update all dependencies
-- [x] 0.2 — Migrate Tailwind v4
-- [x] 0.3 — Create all config files
-- [x] 0.4 — Create all Universal Components
-- [x] 0.5 — Implement global services (ModalService, ToastService, UndoService, OfflineQueue)
-- [ ] 0.6 — Update Prisma schema
-- [x] 0.7 — Overhaul existing components for compliance
-- [x] 0.8 — SEO foundation
-- [x] 0.9 — Wire navigation + error/loading pages
-- [ ] 0.10 — Phase 0 checkpoint
+- [x] 1.1 — ValidityEngine + TrustBadge
+- [x] 1.2 — DraftingCoachService + DraftingCoach component
+- [ ] 1.3 — DiceBear AvatarEditor + UserAvatar
+- [ ] 1.4 — Google OAuth
+- [ ] 1.5 — Bug Report system
+- [ ] 1.6 — Admin pages group
+- [ ] 1.7 — Confirmations + Undo
+- [ ] 1.8 — User tagging in comments (@mentions)
+- [ ] 1.9 — Subtle links full-codebase audit
+- [ ] 1.10 — Privacy & Terms pages
+- [ ] 1.11 — Phase 1 checkpoint
 
 ---
 

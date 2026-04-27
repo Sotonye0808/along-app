@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { AntdProvider } from "./providers/AntdProvider";
 import { AuthProvider } from "./providers/AuthProvider";
 import { CookieConsentProvider } from "./providers/CookieConsentProvider";
@@ -11,10 +10,8 @@ import { InstallPrompt } from "./components/features/pwa";
 import { CookieConsent } from "./components/ui/CookieConsent";
 import { GlobalConfirmModal } from "./components/ui/GlobalConfirmModal";
 import { GlobalUndoToast } from "./components/ui/GlobalUndoToast";
-import { DEFAULT_OG_IMAGE, SITE_NAME, getSiteUrl } from "./lib/utils/metadata";
+import { DEFAULT_OG_IMAGE, getSiteUrl } from "./lib/utils/metadata";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
@@ -93,7 +90,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className={inter.className}>
+      <body className="font-sans antialiased">
         <ServiceWorkerRegistration />
         <ThemeProvider>
           <CookieConsentProvider>

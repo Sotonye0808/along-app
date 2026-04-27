@@ -17,6 +17,8 @@ export interface TrustBreakdown {
 export interface TrustBadgeProps {
   score: number;
   breakdown?: TrustBreakdown;
+  size?: "small" | "default";
+  showScore?: boolean;
 }
 
 function getTrustMeta(score: number): {
@@ -39,6 +41,8 @@ function getTrustMeta(score: number): {
 export function TrustBadge({
   score,
   breakdown,
+  size = "default",
+  showScore = true,
 }: TrustBadgeProps): React.ReactElement {
   const { label, Icon, variant } = getTrustMeta(score);
 
@@ -63,13 +67,21 @@ export function TrustBadge({
     <span>{label} trust score</span>
   );
 
+  const tagLabel =
+    size === "small"
+      ? label
+      : showScore
+        ? `${label} ${score}%`
+        : label;
+
   return (
     <AppTooltip title={tooltip}>
       <span>
         <AppTag
-          label={`${label} ${score}%`}
+          label={tagLabel}
           icon={Icon}
           variant={variant}
+          size={size === "small" ? "xs" : "sm"}
           pill
         />
       </span>
