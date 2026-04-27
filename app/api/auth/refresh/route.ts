@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
 import jwt from 'jsonwebtoken';
+import { z } from 'zod';
+
+const tokenPayloadSchema = z.object({
+    userId: z.string().min(1, 'Invalid token payload'),
+});
 
 // Generate new access token
 function generateAccessToken(userId: string) {
@@ -41,7 +47,16 @@ export async function POST(request: NextRequest) {
         // Verify and decode the JWT refresh token
         let decoded: { userId: string };
         try {
-            decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as { userId: string };
+            const verifiedToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!);
+            const parsedPayload = tokenPayloadSchema.safeParse(verifiedToken);
+            if (!parsedPayload.success) {
+                return NextResponse.json(
+                    { error: parsedPayload.error.issues[0]?.message || 'Invalid token payload' },
+                    { status: 401 }
+                );
+            }
+
+            decoded = parsedPayload.data;
         } catch (error) {
             return NextResponse.json(
                 { error: 'Invalid or expired refresh token' },
@@ -93,6 +108,11 @@ export async function POST(request: NextRequest) {
 
         return response;
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'User');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Token refresh error:', error);
         return NextResponse.json(
             { error: 'Token refresh failed. Please try again.' },

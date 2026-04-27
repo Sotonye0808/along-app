@@ -6,6 +6,7 @@ import { cache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import { uploadImage, deleteImage, validateImageFile, fileToBase64 } from '@/lib/utils/cloudinary';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
 
 // Validation schema for profile updates
 const updateProfileSchema = z.object({
@@ -111,6 +112,11 @@ export async function GET(
 
         return NextResponse.json(transformedUser);
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'User');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error fetching user:', error);
         return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
     }
@@ -263,6 +269,12 @@ export async function PUT(
                 { status: 400 }
             );
         }
+
+        const prismaError = handlePrismaError(error, 'User');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error updating user:', error);
         return NextResponse.json(
             { error: 'Failed to update user' },
@@ -320,6 +332,11 @@ export async function DELETE(
             { status: 200 }
         );
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'User');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error deleting user:', error);
         return NextResponse.json(
             { error: 'Failed to delete user' },

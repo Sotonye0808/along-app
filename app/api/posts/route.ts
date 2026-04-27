@@ -5,14 +5,34 @@ import { authenticateRequest, requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByUser, rateLimitByIP } from '@/lib/utils/rateLimiter';
 import { getPersonalizedFeed } from '@/lib/services/feedService';
 import { uploadImage, validateImageFile } from '@/lib/utils/cloudinary';
+import { Prisma } from '@/app/generated/prisma/client';
+import { createPostSchema } from '@/lib/utils/validation';
+import { z } from 'zod';
+
+const postsQuerySchema = z.object({
+    cursor: z.string().cuid().optional().nullable(),
+    limit: z.coerce.number().int().min(1).max(50).optional().default(20),
+    userId: z.string().cuid().optional().nullable(),
+});
 
 // GET /api/posts - Get personalized feed
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const cursor = searchParams.get('cursor');
-        const limit = parseInt(searchParams.get('limit') || '20');
-        const userId = searchParams.get('userId'); // For user-specific posts
+        const parsedQuery = postsQuerySchema.safeParse({
+            cursor: searchParams.get('cursor'),
+            limit: searchParams.get('limit') ?? undefined,
+            userId: searchParams.get('userId'),
+        });
+
+        if (!parsedQuery.success) {
+            return NextResponse.json(
+                { error: parsedQuery.error.issues[0]?.message || 'Invalid query parameters' },
+                { status: 400 }
+            );
+        }
+
+        const { cursor, limit, userId } = parsedQuery.data;
 
         // Rate limit check for unauthenticated requests
         const authenticatedUserId = await authenticateRequest(request);
@@ -152,6 +172,19 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(transformedPosts, { status: 200 });
 
     } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return NextResponse.json(
+                    { error: 'Post resource not found' },
+                    { status: 404 }
+                );
+            }
+            return NextResponse.json(
+                { error: 'Database request failed' },
+                { status: 400 }
+            );
+        }
+
         console.error('Error fetching posts:', error);
         return NextResponse.json(
             { error: 'Failed to fetch posts' },
@@ -180,18 +213,18 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { title, routes, images, tags } = body;
-
-        // Validate required fields
-        if (!title || !routes || routes.length === 0) {
+        const parsedBody = createPostSchema.safeParse(body);
+        if (!parsedBody.success) {
             return NextResponse.json(
-                { error: 'Title and at least one route are required' },
+                { error: parsedBody.error.issues[0]?.message || 'Invalid post payload' },
                 { status: 400 }
             );
         }
 
+        const { title, routes, images, tags } = parsedBody.data;
+
         // Upload images to Cloudinary if provided
-        let uploadedImageUrls: string[] = [];
+        const uploadedImageUrls: string[] = [];
 
         if (images && images.length > 0) {
             for (const imageBase64 of images) {
@@ -222,7 +255,7 @@ export async function POST(request: NextRequest) {
             data: {
                 userId,
                 title,
-                routes: routes as any, // JSON field
+                routes: routes as Prisma.InputJsonValue,
                 images: uploadedImageUrls,
                 tags: tags || []
             },
@@ -277,6 +310,25 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 { error: 'Authentication required' },
                 { status: 401 }
+            );
+        }
+
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return NextResponse.json(
+                    { error: 'Post resource not found' },
+                    { status: 404 }
+                );
+            }
+            if (error.code === 'P2002') {
+                return NextResponse.json(
+                    { error: 'Duplicate post data violates a unique constraint' },
+                    { status: 409 }
+                );
+            }
+            return NextResponse.json(
+                { error: 'Database request failed' },
+                { status: 400 }
             );
         }
 

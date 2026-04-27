@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { cache } from '@/lib/cache/redis';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 import { validateRegisterData } from '@/lib/utils/validation';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
 import bcrypt from 'bcryptjs';
 
 // Generate 6-digit OTP
@@ -113,6 +114,11 @@ export async function POST(request: NextRequest) {
             },
         });
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'User');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Registration error:', error);
         return NextResponse.json(
             { error: 'Registration failed. Please try again.' },

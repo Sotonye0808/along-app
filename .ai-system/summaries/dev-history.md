@@ -96,3 +96,25 @@ The final mock-backed API handlers were migrated from in-memory DB access to Pri
 
 **Next Sprint Focus:**
 Execute hardening tasks across API routes: Zod coverage, cursor pagination normalization, and `PrismaClientKnownRequestError` handling.
+
+---
+
+## 2026-04-26 — API Hardening Consistency Sweep
+
+**Summary:**
+A full route hardening sweep standardized validation and Prisma error handling across the remaining Prisma-backed API routes. A shared Prisma error utility was introduced and integrated into auth, posts, users, and notification-by-id handlers to reduce duplicated error branches and enforce consistent HTTP status mapping. Build integrity remained green after the full batch.
+
+**Completed:**
+
+- Added shared Prisma route error mapper at `app/lib/utils/prismaErrors.ts`
+- Added/expanded Zod validation on route params, bodies, and JWT payload decode paths in remaining hardening targets
+- Wired shared Prisma error mapping into the remaining Prisma-backed routes lacking it
+- Refreshed API audit and sprint queue tracking for hardening progress
+
+**Key Changes:**
+
+- Route behavior is now more uniform for Prisma known errors (`P2025`/`P2002`) and invalid request payloads
+- The remaining hardening decisions are now mostly policy-level (which GET endpoints should be intentionally uncached and which list-like endpoints need cursor contracts)
+
+**Next Sprint Focus:**
+Finalize cache strategy exceptions for authenticated relation/status GET routes and complete any remaining pagination normalization decisions, then return to Phase 0.10 closure blockers (legacy Jest/Lint debt + missing migration DB URL for 0.6).

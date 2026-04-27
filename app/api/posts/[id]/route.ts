@@ -4,13 +4,35 @@ import { cache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import { authenticateRequest, requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 import { uploadImage, deleteImage, validateImageFile } from '@/lib/utils/cloudinary';
+import { Prisma } from '@/app/generated/prisma/client';
+import { z } from 'zod';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
+
+const postParamsSchema = z.object({
+    id: z.string().min(1, 'Post id is required'),
+});
+
+const updatePostSchema = z.object({
+    title: z.string().trim().min(1).max(280).optional(),
+    routes: z.unknown().optional(),
+    images: z.array(z.string().min(1)).optional(),
+    tags: z.array(z.string().min(1)).optional(),
+});
 
 // GET /api/posts/[id] - Get post by ID
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
+    const parsedParams = postParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
+        return NextResponse.json(
+            { error: parsedParams.error.issues[0]?.message || 'Invalid post id' },
+            { status: 400 }
+        );
+    }
+
+    const { id } = parsedParams.data;
 
     try {
         // Rate limit check for unauthenticated requests
@@ -96,6 +118,11 @@ export async function GET(
 
         return NextResponse.json(transformedPost, { status: 200 });
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'Post');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error fetching post:', error);
         return NextResponse.json(
             { error: 'Failed to fetch post' },
@@ -109,7 +136,15 @@ export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
+    const parsedParams = postParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
+        return NextResponse.json(
+            { error: parsedParams.error.issues[0]?.message || 'Invalid post id' },
+            { status: 400 }
+        );
+    }
+
+    const { id } = parsedParams.data;
 
     try {
         // Require authentication
@@ -135,8 +170,15 @@ export async function PUT(
             );
         }
 
-        const body = await request.json();
-        const { title, routes, images, tags } = body;
+        const parsedBody = updatePostSchema.safeParse(await request.json());
+        if (!parsedBody.success) {
+            return NextResponse.json(
+                { error: parsedBody.error.issues[0]?.message || 'Invalid post update payload' },
+                { status: 400 }
+            );
+        }
+
+        const { title, routes, images, tags } = parsedBody.data;
 
         // Handle image updates
         let finalImageUrls = existingPost.images;
@@ -180,10 +222,10 @@ export async function PUT(
         const updatedPost = await prisma.post.update({
             where: { id },
             data: {
-                ...(title && { title }),
-                ...(routes && { routes: routes as any }),
-                ...(images && { images: finalImageUrls }),
-                ...(tags && { tags })
+                ...(title ? { title } : {}),
+                ...(routes !== undefined ? { routes: routes as Prisma.InputJsonValue } : {}),
+                ...(images ? { images: finalImageUrls } : {}),
+                ...(tags ? { tags } : {})
             },
             include: {
                 user: {
@@ -228,6 +270,11 @@ export async function PUT(
             );
         }
 
+        const prismaError = handlePrismaError(error, 'Post');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error updating post:', error);
         return NextResponse.json(
             { error: 'Failed to update post' },
@@ -241,7 +288,15 @@ export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
+    const parsedParams = postParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
+        return NextResponse.json(
+            { error: parsedParams.error.issues[0]?.message || 'Invalid post id' },
+            { status: 400 }
+        );
+    }
+
+    const { id } = parsedParams.data;
 
     try {
         // Require authentication
@@ -295,6 +350,11 @@ export async function DELETE(
                 { error: 'Authentication required' },
                 { status: 401 }
             );
+        }
+
+        const prismaError = handlePrismaError(error, 'Post');
+        if (prismaError) {
+            return prismaError;
         }
 
         console.error('Error deleting post:', error);

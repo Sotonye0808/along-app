@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByUser } from '@/lib/utils/rateLimiter';
+import { z } from 'zod';
+
+const unsubscribeSchema = z.object({
+    endpoint: z.string().url('Endpoint must be a valid URL'),
+});
 
 /**
  * POST /api/notifications/unsubscribe
@@ -28,15 +33,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const body = await request.json();
-        const { endpoint } = body;
-
-        if (!endpoint) {
+        const parsedBody = unsubscribeSchema.safeParse(await request.json());
+        if (!parsedBody.success) {
             return NextResponse.json(
-                { error: 'Endpoint is required' },
+                { error: parsedBody.error.issues[0]?.message || 'Endpoint is required' },
                 { status: 400 }
             );
         }
+
+        const { endpoint } = parsedBody.data;
 
         // TODO: Implement database removal for push subscriptions
         // await prisma.pushSubscription.deleteMany({

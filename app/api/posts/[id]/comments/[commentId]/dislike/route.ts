@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
 
 const commentParamsSchema = z.object({
   id: z.string().cuid('Invalid post ID'),
@@ -79,6 +80,11 @@ export async function POST(
     }
     return NextResponse.json(comment, { status: 200 });
   } catch (error) {
+    const prismaError = handlePrismaError(error, 'Comment');
+    if (prismaError) {
+      return prismaError;
+    }
+
     console.error('Error disliking comment:', error);
     return NextResponse.json(
       { error: 'Failed to dislike comment' },
@@ -159,6 +165,11 @@ export async function DELETE(
     }
     return NextResponse.json(comment, { status: 200 });
   } catch (error) {
+    const prismaError = handlePrismaError(error, 'Comment');
+    if (prismaError) {
+      return prismaError;
+    }
+
     console.error('Error removing dislike from comment:', error);
     return NextResponse.json(
       { error: 'Failed to remove dislike from comment' },

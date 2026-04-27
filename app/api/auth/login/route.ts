@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 import { validateLoginData } from '@/lib/utils/validation';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -142,6 +143,11 @@ export async function POST(request: NextRequest) {
 
         return response;
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'User');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Login error:', error);
         return NextResponse.json(
             { error: 'Login failed. Please try again.' },

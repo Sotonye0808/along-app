@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByUser } from '@/lib/utils/rateLimiter';
+import { z } from 'zod';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
+
+const likeParamsSchema = z.object({
+    id: z.string().min(1, 'Post id is required'),
+});
+
+const likeBodySchema = z.object({
+    type: z.enum(['LIKE', 'DISLIKE']),
+});
 
 // GET /api/posts/[id]/like - Check if user has liked/disliked this post
 export async function GET(
@@ -9,7 +19,15 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const parsedParams = likeParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid post id' },
+                { status: 400 }
+            );
+        }
+
+        const { id } = parsedParams.data;
         const userId = await requireAuth(request);
 
         const like = await prisma.like.findUnique({
@@ -35,6 +53,12 @@ export async function GET(
                 { status: 401 }
             );
         }
+
+        const prismaError = handlePrismaError(error, 'Like');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error checking like status:', error);
         return NextResponse.json(
             { error: 'Failed to check like status' },
@@ -48,7 +72,15 @@ export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
+    const parsedParams = likeParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
+        return NextResponse.json(
+            { error: parsedParams.error.issues[0]?.message || 'Invalid post id' },
+            { status: 400 }
+        );
+    }
+
+    const { id } = parsedParams.data;
 
     try {
         const userId = await requireAuth(request);
@@ -66,15 +98,15 @@ export async function POST(
             );
         }
 
-        const body = await request.json();
-        const { type } = body; // type: 'LIKE' | 'DISLIKE'
-
-        if (!type || !['LIKE', 'DISLIKE'].includes(type)) {
+        const parsedBody = likeBodySchema.safeParse(await request.json());
+        if (!parsedBody.success) {
             return NextResponse.json(
-                { error: 'Invalid type. Must be LIKE or DISLIKE' },
+                { error: parsedBody.error.issues[0]?.message || 'Invalid type. Must be LIKE or DISLIKE' },
                 { status: 400 }
             );
         }
+
+        const { type } = parsedBody.data;
 
         // Verify post exists
         const post = await prisma.post.findUnique({
@@ -162,6 +194,12 @@ export async function POST(
                 { status: 401 }
             );
         }
+
+        const prismaError = handlePrismaError(error, 'Like');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error toggling like:', error);
         return NextResponse.json(
             { error: 'Failed to toggle like' },
@@ -176,7 +214,15 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const parsedParams = likeParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid post id' },
+                { status: 400 }
+            );
+        }
+
+        const { id } = parsedParams.data;
         const userId = await requireAuth(request);
 
         // Check if like exists
@@ -217,6 +263,12 @@ export async function DELETE(
                 { status: 401 }
             );
         }
+
+        const prismaError = handlePrismaError(error, 'Like');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error removing like:', error);
         return NextResponse.json(
             { error: 'Failed to remove like' },

@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByUser } from '@/lib/utils/rateLimiter';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { z } from 'zod';
+
+const notificationParamsSchema = z.object({
+    id: z.string().min(1, 'Notification id is required'),
+});
 
 /**
  * GET /api/notifications/[id]
@@ -13,7 +19,15 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const parsedParams = notificationParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid notification id' },
+                { status: 400 }
+            );
+        }
+
+        const { id } = parsedParams.data;
         const authUser = await requireAuth(request);
 
         // Rate limiting
@@ -82,6 +96,11 @@ export async function GET(
 
         return NextResponse.json(transformedNotification);
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'Notification');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error fetching notification:', error);
         return NextResponse.json(
             { error: 'Failed to fetch notification' },
@@ -100,7 +119,15 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const parsedParams = notificationParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid notification id' },
+                { status: 400 }
+            );
+        }
+
+        const { id } = parsedParams.data;
         const authUser = await requireAuth(request);
 
         // Rate limiting
@@ -143,6 +170,11 @@ export async function PATCH(
             message: 'Notification marked as read',
         });
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'Notification');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error updating notification:', error);
         return NextResponse.json(
             { error: 'Failed to update notification' },
@@ -161,7 +193,15 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const parsedParams = notificationParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid notification id' },
+                { status: 400 }
+            );
+        }
+
+        const { id } = parsedParams.data;
         const authUser = await requireAuth(request);
 
         // Rate limiting
@@ -203,6 +243,11 @@ export async function DELETE(
             message: 'Notification deleted successfully',
         });
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'Notification');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error deleting notification:', error);
         return NextResponse.json(
             { error: 'Failed to delete notification' },

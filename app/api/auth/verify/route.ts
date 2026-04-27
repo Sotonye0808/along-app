@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/db/prisma';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { z } from 'zod';
+
+const tokenPayloadSchema = z.object({
+    userId: z.string().min(1, 'Invalid token payload'),
+});
 
 export async function GET(request: NextRequest) {
     try {
@@ -31,7 +37,16 @@ export async function GET(request: NextRequest) {
 
         let decoded: { userId: string };
         try {
-            decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!) as { userId: string };
+            const verifiedToken = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!);
+            const parsedPayload = tokenPayloadSchema.safeParse(verifiedToken);
+            if (!parsedPayload.success) {
+                return NextResponse.json(
+                    { error: parsedPayload.error.issues[0]?.message || 'Invalid token payload' },
+                    { status: 401 }
+                );
+            }
+
+            decoded = parsedPayload.data;
         } catch {
             return NextResponse.json(
                 { error: 'Invalid or expired token' },
@@ -90,6 +105,11 @@ export async function GET(request: NextRequest) {
             user: responseUser,
         });
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'User');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Token verification error:', error);
         return NextResponse.json(
             { error: 'Authentication verification failed' },

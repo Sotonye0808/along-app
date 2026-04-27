@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByUser } from '@/lib/utils/rateLimiter';
+import { z } from 'zod';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
+
+const bookmarkParamsSchema = z.object({
+    id: z.string().min(1, 'Post id is required'),
+});
 
 // GET /api/posts/[id]/bookmark - Check if user has bookmarked this post
 export async function GET(
@@ -9,7 +15,15 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const parsedParams = bookmarkParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid post id' },
+                { status: 400 }
+            );
+        }
+
+        const { id } = parsedParams.data;
         const userId = await requireAuth(request);
 
         const bookmark = await prisma.bookmark.findUnique({
@@ -36,6 +50,12 @@ export async function GET(
                 { status: 401 }
             );
         }
+
+        const prismaError = handlePrismaError(error, 'Bookmark');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error checking bookmark:', error);
         return NextResponse.json(
             { error: 'Failed to check bookmark' },
@@ -50,7 +70,15 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const parsedParams = bookmarkParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid post id' },
+                { status: 400 }
+            );
+        }
+
+        const { id } = parsedParams.data;
         const userId = await requireAuth(request);
 
         // Rate limit check (100 bookmarks per hour per user)
@@ -134,6 +162,12 @@ export async function POST(
                 { status: 401 }
             );
         }
+
+        const prismaError = handlePrismaError(error, 'Bookmark');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('Error toggling bookmark:', error);
         return NextResponse.json(
             { error: 'Failed to toggle bookmark' },

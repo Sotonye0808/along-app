@@ -251,3 +251,62 @@ Continue with API hardening tasks: add standardized Zod validation to all remain
 
 - `npm run build` passes after these migrations.
 - Full Phase 0.10 closure remains blocked by existing repository-wide test/lint debt, not by newly migrated routes.
+
+---
+
+## Session 9 — 2026-04-26
+
+**Completed:**
+Executed a broad API hardening sweep focused on validation and error-contract consistency. Added route-level Zod validation to remaining parameter/body/token payload paths, introduced a shared Prisma error mapper utility, and wired it across Prisma-backed auth/posts/users/notifications handlers. Re-validated build integrity after the full batch.
+
+**Files Modified:**
+
+- `app/lib/utils/prismaErrors.ts` — added shared Prisma known-request error mapper (`P2025`, `P2002`, fallback)
+- `app/api/auth/login/route.ts` — integrated shared Prisma error mapping
+- `app/api/auth/refresh/route.ts` — added Zod JWT payload validation + shared Prisma error mapping
+- `app/api/auth/register/route.ts` — integrated shared Prisma error mapping
+- `app/api/auth/verify/route.ts` — added Zod JWT payload validation + shared Prisma error mapping
+- `app/api/auth/verify-otp/route.ts` — integrated shared Prisma error mapping
+- `app/api/notifications/[id]/route.ts` — added Zod params validation + shared Prisma error mapping
+- `app/api/notifications/subscribe/route.ts` — added Zod subscription payload validation
+- `app/api/notifications/unsubscribe/route.ts` — added Zod unsubscribe payload validation
+- `app/api/posts/[id]/bookmark/route.ts` — added Zod params validation + shared Prisma error mapping
+- `app/api/posts/[id]/comments/route.ts` — added Zod params/body validation + shared Prisma error mapping
+- `app/api/posts/[id]/comments/[commentId]/like/route.ts` — integrated shared Prisma error mapping
+- `app/api/posts/[id]/comments/[commentId]/dislike/route.ts` — integrated shared Prisma error mapping
+- `app/api/posts/[id]/like/route.ts` — added Zod params/body validation + shared Prisma error mapping
+- `app/api/posts/[id]/route.ts` — added Zod params/body validation, replaced `any` JSON cast, integrated shared Prisma error mapping
+- `app/api/users/[id]/follow/route.ts` — added Zod params validation + shared Prisma error mapping
+- `app/api/users/[id]/route.ts` — integrated shared Prisma error mapping
+- `.ai-system/index/api-route-audit.md` — refreshed hardening matrix and summary
+- `.ai-system/planning/task-queue.md` — marked hardening checklist progress
+
+**Next Task:**
+Close remaining checklist items by normalizing cache strategy for authenticated GET relation/status endpoints and deciding whether those endpoints should stay uncached by design or use short TTLs; then finalize cursor-pagination status for any residual list-like routes.
+
+**Notes / Blockers:**
+
+- `npm run build` passes after this hardening batch.
+- Full Phase 0.10 closure remains blocked by pre-existing repository-wide Jest/Lint debt.
+- Prisma migration task 0.6 remains blocked by missing `LOCAL_DB` / `DATABASE_URL` configuration.
+
+---
+
+## Session 10 — 2026-04-26
+
+**Completed:**
+Finished the remaining list-endpoint hardening slice by implementing cursor pagination and Redis caching for post comments listing, including write-path cache invalidation on comment creation. Updated sprint tracker and route audit to mark cache and cursor checklist items complete.
+
+**Files Modified:**
+
+- `app/api/posts/[id]/comments/route.ts` — added cursor query validation, paginated GET (`limit`/`cursor` + `x-next-cursor`), Redis cache keying, and cache invalidation after POST
+- `.ai-system/index/api-route-audit.md` — updated comments route cache/cursor coverage
+- `.ai-system/planning/task-queue.md` — marked cache + cursor hardening tasks complete
+
+**Next Task:**
+Proceed to Phase 0.10 closure blockers: isolate/fix repository-wide Jest/Lint debt enough to complete checkpoint criteria, and separately unblock 0.6 once `LOCAL_DB`/`DATABASE_URL` is available.
+
+**Notes / Blockers:**
+
+- `npm run build` passes after comments pagination/caching changes.
+- 0.6 remains blocked by missing DB datasource env.

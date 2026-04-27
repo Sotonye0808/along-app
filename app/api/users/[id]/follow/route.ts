@@ -3,6 +3,12 @@ import { prisma } from '@/lib/db/prisma';
 import { requireAuth, authenticateRequest } from '@/lib/utils/auth-server';
 import { rateLimitByUser } from '@/lib/utils/rateLimiter';
 import { cache, CACHE_KEYS } from '@/lib/cache/redis';
+import { z } from 'zod';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
+
+const followParamsSchema = z.object({
+    id: z.string().min(1, 'User id is required'),
+});
 
 /**
  * POST /api/users/[id]/follow
@@ -14,7 +20,15 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id: targetUserId } = await params;
+        const parsedParams = followParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid user id' },
+                { status: 400 }
+            );
+        }
+
+        const targetUserId = parsedParams.data.id;
         const authUser = await requireAuth(request);
 
         // Rate limiting
@@ -123,6 +137,11 @@ export async function POST(
             });
         }
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'Follow');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error("Follow error:", error);
         return NextResponse.json(
             { error: "Failed to process follow request" },
@@ -141,7 +160,15 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id: targetUserId } = await params;
+        const parsedParams = followParamsSchema.safeParse(await params);
+        if (!parsedParams.success) {
+            return NextResponse.json(
+                { error: parsedParams.error.issues[0]?.message || 'Invalid user id' },
+                { status: 400 }
+            );
+        }
+
+        const targetUserId = parsedParams.data.id;
         const authUser = await authenticateRequest(request);
 
         // If not authenticated, return false
@@ -161,6 +188,11 @@ export async function GET(
 
         return NextResponse.json({ isFollowing: !!follow });
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'Follow');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error("Check follow error:", error);
         return NextResponse.json(
             { error: "Failed to check follow status" },

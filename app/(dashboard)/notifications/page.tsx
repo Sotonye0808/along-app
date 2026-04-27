@@ -36,13 +36,13 @@ export default function NotificationsPage() {
     try {
       setLoading(true);
       const response = await api.get<AppNotification[]>(
-        `${API_ENDPOINTS.NOTIFICATIONS}?userId=${currentUser.id}`
+        API_ENDPOINTS.NOTIFICATIONS,
       );
       setNotifications(
         response.data.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
       );
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
@@ -54,12 +54,10 @@ export default function NotificationsPage() {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await api.patch(`${API_ENDPOINTS.NOTIFICATIONS}/${notificationId}`, {
-        read: true,
-      });
+      await api.patch(`${API_ENDPOINTS.NOTIFICATIONS}/${notificationId}`);
 
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
       );
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
@@ -67,18 +65,8 @@ export default function NotificationsPage() {
   };
 
   const markAllAsRead = async () => {
-    if (!currentUser) return;
-
     try {
-      const unreadNotifications = notifications.filter((n) => !n.read);
-
-      await Promise.all(
-        unreadNotifications.map((n) =>
-          api.patch(`${API_ENDPOINTS.NOTIFICATIONS}/${n.id}`, {
-            read: true,
-          })
-        )
-      );
+      await api.patch(API_ENDPOINTS.NOTIFICATIONS, { markAll: true });
 
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       message.success("All notifications marked as read");

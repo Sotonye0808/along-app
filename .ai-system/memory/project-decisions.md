@@ -306,3 +306,22 @@ The route audit showed the final mock dependencies were isolated to comment reac
 
 **Implications:**
 All API route handlers are now Prisma-backed or utility-only. Next work should focus on cross-route consistency (Zod coverage, cursor pagination, Redis strategy, Prisma error mapping) instead of datasource migration.
+
+---
+
+## Shared Prisma Route Error Mapper
+
+**Decision:** Introduce and use a shared helper (`app/lib/utils/prismaErrors.ts`) for route-level Prisma known-request error mapping instead of ad-hoc per-route error branches.
+**Date:** 2026-04-26
+**Made by:** AI agent
+
+**Reason:**
+As route hardening expanded, duplicating `P2025`/`P2002` handling across each handler created drift risk and inconsistent response contracts. A centralized mapper keeps API behavior uniform while reducing route boilerplate.
+
+**Alternatives Considered:**
+
+- Keep inline `PrismaClientKnownRequestError` branches per route: rejected due repeated logic and high chance of divergent status/message behavior.
+- Introduce a global runtime middleware catch for Prisma errors: rejected because route handlers already mix domain-level and auth-level error mapping requiring local control.
+
+**Implications:**
+Prisma-backed routes should call the shared mapper first in `catch` blocks before generic 500 responses. Utility-only routes without Prisma usage are exempt.

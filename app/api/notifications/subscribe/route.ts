@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByUser } from '@/lib/utils/rateLimiter';
+import { z } from 'zod';
+
+const subscribeSchema = z.object({
+    endpoint: z.string().url('Endpoint must be a valid URL'),
+    keys: z.object({
+        p256dh: z.string().min(1, 'Missing p256dh key'),
+        auth: z.string().min(1, 'Missing auth key'),
+    }),
+});
 
 /**
  * POST /api/notifications/subscribe
@@ -29,15 +38,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const subscription = await request.json();
-
-        // Validate subscription object
-        if (!subscription.endpoint || !subscription.keys) {
+        const parsedSubscription = subscribeSchema.safeParse(await request.json());
+        if (!parsedSubscription.success) {
             return NextResponse.json(
-                { error: 'Invalid subscription data' },
+                { error: parsedSubscription.error.issues[0]?.message || 'Invalid subscription data' },
                 { status: 400 }
             );
         }
+
+        const subscription = parsedSubscription.data;
 
         // TODO: Implement database storage for push subscriptions
         // await prisma.pushSubscription.create({

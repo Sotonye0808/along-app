@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { cache } from '@/lib/cache/redis';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 import { verifyOtpSchema } from '@/lib/utils/validation';
+import { handlePrismaError } from '@/lib/utils/prismaErrors';
 
 export async function POST(request: NextRequest) {
     try {
@@ -95,6 +96,11 @@ export async function POST(request: NextRequest) {
             message: 'Account verified successfully',
         });
     } catch (error) {
+        const prismaError = handlePrismaError(error, 'User');
+        if (prismaError) {
+            return prismaError;
+        }
+
         console.error('OTP verification error:', error);
         return NextResponse.json(
             { error: 'Verification failed. Please try again.' },

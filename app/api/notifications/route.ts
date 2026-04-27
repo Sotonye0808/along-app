@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/utils/auth-server';
 import { rateLimitByUser } from '@/lib/utils/rateLimiter';
+import { cache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import { Prisma } from '@/app/generated/prisma/client';
+import { z } from 'zod';
+
+const notificationsQuerySchema = z.object({
+    limit: z.coerce.number().int().min(1).max(50).optional().default(20),
+    cursor: z.string().cuid().optional().nullable(),
+});
 
 /**
  * GET /api/notifications
@@ -35,8 +43,30 @@ export async function GET(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url);
-        const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
-        const cursor = searchParams.get('cursor');
+        const parsedQuery = notificationsQuerySchema.safeParse({
+            limit: searchParams.get('limit') ?? undefined,
+            cursor: searchParams.get('cursor'),
+        });
+
+        if (!parsedQuery.success) {
+            return NextResponse.json(
+                { error: parsedQuery.error.issues[0]?.message || 'Invalid query parameters' },
+                { status: 400 }
+            );
+        }
+
+        const { limit, cursor } = parsedQuery.data;
+
+        const cacheKey = `${CACHE_KEYS.searchResults(authUser, 'notifications')}:${cursor || 'initial'}:${limit}`;
+        const cached = await cache.get<string>(cacheKey);
+        if (cached) {
+            const parsedCache = JSON.parse(cached) as { data: Notification[]; nextCursor: string | null };
+            const response = NextResponse.json(parsedCache.data, { status: 200 });
+            if (parsedCache.nextCursor) {
+                response.headers.set('x-next-cursor', parsedCache.nextCursor);
+            }
+            return response;
+        }
 
         // Fetch notifications through recipient relationship
         const notificationRecipients = await prisma.notificationRecipient.findMany({
@@ -95,9 +125,35 @@ export async function GET(request: NextRequest) {
             actor: recipient.notification.actor,
         }));
 
+        await cache.set(
+            cacheKey,
+            JSON.stringify({
+                data: transformedNotifications,
+                nextCursor,
+            }),
+            CACHE_TTL.search
+        );
+
         // Return array directly for frontend compatibility
-        return NextResponse.json(transformedNotifications);
+        const response = NextResponse.json(transformedNotifications, { status: 200 });
+        if (nextCursor) {
+            response.headers.set('x-next-cursor', nextCursor);
+        }
+        return response;
     } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return NextResponse.json(
+                    { error: 'Notification resource not found' },
+                    { status: 404 }
+                );
+            }
+            return NextResponse.json(
+                { error: 'Database request failed' },
+                { status: 400 }
+            );
+        }
+
         console.error('Error fetching notifications:', error);
         return NextResponse.json(
             { error: 'Failed to fetch notifications' },
@@ -129,7 +185,20 @@ export async function PATCH(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { notificationId, markAll } = body;
+        const patchSchema = z.object({
+            notificationId: z.string().cuid().optional(),
+            markAll: z.boolean().optional().default(false),
+        });
+        const parsedBody = patchSchema.safeParse(body);
+
+        if (!parsedBody.success) {
+            return NextResponse.json(
+                { error: parsedBody.error.issues[0]?.message || 'Invalid request payload' },
+                { status: 400 }
+            );
+        }
+
+        const { notificationId, markAll } = parsedBody.data;
 
         if (markAll) {
             // Mark all notifications as read for this user
@@ -142,6 +211,8 @@ export async function PATCH(request: NextRequest) {
                     read: true,
                 },
             });
+
+            await cache.delPattern(`${CACHE_KEYS.searchResults(authUser, 'notifications')}:*`);
 
             return NextResponse.json({
                 message: 'All notifications marked as read',
@@ -169,6 +240,8 @@ export async function PATCH(request: NextRequest) {
                 data: { read: true },
             });
 
+            await cache.delPattern(`${CACHE_KEYS.searchResults(authUser, 'notifications')}:*`);
+
             return NextResponse.json({
                 message: 'Notification marked as read',
             });
@@ -179,6 +252,19 @@ export async function PATCH(request: NextRequest) {
             );
         }
     } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return NextResponse.json(
+                    { error: 'Notification resource not found' },
+                    { status: 404 }
+                );
+            }
+            return NextResponse.json(
+                { error: 'Database request failed' },
+                { status: 400 }
+            );
+        }
+
         console.error('Error updating notification:', error);
         return NextResponse.json(
             { error: 'Failed to update notification' },

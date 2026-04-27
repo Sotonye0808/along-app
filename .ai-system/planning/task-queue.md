@@ -13,11 +13,11 @@
 - [x] Migrate `app/api/posts/` routes to use Prisma (CRUD, likes, comments, bookmarks)
 - [x] Migrate `app/api/users/` routes to use Prisma (profile, follow, unfollow)
 - [x] Migrate `app/api/notifications/` routes to use Prisma
-- [ ] Add Zod validation schemas to all API route handlers
-- [ ] Add Redis caching to all GET endpoints (posts list, user profile, notifications)
-- [ ] Implement cursor-based pagination on all list endpoints
-- [ ] Add rate limiting (`rateLimitByUser` / `rateLimitByIP`) to all API routes
-- [ ] Add proper `PrismaClientKnownRequestError` handling in all routes
+- [x] Add Zod validation schemas to all API route handlers (except no-input logout utility route)
+- [x] Add Redis caching to all primary GET endpoints (posts list/detail, user profile, notifications, comments list)
+- [x] Implement cursor-based pagination on list endpoints (`posts`, `users`, `notifications`, `posts/[id]/comments`)
+- [x] Add rate limiting (`rateLimitByUser` / `rateLimitByIP`) to all API routes
+- [x] Add proper `PrismaClientKnownRequestError` handling in all Prisma-backed routes
 
 ---
 
@@ -94,4 +94,5 @@
 - **Note (0.7):** Rewrite batch is complete and `npm run build` passes. `npm test` still has a small amount of legacy test compatibility debt in auth/post dropdown expectations, but no production build regressions remain.
 - **Note (0.8/0.9):** SEO helpers, root metadata, structured data wiring, sitemap/robots cleanup, and route-level loading/error shells are complete. The remaining build blocker was a server/client boundary issue in `app/not-found.tsx`; converting it to a client component resolved the prerender failure on `/` and the production build now passes.
 - **Note (API audit):** Route audit report is recorded at `.ai-system/index/api-route-audit.md`. All `app/api/**/route.ts` handlers are now Prisma-backed or non-DB utility handlers.
+- **Note (hardening):** Shared Prisma error mapper (`app/lib/utils/prismaErrors.ts`) is now used across Prisma-backed route handlers for consistent `P2025`/`P2002` responses.
 - **Note (0.10 status):** Checkpoint command sequence was executed (`build`, `tsc`, `test`, `lint`). `npm run build` passes; repository-wide legacy Jest/Lint debt still prevents full 0.10 closure until dedicated cleanup.
