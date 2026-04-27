@@ -4,8 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { Avatar } from "antd";
 import { CheckCircle } from "lucide-react";
+import { buildAvatarUrl, getFallbackAvatarUrl } from "@/lib/config/avatar";
 import type { AvatarConfig } from "@/lib/config/avatar";
-import { getFallbackAvatarUrl } from "@/lib/config/avatar";
 
 export interface AvatarUser {
   userName: string;
@@ -23,6 +23,16 @@ export interface AppAvatarProps {
   className?: string;
 }
 
+function resolveAvatarSrc(user: AvatarUser): string {
+  if (user.avatarConfig) {
+    return buildAvatarUrl(user.avatarConfig);
+  }
+  if (user.avatar) {
+    return user.avatar;
+  }
+  return getFallbackAvatarUrl(user.userName || user.firstName || "along-user");
+}
+
 export function AppAvatar({
   user,
   size = 40,
@@ -30,9 +40,7 @@ export function AppAvatar({
   showVerifiedBadge = true,
   className,
 }: AppAvatarProps): React.ReactElement {
-  const src =
-    user.avatar ||
-    getFallbackAvatarUrl(user.userName || user.firstName || "along-user");
+  const src = resolveAvatarSrc(user);
 
   const avatarNode = (
     <span
