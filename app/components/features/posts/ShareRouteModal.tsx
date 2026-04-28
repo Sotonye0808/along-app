@@ -6,10 +6,10 @@ import { App, Upload } from "antd";
 import type { UploadFile } from "antd";
 import { Link2, Plus, Trash2, X } from "lucide-react";
 import { VEHICLE_REGISTRY } from "@/lib/config/vehicles";
+import { DraftingCoach } from "./DraftingCoach";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppInput } from "@/components/ui/AppInput";
 import { AppModal } from "@/components/ui/AppModal";
-import { AppProgress } from "@/components/ui/AppProgress";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { AppTag } from "@/components/ui/AppTag";
 import { AppTextarea } from "@/components/ui/AppTextarea";
@@ -101,16 +101,21 @@ export function ShareRouteModal({
     setFileList([]);
   }, [open, editMode, postToEdit]);
 
-  const completionPercent = useMemo(() => {
-    const checks = [
-      title.trim().length > 3,
-      routes.some((route) => route.text.trim().length > 10),
-      tags.length > 0,
-    ];
-
-    const completed = checks.filter(Boolean).length;
-    return Math.round((completed / checks.length) * 100);
-  }, [title, routes, tags]);
+  const draftState = useMemo(
+    () => ({
+      title,
+      routes: routes.map((r) => ({
+        text: r.text,
+        vehicles: r.vehicles,
+        fare: r.fare,
+        links: r.links,
+      })),
+      images: fileList
+        .map((f) => f.url || f.thumbUrl || "")
+        .filter((url) => url.length > 0),
+    }),
+    [title, routes, fileList],
+  );
 
   const vehicleOptions = useMemo(
     () =>
@@ -296,13 +301,7 @@ export function ShareRouteModal({
         subtitle="Build a clear, trusted route report"
         footer={null}>
         <div className="space-y-4">
-          <div>
-            <div className="mb-2 flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
-              <span>Draft completion</span>
-              <span>{completionPercent}%</span>
-            </div>
-            <AppProgress percent={completionPercent} />
-          </div>
+          <DraftingCoach draft={draftState} className="mb-2" />
 
           <AppInput
             placeholder="Give your route a clear title"

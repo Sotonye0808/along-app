@@ -16,12 +16,9 @@ interface DashboardNavbarProps {
 }
 
 function getRoleFromUser(user: User | null): UserRole {
-  const candidateRole = (user as (User & { role?: string }) | null)?.role;
-  if (candidateRole === "admin") {
+  const role = user?.role;
+  if (role === "ADMIN") {
     return "admin";
-  }
-  if (candidateRole === "guest") {
-    return "guest";
   }
   return "user";
 }

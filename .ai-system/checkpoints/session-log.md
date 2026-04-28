@@ -310,3 +310,43 @@ Proceed to Phase 0.10 closure blockers: isolate/fix repository-wide Jest/Lint de
 
 - `npm run build` passes after comments pagination/caching changes.
 - 0.6 remains blocked by missing DB datasource env.
+
+---
+
+## Session 11 — 2026-04-27
+
+**Completed:**
+Context reconstruction across all `.ai-system` files. Phase 0 verified as complete (0.6 blocked by missing DB env; 0.10 checkpoint command sequence previously executed with build passing). Executed Phase 1 Tasks 1.1 and 1.2:
+
+- **1.1 ValidityEngine + TrustBadge:** Created `ValidityEngine` class service with 4 config-driven sub-computations (likeRatio, detailScore, similarityRatio, recency), `SiteConfigRepository` for DB-backed site config, `getSiteConfig()` utility with fallback to defaults, and updated `TrustBadge` with `size` prop. Updated `Post` and `User` global interfaces with new fields from Prisma schema.
+- **1.2 DraftingCoachService + DraftingCoach:** Created `DraftingCoachService` class with `evaluate()`, `getScore()`, `getNextSuggestion()` against `QUALITY_CHECKPOINTS` config. Created `DraftingCoach` component with progress bar, checkpoint checklist, and contextual alert. Wired into `ShareRouteModal` replacing the simple completion bar.
+- Fixed build blocker: removed `next/font/google` dependency that failed in offline sandboxed environment. Replaced with CSS system font stack.
+
+**Files Modified:**
+
+- `app/layout.tsx` — removed Google Fonts import, use system font class
+- `app/lib/types/interfaces.ts` — added `AvatarConfig`, extended `Post` with `validityScore`/`validityTier`/`isPlatformGen`/geo fields, extended `User` with `role`/`rewardPoints`/`rewardTier`/`avatarConfig`
+- `app/lib/db/SiteConfigRepository.ts` — new DB repository for SiteConfig model
+- `app/lib/utils/siteConfig.ts` — new `getSiteConfig()`/`setSiteConfig()` utility
+- `app/lib/services/ValidityEngine.ts` — new class-based service, 4 sub-computations, config-driven
+- `app/components/ui/TrustBadge.tsx` — added `size` and `showScore` props
+- `app/components/features/posts/PostCard.tsx` — cleaned up `validityScore` type cast; uses `size="small"` on TrustBadge
+- `app/lib/services/DraftingCoachService.ts` — new class-based service
+- `app/components/features/posts/DraftingCoach.tsx` — new component, embedded in ShareRouteModal
+- `app/components/features/posts/ShareRouteModal.tsx` — replaced simple progress bar with DraftingCoach component
+- `app/components/features/posts/index.ts` — exported DraftingCoach
+- `app/components/features/navigation/DashboardNavbar.tsx` — fixed role comparison to use `"ADMIN"` (new User.role type)
+- `app/lib/data/database.ts` — added `validityScore: 0` to mock post creation
+- `app/lib/data/mockData.ts` — added `validityScore` to mock posts
+- `app/lib/test-utils.tsx` — added `validityScore` to mockPost
+- `.ai-system/planning/task-queue.md` — advanced to Phase 1, marked 1.1 and 1.2 complete
+
+**Next Task:**
+Phase 1 Task 1.3 — DiceBear AvatarEditor + full AppAvatar wiring
+
+**Notes / Blockers:**
+
+- `npm run build` passes after all changes.
+- 0.6 remains blocked by missing `LOCAL_DB`/`DATABASE_URL` environment configuration.
+- Google Fonts dependency removed permanently from layout.tsx; Inter now resolves via system font stack in globals.css `@theme`.
+

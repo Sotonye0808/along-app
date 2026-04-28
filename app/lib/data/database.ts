@@ -105,6 +105,7 @@ class InMemoryStore {
             dislikes: 0,
             comments: 0,
             bookmarks: 0,
+            validityScore: 0,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };

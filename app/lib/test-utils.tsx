@@ -87,6 +87,7 @@ export const mockPost: Post = {
   dislikes: 2,
   comments: 10,
   bookmarks: 15,
+  validityScore: 65,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };

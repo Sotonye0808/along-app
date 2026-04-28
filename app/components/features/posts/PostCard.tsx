@@ -70,11 +70,7 @@ export const PostCard = memo(function PostCard({
   const [loadingAction, setLoadingAction] = useState<ActionName | null>(null);
 
   const isOwnPost = currentUserId === post.userId;
-  const validityScore =
-    typeof (post as Post & { validityScore?: number }).validityScore ===
-    "number"
-      ? (post as Post & { validityScore: number }).validityScore
-      : null;
+  const validityScore = typeof post.validityScore === "number" ? post.validityScore : null;
 
   const menuItems = useMemo(() => {
     const items = [] as {
@@ -204,7 +200,7 @@ export const PostCard = memo(function PostCard({
 
       {validityScore !== null ? (
         <div className="mb-3">
-          <TrustBadge score={validityScore} />
+          <TrustBadge score={validityScore} size="small" />
         </div>
       ) : null}
 
