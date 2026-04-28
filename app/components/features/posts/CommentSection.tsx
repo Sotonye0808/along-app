@@ -1,29 +1,17 @@
 "use client";
 
-import React, { useState, memo } from "react";
-import {
-  Modal,
-  Input,
-  Button,
-  Avatar,
-  Space,
-  Divider,
-  Empty,
-  Dropdown,
-  App,
-} from "antd";
-import type { MenuProps } from "antd";
-import {
-  LikeOutlined,
-  DislikeOutlined,
-  LikeFilled,
-  DislikeFilled,
-  SendOutlined,
-  MoreOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import React, { memo, useCallback, useRef, useState } from "react";
+import { MoreHorizontal, Send, ThumbsDown, ThumbsUp } from "lucide-react";
 import { formatDate, formatNumber } from "@/lib/utils/format";
+import { CommentText, extractMentions } from "@/lib/utils/commentParser";
+import { ModalService } from "@/lib/services/modalService";
+import { UndoService } from "@/lib/services/undoService";
+import { AppAvatar } from "@/components/ui/AppAvatar";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppDropdown } from "@/components/ui/AppDropdown";
+import { AppModal } from "@/components/ui/AppModal";
+import { AppTextarea } from "@/components/ui/AppTextarea";
+import { AppUserLabel } from "@/components/ui/AppUserLabel";
 
 interface CommentSectionProps {
   open: boolean;
@@ -51,188 +39,175 @@ export const CommentSection = memo(function CommentSection({
   onEditComment,
   onDeleteComment,
   onShowLoginModal,
-}: CommentSectionProps) {
-  const { message, notification } = App.useApp();
+}: CommentSectionProps): React.ReactElement {
   const [commentText, setCommentText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
 
-  const handleSubmit = async () => {
-    if (!commentText.trim()) return;
+  function handleTextChange(value: string): void {
+    setCommentText(value);
+    const cursorPos = textareaRef.current?.selectionStart ?? value.length;
+    const before = value.slice(0, cursorPos);
+    const mentionMatch = /@([a-zA-Z0-9_]*)$/.exec(before);
+    setMentionQuery(mentionMatch ? mentionMatch[1] : null);
+  }
 
+  function insertMention(userName: string): void {
+    const cursorPos = textareaRef.current?.selectionStart ?? commentText.length;
+    const before = commentText.slice(0, cursorPos);
+    const after = commentText.slice(cursorPos);
+    const replaced = before.replace(/@[a-zA-Z0-9_]*$/, `@${userName} `);
+    setCommentText(replaced + after);
+    setMentionQuery(null);
+    textareaRef.current?.focus();
+  }
+
+  const mentionCandidates =
+    mentionQuery !== null
+      ? comments
+          .map((c) => c.author)
+          .filter(
+            (a, i, arr) =>
+              arr.findIndex((x) => x.id === a.id) === i &&
+              a.userName.toLowerCase().startsWith(mentionQuery.toLowerCase()),
+          )
+          .slice(0, 5)
+      : [];
+
+  async function handleSubmit(): Promise<void> {
+    const text = commentText.trim();
+    if (!text) return;
     setLoading(true);
     try {
-      await onAddComment(postId, commentText.trim());
+      await onAddComment(postId, text);
+      void extractMentions(text);
       setCommentText("");
-    } catch (error) {
-      console.error("Failed to add comment:", error);
+      setMentionQuery(null);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleStartEdit = (comment: PostComment & { author: User }) => {
-    setEditingCommentId(comment.id);
-    setEditText(comment.text);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingCommentId(null);
-    setEditText("");
-  };
-
-  const handleSaveEdit = async (commentId: string) => {
-    if (!editText.trim() || !onEditComment) return;
-
+  async function handleSaveEdit(commentId: string): Promise<void> {
+    const text = editText.trim();
+    if (!text || !onEditComment) return;
     setLoading(true);
     try {
-      await onEditComment(commentId, editText.trim());
-      setEditingCommentId(null);
+      await onEditComment(commentId, text);
+      setEditingId(null);
       setEditText("");
-      message.success("Comment updated successfully");
-    } catch (error) {
-      console.error("Failed to update comment:", error);
-      message.error("Failed to update comment");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleDeleteComment = (commentId: string) => {
-    if (!onDeleteComment) return;
-
-    const key = `delete-comment-${commentId}`;
-    let undoClicked = false;
-    let countdown = 10;
-
-    const updateNotification = () => {
-      notification.open({
-        key,
-        message: "Comment deleted",
-        description: `Undo within ${countdown} second${
-          countdown !== 1 ? "s" : ""
-        }`,
-        duration: null,
-        btn: (
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => {
-              undoClicked = true;
-              notification.destroy(key);
-              clearInterval(interval);
-              message.info("Deletion cancelled");
-            }}>
-            Undo
-          </Button>
-        ),
+  const handleDeleteComment = useCallback(
+    async (commentId: string): Promise<void> => {
+      const confirmed = await ModalService.confirm({
+        title: "Delete comment",
+        description: "This will be undoable for 10 seconds.",
+        confirmLabel: "Delete",
+        destructive: true,
       });
-    };
+      if (!confirmed) return;
 
-    updateNotification();
-
-    const interval = setInterval(() => {
-      countdown--;
-      if (countdown > 0) {
-        updateNotification();
-      } else {
-        clearInterval(interval);
-        notification.destroy(key);
-        if (!undoClicked) {
-          onDeleteComment(commentId)
-            .then(() => {
-              message.success("Comment deleted permanently");
-            })
-            .catch((error) => {
-              console.error("Failed to delete comment:", error);
-              message.error("Failed to delete comment");
-            });
-        }
-      }
-    }, 1000);
-  };
+      UndoService.push({
+        message: "Comment deleted",
+        onUndo: () => {},
+        onCommit: () => {
+          onDeleteComment?.(commentId).catch(console.error);
+        },
+        delayMs: 10_000,
+      });
+    },
+    [onDeleteComment],
+  );
 
   return (
-    <Modal
-      title={
-        <div className="text-lg font-semibold">
-          Comments ({comments.length})
-        </div>
-      }
+    <AppModal
       open={open}
-      onCancel={onClose}
-      footer={null}
-      width={600}>
-      <div
-        className="max-h-[60vh] overflow-y-auto"
-        role="region"
-        aria-label="Comments section">
-        {/* Add Comment */}
-        {currentUser && (
-          <div className="sticky top-0 bg-transparent z-10 pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex gap-3">
-              <Avatar
-                src={currentUser.avatar}
-                size={40}
-                alt={`${currentUser.firstName} ${currentUser.lastName}`}>
-                {currentUser.firstName[0]}
-                {currentUser.lastName[0]}
-              </Avatar>
-              <div className="flex-1">
-                <Input.TextArea
-                  placeholder="Write a comment..."
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  autoSize={{ minRows: 2, maxRows: 4 }}
-                  maxLength={500}
-                  onPressEnter={(e) => {
-                    if (e.shiftKey) return;
+      onClose={onClose}
+      title={`Comments (${comments.length})`}
+      size="default"
+      footer={null}>
+      <div className="flex max-h-[65vh] flex-col gap-4 overflow-y-auto">
+        {currentUser ? (
+          <div className="flex gap-3">
+            <AppAvatar user={currentUser} size={40} linkToProfile={false} />
+            <div className="relative flex-1">
+              <AppTextarea
+                ref={textareaRef}
+                placeholder="Write a comment… Use @username to mention"
+                value={commentText}
+                onChange={(e) => handleTextChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    handleSubmit();
-                  }}
-                  aria-label="Write a comment"
-                />
-                <div className="flex justify-end mt-2">
-                  <Button
-                    type="primary"
-                    icon={<SendOutlined />}
-                    onClick={handleSubmit}
-                    loading={loading}
-                    disabled={!commentText.trim()}
-                    className="bg-[#00623B]"
-                    aria-label="Submit comment">
-                    Comment
-                  </Button>
+                    void handleSubmit();
+                  }
+                }}
+                autoSize={{ minRows: 2, maxRows: 4 }}
+                maxLength={500}
+              />
+              {mentionCandidates.length > 0 ? (
+                <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-base)] shadow-lg">
+                  {mentionCandidates.map((user) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        insertMention(user.userName);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-[var(--color-bg-elevated)]">
+                      <AppAvatar user={user} size={24} linkToProfile={false} />
+                      <div>
+                        <span className="font-medium">
+                          {user.firstName} {user.lastName}
+                        </span>
+                        <span className="ml-1 text-xs text-[var(--color-text-secondary)]">
+                          @{user.userName}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
                 </div>
+              ) : null}
+              <div className="mt-2 flex justify-end">
+                <AppButton
+                  icon={Send}
+                  onClick={() => void handleSubmit()}
+                  loading={loading}
+                  disabled={!commentText.trim()}>
+                  Comment
+                </AppButton>
               </div>
             </div>
           </div>
+        ) : (
+          <div className="text-center">
+            <AppButton variant="ghost" onClick={onShowLoginModal}>
+              Sign in to comment
+            </AppButton>
+          </div>
         )}
 
-        {/* Comments List */}
         {comments.length === 0 ? (
-          <Empty
-            description="No comments yet"
-            className="my-8"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          />
+          <p className="py-8 text-center text-sm text-[var(--color-text-muted)]">
+            No comments yet. Be the first!
+          </p>
         ) : (
-          <div className="space-y-4" role="list" aria-label="List of comments">
+          <div className="space-y-4" role="list">
             {comments.map((comment) => (
               <div key={comment.id} className="flex gap-3" role="listitem">
-                <Avatar
-                  src={comment.author.avatar}
-                  size={40}
-                  alt={`${comment.author.firstName} ${comment.author.lastName}`}>
-                  {comment.author.firstName[0]}
-                  {comment.author.lastName[0]}
-                </Avatar>
-                <div className="flex-1">
-                  {editingCommentId === comment.id ? (
-                    // Edit Mode
+                <AppAvatar user={comment.author} size={40} />
+                <div className="min-w-0 flex-1">
+                  {editingId === comment.id ? (
                     <div className="space-y-2">
-                      <Input.TextArea
+                      <AppTextarea
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         autoSize={{ minRows: 2, maxRows: 4 }}
@@ -240,101 +215,100 @@ export const CommentSection = memo(function CommentSection({
                         autoFocus
                       />
                       <div className="flex justify-end gap-2">
-                        <Button size="small" onClick={handleCancelEdit}>
+                        <AppButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditText("");
+                          }}>
                           Cancel
-                        </Button>
-                        <Button
-                          type="primary"
-                          size="small"
-                          onClick={() => handleSaveEdit(comment.id)}
+                        </AppButton>
+                        <AppButton
+                          size="sm"
                           loading={loading}
                           disabled={!editText.trim()}
-                          className="bg-[#00623B]">
+                          onClick={() => void handleSaveEdit(comment.id)}>
                           Save
-                        </Button>
+                        </AppButton>
                       </div>
                     </div>
                   ) : (
-                    // View Mode
                     <>
-                      <div className="bg-gray-50 dark:bg-gray-900/60 rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                              {comment.author.firstName}{" "}
-                              {comment.author.lastName}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              @{comment.author.userName}
-                            </span>
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                              • {formatDate(comment.createdAt)}
+                      <div className="rounded-[var(--radius-card)] bg-[var(--color-bg-elevated)] px-3 py-2">
+                        <div className="mb-1 flex flex-wrap items-center justify-between gap-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <AppUserLabel
+                              user={comment.author}
+                              showHandle
+                              showFullName
+                              avatarSize={24}
+                              linkToProfile
+                            />
+                            <span className="text-xs text-[var(--color-text-muted)]">
+                              {formatDate(comment.createdAt)}
                             </span>
                           </div>
-                          {currentUser?.id === comment.userId && (
-                            <Dropdown
-                              menu={{
-                                items: [
-                                  {
-                                    key: "edit",
-                                    icon: <EditOutlined />,
-                                    label: "Edit",
-                                    onClick: () => handleStartEdit(comment),
+                          {currentUser?.id === comment.userId ? (
+                            <AppDropdown
+                              items={[
+                                {
+                                  key: "edit",
+                                  label: "Edit",
+                                  onClick: () => {
+                                    setEditingId(comment.id);
+                                    setEditText(comment.text);
                                   },
-                                  {
-                                    key: "delete",
-                                    icon: <DeleteOutlined />,
-                                    label: "Delete",
-                                    danger: true,
-                                    onClick: () =>
-                                      handleDeleteComment(comment.id),
-                                  },
-                                ] as MenuProps["items"],
-                              }}
-                              trigger={["click"]}>
-                              <Button
-                                type="text"
-                                size="small"
-                                icon={<MoreOutlined />}
-                                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                              />
-                            </Dropdown>
-                          )}
+                                },
+                                {
+                                  key: "delete",
+                                  label: "Delete",
+                                  danger: true,
+                                  onClick: () =>
+                                    void handleDeleteComment(comment.id),
+                                },
+                              ]}
+                              label="More"
+                              icon={MoreHorizontal}
+                              variant="ghost"
+                              size="sm"
+                              hideLabel
+                            />
+                          ) : null}
                         </div>
-                        <p className="text-gray-800 dark:text-gray-200 text-sm">
-                          {comment.text}
+                        <p className="text-sm text-[var(--color-text-primary)]">
+                          <CommentText text={comment.text} />
                         </p>
                       </div>
-
-                      {/* Comment Actions */}
-                      <div className="flex items-center gap-4 mt-2 ml-2">
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<LikeOutlined />}
+                      <div className="ml-2 mt-1.5 flex items-center gap-3">
+                        <AppButton
+                          variant="ghost"
+                          size="sm"
+                          icon={ThumbsUp}
                           onClick={() => {
-                            if (!currentUser && onShowLoginModal) {
-                              onShowLoginModal();
-                            } else {
-                              onLikeComment?.(comment.id);
+                            if (!currentUser) {
+                              onShowLoginModal?.();
+                              return;
                             }
+                            onLikeComment?.(comment.id);
                           }}>
-                          {comment.likes > 0 && formatNumber(comment.likes)}
-                        </Button>
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<DislikeOutlined />}
+                          {comment.likes > 0 ? formatNumber(comment.likes) : ""}
+                        </AppButton>
+                        <AppButton
+                          variant="ghost"
+                          size="sm"
+                          icon={ThumbsDown}
                           onClick={() => {
-                            if (!currentUser && onShowLoginModal) {
-                              onShowLoginModal();
-                            } else {
-                              onDislikeComment?.(comment.id);
+                            if (!currentUser) {
+                              onShowLoginModal?.();
+                              return;
                             }
+                            onDislikeComment?.(comment.id);
                           }}>
-                          {comment.dislikes > 0 &&
-                            formatNumber(comment.dislikes)}
-                        </Button>
+                          {comment.dislikes > 0
+                            ? formatNumber(comment.dislikes)
+                            : ""}
+                        </AppButton>
                       </div>
                     </>
                   )}
@@ -344,6 +318,6 @@ export const CommentSection = memo(function CommentSection({
           </div>
         )}
       </div>
-    </Modal>
+    </AppModal>
   );
 });
