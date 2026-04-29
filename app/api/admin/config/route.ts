@@ -6,7 +6,7 @@ import { siteConfigRepository } from "@/lib/db/SiteConfigRepository";
 
 const bodySchema = z.object({
   key: z.enum(["validityConfig", "feedAlgorithm"]),
-  value: z.record(z.unknown()),
+  value: z.record(z.string(), z.unknown()),
 });
 
 async function requireAdmin(request: NextRequest): Promise<string | NextResponse> {

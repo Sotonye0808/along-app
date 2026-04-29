@@ -114,14 +114,13 @@ export const CommentSection = memo(function CommentSection({
       });
       if (!confirmed) return;
 
-      UndoService.push({
-        message: "Comment deleted",
-        onUndo: () => {},
-        onCommit: () => {
+      UndoService.registerAction(
+        "Comment deleted",
+        () => {
           onDeleteComment?.(commentId).catch(console.error);
         },
-        delayMs: 10_000,
-      });
+        10_000,
+      );
     },
     [onDeleteComment],
   );
@@ -268,12 +267,14 @@ export const CommentSection = memo(function CommentSection({
                                     void handleDeleteComment(comment.id),
                                 },
                               ]}
-                              label="More"
-                              icon={MoreHorizontal}
-                              variant="ghost"
-                              size="sm"
-                              hideLabel
-                            />
+                              placement="bottomRight">
+                              <AppButton
+                                variant="icon"
+                                size="sm"
+                                icon={MoreHorizontal}
+                                ariaLabel="More comment actions"
+                              />
+                            </AppDropdown>
                           ) : null}
                         </div>
                         <p className="text-sm text-[var(--color-text-primary)]">

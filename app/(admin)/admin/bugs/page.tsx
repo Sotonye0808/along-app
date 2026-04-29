@@ -2,11 +2,13 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { formatDate } from "@/lib/utils/format";
+import { BUG_STATUS_CONFIG, BUG_STATUS_OPTIONS } from "@/lib/config";
 import { AppDropdown } from "@/components/ui/AppDropdown";
 import { AppSpinner } from "@/components/ui/AppSpinner";
 import { AppStatusDot } from "@/components/ui/AppStatusDot";
 import { AppTable } from "@/components/ui/AppTable";
 import type { AppTableColumn } from "@/components/ui/AppTable";
+import { AppButton } from "@/components/ui/AppButton";
 import { ModalService } from "@/lib/services/modalService";
 
 interface BugReportRow {
@@ -15,22 +17,12 @@ interface BugReportRow {
   category: string;
   status: string;
   createdAt: string;
-  reporter: { id: string; userName: string; firstName: string; lastName: string };
-}
-
-const STATUS_OPTIONS = ["OPEN", "TRIAGED", "IN_PROGRESS", "RESOLVED", "CLOSED"];
-
-function getStatusVariant(
-  status: string,
-): "default" | "success" | "warning" | "error" | "info" {
-  switch (status) {
-    case "OPEN": return "error";
-    case "TRIAGED": return "warning";
-    case "IN_PROGRESS": return "info";
-    case "RESOLVED": return "success";
-    case "CLOSED": return "default";
-    default: return "default";
-  }
+  reporter: {
+    id: string;
+    userName: string;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export default function AdminBugsPage(): React.ReactElement {
@@ -41,8 +33,10 @@ export default function AdminBugsPage(): React.ReactElement {
     try {
       const res = await fetch("/api/bug-reports", { credentials: "include" });
       if (res.ok) {
-        const body = (await res.json()) as { data: BugReportRow[] } | BugReportRow[];
-        setReports(Array.isArray(body) ? body : body.data ?? []);
+        const body = (await res.json()) as
+          | { data: BugReportRow[] }
+          | BugReportRow[];
+        setReports(Array.isArray(body) ? body : (body.data ?? []));
       }
     } finally {
       setLoading(false);
@@ -53,7 +47,10 @@ export default function AdminBugsPage(): React.ReactElement {
     void load();
   }, [load]);
 
-  async function handleStatusChange(reportId: string, newStatus: string): Promise<void> {
+  async function handleStatusChange(
+    reportId: string,
+    newStatus: string,
+  ): Promise<void> {
     const confirmed = await ModalService.confirm({
       title: "Change bug status",
       description: `Set status to "${newStatus}"?`,
@@ -88,10 +85,7 @@ export default function AdminBugsPage(): React.ReactElement {
       key: "status",
       title: "Status",
       render: (_v, row) => (
-        <div className="flex items-center gap-1.5">
-          <AppStatusDot variant={getStatusVariant(row.status)} />
-          <span className="text-sm">{row.status.replace(/_/g, " ")}</span>
-        </div>
+        <AppStatusDot status={row.status} configMap={BUG_STATUS_CONFIG} />
       ),
     },
     {
@@ -113,15 +107,17 @@ export default function AdminBugsPage(): React.ReactElement {
       title: "",
       render: (_v, row) => (
         <AppDropdown
-          items={STATUS_OPTIONS.filter((s) => s !== row.status).map((s) => ({
-            key: s,
-            label: s.replace(/_/g, " "),
-            onClick: () => void handleStatusChange(row.id, s),
-          }))}
-          label="Change status"
-          size="sm"
-          variant="ghost"
-        />
+          items={BUG_STATUS_OPTIONS.filter((s) => s !== row.status).map(
+            (s) => ({
+              key: s,
+              label: s.replace(/_/g, " "),
+              onClick: () => void handleStatusChange(row.id, s),
+            }),
+          )}>
+          <AppButton variant="ghost" size="sm">
+            Change status
+          </AppButton>
+        </AppDropdown>
       ),
     },
   ];
@@ -129,7 +125,7 @@ export default function AdminBugsPage(): React.ReactElement {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <AppSpinner size="lg" />
+        <AppSpinner size={32} />
       </div>
     );
   }
@@ -143,7 +139,10 @@ export default function AdminBugsPage(): React.ReactElement {
         columns={columns}
         data={reports}
         rowKey="id"
-        emptyState={{ title: "No bug reports", description: "Nothing to triage yet." }}
+        emptyState={{
+          title: "No bug reports",
+          description: "Nothing to triage yet.",
+        }}
       />
     </div>
   );

@@ -6,9 +6,13 @@ import type { TextAreaProps } from "antd/es/input";
 
 export type AppTextareaProps = TextAreaProps;
 
-export function AppTextarea(props: AppTextareaProps): React.ReactElement {
+export const AppTextarea = React.forwardRef<
+  HTMLTextAreaElement,
+  AppTextareaProps
+>((props, ref) => {
   return (
     <Input.TextArea
+      ref={ref}
       {...props}
       className={[
         "!rounded-[var(--radius-input)] focus:!border-[var(--color-primary)]",
@@ -18,4 +22,6 @@ export function AppTextarea(props: AppTextareaProps): React.ReactElement {
         .trim()}
     />
   );
-}
+});
+
+AppTextarea.displayName = "AppTextarea";

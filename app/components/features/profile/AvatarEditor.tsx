@@ -19,14 +19,14 @@ interface AvatarEditorProps {
 }
 
 const BG_COLORS = [
-  "#dbeafe",
-  "#dcfce7",
-  "#fef9c3",
-  "#fce7f3",
-  "#ede9fe",
-  "#fee2e2",
-  "#f0f9ff",
-  "#f5f5f5",
+  { value: "#dbeafe", className: "bg-[#dbeafe]" },
+  { value: "#dcfce7", className: "bg-[#dcfce7]" },
+  { value: "#fef9c3", className: "bg-[#fef9c3]" },
+  { value: "#fce7f3", className: "bg-[#fce7f3]" },
+  { value: "#ede9fe", className: "bg-[#ede9fe]" },
+  { value: "#fee2e2", className: "bg-[#fee2e2]" },
+  { value: "#f0f9ff", className: "bg-[#f0f9ff]" },
+  { value: "#f5f5f5", className: "bg-[#f5f5f5]" },
 ];
 
 export function AvatarEditor({
@@ -58,7 +58,10 @@ export function AvatarEditor({
     [selectedStyle, seed, selectedBg],
   );
 
-  const previewUrl = useMemo(() => buildAvatarUrl(previewConfig), [previewConfig]);
+  const previewUrl = useMemo(
+    () => buildAvatarUrl(previewConfig),
+    [previewConfig],
+  );
 
   async function handleSave(): Promise<void> {
     setSaving(true);
@@ -185,17 +188,17 @@ export function AvatarEditor({
             <div className="grid grid-cols-4 gap-2">
               {BG_COLORS.map((color) => (
                 <button
-                  key={color}
+                  key={color.value}
                   type="button"
-                  aria-label={`Background colour ${color}`}
-                  onClick={() => setSelectedBg(color)}
+                  aria-label={`Background colour ${color.value}`}
+                  onClick={() => setSelectedBg(color.value)}
                   className={[
                     "h-7 w-7 rounded-full border-2 transition-all",
-                    selectedBg === color
+                    color.className,
+                    selectedBg === color.value
                       ? "border-[var(--color-primary)] scale-110"
                       : "border-transparent hover:border-[var(--color-text-muted)]",
                   ].join(" ")}
-                  style={{ backgroundColor: color }}
                 />
               ))}
             </div>

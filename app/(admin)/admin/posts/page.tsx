@@ -48,10 +48,12 @@ export default function AdminPostsPage(): React.ReactElement {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/posts?limit=50", { credentials: "include" });
+      const res = await fetch("/api/posts?limit=50", {
+        credentials: "include",
+      });
       if (res.ok) {
         const body = (await res.json()) as { data: Post[] } | Post[];
-        setPosts(Array.isArray(body) ? body : body.data ?? []);
+        setPosts(Array.isArray(body) ? body : (body.data ?? []));
       }
     } finally {
       setLoading(false);
@@ -65,14 +67,16 @@ export default function AdminPostsPage(): React.ReactElement {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <AppSpinner size="lg" />
+        <AppSpinner size={32} />
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">Posts</h1>
+      <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">
+        Posts
+      </h1>
       <AppTable<Post>
         columns={columns}
         data={posts}

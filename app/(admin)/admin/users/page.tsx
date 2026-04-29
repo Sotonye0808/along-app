@@ -66,10 +66,12 @@ export default function AdminUsersPage(): React.ReactElement {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/users?limit=50", { credentials: "include" });
+      const res = await fetch("/api/users?limit=50", {
+        credentials: "include",
+      });
       if (res.ok) {
         const body = (await res.json()) as { data: AdminUser[] } | AdminUser[];
-        setUsers(Array.isArray(body) ? body : body.data ?? []);
+        setUsers(Array.isArray(body) ? body : (body.data ?? []));
       }
     } finally {
       setLoading(false);
@@ -83,14 +85,16 @@ export default function AdminUsersPage(): React.ReactElement {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <AppSpinner size="lg" />
+        <AppSpinner size={32} />
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">Users</h1>
+      <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">
+        Users
+      </h1>
       <AppTable<AdminUser>
         columns={columns}
         data={users}

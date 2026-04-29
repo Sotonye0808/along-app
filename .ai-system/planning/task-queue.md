@@ -27,9 +27,11 @@
 
 - [x] 1.1 — ValidityEngine + TrustBadge
 - [x] 1.2 — DraftingCoachService + DraftingCoach component
-- [ ] 1.3 — DiceBear AvatarEditor + UserAvatar
+- [x] 1.3 — DiceBear AvatarEditor + UserAvatar
 - [ ] 1.4 — Google OAuth
+- [x] 1.4 — Google OAuth
 - [ ] 1.5 — Bug Report system
+- [x] 1.5 — Bug Report system
 - [ ] 1.6 — Admin pages group
 - [ ] 1.7 — Confirmations + Undo
 - [ ] 1.8 — User tagging in comments (@mentions)
@@ -74,8 +76,8 @@
 
 - [x] 1.1 — ValidityEngine + TrustBadge
 - [x] 1.2 — DraftingCoachService + DraftingCoach component
-- [ ] 1.3 — DiceBear AvatarEditor + UserAvatar
-- [ ] 1.4 — Google OAuth
+- [x] 1.3 — DiceBear AvatarEditor + UserAvatar
+- [x] 1.4 — Google OAuth
 - [ ] 1.5 — Bug Report system
 - [ ] 1.6 — Admin pages group
 - [ ] 1.7 — Confirmations + Undo

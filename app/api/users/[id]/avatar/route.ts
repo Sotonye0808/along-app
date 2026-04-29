@@ -8,7 +8,7 @@ import { handlePrismaError } from "@/lib/utils/prismaErrors";
 import { AVATAR_STYLES } from "@/lib/config/avatar";
 
 const avatarConfigSchema = z.object({
-  style: z.enum(AVATAR_STYLES as [string, ...string[]]),
+  style: z.enum(AVATAR_STYLES as unknown as [string, ...string[]]),
   seed: z.string().min(1).max(100),
   backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   radius: z.number().int().min(0).max(50).optional(),

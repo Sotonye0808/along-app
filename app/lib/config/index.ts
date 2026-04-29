@@ -1,5 +1,6 @@
 export * from "./apiRegistry";
 export * from "./avatar";
+export * from "./bugStatus";
 export * from "./cache";
 export * from "./draftingCoach";
 export * from "./emptyStates";

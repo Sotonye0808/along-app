@@ -31,10 +31,30 @@ export default function AdminDashboardPage(): React.ReactElement {
       };
 
       setStats([
-        { label: "Users", value: getUserCount(), icon: Users, color: "text-[var(--color-primary)]" },
-        { label: "Posts", value: postsRes.status === "fulfilled" ? 0 : 0, icon: FileText, color: "text-[var(--color-success-text)]" },
-        { label: "Bug Reports", value: bugsRes.status === "fulfilled" ? 0 : 0, icon: Bug, color: "text-[var(--color-error-text)]" },
-        { label: "Reviews", value: 0, icon: Star, color: "text-[var(--color-warning-text)]" },
+        {
+          label: "Users",
+          value: getUserCount(),
+          icon: Users,
+          color: "text-[var(--color-primary)]",
+        },
+        {
+          label: "Posts",
+          value: postsRes.status === "fulfilled" ? 0 : 0,
+          icon: FileText,
+          color: "text-[var(--color-success-text)]",
+        },
+        {
+          label: "Bug Reports",
+          value: bugsRes.status === "fulfilled" ? 0 : 0,
+          icon: Bug,
+          color: "text-[var(--color-error-text)]",
+        },
+        {
+          label: "Reviews",
+          value: 0,
+          icon: Star,
+          color: "text-[var(--color-warning-text)]",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -48,7 +68,7 @@ export default function AdminDashboardPage(): React.ReactElement {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <AppSpinner size="lg" />
+        <AppSpinner size={32} />
       </div>
     );
   }
@@ -67,7 +87,9 @@ export default function AdminDashboardPage(): React.ReactElement {
                 <div className="text-2xl font-semibold text-[var(--color-text-primary)]">
                   {value.toLocaleString()}
                 </div>
-                <div className="text-xs text-[var(--color-text-secondary)]">{label}</div>
+                <div className="text-xs text-[var(--color-text-secondary)]">
+                  {label}
+                </div>
               </div>
             </div>
           </AppCard>

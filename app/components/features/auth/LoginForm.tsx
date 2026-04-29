@@ -33,6 +33,11 @@ export function LoginForm() {
   }
 
   function handleOAuthLogin(provider: "google" | "apple"): void {
+    if (provider === "google") {
+      // redirect to server route that starts Google OAuth
+      window.location.href = "/api/auth/google";
+      return;
+    }
     message.info(`${provider} login will be implemented soon`);
   }
 

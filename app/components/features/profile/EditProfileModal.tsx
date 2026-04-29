@@ -5,10 +5,12 @@ import { App, Upload } from "antd";
 import type { RcFile } from "antd/es/upload/interface";
 import { Crosshair } from "lucide-react";
 import { EDIT_PROFILE_FIELDS } from "@/lib/config/forms";
+import type { AvatarConfig } from "@/lib/config/avatar";
 import {
   getCurrentLocation,
   isGeolocationAvailable,
 } from "@/lib/utils/geolocation";
+import { AvatarEditor } from "./AvatarEditor";
 import { AppAvatar } from "@/components/ui/AppAvatar";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppModal } from "@/components/ui/AppModal";
@@ -32,6 +34,10 @@ export function EditProfileModal({
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [avatarFile, setAvatarFile] = useState<string | undefined>(undefined);
+  const [avatarConfig, setAvatarConfig] = useState<AvatarConfig | null>(
+    (user.avatarConfig as AvatarConfig | null) ?? null,
+  );
+  const [avatarEditorOpen, setAvatarEditorOpen] = useState(false);
   const [draftValues, setDraftValues] = useState<Record<string, unknown>>({});
   const [formVersion, setFormVersion] = useState(0);
 
@@ -50,6 +56,7 @@ export function EditProfileModal({
       location: user.location || "",
     });
     setAvatarFile(user.avatar);
+    setAvatarConfig((user.avatarConfig as AvatarConfig | null) ?? null);
     setFormVersion((prev) => prev + 1);
   }, [open, user]);
 
@@ -58,12 +65,14 @@ export function EditProfileModal({
       userName: String(draftValues.userName || user.userName),
       firstName: String(draftValues.firstName || user.firstName),
       avatar: avatarFile,
+      avatarConfig,
       verified: user.verified,
     }),
     [
       draftValues.userName,
       draftValues.firstName,
       avatarFile,
+      avatarConfig,
       user.userName,
       user.firstName,
       user.verified,
@@ -158,13 +167,20 @@ export function EditProfileModal({
         <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] p-3">
           <div className="mb-3 flex items-center gap-3">
             <AppAvatar user={previewUser} size={80} linkToProfile={false} />
-            <Upload
-              accept="image/*"
-              showUploadList={false}
-              beforeUpload={handleBeforeUpload}
-              maxCount={1}>
-              <AppButton variant="secondary">Change picture</AppButton>
-            </Upload>
+            <div className="flex flex-col gap-2">
+              <Upload
+                accept="image/*"
+                showUploadList={false}
+                beforeUpload={handleBeforeUpload}
+                maxCount={1}>
+                <AppButton variant="secondary">Change picture</AppButton>
+              </Upload>
+              <AppButton
+                variant="ghost"
+                onClick={() => setAvatarEditorOpen(true)}>
+                Edit avatar style
+              </AppButton>
+            </div>
           </div>
           <p className="text-xs text-[var(--color-text-secondary)]">
             Recommended: square image, at least 400x400.
@@ -190,6 +206,18 @@ export function EditProfileModal({
           </AppButton>
         </div>
       </div>
+
+      <AvatarEditor
+        open={avatarEditorOpen}
+        onClose={() => setAvatarEditorOpen(false)}
+        userId={user.id}
+        userName={String(draftValues.userName || user.userName)}
+        currentConfig={avatarConfig}
+        onSaved={(config) => {
+          setAvatarConfig(config);
+          setAvatarFile(undefined);
+        }}
+      />
     </AppModal>
   );
 }

@@ -2,17 +2,16 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { App, Upload } from "antd";
-import type { UploadFile } from "antd";
 import { Link2, Plus, Trash2, X } from "lucide-react";
-import { VEHICLE_REGISTRY } from "@/lib/config/vehicles";
-import { DraftingCoach } from "./DraftingCoach";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppInput } from "@/components/ui/AppInput";
 import { AppModal } from "@/components/ui/AppModal";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { AppTag } from "@/components/ui/AppTag";
 import { AppTextarea } from "@/components/ui/AppTextarea";
+import { DraftingCoach } from "./DraftingCoach";
+import { VEHICLE_REGISTRY } from "@/lib/config/vehicles";
+import { ToastService } from "@/lib/services/toastService";
 
 interface ShareRouteModalProps {
   open: boolean;
@@ -31,6 +30,13 @@ interface DraftLink {
   text: string;
 }
 
+interface LocalUploadFile {
+  uid: string;
+  name: string;
+  url: string;
+  thumbUrl: string;
+}
+
 function createInitialRoute(order: number): RouteInput {
   return {
     tempId: `${Date.now()}-${order}`,
@@ -43,6 +49,21 @@ function createInitialRoute(order: number): RouteInput {
   };
 }
 
+async function fileToDataUrl(file: File): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+      reject(new Error("Failed to read image file."));
+    };
+    reader.onerror = () => reject(new Error("Failed to read image file."));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function ShareRouteModal({
   open,
   onClose,
@@ -51,17 +72,17 @@ export function ShareRouteModal({
   postToEdit,
 }: ShareRouteModalProps) {
   const [title, setTitle] = useState("");
-  const [routes, setRoutes] = useState<RouteInput[]>([createInitialRoute(1)]);
+  const [routes, setRoutes] = useState<RouteInput[]>([
+    createInitialRoute(1),
+  ]);
   const [tagsInput, setTagsInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileList, setFileList] = useState<LocalUploadFile[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [linkTargetRoute, setLinkTargetRoute] = useState<string | null>(null);
   const [draftLink, setDraftLink] = useState<DraftLink>({ url: "", text: "" });
-
-  const { message } = App.useApp();
 
   useEffect(() => {
     if (!open) {
@@ -110,9 +131,7 @@ export function ShareRouteModal({
         fare: r.fare,
         links: r.links,
       })),
-      images: fileList
-        .map((f) => f.url || f.thumbUrl || "")
-        .filter((url) => url.length > 0),
+      images: fileList.map((f) => f.url).filter((url) => url.length > 0),
     }),
     [title, routes, fileList],
   );
@@ -136,9 +155,7 @@ export function ShareRouteModal({
     updater: (route: RouteInput) => RouteInput,
   ): void {
     setRoutes((prev) =>
-      prev.map((route) =>
-        route.tempId === routeTempId ? updater(route) : route,
-      ),
+      prev.map((route) => (route.tempId === routeTempId ? updater(route) : route)),
     );
   }
 
@@ -174,44 +191,6 @@ export function ShareRouteModal({
     setTags((prev) => prev.filter((entry) => entry !== tag));
   }
 
-  async function handleBeforeUpload(
-    file: File,
-  ): Promise<false | typeof Upload.LIST_IGNORE> {
-    if (!file.type.startsWith("image/")) {
-      message.error("Only image files are supported.");
-      return Upload.LIST_IGNORE;
-    }
-
-    if (file.size / 1024 / 1024 > 5) {
-      message.error("Image must be smaller than 5MB.");
-      return Upload.LIST_IGNORE;
-    }
-
-    const reader = new FileReader();
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          resolve(reader.result);
-          return;
-        }
-        reject(new Error("Failed to read image file."));
-      };
-      reader.onerror = () => reject(new Error("Failed to read image file."));
-      reader.readAsDataURL(file);
-    });
-
-    const newUpload: UploadFile = {
-      uid: `${Date.now()}-${file.name}`,
-      name: file.name,
-      status: "done",
-      url: dataUrl,
-      thumbUrl: dataUrl,
-    };
-
-    setFileList((prev) => [...prev, newUpload]);
-    return false;
-  }
-
   function openAddLinkModal(routeTempId: string): void {
     setLinkTargetRoute(routeTempId);
     setDraftLink({ url: "", text: "" });
@@ -220,7 +199,7 @@ export function ShareRouteModal({
 
   function addLinkToRoute(): void {
     if (!linkTargetRoute || !draftLink.url.trim() || !draftLink.text.trim()) {
-      message.error("Add both link text and URL.");
+      ToastService.error("Add both link text and URL.");
       return;
     }
 
@@ -244,15 +223,62 @@ export function ShareRouteModal({
     }));
   }
 
+  async function handleFiles(files: FileList | null): Promise<void> {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const selected = Array.from(files);
+
+    const validFiles: File[] = [];
+    for (const file of selected) {
+      if (!file.type.startsWith("image/")) {
+        ToastService.error("Only image files are supported.");
+        continue;
+      }
+      if (file.size / 1024 / 1024 > 5) {
+        ToastService.error("Image must be smaller than 5MB.");
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const uploaded = await Promise.all(
+        validFiles.map(async (file) => {
+          const dataUrl = await fileToDataUrl(file);
+          return {
+            uid: `${Date.now()}-${file.name}`,
+            name: file.name,
+            url: dataUrl,
+            thumbUrl: dataUrl,
+          } satisfies LocalUploadFile;
+        }),
+      );
+
+      setFileList((prev) => [...prev, ...uploaded]);
+    } catch {
+      ToastService.error("Failed to read one or more images.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSubmit(): Promise<void> {
     if (!title.trim()) {
-      message.error("Please add a route title.");
+      ToastService.error("Please add a route title.");
       return;
     }
 
     const validRoutes = routes.filter((route) => route.text.trim().length > 0);
     if (validRoutes.length === 0) {
-      message.error("Please add at least one route segment.");
+      ToastService.error("Please add at least one route segment.");
       return;
     }
 
@@ -271,21 +297,16 @@ export function ShareRouteModal({
           fare: route.fare,
           status: route.status,
         })),
-        images: fileList
-          .map((file) => file.url || file.thumbUrl || "")
-          .filter((value) => value.length > 0),
+        images: fileList.map((file) => file.url).filter((value) => value.length > 0),
         tags,
       });
 
-      message.success(
+      ToastService.success(
         editMode ? "Route updated successfully." : "Route posted successfully.",
       );
       onClose();
-    } catch (error) {
-      message.error(
-        editMode ? "Failed to update route." : "Failed to post route.",
-      );
-      console.error(error);
+    } catch {
+      ToastService.error(editMode ? "Failed to update route." : "Failed to post route.");
     } finally {
       setLoading(false);
     }
@@ -299,7 +320,8 @@ export function ShareRouteModal({
         size="lg"
         title={editMode ? "Edit route" : "Share a route"}
         subtitle="Build a clear, trusted route report"
-        footer={null}>
+        footer={null}
+      >
         <div className="space-y-4">
           <DraftingCoach draft={draftState} className="mb-2" />
 
@@ -314,19 +336,23 @@ export function ShareRouteModal({
             {routes.map((route, index) => (
               <div
                 key={route.tempId}
-                className="rounded-[var(--radius-card)] border border-[var(--color-border)] p-3">
+                className="rounded-[var(--radius-card)] border border-[var(--color-border)] p-3"
+              >
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-sm font-semibold text-[var(--color-text-primary)]">
                     Segment {index + 1}
                   </span>
+
                   <div className="flex items-center gap-2">
                     <AppButton
                       variant="ghost"
                       size="sm"
                       icon={Link2}
-                      onClick={() => openAddLinkModal(route.tempId)}>
+                      onClick={() => openAddLinkModal(route.tempId)}
+                    >
                       Link
                     </AppButton>
+
                     <AppButton
                       variant="ghost"
                       size="sm"
@@ -339,16 +365,11 @@ export function ShareRouteModal({
 
                 <div className="space-y-2">
                   <AppTextarea
-                    placeholder={
-                      index === 0 ? "Where does the trip start?" : "Where next?"
-                    }
+                    placeholder={index === 0 ? "Where does the trip start?" : "Where next?"}
                     value={route.text}
                     onChange={(event) => {
                       const value = event.target.value;
-                      updateRoute(route.tempId, (prev) => ({
-                        ...prev,
-                        text: value,
-                      }));
+                      updateRoute(route.tempId, (prev) => ({ ...prev, text: value }));
                     }}
                     autoSize={{ minRows: 2, maxRows: 6 }}
                     maxLength={index === 0 ? 300 : 220}
@@ -421,6 +442,7 @@ export function ShareRouteModal({
                 Add tags
               </AppButton>
             </div>
+
             {tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
@@ -438,26 +460,42 @@ export function ShareRouteModal({
           </div>
 
           <div className="space-y-2">
-            <Upload
-              beforeUpload={handleBeforeUpload}
-              showUploadList={false}
+            <input
+              id="share-route-images"
+              type="file"
+              accept="image/*"
               multiple
-              accept="image/*">
-              <AppButton variant="ghost">Upload images</AppButton>
-            </Upload>
+              className="hidden"
+              aria-label="Upload route images"
+              title="Upload route images"
+              onChange={(e) => void handleFiles(e.target.files)}
+            />
+
+            <div className="flex items-center gap-3">
+              <label htmlFor="share-route-images" className="cursor-pointer">
+                <AppButton variant="ghost" icon={Plus}>
+                  Upload images
+                </AppButton>
+              </label>
+
+              {fileList.length > 0 ? (
+                <span className="text-xs text-[var(--color-text-secondary)]">
+                  {fileList.length} selected
+                </span>
+              ) : null}
+            </div>
 
             {fileList.length > 0 ? (
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {fileList.map((file) => {
                   const src = file.thumbUrl || file.url;
-                  if (!src) {
-                    return null;
-                  }
+                  if (!src) return null;
 
                   return (
                     <div
                       key={file.uid}
-                      className="relative overflow-hidden rounded-md border border-[var(--color-border)]">
+                      className="relative overflow-hidden rounded-md border border-[var(--color-border)]"
+                    >
                       <div className="relative aspect-square w-full">
                         <Image
                           src={src}
@@ -467,6 +505,7 @@ export function ShareRouteModal({
                           className="object-cover"
                         />
                       </div>
+
                       <AppButton
                         variant="icon"
                         icon={X}
@@ -489,6 +528,7 @@ export function ShareRouteModal({
             <AppButton variant="ghost" onClick={onClose} disabled={loading}>
               Cancel
             </AppButton>
+
             <AppButton onClick={() => void handleSubmit()} loading={loading}>
               {editMode ? "Update route" : "Post route"}
             </AppButton>
@@ -507,7 +547,8 @@ export function ShareRouteModal({
             </AppButton>
             <AppButton onClick={addLinkToRoute}>Add link</AppButton>
           </div>
-        }>
+        }
+      >
         <div className="space-y-3">
           <AppInput
             value={draftLink.url}
@@ -516,6 +557,7 @@ export function ShareRouteModal({
             }
             placeholder="https://example.com"
           />
+
           <AppInput
             value={draftLink.text}
             onChange={(event) =>

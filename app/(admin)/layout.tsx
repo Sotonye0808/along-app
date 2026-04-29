@@ -35,7 +35,7 @@ export default function AdminLayout({
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <AppSpinner size="lg" />
+        <AppSpinner size={32} />
       </div>
     );
   }
@@ -56,7 +56,9 @@ export default function AdminLayout({
         </div>
         <nav className="flex-1 space-y-0.5 p-3">
           {ADMIN_NAV.map(({ label, href, icon: Icon }) => {
-            const active = pathname === href || (href !== "/admin" && pathname?.startsWith(href));
+            const active =
+              pathname === href ||
+              (href !== "/admin" && pathname?.startsWith(href));
             return (
               <Link
                 key={href}

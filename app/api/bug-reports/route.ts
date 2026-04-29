@@ -10,7 +10,7 @@ const bugReportSchema = z.object({
   description: z.string().min(10).max(2000),
   category: z.enum(["UI", "ROUTING", "AUTH", "PERFORMANCE", "DATA", "NOTIFICATIONS", "OTHER"]),
   postId: z.string().cuid().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         category: data.category,
         reporterId: authUser,
         postId: data.postId,
-        metadata: data.metadata,
+        metadata: data.metadata ? JSON.parse(JSON.stringify(data.metadata)) : null,
       },
       select: {
         id: true,

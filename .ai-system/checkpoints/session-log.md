@@ -350,3 +350,75 @@ Phase 1 Task 1.3 — DiceBear AvatarEditor + full AppAvatar wiring
 - 0.6 remains blocked by missing `LOCAL_DB`/`DATABASE_URL` environment configuration.
 - Google Fonts dependency removed permanently from layout.tsx; Inter now resolves via system font stack in globals.css `@theme`.
 
+---
+
+## Session 12 — 2026-04-29
+
+**Completed:**
+Finished Phase 1 Task 1.3. Wired the existing `AvatarEditor` into `EditProfileModal`, exposed `avatarConfig` from the user profile API, exported the profile avatar editor from the feature barrel, and fixed the remaining design-system/type mismatches surfaced during validation (`AppStatusDot`, `AppDropdown`, `AppSpinner`, `AppCard`, `AppTextarea`, Zod record parsing, and the avatar route enum cast). The avatar editor now uses class-based background swatches and the production build passes.
+
+**Files Modified:**
+
+- `app/components/features/profile/EditProfileModal.tsx` — added avatar editor entry point and preview avatar config support
+- `app/components/features/profile/AvatarEditor.tsx` — removed inline swatch styles and kept class-based color chips
+- `app/components/features/profile/index.ts` — exported `AvatarEditor`
+- `app/api/users/[id]/route.ts` — included `avatarConfig` in profile responses
+- `app/api/users/[id]/avatar/route.ts` — fixed Zod enum typing for readonly avatar styles
+- `app/api/admin/config/route.ts` — fixed Zod `record` schema typing
+- `app/api/bug-reports/route.ts` — fixed Zod `record` schema typing and JSON serialization for metadata
+- `app/components/features/posts/CommentSection.tsx` — fixed UndoService usage and AppDropdown trigger wiring
+- `app/components/ui/AppTextarea.tsx` — added ref forwarding for textarea usage
+- `app/(admin)/layout.tsx` — corrected spinner sizing
+- `app/(admin)/admin/bugs/page.tsx` — aligned bug status rendering with `AppStatusDot` and `AppDropdown`
+- `app/(admin)/admin/config/page.tsx` — removed unsupported card title props
+- `app/(admin)/admin/page.tsx` — corrected spinner sizing
+- `app/(admin)/admin/posts/page.tsx` — corrected spinner sizing
+- `app/(admin)/admin/users/page.tsx` — corrected spinner sizing
+
+**Next Task:**
+Phase 1 Task 1.4 — Google OAuth
+
+**Notes / Blockers:**
+
+- `npm run build` passes.
+- `app/api/users/[id]/avatar/route.ts` still depends on the existing Prisma JSON field and the current profile UI path; no new DB migration was required for this task.
+
+---
+
+## Session 13 — 2026-04-29
+
+**Completed:**
+Phase 1 Task 1.4 — Google OAuth wiring: connected the login UI to the server OAuth start route, added a small server-side OAuth config helper, and verified the full callback flow already present (`/api/auth/google/callback`) exchanges code → token → userInfo → upserts user → issues JWT cookies and redirects. Ensured `npm run build` passes.
+
+**Files Modified:**
+
+- `app/components/features/auth/LoginForm.tsx` — Google button now redirects to `/api/auth/google` to initiate OAuth flow
+- `app/lib/config/oauth.ts` — new server-side OAuth config helpers and `buildGoogleAuthUrl()` exported
+- `.ai-system/planning/task-queue.md` — marked Task 1.4 complete
+
+**Next Task:**
+Continue with Phase 1 Task 1.5 — Bug Report system (implement API route, UI, and admin moderation hooks).
+
+**Notes / Blockers:**
+
+- Google OAuth routes are implemented; environment variables `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and optional `GOOGLE_REDIRECT_URI` must be set in deployment for the flow to run end-to-end. Local dev may redirect to login with `oauth_not_configured` when env vars are missing.
+- Remaining hardening step: add route-level Zod validation and rate limiting to the Google OAuth start/callback routes if desired (currently the callback performs internal checks and has error handling).
+
+---
+
+## Session 14 — 2026-04-29
+
+**Completed:**
+Phase 1 Task 1.5 — Bug Report system: aligned the public bug report form with the API by switching the form field to `category` (matching `BugCategory` enum), verified the admin moderation UI at `/(admin)/admin/bugs` which uses `PATCH /api/bug-reports/[id]` to triage reports, and confirmed server-side Zod validation and rate limiting are present on bug report routes. Production build passes.
+
+**Files Modified:**
+
+- `app/lib/config/forms.ts` — updated `BUG_REPORT_FIELDS` to use `category` with enum-safe values
+- `.ai-system/planning/task-queue.md` — marked Task 1.5 complete
+
+**Next Task:**
+Phase 1 Task 1.6 — Admin pages group (continue expanding admin UI and role-gated pages).
+
+**Notes / Blockers:**
+
+- The `BugReport` Prisma model requires an authenticated reporter; unauthenticated submissions are currently rejected with 401. If guest reports are desired, the model and route must be adjusted (reporterId made optional) requiring a DB migration.
