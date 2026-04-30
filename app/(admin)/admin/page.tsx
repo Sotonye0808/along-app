@@ -2,14 +2,24 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Bug, FileText, Star, Users } from "lucide-react";
+import { AppButton } from "@/components/ui/AppButton";
 import { AppCard } from "@/components/ui/AppCard";
 import { AppSpinner } from "@/components/ui/AppSpinner";
+import type { LucideIcon } from "lucide-react";
+
+interface AdminSummary {
+  users: number;
+  posts: number;
+  bugReports: number;
+  reviews: number;
+}
 
 interface AdminStat {
   label: string;
   value: number;
-  icon: typeof Bug;
+  icon: LucideIcon;
   color: string;
+  href: string;
 }
 
 export default function AdminDashboardPage(): React.ReactElement {
@@ -17,43 +27,38 @@ export default function AdminDashboardPage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
 
   const loadStats = useCallback(async () => {
-    // Stats are composed from available admin endpoints; graceful fallback on error
     try {
-      const [usersRes, postsRes, bugsRes] = await Promise.allSettled([
-        fetch("/api/users?limit=1", { credentials: "include" }),
-        fetch("/api/posts?limit=1", { credentials: "include" }),
-        fetch("/api/bug-reports?limit=1", { credentials: "include" }),
-      ]);
-
-      const getUserCount = (): number => {
-        if (usersRes.status === "fulfilled" && usersRes.value.ok) return 0;
-        return 0;
-      };
+      const res = await fetch("/api/admin/summary", { credentials: "include" });
+      const summary = (await res.json()) as AdminSummary;
 
       setStats([
         {
           label: "Users",
-          value: getUserCount(),
+          value: summary.users,
           icon: Users,
           color: "text-[var(--color-primary)]",
+          href: "/admin/users",
         },
         {
           label: "Posts",
-          value: postsRes.status === "fulfilled" ? 0 : 0,
+          value: summary.posts,
           icon: FileText,
           color: "text-[var(--color-success-text)]",
+          href: "/admin/posts",
         },
         {
           label: "Bug Reports",
-          value: bugsRes.status === "fulfilled" ? 0 : 0,
+          value: summary.bugReports,
           icon: Bug,
           color: "text-[var(--color-error-text)]",
+          href: "/admin/bugs",
         },
         {
           label: "Reviews",
-          value: 0,
+          value: summary.reviews,
           icon: Star,
           color: "text-[var(--color-warning-text)]",
+          href: "/admin/reviews",
         },
       ]);
     } finally {
@@ -75,12 +80,23 @@ export default function AdminDashboardPage(): React.ReactElement {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-        Admin Dashboard
-      </h1>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {stats.map(({ label, value, icon: Icon, color }) => (
-          <AppCard key={label} variant="default">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">
+            Admin Dashboard
+          </h1>
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            Live overview of users, posts, moderation, and review activity.
+          </p>
+        </div>
+        <AppButton variant="secondary" href="/admin/config">
+          Open config
+        </AppButton>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map(({ label, value, icon: Icon, color, href }) => (
+          <AppCard key={label} variant="default" href={href} hover>
             <div className="flex items-start gap-3">
               <Icon size={20} className={color} aria-hidden="true" />
               <div>

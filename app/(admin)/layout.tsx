@@ -3,25 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Bug,
-  FileText,
-  LayoutDashboard,
-  Settings,
-  Star,
-  Users,
-} from "lucide-react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { AppSpinner } from "@/components/ui/AppSpinner";
+import { filterNavItems } from "@/lib/config/navigation";
 
-const ADMIN_NAV = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Users", href: "/admin/users", icon: Users },
-  { label: "Posts", href: "/admin/posts", icon: FileText },
-  { label: "Bug Reports", href: "/admin/bugs", icon: Bug },
-  { label: "Reviews", href: "/admin/reviews", icon: Star },
-  { label: "Config", href: "/admin/config", icon: Settings },
-] as const;
+const ADMIN_NAV = filterNavItems("admin", { sidebarOnly: true }).filter(
+  (item) => item.key !== "settings",
+);
 
 export default function AdminLayout({
   children,

@@ -422,3 +422,32 @@ Phase 1 Task 1.6 — Admin pages group (continue expanding admin UI and role-gat
 **Notes / Blockers:**
 
 - The `BugReport` Prisma model requires an authenticated reporter; unauthenticated submissions are currently rejected with 401. If guest reports are desired, the model and route must be adjusted (reporterId made optional) requiring a DB migration.
+
+---
+
+## Session 15 — 2026-04-30
+
+**Completed:**
+Phase 1 Task 1.6 — Admin pages group. Refactored the admin shell to use config-driven navigation, added a repository-backed admin summary API, and implemented a real reviews moderation page with status filters and approve/reject actions. Also verified the existing global confirmation and undo infrastructure is already mounted and working, and confirmed comment mentions are already supported in the comment composer/parser flow.
+
+**Files Modified:**
+
+- `app/(admin)/layout.tsx` — replaced hardcoded admin nav with config-driven sidebar items
+- `app/(admin)/admin/page.tsx` — wired dashboard to `/api/admin/summary` and added quick links
+- `app/(admin)/admin/reviews/page.tsx` — built moderation UI for user reviews
+- `app/api/admin/summary/route.ts` — new admin dashboard metrics endpoint
+- `app/api/reviews/route.ts` — new admin review list endpoint
+- `app/api/reviews/[id]/route.ts` — new review status update endpoint
+- `app/lib/config/reviews.ts` — centralized review status config
+- `app/lib/db/AdminMetricsRepository.ts` — summary counts repository
+- `app/lib/db/AdminAccessRepository.ts` — admin authorization repository helper
+- `app/lib/db/UserReviewRepository.ts` — review listing and moderation repository
+- `app/lib/config/forms.ts` — bug report field alignment from earlier task retained
+
+**Next Task:**
+Phase 1 Task 1.9 — Subtle links full-codebase audit.
+
+**Notes / Blockers:**
+
+- `npm run build` passes after the admin batch.
+- `app/components/features/posts/CommentSection.tsx`, `app/lib/utils/commentParser.tsx`, and the global providers already cover the confirmation/undo and @mention flows, so no new code was required for 1.7/1.8 beyond tracker reconciliation.

@@ -32,9 +32,9 @@
 - [x] 1.4 — Google OAuth
 - [ ] 1.5 — Bug Report system
 - [x] 1.5 — Bug Report system
-- [ ] 1.6 — Admin pages group
-- [ ] 1.7 — Confirmations + Undo
-- [ ] 1.8 — User tagging in comments (@mentions)
+- [x] 1.6 — Admin pages group
+- [x] 1.7 — Confirmations + Undo
+- [x] 1.8 — User tagging in comments (@mentions)
 - [ ] 1.9 — Subtle links full-codebase audit
 - [ ] 1.10 — Privacy & Terms pages
 - [ ] 1.11 — Phase 1 checkpoint
