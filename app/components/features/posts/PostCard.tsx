@@ -386,6 +386,7 @@ export const PostCard = memo(function PostCard({
               size="sm"
               loading={loadingAction === "bookmark"}
               disabled={loadingAction !== null && loadingAction !== "bookmark"}
+              className={isBookmarked ? "!text-[var(--color-primary)]" : ""}
               onClick={() => {
                 void handleAction("bookmark", () => onBookmark?.(post.id));
               }}

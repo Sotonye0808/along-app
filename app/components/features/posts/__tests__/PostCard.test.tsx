@@ -229,21 +229,24 @@ describe("PostCard", () => {
       render(<PostCard {...defaultProps} isLiked={true} />);
 
       const likeButtons = screen.getAllByLabelText(/like/i);
-      expect(likeButtons[0]).toHaveClass("text-[#00623B]"); // Along Green color
+      // active state applies primary color token
+      expect(likeButtons[0]).toHaveClass("!text-[var(--color-primary)]");
     });
 
     it("should show filled dislike icon when post is disliked", () => {
       render(<PostCard {...defaultProps} isDisliked={true} />);
 
       const dislikeButtons = screen.getAllByLabelText(/dislike/i);
-      expect(dislikeButtons[0]).toHaveClass("text-red-500");
+      // active state applies error color token
+      expect(dislikeButtons[0]).toHaveClass("!text-[var(--color-error-text)]");
     });
 
     it("should show filled bookmark icon when post is bookmarked", () => {
       render(<PostCard {...defaultProps} isBookmarked={true} />);
 
       const bookmarkButton = screen.getByLabelText(/bookmark/i);
-      expect(bookmarkButton).toHaveClass("text-[#00623B]");
+      // active state applies primary color token
+      expect(bookmarkButton).toHaveClass("!text-[var(--color-primary)]");
     });
   });
 
