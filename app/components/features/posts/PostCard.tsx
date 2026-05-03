@@ -12,6 +12,7 @@ import {
   MapPin,
   MessageCircle,
   Share2,
+  Sparkles,
   ThumbsDown,
   ThumbsUp,
   UserMinus,
@@ -147,8 +148,20 @@ export const PostCard = memo(function PostCard({
     }
   }
 
+  const cardVariant = post.isPlatformGen ? "suggestion" : "default";
+
   return (
-    <AppCard variant="default" hover className="mb-4">
+    <AppCard variant={cardVariant} hover className="mb-4">
+      {post.isPlatformGen && (
+        <div className="mb-3 -mt-1">
+          <AppTag
+            label="Along Suggestion"
+            variant="primary"
+            size="xs"
+            icon={Sparkles}
+          />
+        </div>
+      )}
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <AppUserLabel

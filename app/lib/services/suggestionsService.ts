@@ -3,18 +3,24 @@
  * 
  * Implements user suggestion algorithm with intelligent scoring
  * based on location, interests, mutual connections, and verified status.
+ * Scoring weights are read from getSiteConfig('feedAlgorithm') so they
+ * remain admin-adjustable at runtime.
  */
 
 import { prisma } from '../db/prisma';
 import { cache, CACHE_KEYS, CACHE_TTL } from '../cache/redis';
+import { getSiteConfig } from '../utils/siteConfig';
+import { DEFAULT_FEED_CONFIG } from '../config/feedAlgorithm';
 
 /**
  * Get user suggestions
- * Scoring system (max 100 points):
- * - Location proximity: 40 points (exact) or 20 points (similar)
- * - Similar interests via tags: 30 points (7.5 per common tag, max 4)
- * - Mutual connections: 20 points (5 per mutual, max 4)
- * - Verified status: 10 points
+ * Scoring weights are loaded from getSiteConfig('feedAlgorithm') so they
+ * are admin-adjustable. The scoring system normalises the config weights
+ * to a 100-point scale:
+ * - Location proximity: proportional to proximityBoost
+ * - Similar interests via tags: proportional to interactionWeight
+ * - Mutual connections: proportional to followingBoost
+ * - Verified status: proportional to verifiedBoost
  * 
  * @param userId - User ID requesting suggestions
  * @param limit - Number of suggestions to return (default: 5)
@@ -27,10 +33,24 @@ export async function getUserSuggestions(
     try {
         // Check cache first
         const cacheKey = CACHE_KEYS.userSuggestions(userId);
-        const cached = await cache.get<any>(cacheKey);
+        const cached = await cache.get<unknown[]>(cacheKey);
         if (cached) {
             return cached;
         }
+
+        // Load admin-adjustable weights
+        const config = await getSiteConfig('feedAlgorithm', DEFAULT_FEED_CONFIG);
+        const totalWeight =
+            config.proximityBoost +
+            config.interactionWeight +
+            config.followingBoost +
+            config.verifiedBoost;
+        const scale = totalWeight > 0 ? 100 / totalWeight : 1;
+
+        const proximityMax = config.proximityBoost * scale;
+        const interestMax = config.interactionWeight * scale;
+        const connectionMax = config.followingBoost * scale;
+        const verifiedBonus = config.verifiedBoost * scale;
 
         // Get current user data
         const currentUser = await prisma.user.findUnique({
