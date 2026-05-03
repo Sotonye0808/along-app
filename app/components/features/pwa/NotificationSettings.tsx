@@ -120,9 +120,9 @@ export function NotificationSettings() {
             How to enable notifications:
           </Text>
           <ol className="mt-2 text-sm text-gray-600 dark:text-gray-400 list-decimal list-inside">
-            <li>Click the lock icon in your browser's address bar</li>
-            <li>Find the "Notifications" setting</li>
-            <li>Change it to "Allow"</li>
+            <li>Click the lock icon in your browser&apos;s address bar</li>
+            <li>Find the &quot;Notifications&quot; setting</li>
+            <li>Change it to &quot;Allow&quot;</li>
             <li>Refresh this page</li>
           </ol>
         </div>
@@ -172,7 +172,7 @@ export function NotificationSettings() {
 
         <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
           <Text strong className="dark:text-gray-200">
-            You'll be notified about:
+          You&apos;ll be notified about:
           </Text>
           <ul className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400">
             <li>• New comments on your posts</li>

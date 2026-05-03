@@ -35,9 +35,9 @@
 - [x] 1.6 — Admin pages group
 - [x] 1.7 — Confirmations + Undo
 - [x] 1.8 — User tagging in comments (@mentions)
-- [ ] 1.9 — Subtle links full-codebase audit
-- [ ] 1.10 — Privacy & Terms pages
-- [ ] 1.11 — Phase 1 checkpoint
+- [x] 1.9 — Subtle links full-codebase audit
+- [x] 1.10 — Privacy & Terms pages
+- [x] 1.11 — Phase 1 checkpoint
 
 ---
 
@@ -78,13 +78,13 @@
 - [x] 1.2 — DraftingCoachService + DraftingCoach component
 - [x] 1.3 — DiceBear AvatarEditor + UserAvatar
 - [x] 1.4 — Google OAuth
-- [ ] 1.5 — Bug Report system
-- [ ] 1.6 — Admin pages group
-- [ ] 1.7 — Confirmations + Undo
-- [ ] 1.8 — User tagging in comments (@mentions)
-- [ ] 1.9 — Subtle links full-codebase audit
-- [ ] 1.10 — Privacy & Terms pages
-- [ ] 1.11 — Phase 1 checkpoint
+- [x] 1.5 — Bug Report system
+- [x] 1.6 — Admin pages group
+- [x] 1.7 — Confirmations + Undo
+- [x] 1.8 — User tagging in comments (@mentions)
+- [x] 1.9 — Subtle links full-codebase audit
+- [x] 1.10 — Privacy & Terms pages
+- [x] 1.11 — Phase 1 checkpoint
 
 ---
 
@@ -100,4 +100,4 @@
 - **Note (0.8/0.9):** SEO helpers, root metadata, structured data wiring, sitemap/robots cleanup, and route-level loading/error shells are complete. The remaining build blocker was a server/client boundary issue in `app/not-found.tsx`; converting it to a client component resolved the prerender failure on `/` and the production build now passes.
 - **Note (API audit):** Route audit report is recorded at `.ai-system/index/api-route-audit.md`. All `app/api/**/route.ts` handlers are now Prisma-backed or non-DB utility handlers.
 - **Note (hardening):** Shared Prisma error mapper (`app/lib/utils/prismaErrors.ts`) is now used across Prisma-backed route handlers for consistent `P2025`/`P2002` responses.
-- **Note (0.10 status):** Checkpoint command sequence was executed (`build`, `tsc`, `test`, `lint`). `npm run build` passes; repository-wide legacy Jest/Lint debt still prevents full 0.10 closure until dedicated cleanup.
+- **Note (Phase 1 complete):** All Phase 1 tasks (1.1–1.11) are complete. `npm run build` passes; `tsc --noEmit` clean; 142/142 tests pass. Remaining lint warnings are pre-existing `no-explicit-any` debt concentrated in `feedService.ts`, `searchService.ts`, `suggestionsService.ts`, and `mock-redis.ts` — to be addressed during Phase 2 service rewrites. The two `react-hooks/rules-of-hooks` violations in the profile pages were fixed as part of 1.11.
