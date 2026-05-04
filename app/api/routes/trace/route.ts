@@ -12,8 +12,14 @@ const traceSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const rateLimitError = await rateLimitByIP(request);
-  if (rateLimitError) return rateLimitError;
+  const clientIP = request.headers.get("x-forwarded-for") ?? "unknown";
+  const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 100, windowSeconds: 60 });
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(rateLimit.reset) } },
+    );
+  }
 
   let body: unknown;
   try {

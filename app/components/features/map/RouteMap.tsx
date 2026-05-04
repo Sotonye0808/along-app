@@ -228,7 +228,7 @@ export function RouteMap({
       <div
         className="flex items-center justify-center rounded-xl bg-[var(--color-bg-elevated)]"
         style={{ height }}>
-        <AppSpinner size="sm" />
+        <AppSpinner size={18} />
       </div>
     );
   }

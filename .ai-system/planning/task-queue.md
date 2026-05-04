@@ -72,7 +72,7 @@
 
 > **Authority:** `.ai-system/planning/along_copilot_plan_v2.md`
 
-## Current Phase: 1 — Core Product
+## Current Phase: 2 — Geography & Suggestions
 
 - [x] 1.1 — ValidityEngine + TrustBadge
 - [x] 1.2 — DraftingCoachService + DraftingCoach component
@@ -85,6 +85,14 @@
 - [x] 1.9 — Subtle links full-codebase audit
 - [x] 1.10 — Privacy & Terms pages
 - [x] 1.11 — Phase 1 checkpoint
+- [x] 2.1 — MapLibre migration (RouteMap component — desktop inline 300px, mobile collapsible, glass overlay)
+- [x] 2.2 — RouteTracingService + `/api/routes/trace` endpoint
+- [x] 2.3 — PlaceAutocomplete component (Google Places, graceful fallback)
+- [x] 2.4 — Geo fields in ShareRouteModal (startLat/lng, endLat/lng, region, auto-computed distance/time)
+- [x] 2.5 — suggestionsService uses getSiteConfig('feedAlgorithm') for all scoring weights
+- [x] 2.6 — PlatformSuggestionsService + PostCard "Along Suggestion" chip (AppTag primary + Sparkles icon)
+- [x] 2.7 — Explore page (search, region filters, map view, glass popup, back-to-top FAB, share-this-view)
+- [x] 2.8 — Phase 2 checkpoint: build ✓ tsc ✓ 142/142 tests ✓
 
 ---
 
@@ -100,4 +108,4 @@
 - **Note (0.8/0.9):** SEO helpers, root metadata, structured data wiring, sitemap/robots cleanup, and route-level loading/error shells are complete. The remaining build blocker was a server/client boundary issue in `app/not-found.tsx`; converting it to a client component resolved the prerender failure on `/` and the production build now passes.
 - **Note (API audit):** Route audit report is recorded at `.ai-system/index/api-route-audit.md`. All `app/api/**/route.ts` handlers are now Prisma-backed or non-DB utility handlers.
 - **Note (hardening):** Shared Prisma error mapper (`app/lib/utils/prismaErrors.ts`) is now used across Prisma-backed route handlers for consistent `P2025`/`P2002` responses.
-- **Note (Phase 1 complete):** All Phase 1 tasks (1.1–1.11) are complete. `npm run build` passes; `tsc --noEmit` clean; 142/142 tests pass. Remaining lint warnings are pre-existing `no-explicit-any` debt concentrated in `feedService.ts`, `searchService.ts`, `suggestionsService.ts`, and `mock-redis.ts` — to be addressed during Phase 2 service rewrites. The two `react-hooks/rules-of-hooks` violations in the profile pages were fixed as part of 1.11.
+- **Note (Phase 2 complete):** All Phase 2 tasks (2.1–2.8) are complete. `npm run build` passes; `tsc --noEmit` clean; 142/142 tests pass. New additions: RouteMap (maplibre-gl, desktop inline / mobile collapsible), RouteTracingService, PlaceAutocomplete (Google Places with fallback), geo fields in ShareRouteModal, suggestionsService now uses getSiteConfig weights, PlatformSuggestionsService, PostCard "Along Suggestion" chip, full Explore page (search/filter/map/glass popup/FAB), `/api/routes/trace` endpoint.

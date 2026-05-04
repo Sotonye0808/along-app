@@ -101,29 +101,31 @@ export async function getUserSuggestions(
             potentialSuggestions.map(async (user: any) => {
                 let score = 0;
 
-                // 1. Location proximity (40 points max)
+                // 1. Location proximity — weight from config
                 if (currentUser.location && user.location) {
                     if (isSimilarLocation(currentUser.location, user.location)) {
-                        score += user.location === currentUser.location ? 40 : 20;
+                        score += user.location === currentUser.location
+                            ? proximityMax
+                            : proximityMax * 0.5;
                     }
                 }
 
-                // 2. Similar interests via tags (30 points max)
+                // 2. Similar interests via tags — weight from config
                 const userTags = await getUserPostTags(user.id);
                 const commonTags = userTags.filter(tag => userTagsSet.has(tag));
-                const tagScore = Math.min(commonTags.length, 4) * 7.5;
+                const tagScore = Math.min(commonTags.length, 4) * (interestMax / 4);
                 score += tagScore;
 
-                // 3. Mutual connections (20 points max)
-                const mutualFollowers = user.followers.filter((f: any) =>
+                // 3. Mutual connections — weight from config
+                const mutualFollowers = user.followers.filter((f: { followerId: string }) =>
                     followingIds.includes(f.followerId)
                 );
-                const mutualScore = Math.min(mutualFollowers.length, 4) * 5;
+                const mutualScore = Math.min(mutualFollowers.length, 4) * (connectionMax / 4);
                 score += mutualScore;
 
-                // 4. Verified status (10 points)
+                // 4. Verified status — weight from config
                 if (user.verified) {
-                    score += 10;
+                    score += verifiedBonus;
                 }
 
                 return {

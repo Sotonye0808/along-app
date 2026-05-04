@@ -31,7 +31,7 @@ export interface PlatformSuggestionInput {
 }
 
 const PLATFORM_USER_EMAIL = process.env.PLATFORM_USER_EMAIL ?? "platform@along.app";
-const PLATFORM_GEN_CACHE_TTL = CACHE_TTL.POSTS_LIST;
+const PLATFORM_GEN_CACHE_TTL = CACHE_TTL.feed;
 
 export class PlatformSuggestionsService {
   /**
@@ -117,7 +117,7 @@ export class PlatformSuggestionsService {
         id: r.id,
         userId: r.userId,
         title: r.title,
-        routes: r.routes as Route[],
+        routes: r.routes as unknown as Route[],
         images: r.images,
         tags: r.tags,
         likes: r.likes,
@@ -151,7 +151,7 @@ export class PlatformSuggestionsService {
    * Return a sample of platform suggestions for the home feed (any region).
    */
   static async getFeedSuggestions(limit = 3): Promise<Post[]> {
-    const cacheKey = `${CACHE_KEYS.postsList(1, limit)}:platform`;
+    const cacheKey = `platform_suggestions:all:${limit}`;
     const cached = await cache.get<Post[]>(cacheKey);
     if (cached) return cached;
 
@@ -166,7 +166,7 @@ export class PlatformSuggestionsService {
         id: r.id,
         userId: r.userId,
         title: r.title,
-        routes: r.routes as Route[],
+        routes: r.routes as unknown as Route[],
         images: r.images,
         tags: r.tags,
         likes: r.likes,
