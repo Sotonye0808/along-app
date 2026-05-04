@@ -34,6 +34,19 @@ export const API_ENDPOINTS = {
 
   // Notifications
   NOTIFICATIONS: "/notifications",
+
+  // Rewards
+  USER_REWARDS: (id: string) => `/users/${id}/rewards`,
+
+  // Invites
+  INVITES: "/invites",
+  INVITE_VALIDATE: (code: string) => `/invites/${code}`,
+
+  // Analytics
+  ANALYTICS: "/analytics",
+
+  // Reviews (user-facing)
+  REVIEWS_USER: "/reviews/user",
 } as const;
 
 // App Routes

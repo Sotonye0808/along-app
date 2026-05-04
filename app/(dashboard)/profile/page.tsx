@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { Spin, App, Skeleton, Card } from "antd";
 import { UserProfile } from "@/components/features/profile";
+import { RewardsPanel, type RewardsSummaryData } from "@/components/features/rewards/RewardsPanel";
 const EditProfileModal = lazy(() =>
   import("@/components/features/profile/EditProfileModal").then((mod) => ({
     default: mod.EditProfileModal,
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [comments, setComments] = useState<CommentWithAuthorAndPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rewardsSummary, setRewardsSummary] = useState<RewardsSummaryData | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editPostModalOpen, setEditPostModalOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
@@ -48,8 +50,19 @@ export default function ProfilePage() {
       fetchUserPosts();
       fetchUserComments();
       fetchUserInteractions();
+      fetchRewardsSummary();
     }
   }, [currentUser]);
+
+  const fetchRewardsSummary = async () => {
+    if (!currentUser) return;
+    try {
+      const res = await api.get<RewardsSummaryData>(API_ENDPOINTS.USER_REWARDS(currentUser.id));
+      setRewardsSummary(res.data ?? null);
+    } catch {
+      // Non-critical — silently ignore if rewards endpoint unavailable
+    }
+  };
 
   const fetchUserProfile = async () => {
     if (!currentUser) return;
@@ -588,6 +601,11 @@ export default function ProfilePage() {
 
   return (
     <>
+      {rewardsSummary && (
+        <div className="max-w-4xl mx-auto px-4 pt-4">
+          <RewardsPanel data={rewardsSummary} />
+        </div>
+      )}
       <UserProfile
         user={user}
         isOwnProfile={true}
