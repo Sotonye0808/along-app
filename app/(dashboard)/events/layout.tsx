@@ -10,6 +10,11 @@ export const metadata: Metadata = {
     type: "website",
     url: "/events",
   },
+  twitter: {
+    card: "summary",
+    title: "Events | Along",
+    description: "Discover travel events and community meetups powered by Along and Tega.",
+  },
 };
 
 export default function EventsLayout({ children }: { children: ReactNode }) {

@@ -10,6 +10,11 @@ export const metadata: Metadata = {
     type: "website",
     url: "/contact",
   },
+  twitter: {
+    card: "summary",
+    title: "Contact | Along",
+    description: "Get in touch with the Along team.",
+  },
 };
 
 export default function ContactLayout({ children }: { children: ReactNode }) {

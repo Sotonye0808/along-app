@@ -317,7 +317,7 @@ describe('structuredData.ts utility functions', () => {
 
             const schema = generateBreadcrumbSchema(items, baseUrl)
 
-            schema.itemListElement.forEach((item: any, index: number) => {
+            schema.itemListElement.forEach((item: { position: number }, index: number) => {
                 expect(item.position).toBe(index + 1)
             })
         })

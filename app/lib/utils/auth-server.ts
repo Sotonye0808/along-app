@@ -43,7 +43,7 @@ export async function authenticateRequest(request: NextRequest): Promise<string 
         }
 
         return decoded.userId;
-    } catch (error) {
+    } catch {
         // Token is invalid or expired
         return null;
     }

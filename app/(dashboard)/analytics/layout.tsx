@@ -10,6 +10,11 @@ export const metadata: Metadata = {
     type: "website",
     url: "/analytics",
   },
+  twitter: {
+    card: "summary",
+    title: "Analytics | Along",
+    description: "View your engagement analytics on Along.",
+  },
 };
 
 export default function AnalyticsLayout({ children }: { children: ReactNode }) {

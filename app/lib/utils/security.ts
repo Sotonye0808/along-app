@@ -414,9 +414,9 @@ export function maskPhone(phone: string): string {
  * @returns Data with sensitive fields redacted
  */
 export function redactSensitiveData(
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     sensitiveKeys: string[] = ['password', 'token', 'secret', 'apiKey']
-): Record<string, any> {
+): Record<string, unknown> {
     const redacted = { ...data };
 
     sensitiveKeys.forEach((key) => {

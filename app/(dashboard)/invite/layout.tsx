@@ -10,6 +10,11 @@ export const metadata: Metadata = {
     type: "website",
     url: "/invite",
   },
+  twitter: {
+    card: "summary",
+    title: "Invite Friends | Along",
+    description: "Invite your friends to Along and earn reward points for every accepted invite.",
+  },
 };
 
 export default function InviteLayout({ children }: { children: ReactNode }) {
