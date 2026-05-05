@@ -72,7 +72,7 @@
 
 > **Authority:** `.ai-system/planning/along_copilot_plan_v2.md`
 
-## Current Phase: 2 — Geography & Suggestions
+## Current Phase: 5 — Complete
 
 - [x] 1.1 — ValidityEngine + TrustBadge
 - [x] 1.2 — DraftingCoachService + DraftingCoach component
@@ -93,6 +93,19 @@
 - [x] 2.6 — PlatformSuggestionsService + PostCard "Along Suggestion" chip (AppTag primary + Sparkles icon)
 - [x] 2.7 — Explore page (search, region filters, map view, glass popup, back-to-top FAB, share-this-view)
 - [x] 2.8 — Phase 2 checkpoint: build ✓ tsc ✓ 142/142 tests ✓
+- [x] 4.1 — QStash background workers (`/api/workers/notify` + `/api/workers/digest`)
+- [x] 4.2 — N+1 query elimination
+- [x] 4.3 — RxJS reactive feed (useFeedStream)
+- [x] 4.4 — AppFooter (with dev credit)
+- [x] 4.5 — Jest test suite (196/196 ✓)
+- [x] 4.6 — PWA full audit
+- [x] 4.7 — SEO audit (twitter cards, sitemap expanded)
+- [x] 4.8 — Phase 4 final gate: build ✓ tsc ✓ 196/196 tests ✓
+- [x] 5.1 — Push notifications (VAPID web-push, PushSubscription schema, subscribe/unsubscribe/send routes, PushService)
+- [x] 5.2 — CI/CD pipeline (`.github/workflows/ci.yml` — install → tsc → test → lint → build)
+- [x] 5.3 — Sentry error tracking (client/server/edge configs, instrumentation hook, next.config.mjs withSentryConfig)
+- [x] 5.4 — Remove `mock-backend/`, `app/lib/data/`, `scripts/migrate-to-prisma.ts`
+- [x] 5.5 — Phase 5 checkpoint: build ✓ tsc ✓ 196/196 tests ✓
 
 ---
 

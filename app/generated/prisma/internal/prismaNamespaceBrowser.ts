@@ -63,7 +63,8 @@ export const ModelName = {
   SiteConfig: 'SiteConfig',
   BugReport: 'BugReport',
   UserReview: 'UserReview',
-  AnalyticsEvent: 'AnalyticsEvent'
+  AnalyticsEvent: 'AnalyticsEvent',
+  PushSubscription: 'PushSubscription'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -277,6 +278,18 @@ export const AnalyticsEventScalarFieldEnum = {
 } as const
 
 export type AnalyticsEventScalarFieldEnum = (typeof AnalyticsEventScalarFieldEnum)[keyof typeof AnalyticsEventScalarFieldEnum]
+
+
+export const PushSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  endpoint: 'endpoint',
+  p256dh: 'p256dh',
+  auth: 'auth',
+  createdAt: 'createdAt'
+} as const
+
+export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
 
 
 export const SortOrder = {

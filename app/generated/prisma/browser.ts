@@ -82,3 +82,8 @@ export type UserReview = Prisma.UserReviewModel
  * 
  */
 export type AnalyticsEvent = Prisma.AnalyticsEventModel
+/**
+ * Model PushSubscription
+ * 
+ */
+export type PushSubscription = Prisma.PushSubscriptionModel
