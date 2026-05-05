@@ -118,45 +118,15 @@ export default function ProfilePage() {
     if (!currentUser) return;
 
     try {
-      // Fetch all posts to get comments
-      const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-      const allPosts = postsResponse.data;
+      // Single batched endpoint — eliminates the N+1 loop of one request per post
+      const res = await api.get<{
+        data: Array<PostComment & { user: User; post: Post }>;
+      }>(API_ENDPOINTS.USER_COMMENTS(currentUser.id));
 
-      // Fetch all users
-      const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
-      const usersData = usersResponse.data;
-
-      const userComments: CommentWithAuthorAndPost[] = [];
-
-      // Get comments from each post
-      for (const post of allPosts) {
-        try {
-          const commentsResponse = await api.get<PostComment[]>(
-            API_ENDPOINTS.POST_COMMENTS(post.id)
-          );
-
-          const postComments = commentsResponse.data
-            .filter((comment) => comment.userId === currentUser.id)
-            .map((comment) => ({
-              ...comment,
-              author:
-                usersData.find((u) => u.id === comment.userId) ||
-                ({
-                  id: currentUser.id,
-                  userName: currentUser.userName,
-                  firstName: currentUser.firstName,
-                  lastName: currentUser.lastName,
-                  email: currentUser.email,
-                  createdAt: new Date().toISOString(),
-                } as User),
-              post,
-            }));
-
-          userComments.push(...postComments);
-        } catch (error) {
-          console.error(`Failed to fetch comments for post ${post.id}:`, error);
-        }
-      }
+      const userComments: CommentWithAuthorAndPost[] = res.data.data.map((c) => ({
+        ...c,
+        author: c.user,
+      }));
 
       setComments(userComments);
     } catch (error) {
@@ -168,43 +138,17 @@ export default function ProfilePage() {
     if (!currentUser) return;
 
     try {
-      const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-      const likes = new Set<string>();
-      const dislikes = new Set<string>();
-      const bookmarks = new Set<string>();
+      // Single batched endpoint — eliminates the N+1 loop of two requests per post
+      const res = await api.get<{
+        data: { likes: string[]; dislikes: string[]; bookmarks: string[] };
+      }>(API_ENDPOINTS.USER_INTERACTIONS(currentUser.id));
 
-      for (const post of postsResponse.data) {
-        try {
-          // Check likes/dislikes
-          const likeCheck = await api.get<Like | null>(
-            `${API_ENDPOINTS.POST_LIKE(post.id)}?userId=${currentUser.id}`
-          );
-
-          if (likeCheck.data) {
-            if (likeCheck.data.type === "like") {
-              likes.add(post.id);
-            } else if (likeCheck.data.type === "dislike") {
-              dislikes.add(post.id);
-            }
-          }
-
-          // Check bookmarks
-          const bookmarkCheck = await api.get<Bookmark | null>(
-            `${API_ENDPOINTS.POST_BOOKMARK(post.id)}?userId=${currentUser.id}`
-          );
-
-          if (bookmarkCheck.data) {
-            bookmarks.add(post.id);
-          }
-        } catch (error) {
-          console.error(
-            `Failed to check interactions for post ${post.id}:`,
-            error
-          );
-        }
-      }
-
-      setUserInteractions({ likes, dislikes, bookmarks });
+      const { likes, dislikes, bookmarks } = res.data.data;
+      setUserInteractions({
+        likes: new Set(likes),
+        dislikes: new Set(dislikes),
+        bookmarks: new Set(bookmarks),
+      });
     } catch (error) {
       console.error("Failed to fetch user interactions:", error);
     }
