@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { Spin, App, Skeleton, Card } from "antd";
 import { UserProfile } from "@/components/features/profile";
+import { RewardsPanel, type RewardsSummaryData } from "@/components/features/rewards/RewardsPanel";
 const EditProfileModal = lazy(() =>
   import("@/components/features/profile/EditProfileModal").then((mod) => ({
     default: mod.EditProfileModal,
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [comments, setComments] = useState<CommentWithAuthorAndPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rewardsSummary, setRewardsSummary] = useState<RewardsSummaryData | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editPostModalOpen, setEditPostModalOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
@@ -40,7 +42,7 @@ export default function ProfilePage() {
     dislikes: new Set<string>(),
     bookmarks: new Set<string>(),
   });
-  const { message } = App.useApp();
+  const { message, notification } = App.useApp();
 
   useEffect(() => {
     if (currentUser) {
@@ -48,8 +50,19 @@ export default function ProfilePage() {
       fetchUserPosts();
       fetchUserComments();
       fetchUserInteractions();
+      fetchRewardsSummary();
     }
   }, [currentUser]);
+
+  const fetchRewardsSummary = async () => {
+    if (!currentUser) return;
+    try {
+      const res = await api.get<RewardsSummaryData>(API_ENDPOINTS.USER_REWARDS(currentUser.id));
+      setRewardsSummary(res.data ?? null);
+    } catch {
+      // Non-critical — silently ignore if rewards endpoint unavailable
+    }
+  };
 
   const fetchUserProfile = async () => {
     if (!currentUser) return;
@@ -105,45 +118,15 @@ export default function ProfilePage() {
     if (!currentUser) return;
 
     try {
-      // Fetch all posts to get comments
-      const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-      const allPosts = postsResponse.data;
+      // Single batched endpoint — eliminates the N+1 loop of one request per post
+      const res = await api.get<{
+        data: Array<PostComment & { user: User; post: Post }>;
+      }>(API_ENDPOINTS.USER_COMMENTS(currentUser.id));
 
-      // Fetch all users
-      const usersResponse = await api.get<User[]>(API_ENDPOINTS.USERS);
-      const usersData = usersResponse.data;
-
-      const userComments: CommentWithAuthorAndPost[] = [];
-
-      // Get comments from each post
-      for (const post of allPosts) {
-        try {
-          const commentsResponse = await api.get<PostComment[]>(
-            API_ENDPOINTS.POST_COMMENTS(post.id)
-          );
-
-          const postComments = commentsResponse.data
-            .filter((comment) => comment.userId === currentUser.id)
-            .map((comment) => ({
-              ...comment,
-              author:
-                usersData.find((u) => u.id === comment.userId) ||
-                ({
-                  id: currentUser.id,
-                  userName: currentUser.userName,
-                  firstName: currentUser.firstName,
-                  lastName: currentUser.lastName,
-                  email: currentUser.email,
-                  createdAt: new Date().toISOString(),
-                } as User),
-              post,
-            }));
-
-          userComments.push(...postComments);
-        } catch (error) {
-          console.error(`Failed to fetch comments for post ${post.id}:`, error);
-        }
-      }
+      const userComments: CommentWithAuthorAndPost[] = res.data.data.map((c) => ({
+        ...c,
+        author: c.user,
+      }));
 
       setComments(userComments);
     } catch (error) {
@@ -155,43 +138,17 @@ export default function ProfilePage() {
     if (!currentUser) return;
 
     try {
-      const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-      const likes = new Set<string>();
-      const dislikes = new Set<string>();
-      const bookmarks = new Set<string>();
+      // Single batched endpoint — eliminates the N+1 loop of two requests per post
+      const res = await api.get<{
+        data: { likes: string[]; dislikes: string[]; bookmarks: string[] };
+      }>(API_ENDPOINTS.USER_INTERACTIONS(currentUser.id));
 
-      for (const post of postsResponse.data) {
-        try {
-          // Check likes/dislikes
-          const likeCheck = await api.get<Like | null>(
-            `${API_ENDPOINTS.POST_LIKE(post.id)}?userId=${currentUser.id}`
-          );
-
-          if (likeCheck.data) {
-            if (likeCheck.data.type === "like") {
-              likes.add(post.id);
-            } else if (likeCheck.data.type === "dislike") {
-              dislikes.add(post.id);
-            }
-          }
-
-          // Check bookmarks
-          const bookmarkCheck = await api.get<Bookmark | null>(
-            `${API_ENDPOINTS.POST_BOOKMARK(post.id)}?userId=${currentUser.id}`
-          );
-
-          if (bookmarkCheck.data) {
-            bookmarks.add(post.id);
-          }
-        } catch (error) {
-          console.error(
-            `Failed to check interactions for post ${post.id}:`,
-            error
-          );
-        }
-      }
-
-      setUserInteractions({ likes, dislikes, bookmarks });
+      const { likes, dislikes, bookmarks } = res.data.data;
+      setUserInteractions({
+        likes: new Set(likes),
+        dislikes: new Set(dislikes),
+        bookmarks: new Set(bookmarks),
+      });
     } catch (error) {
       console.error("Failed to fetch user interactions:", error);
     }
@@ -508,7 +465,6 @@ export default function ProfilePage() {
   };
 
   const handleDelete = async (postId: string) => {
-    const { notification } = App.useApp();
     const key = `delete-post-${postId}`;
     let undoClicked = false;
     let countdown = 10;
@@ -589,6 +545,11 @@ export default function ProfilePage() {
 
   return (
     <>
+      {rewardsSummary && (
+        <div className="max-w-4xl mx-auto px-4 pt-4">
+          <RewardsPanel data={rewardsSummary} />
+        </div>
+      )}
       <UserProfile
         user={user}
         isOwnProfile={true}

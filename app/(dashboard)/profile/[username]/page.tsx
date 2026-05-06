@@ -37,7 +37,7 @@ export default function UserProfilePage() {
     dislikes: new Set<string>(),
     bookmarks: new Set<string>(),
   });
-  const { message } = App.useApp();
+  const { message, notification } = App.useApp();
   const router = useRouter();
 
   const isOwnProfile = currentUser?.userName === username;
@@ -482,7 +482,6 @@ export default function UserProfilePage() {
   };
 
   const handleDelete = async (postId: string) => {
-    const { notification } = App.useApp();
     const key = `delete-post-${postId}`;
     let undoClicked = false;
     let countdown = 10;

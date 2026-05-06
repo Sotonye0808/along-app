@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Link2, Plus, Trash2, X } from "lucide-react";
+import { Link2, MapPin, Plus, Trash2, X } from "lucide-react";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppInput } from "@/components/ui/AppInput";
 import { AppModal } from "@/components/ui/AppModal";
@@ -10,6 +10,8 @@ import { AppSelect } from "@/components/ui/AppSelect";
 import { AppTag } from "@/components/ui/AppTag";
 import { AppTextarea } from "@/components/ui/AppTextarea";
 import { DraftingCoach } from "./DraftingCoach";
+import { PlaceAutocomplete, type PlaceResult } from "@/components/features/map";
+import { RouteTracingService } from "@/lib/services/RouteTracingService";
 import { VEHICLE_REGISTRY } from "@/lib/config/vehicles";
 import { ToastService } from "@/lib/services/toastService";
 
@@ -80,6 +82,21 @@ export function ShareRouteModal({
   const [fileList, setFileList] = useState<LocalUploadFile[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Geographic fields
+  const [startLabel, setStartLabel] = useState("");
+  const [startLat, setStartLat] = useState<number | undefined>(undefined);
+  const [startLng, setStartLng] = useState<number | undefined>(undefined);
+  const [endLabel, setEndLabel] = useState("");
+  const [endLat, setEndLat] = useState<number | undefined>(undefined);
+  const [endLng, setEndLng] = useState<number | undefined>(undefined);
+  const [region, setRegion] = useState("");
+
+  // Auto-computed from coordinates
+  const geoComputed = useMemo(() => {
+    if (startLat == null || startLng == null || endLat == null || endLng == null) return null;
+    return RouteTracingService.trace(startLat, startLng, endLat, endLng);
+  }, [startLat, startLng, endLat, endLng]);
+
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [linkTargetRoute, setLinkTargetRoute] = useState<string | null>(null);
   const [draftLink, setDraftLink] = useState<DraftLink>({ url: "", text: "" });
@@ -112,6 +129,13 @@ export function ShareRouteModal({
           thumbUrl: src,
         })),
       );
+      setStartLabel("");
+      setStartLat(postToEdit.startLat);
+      setStartLng(postToEdit.startLng);
+      setEndLabel("");
+      setEndLat(postToEdit.endLat);
+      setEndLng(postToEdit.endLng);
+      setRegion(postToEdit.region ?? "");
       return;
     }
 
@@ -120,6 +144,13 @@ export function ShareRouteModal({
     setTags([]);
     setTagsInput("");
     setFileList([]);
+    setStartLabel("");
+    setStartLat(undefined);
+    setStartLng(undefined);
+    setEndLabel("");
+    setEndLat(undefined);
+    setEndLng(undefined);
+    setRegion("");
   }, [open, editMode, postToEdit]);
 
   const draftState = useMemo(
@@ -299,6 +330,13 @@ export function ShareRouteModal({
         })),
         images: fileList.map((file) => file.url).filter((value) => value.length > 0),
         tags,
+        startLat,
+        startLng,
+        endLat,
+        endLng,
+        region: region.trim() || undefined,
+        totalDistanceKm: geoComputed?.distanceKm,
+        estimatedMins: geoComputed?.estimatedMins,
       });
 
       ToastService.success(
@@ -331,6 +369,48 @@ export function ShareRouteModal({
             onChange={(event) => setTitle(event.target.value)}
             maxLength={100}
           />
+
+          {/* Geographic fields */}
+          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] p-3 space-y-3">
+            <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide flex items-center gap-1">
+              <MapPin size={12} aria-hidden="true" />
+              Route coordinates (optional)
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <PlaceAutocomplete
+                placeholder="Start location"
+                value={startLabel}
+                onChange={setStartLabel}
+                onPlaceSelect={(place: PlaceResult) => {
+                  setStartLabel(place.label);
+                  setStartLat(place.lat);
+                  setStartLng(place.lng);
+                }}
+              />
+              <PlaceAutocomplete
+                placeholder="End / destination"
+                value={endLabel}
+                onChange={setEndLabel}
+                onPlaceSelect={(place: PlaceResult) => {
+                  setEndLabel(place.label);
+                  setEndLat(place.lat);
+                  setEndLng(place.lng);
+                }}
+              />
+            </div>
+            <AppInput
+              placeholder="Region / area (e.g. Lagos Mainland)"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              maxLength={60}
+            />
+            {geoComputed && (
+              <p className="text-xs text-[var(--color-text-secondary)]">
+                Distance: <strong>{geoComputed.distanceKm} km</strong> · Est. time:{" "}
+                <strong>~{geoComputed.estimatedMins} min</strong>
+              </p>
+            )}
+          </div>
 
           <div className="max-h-[48vh] space-y-3 overflow-y-auto pr-1">
             {routes.map((route, index) => (

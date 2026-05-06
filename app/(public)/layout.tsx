@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { APP_ROUTES } from "@/lib/constants";
+import { AppFooter } from "@/components/ui/AppFooter";
 
 export default function PublicLayout({
   children,
@@ -20,6 +21,7 @@ export default function PublicLayout({
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
+      <AppFooter />
     </div>
   );
 }

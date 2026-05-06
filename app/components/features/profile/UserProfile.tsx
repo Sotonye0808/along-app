@@ -1,19 +1,29 @@
 "use client";
 
 import React, { useState } from "react";
-import { Avatar, Button, Tabs, Empty, Card, App } from "antd";
-import {
-  EditOutlined,
-  EnvironmentOutlined,
-  CalendarOutlined,
-  LinkOutlined,
-} from "@ant-design/icons";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  Calendar,
+  CheckCircle,
+  Edit,
+  Link as LinkIcon,
+  MapPin,
+  UserMinus,
+  UserPlus,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { PostCard } from "@/components/features/posts/PostCard";
 import { CommentSection } from "@/components/features/posts/CommentSection";
 import { formatDate } from "@/lib/utils/format";
 import { APP_ROUTES } from "@/lib/constants";
+import { ModalService } from "@/lib/services/modalService";
+import { ToastService } from "@/lib/services/toastService";
+import { AppAvatar } from "@/components/ui/AppAvatar";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppCard } from "@/components/ui/AppCard";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { AppTag } from "@/components/ui/AppTag";
+import { EMPTY_STATES } from "@/lib/config/emptyStates";
 import {
   useProfileComments,
   useProfileSharing,
@@ -36,8 +46,8 @@ interface UserProfileProps {
   onShare?: (postId: string) => void;
   onEdit?: (post: Post) => void;
   onDelete?: (postId: string) => void;
-  onLikeComment?: (commentId: string) => void;
-  onDislikeComment?: (commentId: string) => void;
+  onLikeComment?: (commentId: string, postId: string) => void;
+  onDislikeComment?: (commentId: string, postId: string) => void;
   onEditComment?: (commentId: string, newText: string) => Promise<void>;
   onDeleteComment?: (commentId: string) => Promise<void>;
   userInteractions?: {
@@ -46,6 +56,8 @@ interface UserProfileProps {
     bookmarks: Set<string>;
   };
 }
+
+type ProfileTab = "posts" | "comments";
 
 export function UserProfile({
   user,
@@ -73,12 +85,10 @@ export function UserProfile({
     dislikes: new Set(),
     bookmarks: new Set(),
   },
-}: UserProfileProps) {
-  const [activeTab, setActiveTab] = useState("posts");
-  const { modal } = App.useApp();
+}: UserProfileProps): React.ReactElement {
+  const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
   const router = useRouter();
 
-  // Use custom hooks for comment and sharing functionality
   const {
     commentModalOpen,
     selectedComment,
@@ -92,24 +102,21 @@ export function UserProfile({
 
   const { shareProfile } = useProfileSharing();
 
-  // Use prop handlers if provided, otherwise use hook handlers
-  const handleLikeComment = onLikeCommentProp || hookLikeComment;
-  const handleDislikeComment = onDislikeCommentProp || hookDislikeComment;
-  const handleEditComment = onEditCommentProp || hookEditComment;
-  const handleDeleteComment = onDeleteCommentProp || hookDeleteComment;
+  const handleLikeComment = onLikeCommentProp ?? hookLikeComment;
+  const handleDislikeComment = onDislikeCommentProp ?? hookDislikeComment;
+  const handleEditComment = onEditCommentProp ?? hookEditComment;
+  const handleDeleteComment = onDeleteCommentProp ?? hookDeleteComment;
 
-  const handleFollowClick = () => {
+  const handleFollowClick = async () => {
     if (!isAuthenticated) {
-      modal.confirm({
-        title: "Login Required",
-        content:
-          "You need to be logged in to follow users. Would you like to login now?",
-        okText: "Login",
-        cancelText: "Cancel",
-        onOk: () => {
-          router.push(APP_ROUTES.LOGIN);
-        },
+      const confirmed = await ModalService.confirm({
+        title: "Login required",
+        description: "You need to be signed in to follow users.",
+        confirmLabel: "Sign in",
       });
+      if (confirmed) {
+        router.push(APP_ROUTES.LOGIN);
+      }
       return;
     }
     onFollow?.(user.id);
@@ -117,25 +124,150 @@ export function UserProfile({
 
   const handleCopyProfileLink = () => {
     shareProfile(user);
+    ToastService.success("Profile link copied");
   };
 
-  const tabItems = [
-    {
-      key: "posts",
-      label: `Posts (${posts.length})`,
-      children: (
+  const tabs: { key: ProfileTab; label: string }[] = [
+    { key: "posts", label: `Posts (${posts.length})` },
+    { key: "comments", label: `Comments (${comments.length})` },
+  ];
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      {/* Profile Header */}
+      <AppCard variant="default" className="mb-6">
+        <div className="flex flex-col gap-6 md:flex-row">
+          <div className="flex justify-center md:justify-start">
+            <AppAvatar user={user} size={120} linkToProfile={false} showVerifiedBadge />
+          </div>
+
+          <div className="flex-1">
+            <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                    {user.firstName} {user.lastName}
+                  </h1>
+                  {user.verified ? (
+                    <CheckCircle
+                      size={18}
+                      className="shrink-0 text-[var(--color-primary)]"
+                      aria-label="Verified"
+                    />
+                  ) : null}
+                </div>
+                <p className="text-[var(--color-text-secondary)]">
+                  @{user.userName}
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                {isOwnProfile ? (
+                  <AppButton icon={Edit} onClick={onEditProfile}>
+                    Edit Profile
+                  </AppButton>
+                ) : (
+                  <AppButton
+                    variant={isFollowing ? "secondary" : "primary"}
+                    icon={isFollowing ? UserMinus : UserPlus}
+                    onClick={() => void handleFollowClick()}>
+                    {isFollowing ? "Following" : "Follow"}
+                  </AppButton>
+                )}
+                <AppButton
+                  variant="secondary"
+                  icon={LinkIcon}
+                  onClick={handleCopyProfileLink}
+                  ariaLabel="Share profile">
+                  Share
+                </AppButton>
+              </div>
+            </div>
+
+            {user.bio ? (
+              <p className="mb-4 whitespace-pre-wrap text-[var(--color-text-primary)]">
+                {user.bio}
+              </p>
+            ) : null}
+
+            <div className="mb-4 flex gap-6">
+              <div>
+                <span className="font-bold text-[var(--color-text-primary)]">
+                  {posts.length}
+                </span>
+                <span className="ml-1 text-[var(--color-text-secondary)]">
+                  Posts
+                </span>
+              </div>
+              <div>
+                <span className="font-bold text-[var(--color-text-primary)]">
+                  {user.followers ?? 0}
+                </span>
+                <span className="ml-1 text-[var(--color-text-secondary)]">
+                  Followers
+                </span>
+              </div>
+              <div>
+                <span className="font-bold text-[var(--color-text-primary)]">
+                  {user.following?.length ?? 0}
+                </span>
+                <span className="ml-1 text-[var(--color-text-secondary)]">
+                  Following
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 text-sm text-[var(--color-text-secondary)]">
+              {user.location ? (
+                <div className="flex items-center gap-2">
+                  <MapPin size={14} aria-hidden="true" />
+                  <span>{user.location}</span>
+                </div>
+              ) : null}
+              <div className="flex items-center gap-2">
+                <Calendar size={14} aria-hidden="true" />
+                <span>Joined {formatDate(user.createdAt)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </AppCard>
+
+      {/* Tabs */}
+      <div className="mb-4 flex border-b border-[var(--color-border)]">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            className={[
+              "px-4 py-2 text-sm font-medium transition-colors",
+              activeTab === tab.key
+                ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
+            ]
+              .join(" ")
+              .trim()}
+            onClick={() => setActiveTab(tab.key)}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "posts" ? (
         <div className="space-y-4">
           {posts.length === 0 ? (
-            <Empty
+            <AppEmptyState
+              title={EMPTY_STATES.noPosts.title}
               description={
                 isOwnProfile
-                  ? "You haven't shared any routes yet"
-                  : `${user.firstName} hasn't shared any routes yet`
+                  ? "You haven't shared any routes yet."
+                  : `${user.firstName} hasn't shared any routes yet.`
               }
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              icon={EMPTY_STATES.noPosts.icon}
             />
           ) : (
-            (posts || []).map((post) => (
+            posts.map((post) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -155,217 +287,61 @@ export function UserProfile({
             ))
           )}
         </div>
-      ),
-    },
-    {
-      key: "comments",
-      label: `Comments (${comments.length})`,
-      children: (
+      ) : (
         <div className="space-y-4">
           {comments.length === 0 ? (
-            <Empty
+            <AppEmptyState
+              title="No comments yet"
               description={
                 isOwnProfile
-                  ? "You haven't commented on any posts yet"
-                  : `${user.firstName} hasn't commented on any posts yet`
+                  ? "You haven't commented on any posts yet."
+                  : `${user.firstName} hasn't commented on any posts yet.`
               }
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              icon={EMPTY_STATES.noPosts.icon}
             />
           ) : (
             comments.map((comment) => (
-              <Card
-                key={comment.id}
-                className="mb-4 hover:shadow-md transition-shadow">
+              <AppCard key={comment.id} variant="default" hover>
                 <div className="flex flex-col gap-3">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-[var(--color-text-secondary)]">
                     Commented on{" "}
                     <Link
                       href={`/posts/${comment.post.id}`}
-                      className="font-semibold text-gray-900 hover:text-[#00623B] cursor-pointer">
+                      className="font-semibold text-[var(--color-text-primary)] hover:underline"
+                      onClick={(e) => e.stopPropagation()}>
                       {comment.post.title}
                     </Link>
                   </div>
-                  <p className="text-gray-700">{comment.text}</p>
+                  <p className="text-[var(--color-text-primary)]">
+                    {comment.text}
+                  </p>
                   <div className="flex items-center justify-between">
-                    <div className="text-xs text-gray-400">
+                    <span className="text-xs text-[var(--color-text-muted)]">
                       {formatDate(comment.createdAt)}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        type="text"
-                        size="small"
-                        icon={
-                          <svg
-                            className="w-4 h-4"
-                            fill="currentColor"
-                            viewBox="0 0 20 20">
-                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                          </svg>
-                        }
-                        onClick={() =>
-                          handleLikeComment?.(comment.id, comment.postId)
-                        }
-                        className="text-gray-600 hover:text-[#00623B]">
-                        {comment.likes > 0 && comment.likes}
-                      </Button>
-                      <Button
-                        type="text"
-                        size="small"
-                        icon={
-                          <svg
-                            className="w-4 h-4"
-                            fill="currentColor"
-                            viewBox="0 0 20 20">
-                            <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
-                          </svg>
-                        }
-                        onClick={() =>
-                          handleDislikeComment?.(comment.id, comment.postId)
-                        }
-                        className="text-gray-600 hover:text-red-500">
-                        {comment.dislikes > 0 && comment.dislikes}
-                      </Button>
-                      <Button
-                        type="link"
-                        size="small"
-                        onClick={() => router.push(`/posts/${comment.postId}`)}
-                        className="text-[#00623B]">
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {comment.likes > 0 ? (
+                        <AppTag
+                          label={String(comment.likes)}
+                          size="xs"
+                          variant="success"
+                        />
+                      ) : null}
+                      <Link
+                        href={`/posts/${comment.postId}`}
+                        className="text-sm font-medium text-[var(--color-primary)] hover:underline">
                         View Thread
-                      </Button>
+                      </Link>
                     </div>
                   </div>
                 </div>
-              </Card>
+              </AppCard>
             ))
           )}
         </div>
-      ),
-    },
-  ];
+      )}
 
-  return (
-    <div className="max-w-4xl mx-auto">
-      {/* Profile Header */}
-      <Card className="mb-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Avatar */}
-          <div className="flex justify-center md:justify-start">
-            <Avatar
-              size={120}
-              src={user.avatar}
-              className="border-4 border-[#00623B]">
-              {user.firstName?.[0] || ""}
-              {user.lastName?.[0] || ""}
-            </Avatar>
-          </div>
-
-          {/* User Info */}
-          <div className="flex-1">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {user.firstName} {user.lastName}
-                </h1>
-                <p className="text-gray-500">@{user.userName}</p>
-                {user.verified && (
-                  <span className="inline-flex items-center gap-1 text-sm text-[#00623B] font-medium mt-1">
-                    <svg
-                      className="w-4 h-4 fill-current"
-                      viewBox="0 0 20 20"
-                      fill="currentColor">
-                      <path
-                        fillRule="evenodd"
-                        d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Verified
-                  </span>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                {isOwnProfile ? (
-                  <Button
-                    type="primary"
-                    icon={<EditOutlined />}
-                    onClick={onEditProfile}
-                    className="bg-[#00623B] hover:bg-[#004d2e]">
-                    Edit Profile
-                  </Button>
-                ) : (
-                  <Button
-                    type={isFollowing ? "default" : "primary"}
-                    onClick={handleFollowClick}
-                    className={
-                      isFollowing
-                        ? "border-[#00623B] text-[#00623B] hover:bg-gray-50"
-                        : "bg-[#00623B] hover:bg-[#004d2e]"
-                    }>
-                    {isFollowing ? "Following" : "Follow"}
-                  </Button>
-                )}
-                <Button icon={<LinkOutlined />} onClick={handleCopyProfileLink}>
-                  Share Profile
-                </Button>
-              </div>
-            </div>
-
-            {/* Bio */}
-            {user.bio && (
-              <p className="text-gray-700 mb-4 whitespace-pre-wrap">
-                {user.bio}
-              </p>
-            )}
-
-            {/* User Stats */}
-            <div className="flex gap-6 mb-4">
-              <div>
-                <span className="font-bold text-gray-900">{posts.length}</span>
-                <span className="text-gray-500 ml-1">Posts</span>
-              </div>
-              <div>
-                <span className="font-bold text-gray-900">
-                  {user.followers || 0}
-                </span>
-                <span className="text-gray-500 ml-1">Followers</span>
-              </div>
-              <div>
-                <span className="font-bold text-gray-900">
-                  {user.following?.length || 0}
-                </span>
-                <span className="text-gray-500 ml-1">Following</span>
-              </div>
-            </div>
-
-            {/* Additional Info */}
-            <div className="flex flex-col gap-2 text-sm text-gray-600">
-              {isOwnProfile && user.location && (
-                <div className="flex items-center gap-2">
-                  <EnvironmentOutlined className="text-gray-400" />
-                  <span>{user.location}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                <CalendarOutlined className="text-gray-400" />
-                <span>Joined {formatDate(user.createdAt)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Tabs for Posts and Comments */}
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={tabItems}
-        className="profile-tabs"
-      />
-
-      {/* Comment Section Modal */}
-      {selectedComment && (
+      {selectedComment ? (
         <CommentSection
           open={commentModalOpen}
           onClose={closeCommentModal}
@@ -381,11 +357,11 @@ export function UserProfile({
           }
           onEditComment={handleEditComment}
           onDeleteComment={handleDeleteComment}
-          onShowLoginModal={() => {
+          onShowLoginModal={async () => {
             router.push(APP_ROUTES.LOGIN);
           }}
         />
-      )}
+      ) : null}
     </div>
   );
 }

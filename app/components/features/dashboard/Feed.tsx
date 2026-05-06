@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, lazy, Suspense } from "react";
-import { Empty, Spin, Button, App, Skeleton, Card } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PostCard } from "@/components/features/posts/PostCard";
 import { CommentSection } from "@/components/features/posts/CommentSection";
@@ -18,16 +17,21 @@ import { useFeedPosts } from "@/lib/hooks/useFeedPosts";
 import { useFeedInteractions } from "@/lib/hooks/useFeedInteractions";
 import { useComments } from "@/lib/hooks/useComments";
 import { useNewPostsNotification } from "@/lib/hooks/useNewPostsNotification";
+import { ModalService } from "@/lib/services/modalService";
+import { ToastService } from "@/lib/services/toastService";
+import { UndoService } from "@/lib/services/undoService";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { PostCardSkeleton } from "@/components/ui/AppSkeleton";
+import { EMPTY_STATES } from "@/lib/config/emptyStates";
 
 export function Feed() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
-  const { message, modal } = App.useApp();
   const router = useRouter();
 
   const currentUser = getCurrentUser();
 
-  // Custom hooks for modular state management
   const {
     posts,
     loading,
@@ -72,93 +76,65 @@ export function Feed() {
     fetchPosts();
   }, [fetchPosts]);
 
-  const handleShare = (postId: string) => {
+  const handleShare = useCallback((postId: string) => {
     const shareUrl = `${window.location.origin}/posts/${postId}`;
 
     if (navigator.share) {
       navigator
-        .share({
-          title: "Check out this route",
-          url: shareUrl,
-        })
+        .share({ title: "Check out this route", url: shareUrl })
         .catch((error) => {
           if (error.name !== "AbortError") {
-            console.error("Share failed:", error);
+            void navigator.clipboard.writeText(shareUrl);
+            ToastService.success("Link copied to clipboard");
           }
         });
     } else {
-      navigator.clipboard.writeText(shareUrl);
-      message.success("Link copied to clipboard");
+      void navigator.clipboard.writeText(shareUrl);
+      ToastService.success("Link copied to clipboard");
     }
-  };
+  }, []);
 
-  const handleEdit = (post: Post) => {
+  const handleEdit = useCallback((post: Post) => {
     setPostToEdit(post);
     setEditModalOpen(true);
-  };
+  }, []);
 
-  const handleDelete = (postId: string) => {
-    const { notification } = App.useApp();
-    const key = `delete-post-${postId}`;
-    let undoClicked = false;
-    let countdown = 10;
+  const handleDelete = useCallback((postId: string) => {
+    // Optimistically remove post from feed, register undo action
+    removePost(postId);
+    let undone = false;
 
-    const updateNotification = () => {
-      notification.open({
-        key,
-        message: "Post deleted",
-        description: `Undo within ${countdown} second${
-          countdown !== 1 ? "s" : ""
-        }`,
-        duration: null,
-        btn: (
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => {
-              undoClicked = true;
-              notification.destroy(key);
-              clearInterval(interval);
-              message.info("Deletion cancelled");
-            }}>
-            Undo
-          </Button>
-        ),
-      });
-    };
+    UndoService.registerAction(
+      "Post deleted",
+      () => {
+        // Undo: reload posts to restore
+        undone = true;
+        void fetchPosts();
+        ToastService.info("Deletion cancelled");
+      },
+      10_000,
+    );
 
-    updateNotification();
-
-    const interval = setInterval(() => {
-      countdown--;
-      if (countdown > 0) {
-        updateNotification();
-      } else {
-        clearInterval(interval);
-        notification.destroy(key);
-        if (!undoClicked) {
-          api
-            .delete(`${API_ENDPOINTS.POSTS}/${postId}`)
-            .then(() => {
-              removePost(postId);
-              message.success("Post deleted permanently");
-            })
-            .catch((error) => {
-              console.error("Failed to delete post:", error);
-              message.error("Failed to delete post");
-            });
-        }
-      }
-    }, 1000);
-  };
+    // Execute actual delete after TTL
+    globalThis.setTimeout(() => {
+      if (undone) return;
+      api
+        .delete(`${API_ENDPOINTS.POSTS}/${postId}`)
+        .then(() => {
+          ToastService.success("Post deleted permanently");
+        })
+        .catch(() => {
+          void fetchPosts();
+          ToastService.error("Failed to delete post");
+        });
+    }, 10_100);
+  }, [removePost, fetchPosts]);
 
   if (loading) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((n) => (
-          <Card key={n} className="mb-4">
-            <Skeleton active avatar paragraph={{ rows: 4 }} />
-          </Card>
+          <PostCardSkeleton key={n} />
         ))}
       </div>
     );
@@ -166,37 +142,30 @@ export function Feed() {
 
   if (posts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <Empty
-          description="No posts yet"
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <AppEmptyState
+          title={EMPTY_STATES.noPosts.title}
+          description={EMPTY_STATES.noPosts.description}
+          icon={EMPTY_STATES.noPosts.icon}
+          action={{ label: "Refresh", onClick: fetchPosts }}
         />
-        <Button
-          type="primary"
-          icon={<ReloadOutlined />}
-          onClick={fetchPosts}
-          className="mt-4 bg-[#00623B]">
-          Refresh
-        </Button>
       </div>
     );
   }
 
   return (
     <>
-      {/* New Posts Notification Banner */}
-      {hasNewPosts && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-40 animate-slideDown">
-          <Button
-            type="primary"
-            icon={<ReloadOutlined />}
+      {hasNewPosts ? (
+        <div className="fixed left-1/2 top-20 z-40 -translate-x-1/2">
+          <AppButton
+            icon={RefreshCw}
             onClick={() => handleLoadNewPosts(fetchPosts)}
-            size="large"
-            className="bg-[#00623B] dark:bg-[#00a862] shadow-lg">
-            Load New Posts
-          </Button>
+            size="sm"
+            className="shadow-lg">
+            Load new posts
+          </AppButton>
         </div>
-      )}
+      ) : null}
 
       <div className="space-y-4">
         {(posts || []).map((post) => (
@@ -206,20 +175,10 @@ export function Feed() {
             author={post.author}
             currentUserId={currentUser?.id}
             onLike={(postId) =>
-              handleLike(
-                postId,
-                updatePostLikes,
-                updatePostDislikes,
-                fetchPosts
-              )
+              handleLike(postId, updatePostLikes, updatePostDislikes, fetchPosts)
             }
             onDislike={(postId) =>
-              handleDislike(
-                postId,
-                updatePostLikes,
-                updatePostDislikes,
-                fetchPosts
-              )
+              handleDislike(postId, updatePostLikes, updatePostDislikes, fetchPosts)
             }
             onComment={openCommentModal}
             onBookmark={(postId) =>
@@ -239,9 +198,8 @@ export function Feed() {
         ))}
       </div>
 
-      {/* Edit Post Modal */}
-      {postToEdit && (
-        <Suspense fallback={<Spin size="large" />}>
+      {postToEdit ? (
+        <Suspense fallback={null}>
           <ShareRouteModal
             open={editModalOpen}
             onClose={() => {
@@ -253,10 +211,9 @@ export function Feed() {
             postToEdit={postToEdit}
           />
         </Suspense>
-      )}
+      ) : null}
 
-      {/* Comment Section Modal */}
-      {selectedPostId && (
+      {selectedPostId ? (
         <CommentSection
           open={commentModalOpen}
           onClose={closeCommentModal}
@@ -272,20 +229,18 @@ export function Feed() {
           onDeleteComment={(commentId) =>
             deleteComment(commentId, updatePostComments)
           }
-          onShowLoginModal={() => {
-            modal.confirm({
-              title: "Login Required",
-              content:
-                "You need to be logged in to interact with comments. Would you like to login now?",
-              okText: "Login",
-              cancelText: "Cancel",
-              onOk: () => {
-                router.push(APP_ROUTES.LOGIN);
-              },
+          onShowLoginModal={async () => {
+            const confirmed = await ModalService.confirm({
+              title: "Login required",
+              description: "You need to be signed in to comment.",
+              confirmLabel: "Sign in",
             });
+            if (confirmed) {
+              router.push(APP_ROUTES.LOGIN);
+            }
           }}
         />
-      )}
+      ) : null}
     </>
   );
 }

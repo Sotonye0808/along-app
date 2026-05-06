@@ -155,7 +155,7 @@ export async function requestLocationPermission(): Promise<boolean> {
     try {
         await getCurrentPosition();
         return true;
-    } catch (error) {
+    } catch {
         return false;
     }
 }

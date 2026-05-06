@@ -131,7 +131,7 @@ export function isServiceWorkerActive(): boolean {
 /**
  * Send a message to the active service worker
  */
-export async function sendMessageToSW(message: any): Promise<any> {
+export async function sendMessageToSW(message: unknown): Promise<unknown> {
     if (!navigator.serviceWorker.controller) {
         throw new Error('No active service worker');
     }

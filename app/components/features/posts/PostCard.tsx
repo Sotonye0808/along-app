@@ -12,6 +12,7 @@ import {
   MapPin,
   MessageCircle,
   Share2,
+  Sparkles,
   ThumbsDown,
   ThumbsUp,
   UserMinus,
@@ -147,8 +148,20 @@ export const PostCard = memo(function PostCard({
     }
   }
 
+  const cardVariant = post.isPlatformGen ? "suggestion" : "default";
+
   return (
-    <AppCard variant="default" hover className="mb-4">
+    <AppCard variant={cardVariant} hover className="mb-4">
+      {post.isPlatformGen && (
+        <div className="mb-3 -mt-1">
+          <AppTag
+            label="Along Suggestion"
+            variant="primary"
+            size="xs"
+            icon={Sparkles}
+          />
+        </div>
+      )}
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <AppUserLabel
@@ -195,7 +208,12 @@ export const PostCard = memo(function PostCard({
       </div>
 
       <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-primary)]">
-        {post.title}
+        <Link
+          href={`/posts/${post.id}`}
+          className="hover:underline"
+          onClick={(e) => e.stopPropagation()}>
+          {post.title}
+        </Link>
       </h2>
 
       {validityScore !== null ? (
@@ -311,12 +329,21 @@ export const PostCard = memo(function PostCard({
         </div>
       ) : null}
 
-      {post.tags.length > 0 ? (
+      {(post.tags.length > 0 || post.region) ? (
         <div className="mb-4 flex flex-wrap gap-2">
+          {post.region ? (
+            <Link
+              key={`${post.id}-region`}
+              href={`/explore?region=${encodeURIComponent(post.region)}`}
+              onClick={(e) => e.stopPropagation()}>
+              <AppTag label={post.region} size="sm" variant="info" icon={MapPin} />
+            </Link>
+          ) : null}
           {post.tags.map((tag) => (
             <Link
               key={`${post.id}-${tag}`}
-              href={`/home?q=${encodeURIComponent(tag)}`}>
+              href={`/explore?tag=${encodeURIComponent(tag)}`}
+              onClick={(e) => e.stopPropagation()}>
               <AppTag label={`#${tag}`} size="sm" variant="primary" />
             </Link>
           ))}
@@ -372,6 +399,7 @@ export const PostCard = memo(function PostCard({
               size="sm"
               loading={loadingAction === "bookmark"}
               disabled={loadingAction !== null && loadingAction !== "bookmark"}
+              className={isBookmarked ? "!text-[var(--color-primary)]" : ""}
               onClick={() => {
                 void handleAction("bookmark", () => onBookmark?.(post.id));
               }}

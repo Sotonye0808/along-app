@@ -34,6 +34,23 @@ export const API_ENDPOINTS = {
 
   // Notifications
   NOTIFICATIONS: "/notifications",
+
+  // Rewards
+  USER_REWARDS: (id: string) => `/users/${id}/rewards`,
+
+  // User activity — N+1 eliminating batch endpoints
+  USER_COMMENTS: (id: string) => `/users/${id}/comments`,
+  USER_INTERACTIONS: (id: string) => `/users/${id}/interactions`,
+
+  // Invites
+  INVITES: "/invites",
+  INVITE_VALIDATE: (code: string) => `/invites/${code}`,
+
+  // Analytics
+  ANALYTICS: "/analytics",
+
+  // Reviews (user-facing)
+  REVIEWS_USER: "/reviews/user",
 } as const;
 
 // App Routes

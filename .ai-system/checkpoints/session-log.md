@@ -451,3 +451,36 @@ Phase 1 Task 1.9 — Subtle links full-codebase audit.
 
 - `npm run build` passes after the admin batch.
 - `app/components/features/posts/CommentSection.tsx`, `app/lib/utils/commentParser.tsx`, and the global providers already cover the confirmation/undo and @mention flows, so no new code was required for 1.7/1.8 beyond tracker reconciliation.
+
+---
+
+## Session 16 — 2026-05-03
+
+**Completed:**
+Phase 1 Tasks 1.9, 1.10, 1.11 — Subtle links audit, Privacy & Terms pages, and Phase 1 checkpoint.
+
+Task 1.9: Full component rewrite batch — PostCard (tag/region/title links), NotificationItem (post link), SuggestionsPanel, Feed, notifications/page, UserProfile, and bookmarks/page all migrated off raw antd primitives to design-system components (AppCard, AppButton, AppEmptyState, AppTag, AppAvatar, AppSpinner). Removed duplicate old component at end of bookmarks/page.tsx.
+
+Task 1.10: Privacy (`/privacy`) and Terms (`/terms`) pages verified — full JSX content, correct metadata, linked from CookieConsent banner.
+
+Task 1.11: Phase 1 checkpoint executed. Fixed 2 `react-hooks/rules-of-hooks` violations in profile pages (moved `notification` from inside `handleDelete` to component-level `App.useApp()` destructuring). Fixed 7 `react/no-unescaped-entities` in NotificationSettings.tsx and OfflineIndicator.tsx. Updated PostCard bookmark button to include active-state class for tests. All checkpoint commands pass: `npm run build` ✅ · `tsc --noEmit` ✅ · 142/142 tests ✅. Remaining lint issues are pre-existing `no-explicit-any` debt in service layer files.
+
+**Files Modified:**
+
+- `app/(dashboard)/bookmarks/page.tsx` — removed duplicate old component (342 lines removed)
+- `app/components/features/posts/PostCard.tsx` — bookmark active-state class; tag/region links
+- `app/components/features/posts/__tests__/PostCard.test.tsx` — updated active-state class assertions to use design-token classes
+- `app/(dashboard)/profile/[username]/page.tsx` — fixed hooks violation: move `notification` to component level
+- `app/(dashboard)/profile/page.tsx` — fixed hooks violation: move `notification` to component level
+- `app/components/features/pwa/NotificationSettings.tsx` — fixed unescaped entities
+- `app/components/features/pwa/OfflineIndicator.tsx` — fixed unescaped entity
+- `.ai-system/planning/task-queue.md` — marked tasks 1.9–1.11 complete, updated Plan V2 tracker
+
+**Next Task:**
+Phase 2 Task 2.1 — MapLibre migration (route map in PostDetail, responsive layout, glass-morphism card overlay).
+
+**Notes / Blockers:**
+
+- `npm run build` passes. 142/142 tests pass. TypeScript clean.
+- Pre-existing `no-explicit-any` lint debt in `feedService.ts`, `searchService.ts`, `suggestionsService.ts`, `mock-redis.ts` — address during Phase 2 service rewrites.
+- Phase 2 will require `maplibre-gl` package installation and new PostDetail map panel component.

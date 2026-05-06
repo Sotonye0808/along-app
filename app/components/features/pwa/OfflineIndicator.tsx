@@ -60,7 +60,7 @@ export function OfflineIndicator() {
           <div className="flex items-center gap-3 flex-1">
             <WifiOutlined className="text-xl animate-pulse" />
             <div className="flex-1">
-              <p className="font-medium text-sm">You're offline</p>
+              <p className="font-medium text-sm">You&apos;re offline</p>
               <p className="text-xs opacity-90 hidden md:block">
                 Some features are limited. You can still view cached content.
               </p>

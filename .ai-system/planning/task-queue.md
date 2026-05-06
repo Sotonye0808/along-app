@@ -35,9 +35,9 @@
 - [x] 1.6 — Admin pages group
 - [x] 1.7 — Confirmations + Undo
 - [x] 1.8 — User tagging in comments (@mentions)
-- [ ] 1.9 — Subtle links full-codebase audit
-- [ ] 1.10 — Privacy & Terms pages
-- [ ] 1.11 — Phase 1 checkpoint
+- [x] 1.9 — Subtle links full-codebase audit
+- [x] 1.10 — Privacy & Terms pages
+- [x] 1.11 — Phase 1 checkpoint
 
 ---
 
@@ -72,19 +72,40 @@
 
 > **Authority:** `.ai-system/planning/along_copilot_plan_v2.md`
 
-## Current Phase: 1 — Core Product
+## Current Phase: 5 — Complete
 
 - [x] 1.1 — ValidityEngine + TrustBadge
 - [x] 1.2 — DraftingCoachService + DraftingCoach component
 - [x] 1.3 — DiceBear AvatarEditor + UserAvatar
 - [x] 1.4 — Google OAuth
-- [ ] 1.5 — Bug Report system
-- [ ] 1.6 — Admin pages group
-- [ ] 1.7 — Confirmations + Undo
-- [ ] 1.8 — User tagging in comments (@mentions)
-- [ ] 1.9 — Subtle links full-codebase audit
-- [ ] 1.10 — Privacy & Terms pages
-- [ ] 1.11 — Phase 1 checkpoint
+- [x] 1.5 — Bug Report system
+- [x] 1.6 — Admin pages group
+- [x] 1.7 — Confirmations + Undo
+- [x] 1.8 — User tagging in comments (@mentions)
+- [x] 1.9 — Subtle links full-codebase audit
+- [x] 1.10 — Privacy & Terms pages
+- [x] 1.11 — Phase 1 checkpoint
+- [x] 2.1 — MapLibre migration (RouteMap component — desktop inline 300px, mobile collapsible, glass overlay)
+- [x] 2.2 — RouteTracingService + `/api/routes/trace` endpoint
+- [x] 2.3 — PlaceAutocomplete component (Google Places, graceful fallback)
+- [x] 2.4 — Geo fields in ShareRouteModal (startLat/lng, endLat/lng, region, auto-computed distance/time)
+- [x] 2.5 — suggestionsService uses getSiteConfig('feedAlgorithm') for all scoring weights
+- [x] 2.6 — PlatformSuggestionsService + PostCard "Along Suggestion" chip (AppTag primary + Sparkles icon)
+- [x] 2.7 — Explore page (search, region filters, map view, glass popup, back-to-top FAB, share-this-view)
+- [x] 2.8 — Phase 2 checkpoint: build ✓ tsc ✓ 142/142 tests ✓
+- [x] 4.1 — QStash background workers (`/api/workers/notify` + `/api/workers/digest`)
+- [x] 4.2 — N+1 query elimination
+- [x] 4.3 — RxJS reactive feed (useFeedStream)
+- [x] 4.4 — AppFooter (with dev credit)
+- [x] 4.5 — Jest test suite (196/196 ✓)
+- [x] 4.6 — PWA full audit
+- [x] 4.7 — SEO audit (twitter cards, sitemap expanded)
+- [x] 4.8 — Phase 4 final gate: build ✓ tsc ✓ 196/196 tests ✓
+- [x] 5.1 — Push notifications (VAPID web-push, PushSubscription schema, subscribe/unsubscribe/send routes, PushService)
+- [x] 5.2 — CI/CD pipeline (`.github/workflows/ci.yml` — install → tsc → test → lint → build)
+- [x] 5.3 — Sentry error tracking (client/server/edge configs, instrumentation hook, next.config.mjs withSentryConfig)
+- [x] 5.4 — Remove `mock-backend/`, `app/lib/data/`, `scripts/migrate-to-prisma.ts`
+- [x] 5.5 — Phase 5 checkpoint: build ✓ tsc ✓ 196/196 tests ✓
 
 ---
 
@@ -100,4 +121,4 @@
 - **Note (0.8/0.9):** SEO helpers, root metadata, structured data wiring, sitemap/robots cleanup, and route-level loading/error shells are complete. The remaining build blocker was a server/client boundary issue in `app/not-found.tsx`; converting it to a client component resolved the prerender failure on `/` and the production build now passes.
 - **Note (API audit):** Route audit report is recorded at `.ai-system/index/api-route-audit.md`. All `app/api/**/route.ts` handlers are now Prisma-backed or non-DB utility handlers.
 - **Note (hardening):** Shared Prisma error mapper (`app/lib/utils/prismaErrors.ts`) is now used across Prisma-backed route handlers for consistent `P2025`/`P2002` responses.
-- **Note (0.10 status):** Checkpoint command sequence was executed (`build`, `tsc`, `test`, `lint`). `npm run build` passes; repository-wide legacy Jest/Lint debt still prevents full 0.10 closure until dedicated cleanup.
+- **Note (Phase 2 complete):** All Phase 2 tasks (2.1–2.8) are complete. `npm run build` passes; `tsc --noEmit` clean; 142/142 tests pass. New additions: RouteMap (maplibre-gl, desktop inline / mobile collapsible), RouteTracingService, PlaceAutocomplete (Google Places with fallback), geo fields in ShareRouteModal, suggestionsService now uses getSiteConfig weights, PlatformSuggestionsService, PostCard "Along Suggestion" chip, full Explore page (search/filter/map/glass popup/FAB), `/api/routes/trace` endpoint.

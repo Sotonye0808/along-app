@@ -12,6 +12,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { StructuredData } from "@/components/ui/StructuredData";
 import { generateArticleSchema } from "@/lib/utils/structuredData";
 import { getSiteUrl } from "@/lib/utils/metadata";
+import { RouteMap } from "@/components/features/map";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -535,6 +536,16 @@ export default function PostPage() {
         isDisliked={userInteractions.dislikes.has(post.id)}
         isBookmarked={userInteractions.bookmarks.has(post.id)}
       />
+
+      {/* Route Map — inline on desktop, collapsible on mobile */}
+      <div className="mt-4">
+        <div className="hidden md:block">
+          <RouteMap post={post} height={300} />
+        </div>
+        <div className="md:hidden">
+          <RouteMap post={post} height={240} collapsible />
+        </div>
+      </div>
 
       {/* Comment Section Modal */}
       {commentModalOpen && (

@@ -90,6 +90,7 @@ model User {
   following       Follow[]         @relation("UserFollowing")
   followers       Follow[]         @relation("UserFollowers")
   analyticsEvents AnalyticsEvent[]
+  pushSubscriptions PushSubscription[]
 
   @@index([userName])
   @@index([email])
@@ -367,4 +368,19 @@ model AnalyticsEvent {
   @@index([postId])
   @@index([region])
   @@index([createdAt(sort: Desc)])
+}
+
+// PushSubscription — stores Web Push API subscriptions per user/device
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@index([userId])
 }
