@@ -4,6 +4,22 @@ import React from "react";
 import { ConfigProvider, App, theme } from "antd";
 import { useTheme } from "./ThemeProvider";
 
+const themeTokens = {
+  colorPrimary: "var(--color-primary)",
+  borderRadius: 8,
+  fontFamily: "var(--font-sans)",
+  colorBgBase: "var(--color-bg-base)",
+  colorBgContainer: "var(--color-bg-base)",
+  colorBgElevated: "var(--color-bg-elevated)",
+  colorBgLayout: "var(--color-bg-base)",
+  colorBorder: "var(--color-border)",
+  colorBorderSecondary: "var(--color-border-light)",
+  colorText: "var(--color-text-primary)",
+  colorTextSecondary: "var(--color-text-secondary)",
+  colorTextTertiary: "var(--color-text-muted)",
+  colorTextQuaternary: "var(--color-text-muted)",
+} as const;
+
 export function AntdProvider({ children }: { children: React.ReactNode }) {
   const { theme: currentTheme } = useTheme();
 
@@ -14,37 +30,7 @@ export function AntdProvider({ children }: { children: React.ReactNode }) {
           currentTheme === "dark"
             ? theme.darkAlgorithm
             : theme.defaultAlgorithm,
-        token: {
-          colorPrimary: currentTheme === "dark" ? "#00a862" : "#00623B",
-          borderRadius: 8,
-          fontFamily: "Inter, Roboto, system-ui, sans-serif",
-          // Light mode tokens
-          ...(currentTheme === "light" && {
-            colorBgBase: "#ffffff",
-            colorBgContainer: "#ffffff",
-            colorBgElevated: "#ffffff",
-            colorBgLayout: "#f7f7f7",
-            colorBorder: "#e5e7eb",
-            colorBorderSecondary: "#f3f4f6",
-            colorText: "#232323",
-            colorTextSecondary: "#6b7280",
-            colorTextTertiary: "#9ca3af",
-            colorTextQuaternary: "#d1d5db",
-          }),
-          // Dark mode tokens
-          ...(currentTheme === "dark" && {
-            colorBgBase: "#0f0f0f",
-            colorBgContainer: "#1f1f1f",
-            colorBgElevated: "#1a1a1a",
-            colorBgLayout: "#0f0f0f",
-            colorBorder: "#2d2d2d",
-            colorBorderSecondary: "#262626",
-            colorText: "#f5f5f5",
-            colorTextSecondary: "#d1d5db",
-            colorTextTertiary: "#9ca3af",
-            colorTextQuaternary: "#6b7280",
-          }),
-        },
+        token: themeTokens,
         components: {
           Button: {
             controlHeight: 44,
@@ -52,28 +38,20 @@ export function AntdProvider({ children }: { children: React.ReactNode }) {
           },
           Input: {
             controlHeight: 44,
-            ...(currentTheme === "dark" && {
-              colorBgContainer: "#1f1f1f",
-              colorBorder: "#2d2d2d",
-              colorText: "#f5f5f5",
-            }),
+            colorBgContainer: "var(--color-bg-base)",
+            colorBorder: "var(--color-border)",
+            colorText: "var(--color-text-primary)",
           },
           Card: {
-            ...(currentTheme === "dark" && {
-              colorBgContainer: "#1f1f1f",
-              colorBorderSecondary: "#2d2d2d",
-            }),
+            colorBgContainer: "var(--color-bg-base)",
+            colorBorderSecondary: "var(--color-border)",
           },
           Modal: {
-            ...(currentTheme === "dark" && {
-              contentBg: "#1f1f1f",
-              headerBg: "#1f1f1f",
-            }),
+            contentBg: "var(--color-bg-base)",
+            headerBg: "var(--color-bg-base)",
           },
           Dropdown: {
-            ...(currentTheme === "dark" && {
-              colorBgElevated: "#1f1f1f",
-            }),
+            colorBgElevated: "var(--color-bg-base)",
           },
         },
       }}>

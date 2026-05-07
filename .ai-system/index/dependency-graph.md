@@ -1,144 +1,85 @@
 # Dependency Graph
 
-> **Overview:** Maps how modules in the Along App depend on each other. Agents use this to understand the impact of changes before modifying a module. Updated whenever new dependencies are introduced or modules are refactored.
+> Overview: Module dependencies and external packages in current codebase.
 
 ---
 
 ## Module Dependency Map
 
 ```
-app/layout.tsx (Root Layout)
-  → app/providers/AntdProvider.tsx
-  → app/providers/AuthProvider.tsx
-  → app/providers/ThemeProvider.tsx
-  → app/components/ServiceWorkerRegistration.tsx
+app/layout.tsx
+  -> app/providers/ThemeProvider.tsx
+  -> app/providers/AntdProvider.tsx
+  -> app/providers/AuthProvider.tsx
+  -> app/components/ServiceWorkerRegistration.tsx
+  -> app/components/features/pwa/*
 
-app/(auth)/* Pages
-  → app/components/features/auth/
-  → app/lib/utils/auth.ts
-  → app/lib/utils/validation.ts
-  → app/api/auth/
+app/(auth)/*
+  -> app/components/features/auth/*
+  -> app/lib/utils/auth.ts
+  -> app/api/auth/*
 
 app/(dashboard)/layout.tsx
-  → app/components/features/dashboard/
-  → app/components/features/navigation/
-  → app/lib/hooks/
-  → app/providers/AuthProvider.tsx
+  -> app/components/features/navigation/*
+  -> app/components/features/pwa/*
+  -> app/providers/AuthProvider.tsx
 
-app/(dashboard)/* Pages
-  → app/components/features/[feature]/
-  → app/lib/hooks/
-  → app/api/[resource]/
+app/(dashboard)/*
+  -> app/components/features/*
+  -> app/lib/hooks/*
+  -> app/api/*
 
-app/api/auth/
-  → app/lib/db/            (Prisma client)
-  → app/lib/utils/auth-server.ts
-  → app/lib/utils/validation.ts
-  → app/lib/utils/security.ts
+app/api/*
+  -> app/lib/db/*
+  -> app/lib/cache/*
+  -> app/lib/utils/*
+  -> app/lib/services/*
 
-app/api/posts/
-  → app/lib/db/            (Prisma client)
-  → app/lib/cache/         (Redis)
-  → app/lib/utils/auth-server.ts
-  → app/lib/utils/validation.ts
-  → app/lib/utils/rateLimiter.ts
-  → app/lib/utils/cloudinary.ts
+app/lib/services/*
+  -> app/lib/config/*
+  -> app/lib/db/*
+  -> app/lib/cache/*
 
-app/api/users/
-  → app/lib/db/            (Prisma client)
-  → app/lib/cache/         (Redis)
-  → app/lib/utils/auth-server.ts
-  → app/lib/utils/rateLimiter.ts
-
-app/api/notifications/
-  → app/lib/db/            (Prisma client)
-  → app/lib/cache/         (Redis)
-  → app/lib/utils/auth-server.ts
-  → app/lib/utils/rateLimiter.ts
-
-app/lib/db/
-  → app/generated/prisma   (Prisma generated client)
-  → PostgreSQL (external)
-
-app/lib/cache/
-  → @upstash/redis         (external)
-
-app/lib/utils/cloudinary.ts
-  → app/lib/config/        (Cloudinary config)
-  → cloudinary             (npm package)
-
-app/lib/utils/validation.ts
-  → zod                    (npm package)
-
-app/lib/utils/auth.ts
-  → js-cookie              (npm package)
-  → jsonwebtoken           (npm package)
-
-app/lib/utils/auth-server.ts
-  → next/headers           (cookies)
-  → jsonwebtoken           (npm package)
-
-app/lib/utils/rateLimiter.ts
-  → app/lib/cache/         (Redis)
-
-app/components/features/
-  → antd                   (Ant Design)
-  → @ant-design/icons
-  → app/lib/types/
-  → app/lib/hooks/
-  → app/lib/utils/
-
-app/lib/types/
-  → (no dependencies — auto-imported via tsconfig)
+app/components/ui/*
+  -> antd
+  -> lucide-react
+  -> tailwind css vars
 ```
 
 ---
 
 ## External Dependencies
 
-> **Section summary:** Third-party packages and what they're used for. Review before adding new packages.
-
-| Package | Purpose | Used In |
-|---------|---------|---------|
-| next | App framework | Entire app |
-| react / react-dom | UI library | All components |
-| antd | UI component library | All UI components |
-| @ant-design/icons | Icon library | Components, navigation |
-| @ant-design/nextjs-registry | Ant Design SSR | AntdProvider |
-| @prisma/client | Database ORM | API routes, lib/db |
-| @upstash/redis | Redis client | lib/cache |
-| cloudinary | Image management | lib/utils/cloudinary |
-| next-cloudinary | Next.js Cloudinary component | Image components |
-| jsonwebtoken | JWT generation/verification | auth utilities |
-| bcrypt / bcryptjs | Password hashing | auth API routes |
-| zod | Input validation | API routes, forms |
-| js-cookie | Cookie management (client) | auth utilities |
-| axios | HTTP client | client-side API calls |
-| react-markdown | Markdown rendering | Post descriptions |
-| tailwindcss | Utility CSS | All styling |
-| jest + @testing-library/* | Testing | `app/__tests__/` |
-| json-server | Mock API server | mock-backend |
-| concurrently | Run multiple npm scripts | dev:all |
-
----
-
-## Circular Dependency Warnings
-
-> **Section summary:** Any detected circular dependencies that need to be resolved.
-
-None detected at time of .ai-system initialization. Monitor for cycles between `lib/services/` and `lib/db/` if services become interdependent.
+| Package                      | Purpose                     | Used In                          |
+| ---------------------------- | --------------------------- | -------------------------------- |
+| next                         | App framework               | entire app                       |
+| react / react-dom            | UI runtime                  | all components                   |
+| antd                         | UI components               | App\* wrappers and some features |
+| @ant-design/icons            | Icon library (legacy usage) | some feature components          |
+| lucide-react                 | Icon library                | App\* and features               |
+| tailwindcss                  | Utility CSS                 | all styling                      |
+| @prisma/client / prisma      | ORM                         | app/lib/db, API routes           |
+| @upstash/redis               | Redis cache                 | app/lib/cache                    |
+| @upstash/qstash              | Job queue                   | app/api/workers                  |
+| cloudinary / next-cloudinary | Media                       | app/lib/utils/cloudinary         |
+| web-push                     | Push notifications          | app/lib/services/PushService     |
+| jsonwebtoken / bcrypt        | Auth                        | auth routes and utils            |
+| zod                          | Validation                  | API routes                       |
+| axios                        | HTTP client                 | client API helpers               |
+| maplibre-gl / react-map-gl   | Maps                        | RouteMap                         |
+| supercluster                 | Map clustering              | map features                     |
+| @mapbox/polyline             | Polyline helpers            | map features                     |
+| react-markdown / remark      | Markdown pages              | public pages                     |
+| @ant-design/charts           | Charts                      | analytics                        |
+| rxjs                         | Reactive feed               | feed hooks                       |
+| @sentry/nextjs               | Error tracking              | instrumentation and configs      |
+| workbox-webpack-plugin       | PWA                         | service worker setup             |
 
 ---
 
 ## Dependency Rules
 
-> **Section summary:** Rules about which modules may depend on which others. Prevents architectural decay.
-
-- **Pages** may depend on components and `lib/hooks/` — not directly on `lib/db/`
-- **API routes** may depend on `lib/db/`, `lib/cache/`, `lib/utils/` — not on page components
-- **Components** may depend on `lib/hooks/`, `lib/utils/`, `lib/types/` — not on `lib/db/`
-- **lib/db/** depends only on the generated Prisma client — no app logic
-- **lib/cache/** depends only on Upstash Redis — no app logic
-- **lib/types/** has no dependencies — it is the foundation layer
-- **lib/utils/** may depend on `lib/config/` and external packages — not on `lib/db/` or `lib/cache/`
-- **Providers** may depend on `lib/utils/` and `lib/hooks/` — not on API routes directly
+- Pages may depend on components and hooks, not db/cache directly.
+- API routes may depend on db/cache/utils/services.
+- Components may depend on hooks/utils/types, not db/cache.
+- Config modules should be imported by services and UI, not the reverse.

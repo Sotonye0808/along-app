@@ -33,61 +33,34 @@ export async function registerServiceWorker(): Promise<SwRegistrationResult> {
             });
         }
 
-        // Unregister existing service workers first to prevent conflicts
         const existingRegistrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of existingRegistrations) {
-            await registration.unregister();
-            console.log('Unregistered existing service worker');
-        }
+        const currentRegistration = existingRegistrations.find((registration) =>
+            registration.scope === window.location.origin + '/',
+        );
 
-        // Small delay to ensure cleanup is complete
-        await new Promise(resolve => setTimeout(resolve, 100));
+        if (currentRegistration) {
+            await currentRegistration.update();
+            return { success: true, registration: currentRegistration };
+        }
 
         // Register new service worker
         const registration = await navigator.serviceWorker.register('/sw.js', {
             scope: '/',
-            updateViaCache: 'none', // Always fetch the latest sw.js
+            updateViaCache: 'none',
         });
 
         console.log('Service Worker registered successfully:', registration);
 
-        // DISABLED: Automatic update checks cause excessive function calls
-        // Service worker will update naturally on page reload
-        // TODO: Consider manual update check on user action instead
-        // Check for updates every hour
-        // setInterval(() => {
-        //     registration.update();
-        // }, 60 * 60 * 1000);
-
-        // Handle updates - ensure we only show prompt once per version
-        let updatePromptShown = sessionStorage.getItem('sw-update-prompted') === 'true';
         registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
-            if (newWorker) {
-                newWorker.addEventListener('statechange', () => {
-                    if (
-                        newWorker.state === 'installed' &&
-                        navigator.serviceWorker.controller &&
-                        !updatePromptShown
-                    ) {
-                        // New service worker available, notify user once
-                        updatePromptShown = true;
-                        sessionStorage.setItem('sw-update-prompted', 'true');
-                        console.log('New service worker available');
+            if (!newWorker) return;
 
-                        if (
-                            confirm(
-                                'A new version of Along is available. Reload to update?'
-                            )
-                        ) {
-                            // Clear the flag before reloading so it doesn't persist
-                            sessionStorage.removeItem('sw-update-prompted');
-                            newWorker.postMessage({ type: 'SKIP_WAITING' });
-                            window.location.reload();
-                        }
-                    }
-                });
-            }
+            newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('New service worker available');
+                    sessionStorage.setItem('sw-update-available', 'true');
+                }
+            });
         });
 
         return { success: true, registration };

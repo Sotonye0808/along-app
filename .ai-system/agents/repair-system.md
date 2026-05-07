@@ -242,6 +242,54 @@ Pin UI library versions during foundational refactors and run full build immedia
 
 ---
 
+## Theme Token Drift From Hardcoded Colors
+
+**Symptom:**
+UI elements keep bright white/gray backgrounds or brand hex colors in dark mode, making the theme feel inconsistent and visually stale.
+
+**Root Cause:**
+Components and layouts still use hardcoded color utilities or hex values instead of CSS variables and semantic theme tokens.
+
+**Fix Applied:**
+Audit and replace hardcoded colors with var(--color-\*) tokens or semantic Tailwind classes, and keep Ant Design tokens mapped to CSS variables.
+
+**Prevention:**
+Do not introduce raw hex colors in feature/page code. Prefer App\* wrappers and tokenized class names only.
+
+**Files Affected:**
+
+- app/globals.css
+- app/providers/AntdProvider.tsx
+- app/components/\*
+
+**Date:** 2026-05-07
+
+---
+
+## PWA Install Prompt Noise
+
+**Symptom:**
+The old install prompt continues appearing during navigation or reloads instead of behaving as a one-time, intentional prompt.
+
+**Root Cause:**
+The install prompt and service worker registration logic are too eager and rely on repeated client-side checks and reload behavior.
+
+**Fix Applied:**
+Stabilize the install flow with a single prompt gate and replace forced service worker unregister/re-register behavior with a non-blocking update path.
+
+**Prevention:**
+Keep PWA prompts behind explicit user intent or a durable dismissal gate, and avoid automatic unregister cycles during registration.
+
+**Files Affected:**
+
+- app/components/features/pwa/InstallPrompt.tsx
+- app/components/ServiceWorkerRegistration.tsx
+- app/lib/utils/sw-register.ts
+
+**Date:** 2026-05-07
+
+---
+
 ## Prisma 7 Migrate Dev Fails with Missing datasource.url
 
 **Symptom:**

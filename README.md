@@ -6,11 +6,11 @@
 
 **Discover, share, and explore travel routes with the Along community**
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.0-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.2-blue)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
-[![Ant Design](https://img.shields.io/badge/Ant%20Design-5.27-blue)](https://ant.design/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8)](https://tailwindcss.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.3-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.1-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
+[![Ant Design](https://img.shields.io/badge/Ant%20Design-5.23-blue)](https://ant.design/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8)](https://tailwindcss.com/)
 
 </div>
 
@@ -70,17 +70,18 @@
 
 ### Frontend
 
-- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript](https://www.typescriptlang.org/) (Strict mode)
 - **UI Library**: [Ant Design 5](https://ant.design/)
-- **Styling**: [Tailwind CSS 3](https://tailwindcss.com/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
 - **State Management**: React Context API
 - **HTTP Client**: Axios with interceptors
 
-### Backend (Mock)
+### Backend
 
 - **API**: Next.js API Routes
-- **Data**: TypeScript-based mock database
+- **Data**: Prisma ORM + PostgreSQL
+- **Cache**: Upstash Redis
 - **Auth**: JWT tokens with httpOnly cookies
 
 ### Development Tools
@@ -115,13 +116,24 @@ npm install
 
 3. **Set up environment variables**
 
-Create a `.env.local` file:
+Copy the example env file and fill in values:
+
+```bash
+cp .env.example .env.local
+```
+
+Minimum required for local dev:
 
 ```bash
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NODE_ENV=development
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=your_vapid_public_key_here
-VAPID_PRIVATE_KEY=your_vapid_private_key_here
+LOCAL_DB=postgresql://USER:PASSWORD@HOST:5432/along
+JWT_ACCESS_SECRET=replace_me
+JWT_REFRESH_SECRET=replace_me
+CLOUDINARY_CLOUD_NAME=replace_me
+CLOUDINARY_API_KEY=replace_me
+CLOUDINARY_API_SECRET=replace_me
+UPSTASH_REDIS_REST_URL=replace_me
+UPSTASH_REDIS_REST_TOKEN=replace_me
 ```
 
 4. **Run the development server**
@@ -156,8 +168,11 @@ Comprehensive documentation is available:
 - **[API Documentation](API.md)** - Complete API reference
 - **[Components Documentation](app/components/COMPONENTS.md)** - Component usage guide
 - **[Contributing Guidelines](CONTRIBUTING.md)** - How to contribute
-- **[Project Context](.github/project-context.md)** - Project overview and architecture
-- **[Development Plan](.github/plan.md)** - Roadmap and progress
+- **[Project Context](.ai-system/docs/PROJECT_CONTEXT.md)** - Product and architecture context
+- **[Engineering Roadmap](.ai-system/docs/Along_PRD_Engineering_Roadmap_v2.md)** - PRD and engineering plan
+- **[Design Brief](.ai-system/docs/Along_Stitch_Design_Brief.md)** - Design system source of truth
+- **[Plan v2](.ai-system/planning/along_copilot_plan_v2.md)** - Execution plan and standards
+- **[Repo Map](.ai-system/index/repo-map.md)** - Codebase navigation map
 - **[PWA Features](app/components/features/pwa/README.md)** - Progressive Web App guide
 
 ## 📁 Project Structure
@@ -167,6 +182,8 @@ along-app/
 ├── app/                        # Next.js App Router
 │   ├── (auth)/                # Authentication routes
 │   ├── (dashboard)/           # Dashboard routes
+│   ├── (admin)/               # Admin routes
+│   ├── (public)/              # Public marketing/legal routes
 │   ├── api/                   # API routes
 │   ├── components/            # React components
 │   │   ├── features/          # Feature-specific components
@@ -202,27 +219,9 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## 📊 Project Status
 
-### Completed Phases ✅
+### Current Phase
 
-- ✅ Phase 1: Foundation Setup
-- ✅ Phase 2: Project Structure Refactoring
-- ✅ Phase 3: Type System Implementation
-- ✅ Phase 4: Component Migration
-- ✅ Phase 5: Feature Implementation
-- ✅ Phase 6: Optimization & Polish
-  - Performance optimization
-  - UX improvements (dark mode, animations)
-  - Accessibility (WCAG 2.1 AA)
-  - SEO enhancements
-  - PWA features
-
-### Current Phase 🚀
-
-- 🚀 Phase 7: Testing & Documentation
-  - Unit tests
-  - Component tests
-  - Integration tests
-  - Comprehensive documentation
+- Compliance audit and remediation (design tokens, universal components, PWA prompt behavior)
 
 ## 🔒 Security
 
@@ -252,10 +251,10 @@ Along is a Progressive Web App that can be installed on:
 
 ## 🎨 Design System
 
-- **Primary Color**: #00623B (Along Green)
-- **Typography**: Inter font family
-- **Spacing**: 8px base unit
-- **Components**: Ant Design + Tailwind CSS
+- **Primary Color**: var(--color-primary) (Along Green)
+- **Typography**: System font stack defined in globals.css
+- **Spacing**: 4px base unit (Tailwind defaults)
+- **Components**: App\* wrappers over Ant Design + Tailwind tokens
 
 ## 📈 Performance
 

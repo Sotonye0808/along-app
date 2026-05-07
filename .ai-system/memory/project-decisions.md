@@ -325,3 +325,22 @@ As route hardening expanded, duplicating `P2025`/`P2002` handling across each ha
 
 **Implications:**
 Prisma-backed routes should call the shared mapper first in `catch` blocks before generic 500 responses. Utility-only routes without Prisma usage are exempt.
+
+---
+
+## Compliance Audit and Remediation Roadmap
+
+**Decision:** Treat the 2026-05-07 compliance audit as the next source of truth for UI, routing, PWA, and documentation cleanup.
+**Date:** 2026-05-07
+**Made by:** AI agent
+
+**Reason:**
+The codebase contains several areas of drift after multi-session refactors: theme tokens are not consistently applied, some feature components still import Ant Design directly, PWA prompts are noisy, and documentation no longer matches the current architecture.
+
+**Alternatives Considered:**
+
+- Continue fixing issues opportunistically: rejected because it risks repeated re-audits and inconsistent direction.
+- Rewrite the entire app: rejected because the drift is localized and better handled through a controlled remediation phase.
+
+**Implications:**
+Future changes should follow the compliance-audit plan, with docs kept in sync after each remediation batch and environment variables maintained through .env.example.

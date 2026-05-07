@@ -11,14 +11,14 @@ export function ServiceWorkerRegistration() {
 
     if (!isProduction && !enableInDev) {
       console.log(
-        "[SW] Service Worker registration skipped in development. Set NEXT_PUBLIC_ENABLE_SW_IN_DEV=true to enable."
+        "[SW] Service Worker registration skipped in development. Set NEXT_PUBLIC_ENABLE_SW_IN_DEV=true to enable.",
       );
       return;
     }
 
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       // Wait for page load to avoid interfering with initial render
-      window.addEventListener("load", () => {
+      const handleLoad = () => {
         registerServiceWorker()
           .then(({ success, registration }) => {
             if (success) {
@@ -28,7 +28,13 @@ export function ServiceWorkerRegistration() {
           .catch((error) => {
             console.error("[SW] Service Worker registration failed:", error);
           });
-      });
+      };
+
+      window.addEventListener("load", handleLoad, { once: true });
+
+      return () => {
+        window.removeEventListener("load", handleLoad);
+      };
     }
   }, []);
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button, Modal } from "antd";
-import { DownloadOutlined, CloseOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import { X, Download, CheckCircle2 } from "lucide-react";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppModal } from "@/components/ui/AppModal";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -14,19 +15,30 @@ export function InstallPrompt() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [canPromptAgain, setCanPromptAgain] = useState(false);
+  const promptSeenKey = "along_install_prompt_seen";
+  const dismissKey = "along_install_prompt_dismissed";
 
   useEffect(() => {
     // Check if already installed
     if (
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true
+      Boolean(
+        (window.navigator as Navigator & { standalone?: boolean }).standalone,
+      )
     ) {
       setIsInstalled(true);
       return;
     }
 
     // Check if user previously dismissed
-    const dismissed = localStorage.getItem("install-prompt-dismissed");
+    const sessionGate = sessionStorage.getItem(promptSeenKey) === "true";
+    if (sessionGate) {
+      return;
+    }
+
+    const dismissed = localStorage.getItem(dismissKey);
     if (dismissed) {
       const dismissedTime = parseInt(dismissed, 10);
       const daysSinceDismissal =
@@ -37,16 +49,16 @@ export function InstallPrompt() {
       }
     }
 
+    setCanPromptAgain(true);
+
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       const event = e as BeforeInstallPromptEvent;
       setDeferredPrompt(event);
-
-      // Show prompt after a short delay (better UX)
-      setTimeout(() => {
-        setShowPrompt(true);
-      }, 3000);
+      setIsReady(true);
+      sessionStorage.setItem(promptSeenKey, "true");
+      setShowPrompt(true);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -64,7 +76,7 @@ export function InstallPrompt() {
     return () => {
       window.removeEventListener(
         "beforeinstallprompt",
-        handleBeforeInstallPrompt
+        handleBeforeInstallPrompt,
       );
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
@@ -86,85 +98,81 @@ export function InstallPrompt() {
     } else {
       console.log("User dismissed the install prompt");
       // Save dismissal timestamp
-      localStorage.setItem("install-prompt-dismissed", Date.now().toString());
+      localStorage.setItem(dismissKey, Date.now().toString());
     }
 
     // Clear the prompt
     setDeferredPrompt(null);
     setShowPrompt(false);
+    setIsReady(false);
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem("install-prompt-dismissed", Date.now().toString());
+    localStorage.setItem(dismissKey, Date.now().toString());
+    sessionStorage.setItem(promptSeenKey, "true");
   };
 
   // Don't show if already installed or no prompt available
-  if (isInstalled || !showPrompt || !deferredPrompt) {
+  if (
+    isInstalled ||
+    !canPromptAgain ||
+    !showPrompt ||
+    !deferredPrompt ||
+    !isReady
+  ) {
     return null;
   }
 
   return (
-    <Modal
+    <AppModal
       open={showPrompt}
-      onCancel={handleDismiss}
+      onClose={handleDismiss}
+      title="Install Along"
+      subtitle="Add Along to your device for faster access and offline support."
+      icon={Download}
       footer={null}
-      closeIcon={<CloseOutlined />}
-      centered
       className="install-prompt-modal">
-      <div className="text-center py-4">
-        <div className="text-6xl mb-4">📱</div>
-        <h2 className="text-2xl font-bold mb-2 dark:text-gray-200">
-          Install Along App
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          Install Along on your device for a better experience. Get quick
-          access, offline support, and push notifications.
-        </p>
-
-        <div className="space-y-3 mb-6 text-left max-w-sm mx-auto">
-          <div className="flex items-start gap-3">
-            <span className="text-blue-500 text-xl">✓</span>
-            <div className="flex-1">
-              <p className="font-medium dark:text-gray-200">Works Offline</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Access your routes even without internet
+      <div className="space-y-4 py-1 text-[var(--color-text-primary)]">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="text-[var(--color-primary)]" size={18} />
+            <div>
+              <p className="font-medium">Works offline</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                Access your routes even without internet.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-blue-500 text-xl">✓</span>
-            <div className="flex-1">
-              <p className="font-medium dark:text-gray-200">Fast & Reliable</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Instant loading from your home screen
+          <div className="mt-3 flex items-center gap-3">
+            <CheckCircle2 className="text-[var(--color-primary)]" size={18} />
+            <div>
+              <p className="font-medium">Fast and reliable</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                Launch directly from your home screen.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-blue-500 text-xl">✓</span>
-            <div className="flex-1">
-              <p className="font-medium dark:text-gray-200">Stay Updated</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Get push notifications for new content
+          <div className="mt-3 flex items-center gap-3">
+            <CheckCircle2 className="text-[var(--color-primary)]" size={18} />
+            <div>
+              <p className="font-medium">Stay updated</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                Receive push notifications for important updates.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-3 justify-center">
-          <Button onClick={handleDismiss} size="large">
-            Maybe Later
-          </Button>
-          <Button
-            type="primary"
-            icon={<DownloadOutlined />}
-            onClick={handleInstallClick}
-            size="large">
-            Install Now
-          </Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <AppButton variant="ghost" icon={X} onClick={handleDismiss}>
+            Maybe later
+          </AppButton>
+          <AppButton icon={Download} onClick={handleInstallClick}>
+            Install now
+          </AppButton>
         </div>
       </div>
-    </Modal>
+    </AppModal>
   );
 }

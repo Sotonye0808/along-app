@@ -21,6 +21,20 @@
 
 ---
 
+## Compliance Audit Follow-Up
+
+> Section summary: Consolidated remediation work identified by the 2026-05-07 compliance audit.
+
+- [x] Create compliance audit report and remediation roadmap
+- [x] Add .env.example with full variable list
+- [x] Sync ai-system architecture, repo map, dependency graph, and project plan
+- [ ] Normalize theme tokens across layouts, shared components, and feature UI
+- [ ] Replace remaining direct Ant Design usage in feature components
+- [ ] Replace remaining Ant icons and emoji in UI with Lucide icons
+- [ ] Remove dead route references and fix nav consistency
+- [ ] Stabilize PWA install prompt and service worker update flow
+- [ ] Update README and developer docs after remediation
+
 ## Up Next
 
 > **Section summary:** Phase 1 tasks currently in progress.

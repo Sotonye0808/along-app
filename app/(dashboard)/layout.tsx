@@ -8,7 +8,7 @@ import { OfflineIndicator } from "@/components/features/pwa";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppFooter } from "@/components/ui/AppFooter";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { Spin } from "antd";
+import { AppPageLoader } from "@/components/ui/AppPageLoader";
 
 export default function DashboardLayout({
   children,
@@ -18,16 +18,12 @@ export default function DashboardLayout({
   const { loading, user } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spin size="large" />
-      </div>
-    );
+    return <AppPageLoader />;
   }
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
+      <div className="min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] transition-colors duration-200">
         {/* Offline Indicator */}
         <OfflineIndicator />
 
@@ -37,7 +33,7 @@ export default function DashboardLayout({
         <DesktopTopBar />
 
         {/* Main Content */}
-        <main className="md:ml-20 md:mt-12 mt-8 mb-20 md:mb-0">
+        <main className="mb-20 mt-8 md:mb-0 md:ml-20 md:mt-12">
           <div className="max-w-7xl mx-auto p-1 md:p-4">{children}</div>
         </main>
 
