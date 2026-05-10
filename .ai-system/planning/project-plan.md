@@ -22,8 +22,8 @@
 - [ ] Remove hardcoded colors in UI and align to CSS vars
 - [ ] Replace direct Ant Design usage in feature components
 - [ ] Replace Ant icons and emoji with Lucide icons
-- [ ] Fix dead routes (settings) and nav alignment
-- [ ] Stabilize PWA install prompt and service worker update flow
+- [x] Fix dead routes (settings) and nav alignment
+- [x] Stabilize PWA install prompt and service worker update flow
 - [ ] Update README and ai-system docs to current state
 
 ---

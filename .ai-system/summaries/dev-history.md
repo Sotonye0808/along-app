@@ -1,5 +1,27 @@
 # Development History
 
+## 2026-05-10 — Compliance Remediation Batch 1 (Feature/UI Cleanup)
+
+**Summary:**
+Completed the next compliance pass against the audit drift list by cleaning targeted feature and shared UI components. This batch removed direct Ant Design usage from scoped feature files, replaced non-compliant icons/emoji with Lucide patterns, and aligned selected shared widgets to tokenized color usage.
+
+**Completed:**
+
+- Reworked `MobileTopBar` and `DesktopTopBar` to remove dead `/settings` navigation references and align menu actions to real routes/theme toggling
+- Rebuilt `SearchBar`, `ShareRouteButton`, `NotificationSettings`, and `OfflineIndicator` without direct Ant Design imports
+- Updated shared widgets (`CookieConsent`, `GlobalUndoToast`, `AppTag`) to remove remaining hardcoded color drift in the scoped targets
+- Synced compliance trackers (`task-queue.md`, `project-plan.md`, `session-log.md`) for completed dead-route/PWA stabilization milestones
+
+**Key Changes:**
+
+- Scoped feature components now rely on App* wrappers/Lucide and tokenized styles in the remediated files
+- `/settings` top-bar route references are removed; settings intent now maps to existing profile flow
+- Push notification settings no longer use a hardcoded VAPID fallback in client UI
+
+**Known Blockers:**
+
+- `npx tsc --noEmit` still reports pre-existing typing issues in `app/__tests__/unit/buildMetadata.test.ts`
+
 ## 2026-05-07 — Compliance Audit and Documentation Sync
 
 **Summary:**
