@@ -51,7 +51,7 @@ export function GlobalUndoToast(): React.ReactElement {
   }
 
   return (
-    <div className="fixed bottom-5 left-1/2 z-50 w-[min(92vw,460px)] -translate-x-1/2 rounded-xl border border-[var(--color-border)] bg-white p-3 shadow-xl">
+    <div className="fixed bottom-5 left-1/2 z-50 w-[min(92vw,460px)] -translate-x-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-base)] p-3 shadow-xl">
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm text-[var(--color-text-primary)]">
           {payload.message}

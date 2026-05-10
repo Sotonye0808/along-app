@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Moon, Settings, Sun, User, LogOut, LogIn } from "lucide-react";
+import { Moon, Sun, User, LogOut, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -24,12 +24,6 @@ export function DesktopTopBar() {
       label: "My profile",
       icon: <User size={16} aria-hidden="true" />,
       onClick: () => router.push(APP_ROUTES.PROFILE),
-    },
-    {
-      key: "settings",
-      label: "Settings",
-      icon: <Settings size={16} aria-hidden="true" />,
-      onClick: () => router.push("/settings"),
     },
     {
       key: "theme",

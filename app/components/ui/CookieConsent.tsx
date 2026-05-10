@@ -13,7 +13,7 @@ export function CookieConsent(): React.ReactElement {
   }
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-40 w-[min(95vw,720px)] -translate-x-1/2 rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-xl">
+    <div className="fixed bottom-4 left-1/2 z-40 w-[min(95vw,720px)] -translate-x-1/2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-base)] p-4 shadow-xl">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-[var(--color-text-secondary)]">
           We use cookies to improve route recommendations and platform
