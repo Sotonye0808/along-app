@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Input, Spin, Empty, Avatar, Tag } from "antd";
-import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import { FileText, Hash, Search, X } from "lucide-react";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils/format";
-
-const { Search } = Input;
+import { AppAvatar } from "@/components/ui/AppAvatar";
+import { AppInput } from "@/components/ui/AppInput";
+import { AppEmptyState, EMPTY_STATES } from "@/components/ui/AppEmptyState";
+import { AppSpinner } from "@/components/ui/AppSpinner";
 
 export function SearchBar() {
   const [query, setQuery] = useState("");
@@ -17,7 +18,6 @@ export function SearchBar() {
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Close results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -32,7 +32,6 @@ export function SearchBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Debounced search
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults([]);
@@ -42,7 +41,6 @@ export function SearchBar() {
     setLoading(true);
 
     try {
-      // Fetch users, posts, and extract tags
       const [usersResponse, postsResponse] = await Promise.all([
         api.get<User[]>(API_ENDPOINTS.USERS),
         api.get<Post[]>(API_ENDPOINTS.POSTS),
@@ -51,13 +49,12 @@ export function SearchBar() {
       const searchLower = searchQuery.toLowerCase();
       const searchResults: SearchResult[] = [];
 
-      // Search users (excluding location for privacy)
       const matchingUsers = usersResponse.data
         .filter(
           (user) =>
             user.userName.toLowerCase().includes(searchLower) ||
             user.firstName.toLowerCase().includes(searchLower) ||
-            user.lastName.toLowerCase().includes(searchLower)
+            user.lastName.toLowerCase().includes(searchLower),
         )
         .slice(0, 3)
         .map((user) => ({
@@ -67,25 +64,24 @@ export function SearchBar() {
           subtitle: `@${user.userName}`,
           avatar: user.avatar,
           link: `/profile/${user.userName}`,
-          metadata: undefined, // Location is private
+          metadata: undefined,
         }));
 
       searchResults.push(...matchingUsers);
 
-      // Search posts
       const matchingPosts = postsResponse.data
         .filter(
           (post) =>
             post.title.toLowerCase().includes(searchLower) ||
             post.routes.some((route) =>
-              route.text.toLowerCase().includes(searchLower)
+              route.text.toLowerCase().includes(searchLower),
             ) ||
-            post.tags.some((tag) => tag.toLowerCase().includes(searchLower))
+            post.tags.some((tag) => tag.toLowerCase().includes(searchLower)),
         )
         .slice(0, 5)
         .map((post) => {
           const author = (usersResponse.data || []).find(
-            (u) => u.id === post.userId
+            (u) => u.id === post.userId,
           );
           return {
             type: "post" as const,
@@ -99,7 +95,6 @@ export function SearchBar() {
 
       searchResults.push(...matchingPosts);
 
-      // Search tags
       const allTags = new Set<string>();
       (postsResponse.data || []).forEach((post) => {
         post.tags.forEach((tag) => {
@@ -113,7 +108,7 @@ export function SearchBar() {
         .slice(0, 3)
         .map((tag) => {
           const postsWithTag = (postsResponse.data || []).filter((post) =>
-            post.tags.includes(tag)
+            post.tags.includes(tag),
           );
           return {
             type: "tag" as const,
@@ -125,7 +120,6 @@ export function SearchBar() {
         });
 
       searchResults.push(...matchingTags);
-
       setResults(searchResults);
     } catch (error) {
       console.error("Search failed:", error);
@@ -135,11 +129,10 @@ export function SearchBar() {
     }
   }, []);
 
-  // Debounce search input
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (query.trim()) {
-        performSearch(query);
+        void performSearch(query);
       } else {
         setResults([]);
       }
@@ -147,11 +140,6 @@ export function SearchBar() {
 
     return () => clearTimeout(timeoutId);
   }, [query, performSearch]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-    setShowResults(true);
-  };
 
   const handleClear = () => {
     setQuery("");
@@ -169,20 +157,27 @@ export function SearchBar() {
     switch (result.type) {
       case "user":
         return (
-          <Avatar src={result.avatar} size={40}>
-            {result.title[0]}
-          </Avatar>
+          <AppAvatar
+            user={{
+              userName: result.subtitle?.replace("@", "") || result.title,
+              firstName: result.title,
+              avatar: result.avatar,
+            }}
+            size={40}
+            linkToProfile={false}
+            showVerifiedBadge={false}
+          />
         );
       case "post":
         return (
-          <div className="w-10 h-10 rounded-md bg-[#00623B] flex items-center justify-center text-white font-semibold">
-            P
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[var(--color-primary)]/15 text-[var(--color-primary)]">
+            <FileText size={18} aria-hidden="true" />
           </div>
         );
       case "tag":
         return (
-          <div className="w-10 h-10 rounded-md bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300">
-            #
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)]">
+            <Hash size={18} aria-hidden="true" />
           </div>
         );
     }
@@ -190,44 +185,45 @@ export function SearchBar() {
 
   return (
     <div ref={searchRef} className="relative w-full max-w-2xl">
-      <Search
+      <AppInput
         placeholder="Search users, posts, or tags..."
         value={query}
-        onChange={handleSearchChange}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          setShowResults(true);
+        }}
         onFocus={() => query && setShowResults(true)}
-        prefix={<SearchOutlined className="text-gray-400 dark:text-gray-500" />}
+        prefix={<Search size={16} className="text-[var(--color-text-muted)]" />}
         suffix={
-          query && (
-            <CloseOutlined
-              className="text-gray-400 dark:text-gray-500 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300"
+          query ? (
+            <button
+              type="button"
               onClick={handleClear}
-            />
-          )
+              className="cursor-pointer text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+              aria-label="Clear search">
+              <X size={16} />
+            </button>
+          ) : null
         }
         className="search-bar"
         size="large"
       />
 
-      {/* Search Results Dropdown */}
       {showResults && (query || results.length > 0) && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-[500px] overflow-y-auto z-[9999]">
+        <div className="absolute left-0 right-0 top-full z-[9999] mt-2 max-h-[500px] overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-base)] shadow-lg">
           {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <Spin />
+            <div className="flex items-center justify-center py-8">
+              <AppSpinner size={22} className="text-[var(--color-primary)]" />
             </div>
           ) : results.length === 0 ? (
-            <div className="py-8">
-              <Empty
-                description="No results found"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
+            <div className="py-4">
+              <AppEmptyState {...EMPTY_STATES.noResults} size="sm" />
             </div>
           ) : (
             <div className="py-2">
-              {/* Users Section */}
               {results.filter((r) => r.type === "user").length > 0 && (
                 <div className="mb-2">
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                  <div className="px-4 py-2 text-xs font-semibold uppercase text-[var(--color-text-muted)]">
                     Users
                   </div>
                   {results
@@ -237,21 +233,16 @@ export function SearchBar() {
                         key={result.id}
                         href={result.link}
                         onClick={handleResultClick}
-                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        className="block px-4 py-3 transition-colors hover:bg-[var(--color-bg-elevated)]">
                         <div className="flex items-center gap-3">
                           {getResultIcon(result)}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate font-medium text-[var(--color-text-primary)]">
                               {result.title}
                             </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            <div className="truncate text-sm text-[var(--color-text-secondary)]">
                               {result.subtitle}
                             </div>
-                            {result.metadata && (
-                              <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                📍 {result.metadata}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </Link>
@@ -259,10 +250,9 @@ export function SearchBar() {
                 </div>
               )}
 
-              {/* Posts Section */}
               {results.filter((r) => r.type === "post").length > 0 && (
                 <div className="mb-2">
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                  <div className="px-4 py-2 text-xs font-semibold uppercase text-[var(--color-text-muted)]">
                     Posts
                   </div>
                   {results
@@ -272,19 +262,19 @@ export function SearchBar() {
                         key={result.id}
                         href={result.link}
                         onClick={handleResultClick}
-                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        className="block px-4 py-3 transition-colors hover:bg-[var(--color-bg-elevated)]">
                         <div className="flex items-center gap-3">
                           {getResultIcon(result)}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate font-medium text-[var(--color-text-primary)]">
                               {result.title}
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="mt-1 flex items-center gap-2">
+                              <span className="text-sm text-[var(--color-text-secondary)]">
                                 {result.subtitle}
                               </span>
                               {result.metadata && (
-                                <span className="text-xs text-gray-400 dark:text-gray-500">
+                                <span className="text-xs text-[var(--color-text-muted)]">
                                   • {result.metadata}
                                 </span>
                               )}
@@ -296,10 +286,9 @@ export function SearchBar() {
                 </div>
               )}
 
-              {/* Tags Section */}
               {results.filter((r) => r.type === "tag").length > 0 && (
                 <div>
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                  <div className="px-4 py-2 text-xs font-semibold uppercase text-[var(--color-text-muted)]">
                     Tags
                   </div>
                   {results
@@ -309,14 +298,14 @@ export function SearchBar() {
                         key={result.id}
                         href={result.link}
                         onClick={handleResultClick}
-                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        className="block px-4 py-3 transition-colors hover:bg-[var(--color-bg-elevated)]">
                         <div className="flex items-center gap-3">
                           {getResultIcon(result)}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-[#00623B] dark:text-[#00a862]">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium text-[var(--color-primary)]">
                               {result.title}
                             </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-sm text-[var(--color-text-secondary)]">
                               {result.subtitle}
                             </div>
                           </div>

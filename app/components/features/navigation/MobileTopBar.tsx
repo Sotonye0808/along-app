@@ -1,19 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Avatar, Dropdown, Badge, Button, Switch } from "antd";
-import {
-  SearchOutlined,
-  BellOutlined,
-  UserOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  LoginOutlined,
-  CloseOutlined,
-  BulbOutlined,
-  BulbFilled,
-} from "@ant-design/icons";
-import type { MenuProps } from "antd";
+import { LogIn, LogOut, Moon, Search, Sun, User, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -21,6 +9,9 @@ import { useTheme } from "@/app/providers/ThemeProvider";
 import { NotificationsDropdown } from "./NotificationsDropdown";
 import { SearchBar } from "@/components/features/dashboard/SearchBar";
 import Link from "next/link";
+import { AppAvatar } from "@/components/ui/AppAvatar";
+import { AppButton } from "@/components/ui/AppButton";
+import { AppDropdown } from "@/components/ui/AppDropdown";
 
 export function MobileTopBar() {
   const [searchVisible, setSearchVisible] = useState(false);
@@ -32,39 +23,27 @@ export function MobileTopBar() {
     await logout();
   };
 
-  const userMenuItems: MenuProps["items"] = [
+  const userMenuItems = [
     {
       key: "profile",
-      icon: <UserOutlined />,
+      icon: <User size={16} aria-hidden="true" />,
       label: "My Profile",
       onClick: () => router.push(APP_ROUTES.PROFILE),
     },
     {
       key: "theme",
-      icon: theme === "dark" ? <BulbFilled /> : <BulbOutlined />,
-      label: (
-        <div className="flex items-center justify-between w-full">
-          <span>Dark Mode</span>
-          <Switch
-            checked={theme === "dark"}
-            size="small"
-            onChange={toggleTheme}
-          />
-        </div>
-      ),
-    },
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "Settings",
-      onClick: () => router.push("/settings"),
-    },
-    {
-      type: "divider",
+      icon:
+        theme === "dark" ? (
+          <Sun size={16} aria-hidden="true" />
+        ) : (
+          <Moon size={16} aria-hidden="true" />
+        ),
+      label: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
+      onClick: toggleTheme,
     },
     {
       key: "logout",
-      icon: <LogoutOutlined />,
+      icon: <LogOut size={16} aria-hidden="true" />,
       label: "Logout",
       danger: true,
       onClick: handleLogout,
@@ -72,77 +51,68 @@ export function MobileTopBar() {
   ];
 
   return (
-    <div className="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 z-50 transition-colors duration-200">
+    <div className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg-base)] px-4 py-3 transition-colors duration-200 md:hidden">
       {searchVisible ? (
         <div className="flex items-center gap-2">
           <div className="flex-1">
             <SearchBar />
           </div>
-          <button
-            type="button"
+          <AppButton
+            variant="icon"
+            icon={X}
             onClick={() => setSearchVisible(false)}
-            className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1">
-            <CloseOutlined className="text-lg" />
-            <span className="sr-only">Close Button</span>
-          </button>
+            ariaLabel="Close search"
+          />
         </div>
       ) : (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-[#00623B] dark:text-[#00a862]">
-              Along
-            </h1>
+            <h1 className="text-xl font-bold text-[var(--color-primary)]">Along</h1>
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              type="button"
+            <AppButton
+              variant="icon"
+              icon={Search}
               onClick={() => setSearchVisible(true)}
-              className="text-xl text-gray-700 dark:text-gray-300 hover:text-[#00623B] dark:hover:text-[#00a862]"
-              title="Search"
-              aria-label="Search routes and users">
-              <SearchOutlined />
-            </button>
+              ariaLabel="Search routes and users"
+            />
 
             {isAuthenticated && user ? (
               <NotificationsDropdown userId={user.id} />
             ) : (
-              <button
+              <AppButton
+                variant="icon"
+                icon={theme === "dark" ? Sun : Moon}
                 onClick={toggleTheme}
-                className="text-xl text-gray-700 dark:text-gray-300 hover:text-[#00623B] dark:hover:text-[#00a862]"
-                title={
+                ariaLabel={
                   theme === "dark"
                     ? "Switch to light mode"
                     : "Switch to dark mode"
                 }
-                aria-label="Toggle theme">
-                {theme === "dark" ? <BulbFilled /> : <BulbOutlined />}
-              </button>
+              />
             )}
 
             {isAuthenticated && user ? (
-              <Dropdown
-                menu={{ items: userMenuItems }}
-                trigger={["click"]}
-                placement="bottomRight">
-                <Avatar
-                  size="default"
-                  src={user.avatar}
-                  icon={!user.avatar ? <UserOutlined /> : undefined}
-                  className="cursor-pointer bg-[#00623B]">
-                  {!user.avatar && user.firstName[0]}
-                  {!user.avatar && user.lastName[0]}
-                </Avatar>
-              </Dropdown>
+              <AppDropdown items={userMenuItems} placement="bottomRight">
+                <button type="button" aria-label="Open user menu">
+                  <AppAvatar
+                    user={{
+                      userName: user.userName,
+                      firstName: user.firstName,
+                      avatar: user.avatar,
+                      verified: user.verified,
+                    }}
+                    size={32}
+                    linkToProfile={false}
+                  />
+                </button>
+              </AppDropdown>
             ) : (
               <Link href={APP_ROUTES.LOGIN}>
-                <Button
-                  type="primary"
-                  icon={<LoginOutlined />}
-                  size="small"
-                  className="bg-[#00623B]">
+                <AppButton size="sm" icon={LogIn}>
                   Login
-                </Button>
+                </AppButton>
               </Link>
             )}
           </div>

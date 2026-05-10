@@ -1,5 +1,32 @@
 # Development Checkpoints — Session Log
 
+## Session 15 — 2026-05-10
+
+**Completed:**
+Compliance remediation batch focused on feature/shared UI drift from the 2026-05-07 audit. Removed direct Ant Design and Ant icon usage from targeted feature components, removed dead `/settings` top-bar references, replaced remaining emoji in scoped UI, and aligned target widgets to tokenized colors.
+
+**Files Modified:**
+
+- app/components/features/navigation/MobileTopBar.tsx
+- app/components/features/navigation/DesktopTopBar.tsx
+- app/components/features/dashboard/SearchBar.tsx
+- app/components/features/dashboard/ShareRouteButton.tsx
+- app/components/features/pwa/NotificationSettings.tsx
+- app/components/features/pwa/OfflineIndicator.tsx
+- app/components/ui/CookieConsent.tsx
+- app/components/ui/GlobalUndoToast.tsx
+- app/components/ui/AppTag.tsx
+- .ai-system/planning/task-queue.md
+- .ai-system/planning/project-plan.md
+- .ai-system/checkpoints/session-log.md
+
+**Next Task:**
+Finish remaining compliance cleanup for any residual direct Ant imports/icon drift outside the current target list, then sync README/developer docs to the remediated state.
+
+**Notes / Blockers:**
+
+- Baseline `npx tsc --noEmit` remains blocked by pre-existing test typing errors in `app/__tests__/unit/buildMetadata.test.ts` (not introduced by this batch).
+
 ## Session 14 — 2026-05-07
 
 **Completed:**

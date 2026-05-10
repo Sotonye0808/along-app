@@ -36,8 +36,9 @@ const variantClasses: Record<NonNullable<AppTagProps["variant"]>, string> = {
     "bg-[var(--color-warning)]/30 text-[var(--color-warning-text)] border-[var(--color-warning-text)]/30",
   error:
     "bg-[var(--color-error)]/20 text-[var(--color-error-text)] border-[var(--color-error-text)]/30",
-  info: "bg-sky-100 text-sky-700 border-sky-300",
-  muted: "bg-gray-100 text-gray-500 border-gray-200",
+  info: "bg-[var(--color-primary)]/10 text-[var(--color-text-primary)] border-[var(--color-primary)]/30",
+  muted:
+    "bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)] border-[var(--color-border)]",
 };
 
 const sizeClasses: Record<NonNullable<AppTagProps["size"]>, string> = {
