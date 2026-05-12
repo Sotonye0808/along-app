@@ -13,23 +13,23 @@ export function CookieConsent(): React.ReactElement {
   }
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-40 w-[min(95vw,720px)] -translate-x-1/2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-base)] p-4 shadow-xl">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-bg-base)] px-4 py-3 shadow-xl">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-[var(--color-text-secondary)]">
-          We use cookies to improve route recommendations and platform
-          performance. Read our{" "}
+          Along uses necessary cookies to keep you signed in and improve your
+          experience. By using Along, you accept this. Find out more in our{" "}
           <Link
             href="/privacy"
             className="text-[var(--color-primary)] underline">
-            privacy policy
+            Privacy Policy -&gt;
           </Link>
-          .
         </p>
         <AppButton
+          variant="primary"
           onClick={() => {
             accept();
           }}>
-          Accept
+          Got it
         </AppButton>
       </div>
     </div>

@@ -35,6 +35,15 @@
 - [x] Stabilize PWA install prompt and service worker update flow
 - [ ] Update README and developer docs after remediation
 
+## Feature Sprint — Env + Email + Seed
+
+> Section summary: Development environment routing, email service integration, and local DB readiness.
+
+- [ ] Audit cookie notice compliance and patch against design system + cookie-based consent
+- [ ] Add PROJECT_ENV-based env resolver (Prisma/Cloudinary/Redis dev namespace)
+- [ ] Integrate Resend email service with templates, wrapper, and admin-editable config fallbacks
+- [ ] Run Prisma migrations and add comprehensive local seed for LOCAL_DB
+
 ## Up Next
 
 > **Section summary:** Phase 1 tasks currently in progress.

@@ -8,6 +8,7 @@
  */
 
 import { v2 as cloudinary } from 'cloudinary';
+import { getCloudinaryFolderPrefix } from "@/lib/utils/env";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -17,10 +18,12 @@ cloudinary.config({
     secure: true,
 });
 
+const folderPrefix = getCloudinaryFolderPrefix();
+
 // Upload presets
 export const UPLOAD_PRESETS = {
     avatar: {
-        folder: 'along/avatars',
+        folder: `${folderPrefix}/avatars`,
         transformation: [
             { width: 400, height: 400, crop: 'fill', gravity: 'face' },
             { quality: 'auto', fetch_format: 'auto' }
@@ -28,7 +31,7 @@ export const UPLOAD_PRESETS = {
         allowed_formats: ['jpg', 'png', 'webp'],
     },
     postImage: {
-        folder: 'along/posts',
+        folder: `${folderPrefix}/posts`,
         transformation: [
             { width: 1200, crop: 'limit' },
             { quality: 'auto', fetch_format: 'auto' }

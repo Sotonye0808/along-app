@@ -8,9 +8,16 @@
 
 import { Redis } from '@upstash/redis';
 import { mockRedis } from './mock-redis';
+import { getCacheKeyPrefix, isProjectDev } from "@/lib/utils/env";
 
 // Determine if we should use mock Redis (development mode)
-const USE_MOCK_REDIS = process.env.NODE_ENV === 'development' || !process.env.UPSTASH_REDIS_REST_URL;
+const USE_MOCK_REDIS = !process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN;
+
+const KEY_PREFIX = getCacheKeyPrefix();
+
+function withPrefix(key: string): string {
+    return KEY_PREFIX ? `${KEY_PREFIX}${key}` : key;
+}
 
 // Initialize Redis client
 const redis = USE_MOCK_REDIS
@@ -22,9 +29,10 @@ const redis = USE_MOCK_REDIS
 
 // Log which Redis implementation is being used
 if (USE_MOCK_REDIS) {
-    console.log('🔧 Using Mock Redis (in-memory) for development');
+    console.log('Using mock Redis (in-memory).');
 } else {
-    console.log('☁️ Using Upstash Redis for production');
+    const label = isProjectDev() ? 'development' : 'production';
+    console.log(`Using Upstash Redis (${label}).`);
 }
 
 // Cache TTL constants (in seconds)
@@ -56,7 +64,7 @@ export const cache = {
      */
     async get<T>(key: string): Promise<T | null> {
         try {
-            const value = await redis.get<T>(key);
+            const value = await redis.get<T>(withPrefix(key));
             return value;
         } catch (error) {
             console.error('Redis get error:', error);
@@ -70,9 +78,9 @@ export const cache = {
     async set<T>(key: string, value: T, ttl?: number): Promise<void> {
         try {
             if (ttl) {
-                await redis.setex(key, ttl, JSON.stringify(value));
+                await redis.setex(withPrefix(key), ttl, JSON.stringify(value));
             } else {
-                await redis.set(key, JSON.stringify(value));
+                await redis.set(withPrefix(key), JSON.stringify(value));
             }
         } catch (error) {
             console.error('Redis set error:', error);
@@ -84,7 +92,7 @@ export const cache = {
      */
     async del(key: string): Promise<void> {
         try {
-            await redis.del(key);
+            await redis.del(withPrefix(key));
         } catch (error) {
             console.error('Redis delete error:', error);
         }
@@ -95,7 +103,7 @@ export const cache = {
      */
     async delPattern(pattern: string): Promise<void> {
         try {
-            const keys = await redis.keys(pattern);
+            const keys = await redis.keys(withPrefix(pattern));
             if (keys.length > 0) {
                 await redis.del(...keys);
             }
@@ -109,7 +117,7 @@ export const cache = {
      */
     async incr(key: string): Promise<number> {
         try {
-            return await redis.incr(key);
+            return await redis.incr(withPrefix(key));
         } catch (error) {
             console.error('Redis incr error:', error);
             return 0;
@@ -121,7 +129,7 @@ export const cache = {
      */
     async expire(key: string, seconds: number): Promise<void> {
         try {
-            await redis.expire(key, seconds);
+            await redis.expire(withPrefix(key), seconds);
         } catch (error) {
             console.error('Redis expire error:', error);
         }
@@ -132,7 +140,7 @@ export const cache = {
      */
     async exists(key: string): Promise<boolean> {
         try {
-            const result = await redis.exists(key);
+            const result = await redis.exists(withPrefix(key));
             return result === 1;
         } catch (error) {
             console.error('Redis exists error:', error);
@@ -145,7 +153,7 @@ export const cache = {
      */
     async ttl(key: string): Promise<number> {
         try {
-            return await redis.ttl(key);
+            return await redis.ttl(withPrefix(key));
         } catch (error) {
             console.error('Redis ttl error:', error);
             return -1;
@@ -159,7 +167,7 @@ export const cache = {
      */
     async zadd(key: string, score: number, member: string): Promise<number> {
         try {
-            const result = await redis.zadd(key, { score, member });
+            const result = await redis.zadd(withPrefix(key), { score, member });
             return result ?? 0;
         } catch (error) {
             console.error('Redis zadd error:', error);
@@ -172,7 +180,7 @@ export const cache = {
      */
     async zcard(key: string): Promise<number> {
         try {
-            return await redis.zcard(key);
+            return await redis.zcard(withPrefix(key));
         } catch (error) {
             console.error('Redis zcard error:', error);
             return 0;
@@ -185,9 +193,9 @@ export const cache = {
     async zrange(key: string, start: number, stop: number, options?: { withScores?: boolean }): Promise<Array<string | number>> {
         try {
             if (options?.withScores) {
-                return await redis.zrange(key, start, stop, { withScores: true });
+                return await redis.zrange(withPrefix(key), start, stop, { withScores: true });
             }
-            return await redis.zrange(key, start, stop);
+            return await redis.zrange(withPrefix(key), start, stop);
         } catch (error) {
             console.error('Redis zrange error:', error);
             return [];
@@ -199,7 +207,7 @@ export const cache = {
      */
     async zremrangebyscore(key: string, min: number, max: number): Promise<number> {
         try {
-            return await redis.zremrangebyscore(key, min, max);
+            return await redis.zremrangebyscore(withPrefix(key), min, max);
         } catch (error) {
             console.error('Redis zremrangebyscore error:', error);
             return 0;
