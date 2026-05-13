@@ -44,11 +44,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         ]);
 
         const totalPosts = posts.length;
-        const totalLikes = posts.reduce((s, p) => s + (p.likes ?? 0), 0);
-        const totalComments = posts.reduce((s, p) => s + (p.comments ?? 0), 0);
-        const totalBookmarks = posts.reduce((s, p) => s + (p.bookmarks ?? 0), 0);
-        const totalViews = posts.reduce((s, p) => s + (p.views ?? 0), 0);
-        const totalShares = posts.reduce((s, p) => s + (p.shares ?? 0), 0);
+        const totalLikes = posts.reduce((s: number, p: any) => s + (p.likes ?? 0), 0);
+        const totalComments = posts.reduce((s: number, p: any) => s + (p.comments ?? 0), 0);
+        const totalBookmarks = posts.reduce((s: number, p: any) => s + (p.bookmarks ?? 0), 0);
+        const totalViews = posts.reduce((s: number, p: any) => s + (p.views ?? 0), 0);
+        const totalShares = posts.reduce((s: number, p: any) => s + (p.shares ?? 0), 0);
 
         // Engagement timeline: group posts by month (YYYY-MM)
         const byMonth: Record<string, { likes: number; comments: number; posts: number }> = {};
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const topPosts = [...posts]
             .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
             .slice(0, 5)
-            .map((p) => ({
+            .map((p: any) => ({
                 id: p.id,
                 title: p.title,
                 likes: p.likes ?? 0,

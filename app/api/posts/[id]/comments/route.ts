@@ -216,7 +216,7 @@ export async function POST(
         postId: id,
         score: 3
       }
-    }).catch(err => console.error('Failed to track activity:', err));
+    }).catch((err: any) => console.error('Failed to track activity:', err));
 
     await cache.delPattern(`comments:${id}:*`);
 

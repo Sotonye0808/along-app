@@ -14,7 +14,8 @@ const datasourceUrl = useLocalDb
     ? process.env.LOCAL_DB
     : process.env.DIRECT_URL || process.env.DATABASE_URL;
 
-if (!datasourceUrl) {
+// Only throw during explicit Prisma CLI operations, not during build time
+if (!datasourceUrl && process.argv[1]?.includes("prisma")) {
     throw new Error(
         "Missing datasource URL. Set LOCAL_DB for development or DIRECT_URL/DATABASE_URL for production.",
     );
@@ -27,6 +28,6 @@ export default defineConfig({
         seed: "tsx prisma/seed.ts",
     },
     datasource: {
-        url: datasourceUrl,
+        url: datasourceUrl || "postgresql://",
     },
 });

@@ -1,5 +1,5 @@
 import { DEFAULT_EMAIL_TEMPLATES } from "@/lib/config/email";
-import { renderEmailLayout } from "@/lib/email/layout";
+import { renderEmailLayout } from "@/lib/email/emailLayout";
 
 const TOKEN_PATTERN = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
 

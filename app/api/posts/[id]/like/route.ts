@@ -180,7 +180,7 @@ export async function POST(
                     postId: id,
                     score: type === 'LIKE' ? 2 : 1
                 }
-            }).catch(err => console.error('Failed to track activity:', err));
+            }).catch((err: any) => console.error('Failed to track activity:', err));
 
             return NextResponse.json(
                 { message: 'Like added', action: 'added', type },

@@ -289,7 +289,7 @@ export async function POST(request: NextRequest) {
                 postId: newPost.id,
                 score: 5
             }
-        }).catch(err => console.error('Failed to track activity:', err));
+        }).catch((err: any) => console.error('Failed to track activity:', err));
 
         // Invalidate user's feed cache
         const feedPattern = CACHE_KEYS.userFeed(userId);

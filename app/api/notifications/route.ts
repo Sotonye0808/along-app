@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
         const nextCursor = hasMore ? results[results.length - 1].id : null;
 
         // Transform to match frontend expectations
-        const transformedNotifications = results.map((recipient) => ({
+        const transformedNotifications = results.map((recipient: any) => ({
             id: recipient.notification.id,
             userId: recipient.userId,
             type: recipient.notification.type.toLowerCase() as 'like' | 'comment' | 'follow' | 'mention',
