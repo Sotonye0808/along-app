@@ -16,6 +16,7 @@ import { Receiver } from "@upstash/qstash";
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { handlePrismaError } from "@/lib/utils/prismaErrors";
+import { sendDigestSummaryEmail } from "@/lib/services/emailService";
 
 const digestPayloadSchema = z.object({
     userId: z.string().cuid(),
@@ -109,6 +110,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         const message = `Daily digest: ${parts.join(", ")} in the last 24 hours.`;
 
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { email: true, userName: true, firstName: true },
+        });
+
         // Store as a system notification (actorId = recipient = system user pattern,
         // so we use the recipient's own ID as actor to satisfy the FK constraint).
         await prisma.$transaction(async (tx) => {
@@ -127,6 +133,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 },
             });
         });
+
+        if (user?.email) {
+            const name = user.firstName || user.userName;
+            const result = await sendDigestSummaryEmail({
+                email: user.email,
+                userName: name,
+                likesCount,
+                commentsCount,
+                followsCount,
+            });
+
+            if (!result.ok && !result.skipped) {
+                console.warn("[worker digest] email send failed");
+            }
+        }
 
         return NextResponse.json({ ok: true, userId, digest: { likesCount, commentsCount, followsCount } });
     } catch (error) {

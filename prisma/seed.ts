@@ -11,6 +11,9 @@
 import { prisma } from '../app/lib/db/prisma';
 import { hashPassword } from '../app/lib/utils/security';
 import type { User as PrismaUser } from '../app/generated/prisma/client';
+import { DEFAULT_EMAIL_CONFIG, DEFAULT_EMAIL_TEMPLATES } from '../app/lib/config/email';
+import { DEFAULT_VALIDITY_CONFIG } from '../app/lib/config/validityConfig';
+import { DEFAULT_FEED_CONFIG } from '../app/lib/config/feedAlgorithm';
 
 // Type definitions for seed data
 interface SeedUser {
@@ -48,8 +51,27 @@ interface SeedBookmark {
     postId: string;
 }
 
+async function seedSiteConfig(): Promise<void> {
+    console.log('Seeding site configuration...');
+
+    const entries = [
+        { key: 'validityConfig', value: DEFAULT_VALIDITY_CONFIG },
+        { key: 'feedAlgorithm', value: DEFAULT_FEED_CONFIG },
+        { key: 'email', value: DEFAULT_EMAIL_CONFIG },
+        { key: 'emailTemplates', value: DEFAULT_EMAIL_TEMPLATES },
+    ];
+
+    for (const entry of entries) {
+        await prisma.siteConfig.upsert({
+            where: { key: entry.key },
+            create: { key: entry.key, value: JSON.parse(JSON.stringify(entry.value)) },
+            update: { value: JSON.parse(JSON.stringify(entry.value)) },
+        });
+    }
+}
+
 async function seedUsers(): Promise<PrismaUser[]> {
-    console.log('👥 Seeding users...');
+    console.log('Seeding users...');
 
     const users: SeedUser[] = [
         {
@@ -58,7 +80,7 @@ async function seedUsers(): Promise<PrismaUser[]> {
             lastName: 'Okafor',
             email: 'chidi@example.com',
             location: 'Lagos, Nigeria',
-            bio: 'Lagos navigator | Public transport expert | Sharing the best routes around Nigeria 🇳🇬',
+            bio: 'Lagos navigator | Public transport expert | Sharing the best routes around Nigeria',
             verified: true,
         },
         {
@@ -67,7 +89,7 @@ async function seedUsers(): Promise<PrismaUser[]> {
             lastName: 'Nwosu',
             email: 'ada@example.com',
             location: 'Port Harcourt, Nigeria',
-            bio: 'Port Harcourt babe | Food & travel | Making Lagos traffic bearable one route at a time 😊',
+            bio: 'Port Harcourt babe | Food & travel | Making Lagos traffic bearable one route at a time',
             verified: true,
         },
         {
@@ -112,7 +134,7 @@ async function seedUsers(): Promise<PrismaUser[]> {
             lastName: 'Williams',
             email: 'bola@example.com',
             location: 'Calabar, Nigeria',
-            bio: 'Road trip enthusiast | Carnival lover | Beach bum 🏖️',
+            bio: 'Road trip enthusiast | Carnival lover | Beach bum',
             verified: true,
         },
         {
@@ -157,14 +179,14 @@ async function seedUsers(): Promise<PrismaUser[]> {
             },
         });
         createdUsers.push(user);
-        console.log(`✅ Created user: ${user.userName}`);
+        console.log(`Created user: ${user.userName}`);
     }
 
     return createdUsers;
 }
 
 async function seedFollows(users: PrismaUser[]): Promise<void> {
-    console.log('🤝 Seeding follow relationships...');
+    console.log('Seeding follow relationships...');
 
     // Create a network of follows
     const follows: [number, number][] = [
@@ -193,11 +215,11 @@ async function seedFollows(users: PrismaUser[]): Promise<void> {
         }
     }
 
-    console.log(`✅ Created ${follows.length} follow relationships`);
+    console.log(`Created ${follows.length} follow relationships`);
 }
 
 async function seedPosts(users: PrismaUser[]): Promise<any[]> {
-    console.log('📝 Seeding posts...');
+    console.log('Seeding posts...');
 
     const posts: SeedPost[] = [
         {
@@ -569,20 +591,20 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             },
         });
         createdPosts.push(post);
-        console.log(`✅ Created post: ${post.title}`);
+        console.log(`Created post: ${post.title}`);
     }
 
     return createdPosts;
 }
 
 async function seedComments(users: PrismaUser[], posts: any[]): Promise<void> {
-    console.log('💬 Seeding comments...');
+    console.log('Seeding comments...');
 
     const comments: SeedComment[] = [
         {
             postId: posts[0].id,
             userId: users[1].id,
-            text: 'This route saved my life! Used it yesterday and avoided 2 hours of traffic. Thanks! 🙏',
+            text: 'This route saved my life! Used it yesterday and avoided 2 hours of traffic. Thanks!',
         },
         {
             postId: posts[0].id,
@@ -602,7 +624,7 @@ async function seedComments(users: PrismaUser[], posts: any[]): Promise<void> {
         {
             postId: posts[2].id,
             userId: users[0].id,
-            text: 'Abuja traffic is nothing compared to Lagos 😂 But this route is solid!',
+            text: 'Abuja traffic is nothing compared to Lagos. But this route is solid!',
         },
         {
             postId: posts[3].id,
@@ -664,12 +686,12 @@ async function seedComments(users: PrismaUser[], posts: any[]): Promise<void> {
                 dislikes: Math.floor(Math.random() * 2),
             },
         });
-        console.log(`✅ Created comment on post ${comment.postId}`);
+        console.log(`Created comment on post ${comment.postId}`);
     }
 }
 
 async function seedLikes(users: PrismaUser[], posts: any[]): Promise<void> {
-    console.log('👍 Seeding likes...');
+    console.log('Seeding likes...');
 
     const likes: SeedLike[] = [
         { userId: users[0].id, postId: posts[1].id, type: 'LIKE' },
@@ -708,11 +730,11 @@ async function seedLikes(users: PrismaUser[], posts: any[]): Promise<void> {
         }
     }
 
-    console.log(`✅ Created ${likes.length} likes`);
+    console.log(`Created ${likes.length} likes`);
 }
 
 async function seedBookmarks(users: PrismaUser[], posts: any[]): Promise<void> {
-    console.log('🔖 Seeding bookmarks...');
+    console.log('Seeding bookmarks...');
 
     const bookmarks: SeedBookmark[] = [
         { userId: users[0].id, postId: posts[1].id },
@@ -745,13 +767,14 @@ async function seedBookmarks(users: PrismaUser[], posts: any[]): Promise<void> {
         }
     }
 
-    console.log(`✅ Created ${bookmarks.length} bookmarks`);
+    console.log(`Created ${bookmarks.length} bookmarks`);
 }
 
 async function main() {
-    console.log('🌱 Starting database seeding...\n');
+    console.log('Starting database seeding...\n');
 
     try {
+        await seedSiteConfig();
         const users = await seedUsers();
         await seedFollows(users);
         const posts = await seedPosts(users);
@@ -759,22 +782,22 @@ async function main() {
         await seedLikes(users, posts);
         await seedBookmarks(users, posts);
 
-        console.log('\n✅ Database seeded successfully!');
-        console.log('\n📊 Seed Summary:');
+        console.log('\nDatabase seeded successfully!');
+        console.log('\nSeed Summary:');
         console.log(`   Users:     ${users.length}`);
         console.log(`   Posts:     ${posts.length}`);
         console.log('   Comments:  15');
         console.log('   Likes:     24');
         console.log('   Bookmarks: 18');
         console.log('   Follows:   22');
-        console.log('\n💡 Default password for all users: Password123!');
-        console.log('\n🔐 Test Accounts:');
+        console.log('\nDefault password for all users: Password123!');
+        console.log('\nTest Accounts:');
         console.log('   chidi@example.com    - Lagos expert');
         console.log('   ada@example.com      - Port Harcourt traveler');
         console.log('   emeka@example.com    - Abuja navigator');
         console.log('   john.doe@example.com - New user');
     } catch (error) {
-        console.error('❌ Seeding failed:', error);
+        console.error('Seeding failed:', error);
         throw error;
     } finally {
         await prisma.$disconnect();

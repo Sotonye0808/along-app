@@ -4,6 +4,7 @@ import { cache } from '@/lib/cache/redis';
 import { rateLimitByIP } from '@/lib/utils/rateLimiter';
 import { validateRegisterData } from '@/lib/utils/validation';
 import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { sendOtpVerificationEmail } from '@/lib/services/emailService';
 import bcrypt from 'bcryptjs';
 
 // Generate 6-digit OTP
@@ -102,8 +103,19 @@ export async function POST(request: NextRequest) {
         // Store OTP in cache (10 minute TTL)
         await cache.set(`otp:${email}`, JSON.stringify({ code: otpCode, expiresAt }), 600);
 
-        // Log OTP for testing (in production, send via email/SMS)
-        console.log(`OTP for ${email}: ${otpCode}`);
+        const emailResult = await sendOtpVerificationEmail({
+            email,
+            firstName,
+            code: otpCode,
+            expiresInMinutes: 10,
+        });
+
+        if (!emailResult.ok && !emailResult.skipped) {
+            return NextResponse.json(
+                { error: 'Failed to send verification email. Please try again.' },
+                { status: 500 }
+            );
+        }
 
         return NextResponse.json({
             message: 'User registered successfully. Verification code sent to your email.',

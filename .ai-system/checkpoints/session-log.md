@@ -27,6 +27,50 @@ Finish remaining compliance cleanup for any residual direct Ant imports/icon dri
 
 - Baseline `npx tsc --noEmit` remains blocked by pre-existing test typing errors in `app/__tests__/unit/buildMetadata.test.ts` (not introduced by this batch).
 
+## Session 16 — 2026-05-12
+
+**Completed:**
+Implemented the feature sprint for env routing, cookie consent compliance, and email delivery. Added PROJECT_ENV-based DB/Cloudinary/Redis handling, Resend-backed email templates with admin-editable config, and wired email flows for auth OTP, invites, contact, bug reports, digest, and password change. Updated seed data to remove emoji and seed site config defaults.
+
+**Files Modified:**
+
+- app/components/ui/CookieConsent.tsx
+- app/providers/CookieConsentProvider.tsx
+- app/lib/utils/env.ts
+- app/lib/db/prisma.ts
+- app/lib/config/cloudinary.ts
+- app/lib/cache/redis.ts
+- app/lib/types/email.ts
+- app/lib/config/email.ts
+- app/lib/utils/siteConfig.ts
+- app/api/admin/config/route.ts
+- app/(admin)/admin/config/page.tsx
+- app/lib/email/layout.ts
+- app/lib/email/templates.ts
+- app/lib/services/emailService.ts
+- app/api/auth/register/route.ts
+- app/api/contact/route.ts
+- app/(public)/contact/page.tsx
+- app/api/bug-reports/route.ts
+- app/api/invites/send/route.ts
+- app/(dashboard)/invite/page.tsx
+- app/api/workers/digest/route.ts
+- app/api/users/[id]/route.ts
+- prisma/seed.ts
+- prisma/prisma.config.ts
+- prisma.config.ts
+- package.json
+- package-lock.json
+- .env.example
+- .ai-system/planning/task-queue.md
+
+**Next Task:**
+Resolve Prisma migration connectivity (TLS handshake error) and run migrate+seed for LOCAL_DB.
+
+**Notes / Blockers:**
+
+- `prisma migrate dev` fails with P1011 (TLS handshake EOF) against accelerate.prisma-data.net. Requires DB connectivity fix before migrations/seed can run.
+
 ## Session 14 — 2026-05-07
 
 **Completed:**

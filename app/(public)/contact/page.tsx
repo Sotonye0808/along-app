@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { CheckCircle, Mail } from "lucide-react";
-import { App } from "antd";
 import { ConfigDrivenForm } from "@/components/ui/ConfigDrivenForm";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { CONTACT_FIELDS } from "@/lib/config/forms";
+import { ToastService } from "@/lib/services/toastService";
 
 interface ContactFormValues {
   name: string;
@@ -17,17 +17,23 @@ interface ContactFormValues {
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { message } = App.useApp();
 
   const handleSubmit = async (values: ContactFormValues) => {
     setLoading(true);
     try {
-      // Placeholder: in production this would POST to /api/contact or an email provider
-      await new Promise<void>((r) => setTimeout(r, 800));
-      console.info("[contact]", values);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      if (!res.ok) {
+        throw new Error("Contact request failed");
+      }
+
       setSubmitted(true);
     } catch {
-      message.error("Failed to send message. Please try again.");
+      ToastService.error("Failed to send message. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -37,11 +43,16 @@ export default function ContactPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-          <Mail size={26} className="text-[var(--color-primary)]" aria-hidden="true" />
+          <Mail
+            size={26}
+            className="text-[var(--color-primary)]"
+            aria-hidden="true"
+          />
           Contact Us
         </h1>
         <p className="text-base text-[var(--color-text-secondary)] mt-2 max-w-prose">
-          Questions, feedback, or partnership enquiries — we&apos;d love to hear from you.
+          Questions, feedback, or partnership enquiries — we&apos;d love to hear
+          from you.
         </p>
       </div>
 

@@ -5,7 +5,7 @@ import { requireAuth } from "@/lib/utils/auth-server";
 import { siteConfigRepository } from "@/lib/db/SiteConfigRepository";
 
 const bodySchema = z.object({
-  key: z.enum(["validityConfig", "feedAlgorithm"]),
+  key: z.enum(["validityConfig", "feedAlgorithm", "email", "emailTemplates"]),
   value: z.record(z.string(), z.unknown()),
 });
 

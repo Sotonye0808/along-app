@@ -9,6 +9,13 @@ declare global {
         contactEmail: string;
     }
 
+    interface EmailTemplateCopy {
+        subject: string;
+        preview: string;
+    }
+
+    type EmailTemplateConfig = Record<EmailTemplateId, EmailTemplateCopy>;
+
     type EmailTemplateId =
         | "otpVerification"
         | "invite"

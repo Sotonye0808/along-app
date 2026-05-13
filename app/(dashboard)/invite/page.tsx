@@ -2,11 +2,11 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Copy, Gift, Trophy, Users } from "lucide-react";
-import { App } from "antd";
 import { QRCodeSVG } from "qrcode.react";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppCard } from "@/components/ui/AppCard";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { AppInput } from "@/components/ui/AppInput";
 import { AppSpinner } from "@/components/ui/AppSpinner";
 import { AppTable, type AppTableColumn } from "@/components/ui/AppTable";
 import { AppUserLabel } from "@/components/ui/AppUserLabel";
@@ -14,6 +14,7 @@ import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { INVITE_CONFIG } from "@/lib/config/inviteConfig";
 import { POINTS_CONFIG, PointsAction } from "@/lib/config/rewards";
+import { ToastService } from "@/lib/services/toastService";
 import { useAuth } from "../../providers/AuthProvider";
 
 interface InviteData {
@@ -71,25 +72,27 @@ const LEADERBOARD_COLUMNS: AppTableColumn<LeaderboardEntry>[] = [
 
 export default function InvitePage() {
   const { user } = useAuth();
-  const { message } = App.useApp();
   const [invite, setInvite] = useState<InviteData | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [sendingInvite, setSendingInvite] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get<{ invite: InviteData; leaderboard: LeaderboardEntry[] }>(
-        API_ENDPOINTS.INVITES,
-      );
+      const res = await api.get<{
+        invite: InviteData;
+        leaderboard: LeaderboardEntry[];
+      }>(API_ENDPOINTS.INVITES);
       setInvite(res.data.invite);
       setLeaderboard(res.data.leaderboard);
     } catch {
-      message.error("Failed to load invite data");
+      ToastService.error("Failed to load invite data");
     } finally {
       setLoading(false);
     }
-  }, [message]);
+  }, []);
 
   useEffect(() => {
     if (user) void fetchData();
@@ -97,17 +100,51 @@ export default function InvitePage() {
 
   const handleCopy = useCallback(() => {
     if (!invite) return;
-    navigator.clipboard.writeText(invite.inviteUrl).then(() => {
-      message.success("Invite link copied!");
-    }).catch(() => {
-      message.error("Could not copy to clipboard");
-    });
-  }, [invite, message]);
+    navigator.clipboard
+      .writeText(invite.inviteUrl)
+      .then(() => {
+        ToastService.success("Invite link copied!");
+      })
+      .catch(() => {
+        ToastService.error("Could not copy to clipboard");
+      });
+  }, [invite]);
+
+  const handleSendInvite = useCallback(async () => {
+    if (!inviteEmail.trim()) {
+      ToastService.error("Enter an email address first");
+      return;
+    }
+
+    setSendingInvite(true);
+    try {
+      const res = await fetch("/api/invites/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: inviteEmail.trim() }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Invite send failed");
+      }
+
+      setInviteEmail("");
+      ToastService.success("Invite email sent");
+    } catch {
+      ToastService.error("Failed to send invite email");
+    } finally {
+      setSendingInvite(false);
+    }
+  }, [inviteEmail]);
 
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <AppEmptyState title="Login required" description="Please log in to see your invite link." />
+        <AppEmptyState
+          title="Login required"
+          description="Please log in to see your invite link."
+        />
       </div>
     );
   }
@@ -117,13 +154,18 @@ export default function InvitePage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-          <Gift size={24} className="text-[var(--color-primary)]" aria-hidden="true" />
+          <Gift
+            size={24}
+            className="text-[var(--color-primary)]"
+            aria-hidden="true"
+          />
           Invite Friends
         </h1>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">
           Earn{" "}
-          <strong>{POINTS_CONFIG[PointsAction.INVITE_ACCEPTED]} points</strong> for every
-          friend who joins with your link (up to {INVITE_CONFIG.maxInvitesPerDay}/day).
+          <strong>{POINTS_CONFIG[PointsAction.INVITE_ACCEPTED]} points</strong>{" "}
+          for every friend who joins with your link (up to{" "}
+          {INVITE_CONFIG.maxInvitesPerDay}/day).
         </p>
       </div>
 
@@ -162,8 +204,7 @@ export default function InvitePage() {
                     size="sm"
                     icon={Copy}
                     onClick={handleCopy}
-                    ariaLabel="Copy invite link"
-                  >
+                    ariaLabel="Copy invite link">
                     Copy
                   </AppButton>
                 </div>
@@ -172,6 +213,25 @@ export default function InvitePage() {
                   {invite?.invitedCount ?? 0} friend
                   {invite?.invitedCount !== 1 ? "s" : ""} invited so far
                 </p>
+                <div className="pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
+                    Send an invite email
+                  </p>
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                    <AppInput
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="friend@example.com"
+                    />
+                    <AppButton
+                      variant="primary"
+                      onClick={handleSendInvite}
+                      loading={sendingInvite}>
+                      Send invite
+                    </AppButton>
+                  </div>
+                </div>
               </div>
             </div>
           </AppCard>
@@ -179,7 +239,11 @@ export default function InvitePage() {
           {/* Leaderboard */}
           <div>
             <h2 className="text-base font-semibold text-[var(--color-text-primary)] flex items-center gap-2 mb-3">
-              <Trophy size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
+              <Trophy
+                size={16}
+                className="text-[var(--color-primary)]"
+                aria-hidden="true"
+              />
               Top Inviters
             </h2>
             {leaderboard.length === 0 ? (

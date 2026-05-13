@@ -7,6 +7,7 @@ import { uploadImage, deleteImage, validateImageFile, fileToBase64 } from '@/lib
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { sendPasswordChangedEmail } from '@/lib/services/emailService';
 
 // Validation schema for profile updates
 const updateProfileSchema = z.object({
@@ -244,6 +245,17 @@ export async function PUT(
 
         // Invalidate cache
         await cache.del(CACHE_KEYS.userProfile(id));
+
+        if (hashedPassword) {
+            const name = `${updatedUser.firstName} ${updatedUser.lastName}`.trim();
+            const result = await sendPasswordChangedEmail({
+                email: updatedUser.email,
+                name: name || updatedUser.userName,
+            });
+            if (!result.ok && !result.skipped) {
+                console.warn('[users] password change email failed');
+            }
+        }
 
         // Transform response
         const transformedUser = {

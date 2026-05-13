@@ -196,6 +196,42 @@ Global styles and tokens now live in `app/globals.css` as the source of truth fo
 
 ---
 
+## PROJECT_ENV-Based Environment Routing
+
+**Decision:** Use `PROJECT_ENV` to drive development vs production routing for Prisma (LOCAL_DB), Cloudinary folder prefixes, and Redis key namespaces.
+**Date:** 2026-05-12
+**Made by:** AI agent
+
+**Reason:**
+Hosting platforms can override `NODE_ENV`, so a neutral project-level flag is required to keep local development separated from production data/assets.
+
+**Alternatives Considered:**
+
+- Rely solely on `NODE_ENV`: rejected because platform defaults can be inaccurate.
+
+**Implications:**
+Prisma config, Cloudinary upload presets, and Redis cache keys now use `PROJECT_ENV` to isolate dev data.
+
+---
+
+## Resend Email System + Admin-Editable Template Copy
+
+**Decision:** Implement a Resend-backed email service with template/layout rendering and admin-editable email settings + template copy via SiteConfig.
+**Date:** 2026-05-12
+**Made by:** AI agent
+
+**Reason:**
+Email flows (OTP, invites, contact, bug reports, digest) need a unified, configurable delivery layer with safe defaults and admin override capability.
+
+**Alternatives Considered:**
+
+- Hardcoded templates per route: rejected to keep config-driven admin override capability.
+
+**Implications:**
+SiteConfig now includes `email` and `emailTemplates` keys; admin config UI exposes editable email settings and template subjects/previews.
+
+---
+
 ## Temporary Build Lint Bypass During Foundation Refactor
 
 **Decision:** Enable `eslint.ignoreDuringBuilds: true` in `next.config.mjs` temporarily.

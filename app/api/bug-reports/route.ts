@@ -4,6 +4,10 @@ import { prisma } from "@/lib/db/prisma";
 import { authenticateRequest } from "@/lib/utils/auth-server";
 import { rateLimitByIP, rateLimitByUser } from "@/lib/utils/rateLimiter";
 import { handlePrismaError } from "@/lib/utils/prismaErrors";
+import {
+  sendBugReportConfirmationEmail,
+  sendBugReportNotificationEmail,
+} from "@/lib/services/emailService";
 
 const bugReportSchema = z.object({
   title: z.string().min(5).max(120),
@@ -67,6 +71,38 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         createdAt: true,
       },
     });
+
+    const reporter = await prisma.user.findUnique({
+      where: { id: authUser },
+      select: { firstName: true, lastName: true, email: true },
+    });
+
+    if (reporter) {
+      const reporterName = `${reporter.firstName} ${reporter.lastName}`.trim();
+      const [notifyResult, confirmResult] = await Promise.all([
+        sendBugReportNotificationEmail({
+          name: reporterName,
+          email: reporter.email,
+          reportId: report.id,
+          title: report.title,
+          category: report.category,
+        }),
+        sendBugReportConfirmationEmail({
+          email: reporter.email,
+          name: reporter.firstName,
+          reportId: report.id,
+          title: report.title,
+          category: report.category,
+        }),
+      ]);
+
+      if (
+        (!notifyResult.ok && !notifyResult.skipped) ||
+        (!confirmResult.ok && !confirmResult.skipped)
+      ) {
+        console.warn("[bug-reports] email send failed");
+      }
+    }
 
     return NextResponse.json(report, { status: 201 });
   } catch (error) {

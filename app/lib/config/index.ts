@@ -9,6 +9,7 @@ export * from "./footer";
 export * from "./forms";
 export * from "./inviteConfig";
 export * from "./mapIntegrations";
+export * from "./email";
 export * from "./navigation";
 export * from "./notifications";
 export * from "./rateLimits";
