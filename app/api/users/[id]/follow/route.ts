@@ -96,7 +96,7 @@ export async function POST(
             });
         } else {
             // Follow: Create the follow relationship
-            await prisma.$transaction(async (tx) => {
+            await prisma.$transaction(async (tx: any) => {
                 // Create follow relationship
                 await tx.follow.create({
                     data: {

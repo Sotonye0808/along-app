@@ -113,7 +113,7 @@ export class PlatformSuggestionsService {
       });
 
       // Cast Prisma result to our Post global type
-      const posts = rows.map((r) => ({
+      const posts = rows.map((r: any) => ({
         id: r.id,
         userId: r.userId,
         title: r.title,
@@ -162,7 +162,7 @@ export class PlatformSuggestionsService {
         take: limit,
       });
 
-      const posts = rows.map((r) => ({
+      const posts = rows.map((r: any) => ({
         id: r.id,
         userId: r.userId,
         title: r.title,

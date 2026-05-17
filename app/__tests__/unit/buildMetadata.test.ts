@@ -22,12 +22,12 @@ describe("buildMetadata", () => {
 
   it("sets openGraph type", () => {
     const result = buildMetadata({ title: "T", type: "article" });
-    expect(result.openGraph?.type).toBe("article");
+    expect((result.openGraph as any)?.type).toBe("article");
   });
 
   it("defaults openGraph type to website", () => {
     const result = buildMetadata({ title: "T" });
-    expect(result.openGraph?.type).toBe("website");
+    expect((result.openGraph as any)?.type).toBe("website");
   });
 
   it("sets openGraph siteName to SITE_NAME", () => {
@@ -59,11 +59,11 @@ describe("buildMetadata", () => {
 
   it("sets twitter card type", () => {
     const result = buildMetadata({ title: "T", card: "summary" });
-    expect(result.twitter?.card).toBe("summary");
+    expect((result.twitter as any)?.card).toBe("summary");
   });
 
   it("defaults twitter card to summary_large_image", () => {
     const result = buildMetadata({ title: "T" });
-    expect(result.twitter?.card).toBe("summary_large_image");
+    expect((result.twitter as any)?.card).toBe("summary_large_image");
   });
 });

@@ -128,7 +128,7 @@ export class RewardsService {
             },
         });
 
-        return users.map((u, idx) => ({
+        return users.map((u: any, idx: number) => ({
             rank: idx + 1,
             userId: u.id,
             userName: u.userName,

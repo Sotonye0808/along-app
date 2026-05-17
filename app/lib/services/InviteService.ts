@@ -126,7 +126,7 @@ export class InviteService {
             },
         });
 
-        return users.map((u, idx) => ({
+        return users.map((u: any, idx: any) => ({
             rank: idx + 1,
             userId: u.id,
             userName: u.userName,

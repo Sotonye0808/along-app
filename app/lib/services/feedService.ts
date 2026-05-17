@@ -232,7 +232,7 @@ export async function getTrendingPosts(limit: number = 20) {
         scoredPosts.sort((a: any, b: any) => b.trendingScore - a.trendingScore);
 
         // Take top posts and transform to frontend interface
-        const trendingPosts = scoredPosts.slice(0, limit).map(post => ({
+        const trendingPosts = scoredPosts.slice(0, limit).map((post: any) => ({
             id: post.id,
             userId: post.userId,
             title: post.title,

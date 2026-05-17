@@ -45,7 +45,7 @@ export async function GET(request: NextRequest, { params }: Params): Promise<Nex
             else if (row.type === "DISLIKE") dislikes.push(row.postId);
         }
 
-        const bookmarks = bookmarkRows.map((b) => b.postId);
+        const bookmarks = bookmarkRows.map((b: any) => b.postId);
 
         return NextResponse.json({ data: { likes, dislikes, bookmarks } });
     } catch (error) {

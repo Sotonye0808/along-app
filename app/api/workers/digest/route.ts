@@ -117,7 +117,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         // Store as a system notification (actorId = recipient = system user pattern,
         // so we use the recipient's own ID as actor to satisfy the FK constraint).
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             const notification = await tx.notification.create({
                 data: {
                     type: "MENTION", // closest system-level type available

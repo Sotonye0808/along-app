@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
         const nextCursor = hasMore ? results[results.length - 1].id : null;
 
         // Transform to match frontend expectations
-        const transformedUsers = (results || []).map((user) => ({
+        const transformedUsers = (results || []).map((user: any) => ({
             id: user.id,
             userName: user.userName,
             firstName: user.firstName,

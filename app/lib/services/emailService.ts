@@ -48,7 +48,7 @@ async function deliverEmail(
             subject: options.subject,
             html: options.html,
             text: options.text,
-            replyTo: options.replyTo,
+            reply_to: options.replyTo,
         });
         return { ok: true, skipped: false };
     } catch (error) {

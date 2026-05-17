@@ -102,7 +102,7 @@ export async function GET(
                     postId: id,
                     score: 1
                 }
-            }).catch(err => console.error('Failed to track view:', err));
+            }).catch((err: any) => console.error('Failed to track view:', err));
         }
 
         // Transform response

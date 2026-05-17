@@ -88,7 +88,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     try {
         // Create one notification row and fan-out recipient rows in a transaction
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             const notification = await tx.notification.create({
                 data: {
                     type,

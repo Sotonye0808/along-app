@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
             });
 
             // Transform to match frontend interface
-            const transformedPosts = (posts || []).map(post => ({
+            const transformedPosts = (posts || []).map((post: any) => ({
                 id: post.id,
                 userId: post.userId,
                 title: post.title,
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
         });
 
         // Transform to match frontend interface
-        const transformedPosts = (posts || []).map(post => ({
+        const transformedPosts = (posts || []).map((post: any) => ({
             id: post.id,
             userId: post.userId,
             title: post.title,
