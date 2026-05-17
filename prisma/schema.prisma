@@ -1,0 +1,386 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum RewardTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum BugStatus {
+  OPEN
+  TRIAGED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum BugCategory {
+  UI
+  ROUTING
+  AUTH
+  PERFORMANCE
+  DATA
+  NOTIFICATIONS
+  OTHER
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// User Model
+model User {
+  id           String     @id @default(cuid())
+  userName     String     @unique
+  firstName    String
+  lastName     String
+  email        String     @unique
+  password     String
+  avatar       String?
+  bio          String?
+  location     String?
+  verified     Boolean    @default(false)
+  role         UserRole   @default(USER)
+  rewardPoints Int        @default(0)
+  rewardTier   RewardTier @default(BRONZE)
+  inviteCode   String?    @unique
+  invitedById  String?
+  googleId     String?    @unique
+  avatarConfig Json?
+  lastKnownLat Float?
+  lastKnownLng Float?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  posts                Post[]
+  comments             Comment[]
+  likes                Like[]
+  bookmarks            Bookmark[]
+  notifications        NotificationRecipient[]
+  notificationsAsActor Notification[]          @relation("NotificationActor")
+  activities           UserActivity[]
+  bugReports           BugReport[]             @relation("BugReporter")
+  reviewedBugReports   BugReport[]             @relation("BugReviewer")
+  authoredReviews      UserReview[]            @relation("ReviewAuthor")
+  receivedReviews      UserReview[]            @relation("ReviewTarget")
+
+  invitedBy    User?  @relation("UserInvites", fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedUsers User[] @relation("UserInvites")
+
+  // Self-referential many-to-many for following
+  following       Follow[]         @relation("UserFollowing")
+  followers       Follow[]         @relation("UserFollowers")
+  analyticsEvents AnalyticsEvent[]
+  pushSubscriptions PushSubscription[]
+
+  @@index([userName])
+  @@index([email])
+  @@index([role])
+  @@index([rewardTier])
+  @@index([invitedById])
+  @@index([createdAt])
+}
+
+// Follow Model (Self-referential many-to-many)
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@index([createdAt])
+}
+
+// Post Model
+model Post {
+  id              String   @id @default(cuid())
+  userId          String
+  title           String
+  routes          Json // Array of Route objects
+  images          String[] // Array of Cloudinary URLs
+  tags            String[]
+  likes           Int      @default(0)
+  dislikes        Int      @default(0)
+  comments        Int      @default(0)
+  bookmarks       Int      @default(0)
+  validityScore   Int      @default(0)
+  validityTier    String?
+  startLat        Float?
+  startLng        Float?
+  endLat          Float?
+  endLng          Float?
+  region          String?
+  totalDistanceKm Float?
+  estimatedMins   Int?
+  isPlatformGen   Boolean  @default(false)
+  views           Int      @default(0)
+  shares          Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postComments    Comment[]
+  postLikes       Like[]
+  postBookmarks   Bookmark[]
+  notifications   Notification[]
+  userActivities  UserActivity[]
+  analyticsEvents AnalyticsEvent[]
+  bugReports      BugReport[]
+
+  @@index([userId])
+  @@index([validityScore])
+  @@index([validityTier])
+  @@index([isPlatformGen])
+  @@index([region])
+  @@index([startLat, startLng])
+  @@index([endLat, endLng])
+  @@index([createdAt(sort: Desc)])
+  @@index([tags])
+}
+
+// Comment Model
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  text      String
+  likes     Int      @default(0)
+  dislikes  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@index([postId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Like Model
+model Like {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  type      LikeType
+  createdAt DateTime @default(now())
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum LikeType {
+  LIKE
+  DISLIKE
+}
+
+// Bookmark Model
+model Bookmark {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Notification Model
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  actorId   String // User who triggered the notification
+  postId    String?
+  commentId String?
+  message   String
+  createdAt DateTime         @default(now())
+
+  // Relations
+  actor      User                    @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  post       Post?                   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment    Comment?                @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  recipients NotificationRecipient[]
+
+  @@index([actorId])
+  @@index([createdAt(sort: Desc)])
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  MENTION
+}
+
+// NotificationRecipient Model (Many-to-many between Notification and User)
+model NotificationRecipient {
+  id             String   @id @default(cuid())
+  notificationId String
+  userId         String
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  // Relations
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, userId])
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+// UserActivity Model (For feed algorithm)
+model UserActivity {
+  id        String       @id @default(cuid())
+  userId    String
+  type      ActivityType
+  postId    String?
+  tagId     String?
+  score     Float        @default(1.0)
+  createdAt DateTime     @default(now())
+
+  // Relations
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([type])
+}
+
+enum ActivityType {
+  VIEW
+  LIKE
+  COMMENT
+  BOOKMARK
+  SHARE
+}
+
+model SiteConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model BugReport {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  category    BugCategory
+  status      BugStatus   @default(OPEN)
+  reporterId  String
+  reviewerId  String?
+  postId      String?
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  resolvedAt  DateTime?
+
+  reporter User  @relation("BugReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("BugReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  post     Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([reporterId])
+  @@index([reviewerId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt(sort: Desc)])
+}
+
+model UserReview {
+  id         String       @id @default(cuid())
+  reviewerId String
+  revieweeId String
+  rating     Int
+  comment    String?
+  status     ReviewStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  reviewer User @relation("ReviewAuthor", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewee User @relation("ReviewTarget", fields: [revieweeId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewerId, revieweeId])
+  @@index([reviewerId])
+  @@index([revieweeId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  eventName String
+  userId    String?
+  postId    String?
+  region    String?
+  payload   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([eventName])
+  @@index([userId])
+  @@index([postId])
+  @@index([region])
+  @@index([createdAt(sort: Desc)])
+}
+
+// PushSubscription — stores Web Push API subscriptions per user/device
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@index([userId])
+}
