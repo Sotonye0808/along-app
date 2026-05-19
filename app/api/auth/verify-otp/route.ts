@@ -8,6 +8,23 @@ import { getAuthRateLimitIdentifier } from '@/lib/utils/requestClient';
 
 export async function POST(request: NextRequest) {
     try {
+        // Initial rate limit for malformed/oversized-body abuse protection
+        const preRateLimitIdentifier = getAuthRateLimitIdentifier(request);
+        const preRateLimit = await rateLimitByAction('auth:verify-otp:pre', preRateLimitIdentifier, {
+            maxRequests: 20,
+            windowSeconds: 900,
+        });
+
+        if (!preRateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many verification attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(preRateLimit.reset) }
+                }
+            );
+        }
+
         const body = await request.json();
         const validation = verifyOtpSchema.safeParse(body);
 

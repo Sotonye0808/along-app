@@ -40,6 +40,8 @@ interface LocalUploadFile {
   thumbUrl: string;
 }
 
+const QUICK_TAGS = ["commute", "budget", "safe", "rush-hour", "night", "shortcut"];
+
 function createInitialRoute(order: number): RouteInput {
   return {
     tempId: `${Date.now()}-${order}`,
@@ -74,7 +76,6 @@ export function ShareRouteModal({
   editMode = false,
   postToEdit,
 }: ShareRouteModalProps) {
-  const QUICK_TAGS = ["commute", "budget", "safe", "rush-hour", "night", "shortcut"];
   const [title, setTitle] = useState("");
   const [routes, setRoutes] = useState<RouteInput[]>([
     createInitialRoute(1),
@@ -92,6 +93,11 @@ export function ShareRouteModal({
   const [endLat, setEndLat] = useState<number | undefined>(undefined);
   const [endLng, setEndLng] = useState<number | undefined>(undefined);
   const [region, setRegion] = useState("");
+  const tagsSet = useMemo(() => new Set(tags), [tags]);
+  const availableQuickTags = useMemo(
+    () => QUICK_TAGS.filter((quickTag) => !tagsSet.has(quickTag)),
+    [tagsSet],
+  );
 
   // Auto-computed from coordinates
   const geoComputed = useMemo(() => {
@@ -547,13 +553,15 @@ export function ShareRouteModal({
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {QUICK_TAGS.filter((quickTag) => !tags.includes(quickTag)).map((quickTag) => (
-                <button
+              {availableQuickTags.map((quickTag) => (
+                <AppTag
                   key={quickTag}
-                  type="button"
-                  onClick={() => setTags((prev) => [...prev, quickTag])}>
-                  <AppTag label={`#${quickTag}`} variant="default" size="xs" />
-                </button>
+                  label={`#${quickTag}`}
+                  variant="default"
+                  size="xs"
+                  onClick={() => setTags((prev) => [...prev, quickTag])}
+                  aria-label={`Add ${quickTag} tag`}
+                />
               ))}
             </div>
 

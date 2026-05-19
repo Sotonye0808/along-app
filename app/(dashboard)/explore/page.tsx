@@ -212,8 +212,12 @@ export default function ExplorePage() {
 
         <AppCard variant="glass" padding="sm">
           <p className="text-xs text-[var(--color-text-secondary)]">
-            Future integration placeholder: this page will support discovery overlays from the
-            upcoming events/ticketing platform once APIs are available.
+            Stay tuned for upcoming events and ticketing discovery features. Track rollout updates
+            on the{" "}
+            <Link href="/events" className="font-medium text-[var(--color-primary)] hover:underline">
+              Events page
+            </Link>
+            .
           </p>
         </AppCard>
 

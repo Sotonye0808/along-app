@@ -26,10 +26,38 @@ function generateTokens(userId: string) {
 
 export async function POST(request: NextRequest) {
     try {
+        // Initial rate limit for malformed/oversized-body abuse protection
+        const preRateLimitIdentifier = getAuthRateLimitIdentifier(request);
+        const preRateLimit = await rateLimitByAction('auth:login:pre', preRateLimitIdentifier, {
+            maxRequests: 30,
+            windowSeconds: 900,
+        });
+
+        if (!preRateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many login attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(preRateLimit.reset) }
+                }
+            );
+        }
+
         const body: LoginCredentials = await request.json();
 
-        // Rate limit check (10 login attempts per 15 minutes per user+IP+agent fingerprint)
-        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, body.email);
+        // Validate input data
+        const validation = validateLoginData(body);
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: validation.error.issues[0]?.message || 'Invalid input data' },
+                { status: 400 }
+            );
+        }
+
+        const { email, password } = body;
+
+        // Credential-aware rate limit after payload validation
+        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, email);
         const rateLimit = await rateLimitByAction('auth:login', rateLimitIdentifier, {
             maxRequests: 10,
             windowSeconds: 900,
@@ -44,17 +72,6 @@ export async function POST(request: NextRequest) {
                 }
             );
         }
-
-        // Validate input data
-        const validation = validateLoginData(body);
-        if (!validation.success) {
-            return NextResponse.json(
-                { error: validation.error.issues[0]?.message || 'Invalid input data' },
-                { status: 400 }
-            );
-        }
-
-        const { email, password } = body;
 
         // Find user by email with password
         const user = await prisma.user.findUnique({

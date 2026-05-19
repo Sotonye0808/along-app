@@ -1,7 +1,18 @@
 import { NextRequest } from 'next/server';
 
-function normalizeIdentifier(value: string): string {
-    return value.trim().toLowerCase().replace(/\s+/g, '-').slice(0, 120);
+const MAX_IDENTIFIER_LENGTH = 120;
+
+function normalizeIdentifier(value: unknown): string {
+    if (typeof value !== 'string') {
+        return '';
+    }
+
+    return value
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9._:-]/g, '')
+        .slice(0, MAX_IDENTIFIER_LENGTH);
 }
 
 export function getClientIP(request: NextRequest): string {

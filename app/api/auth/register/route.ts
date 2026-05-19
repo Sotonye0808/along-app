@@ -15,10 +15,38 @@ function generateOTP(): string {
 
 export async function POST(request: NextRequest) {
     try {
+        // Initial rate limit for malformed/oversized-body abuse protection
+        const preRateLimitIdentifier = getAuthRateLimitIdentifier(request);
+        const preRateLimit = await rateLimitByAction('auth:register:pre', preRateLimitIdentifier, {
+            maxRequests: 20,
+            windowSeconds: 3600,
+        });
+
+        if (!preRateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many registration attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(preRateLimit.reset) }
+                }
+            );
+        }
+
         const body: RegisterData = await request.json();
 
-        // Rate limit check (10 registrations per hour per user+IP+agent fingerprint)
-        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, body.email || body.userName);
+        // Validate input data
+        const validation = validateRegisterData(body);
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: validation.error.issues[0]?.message || 'Invalid input data' },
+                { status: 400 }
+            );
+        }
+
+        const { userName, firstName, lastName, email, password } = body;
+
+        // Credential-aware rate limit after payload validation
+        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, email || userName);
         const rateLimit = await rateLimitByAction('auth:register', rateLimitIdentifier, {
             maxRequests: 10,
             windowSeconds: 3600,
@@ -33,17 +61,6 @@ export async function POST(request: NextRequest) {
                 }
             );
         }
-
-        // Validate input data
-        const validation = validateRegisterData(body);
-        if (!validation.success) {
-            return NextResponse.json(
-                { error: validation.error.issues[0]?.message || 'Invalid input data' },
-                { status: 400 }
-            );
-        }
-
-        const { userName, firstName, lastName, email, password } = body;
 
         // Check if email already exists
         const existingEmail = await prisma.user.findUnique({
