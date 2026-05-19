@@ -97,6 +97,14 @@
       color 0.3s ease;
   }
 
+  a {
+    color: var(--color-primary);
+  }
+
+  a:hover {
+    color: var(--color-primary-light);
+  }
+
   /* Smooth transitions for all interactive elements */
   button,
   a,

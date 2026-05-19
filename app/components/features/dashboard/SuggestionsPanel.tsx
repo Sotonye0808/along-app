@@ -204,11 +204,11 @@ export function SuggestionsPanel(): React.ReactElement {
           size="sm"
         />
       ) : (
-        <div className="flex flex-row gap-6 overflow-x-auto lg:flex-col">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
           {suggestedUsers.map((user) => (
             <div
               key={user.id}
-              className="flex min-w-0 flex-col items-center justify-between gap-2 lg:flex-row">
+              className="flex min-w-0 flex-col items-start justify-between gap-2 rounded-[var(--radius-card)] border border-[var(--color-border-light)] p-2.5 lg:flex-row lg:items-center">
               <div className="min-w-0 flex-1">
                 <AppUserLabel
                   user={{
@@ -230,6 +230,7 @@ export function SuggestionsPanel(): React.ReactElement {
               <AppButton
                 variant={followingIds.has(user.id) ? "secondary" : "primary"}
                 size="sm"
+                className="w-full lg:w-auto"
                 icon={followingIds.has(user.id) ? UserMinus : UserPlus}
                 loading={loadingFollowId === user.id}
                 disabled={loadingFollowId !== null && loadingFollowId !== user.id}

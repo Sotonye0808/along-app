@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { rateLimitByAction } from '@/lib/utils/rateLimiter';
 import { validateLoginData } from '@/lib/utils/validation';
 import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { getAuthRateLimitIdentifier } from '@/lib/utils/requestClient';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -25,9 +26,14 @@ function generateTokens(userId: string) {
 
 export async function POST(request: NextRequest) {
     try {
-        // Rate limit check (10 login attempts per 15 minutes per IP)
-        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 10, windowSeconds: 900 });
+        const body: LoginCredentials = await request.json();
+
+        // Rate limit check (10 login attempts per 15 minutes per user+IP+agent fingerprint)
+        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, body.email);
+        const rateLimit = await rateLimitByAction('auth:login', rateLimitIdentifier, {
+            maxRequests: 10,
+            windowSeconds: 900,
+        });
 
         if (!rateLimit.success) {
             return NextResponse.json(
@@ -38,8 +44,6 @@ export async function POST(request: NextRequest) {
                 }
             );
         }
-
-        const body: LoginCredentials = await request.json();
 
         // Validate input data
         const validation = validateLoginData(body);

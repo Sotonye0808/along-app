@@ -29,6 +29,7 @@ import { AppTag } from "@/components/ui/AppTag";
 import { AppTooltip } from "@/components/ui/AppTooltip";
 import { AppUserLabel } from "@/components/ui/AppUserLabel";
 import { TrustBadge } from "@/components/ui/TrustBadge";
+import { RouteMap } from "@/components/features/map";
 
 interface PostCardProps {
   post: Post;
@@ -149,6 +150,11 @@ export const PostCard = memo(function PostCard({
   }
 
   const cardVariant = post.isPlatformGen ? "suggestion" : "default";
+  const hasMapCoordinates =
+    post.startLat != null &&
+    post.startLng != null &&
+    post.endLat != null &&
+    post.endLng != null;
 
   return (
     <AppCard variant={cardVariant} hover className="mb-4">
@@ -326,6 +332,12 @@ export const PostCard = memo(function PostCard({
               ) : null}
             </button>
           ))}
+        </div>
+      ) : null}
+
+      {hasMapCoordinates ? (
+        <div className="mb-4">
+          <RouteMap post={post} height={220} className="w-full" />
         </div>
       ) : null}
 

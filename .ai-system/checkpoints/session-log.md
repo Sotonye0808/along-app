@@ -1,5 +1,40 @@
 # Development Checkpoints — Session Log
 
+## Session 17 — 2026-05-19
+
+**Completed:**
+Executed a targeted UX/bug consistency pass across auth, navigation, posts, suggestions, footer, and marketplace/explore messaging. Fixed auth rate-limit false positives by moving auth endpoints to session/user fingerprint rate-limit keys, replaced topbar text branding with the logo, restored authenticated theme toggles, improved dropdown action dispatch reliability, added post map previews, improved suggestions responsiveness, and upgraded post creation modal guidance/usability controls.
+
+**Files Modified:**
+
+- app/lib/utils/requestClient.ts
+- app/api/auth/login/route.ts
+- app/api/auth/register/route.ts
+- app/api/auth/verify/route.ts
+- app/api/auth/verify-otp/route.ts
+- app/api/auth/logout/route.ts
+- app/api/auth/refresh/route.ts
+- app/components/features/navigation/DesktopTopBar.tsx
+- app/components/features/navigation/MobileTopBar.tsx
+- app/components/ui/AppDropdown.tsx
+- app/components/features/posts/PostCard.tsx
+- app/components/features/dashboard/SuggestionsPanel.tsx
+- app/components/ui/AppFooter.tsx
+- app/components/features/posts/ShareRouteModal.tsx
+- app/(dashboard)/marketplace/page.tsx
+- app/(dashboard)/marketplace/layout.tsx
+- app/(dashboard)/explore/page.tsx
+- app/globals.css
+- .ai-system/planning/task-queue.md
+- .ai-system/checkpoints/session-log.md
+
+**Next Task:**
+Run full validation + review pass, then continue remaining Phase 6 compliance tasks (token normalization, direct Ant usage removal, icon cleanup, docs sync).
+
+**Notes / Blockers:**
+
+- Repository still has significant pre-existing lint debt unrelated to this patch; baseline tests and build pass.
+
 ## Session 15 — 2026-05-10
 
 **Completed:**

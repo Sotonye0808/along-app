@@ -15,7 +15,6 @@ import { AppCard } from "@/components/ui/AppCard";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { AppInput } from "@/components/ui/AppInput";
 import { AppTag } from "@/components/ui/AppTag";
-import { AppSpinner } from "@/components/ui/AppSpinner";
 import { AppUserLabel } from "@/components/ui/AppUserLabel";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { PostCardSkeleton } from "@/components/ui/AppSkeleton";
@@ -198,7 +197,7 @@ export default function ExplorePage() {
               Explore
             </h1>
             <p className="text-sm text-[var(--color-text-secondary)]">
-              Discover transport routes near you
+              Discover community routes now, with upcoming event and ticketing integrations.
             </p>
           </div>
           <AppButton
@@ -210,6 +209,13 @@ export default function ExplorePage() {
             Share this view
           </AppButton>
         </div>
+
+        <AppCard variant="glass" padding="sm">
+          <p className="text-xs text-[var(--color-text-secondary)]">
+            Future integration placeholder: this page will support discovery overlays from the
+            upcoming events/ticketing platform once APIs are available.
+          </p>
+        </AppCard>
 
         {/* Search */}
         <AppInput
@@ -325,4 +331,3 @@ export default function ExplorePage() {
     </>
   );
 }
-

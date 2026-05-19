@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { rateLimitByAction } from '@/lib/utils/rateLimiter';
+import { getAuthRateLimitIdentifier } from '@/lib/utils/requestClient';
 
 export async function POST(request: NextRequest) {
     try {
-        // Rate limit check (10 logout attempts per hour per IP)
-        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 10, windowSeconds: 3600 });
+        // Rate limit check (30 logout attempts per hour per session fingerprint)
+        const rateLimitIdentifier = getAuthRateLimitIdentifier(request);
+        const rateLimit = await rateLimitByAction('auth:logout', rateLimitIdentifier, {
+            maxRequests: 30,
+            windowSeconds: 3600,
+        });
 
         if (!rateLimit.success) {
             return NextResponse.json(
