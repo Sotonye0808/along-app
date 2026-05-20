@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { rateLimitByAction } from '@/lib/utils/rateLimiter';
 import { validateLoginData } from '@/lib/utils/validation';
 import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { getAuthRateLimitIdentifier } from '@/lib/utils/requestClient';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -25,16 +26,19 @@ function generateTokens(userId: string) {
 
 export async function POST(request: NextRequest) {
     try {
-        // Rate limit check (10 login attempts per 15 minutes per IP)
-        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 10, windowSeconds: 900 });
+        // Initial rate limit for malformed/oversized-body abuse protection
+        const preRateLimitIdentifier = getAuthRateLimitIdentifier(request);
+        const preRateLimit = await rateLimitByAction('auth:login:pre', preRateLimitIdentifier, {
+            maxRequests: 30,
+            windowSeconds: 900,
+        });
 
-        if (!rateLimit.success) {
+        if (!preRateLimit.success) {
             return NextResponse.json(
                 { error: 'Too many login attempts. Please try again later.' },
                 {
                     status: 429,
-                    headers: { 'Retry-After': String(rateLimit.reset) }
+                    headers: { 'Retry-After': String(preRateLimit.reset) }
                 }
             );
         }
@@ -51,6 +55,23 @@ export async function POST(request: NextRequest) {
         }
 
         const { email, password } = body;
+
+        // Credential-aware rate limit after payload validation
+        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, email);
+        const rateLimit = await rateLimitByAction('auth:login', rateLimitIdentifier, {
+            maxRequests: 10,
+            windowSeconds: 900,
+        });
+
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many login attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
+            );
+        }
 
         // Find user by email with password
         const user = await prisma.user.findUnique({

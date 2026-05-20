@@ -1,22 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { cache } from '@/lib/cache/redis';
-import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { rateLimitByAction } from '@/lib/utils/rateLimiter';
 import { verifyOtpSchema } from '@/lib/utils/validation';
 import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { getAuthRateLimitIdentifier } from '@/lib/utils/requestClient';
 
 export async function POST(request: NextRequest) {
     try {
-        // Rate limit check (5 OTP verifications per 15 minutes per IP)
-        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 5, windowSeconds: 900 });
+        // Initial rate limit for malformed/oversized-body abuse protection
+        const preRateLimitIdentifier = getAuthRateLimitIdentifier(request);
+        const preRateLimit = await rateLimitByAction('auth:verify-otp:pre', preRateLimitIdentifier, {
+            maxRequests: 20,
+            windowSeconds: 900,
+        });
 
-        if (!rateLimit.success) {
+        if (!preRateLimit.success) {
             return NextResponse.json(
                 { error: 'Too many verification attempts. Please try again later.' },
                 {
                     status: 429,
-                    headers: { 'Retry-After': String(rateLimit.reset) }
+                    headers: { 'Retry-After': String(preRateLimit.reset) }
                 }
             );
         }
@@ -32,6 +36,23 @@ export async function POST(request: NextRequest) {
         }
 
         const { email, code } = validation.data;
+
+        // Rate limit check (5 OTP verifications per 15 minutes per user+IP+agent fingerprint)
+        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, email);
+        const rateLimit = await rateLimitByAction('auth:verify-otp', rateLimitIdentifier, {
+            maxRequests: 5,
+            windowSeconds: 900,
+        });
+
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many verification attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
+            );
+        }
 
         // OTP is stored in Redis-backed cache only.
         const cachedOTP = await cache.get<string>(`otp:${email}`);

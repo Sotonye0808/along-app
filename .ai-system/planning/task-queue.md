@@ -35,6 +35,20 @@
 - [x] Stabilize PWA install prompt and service worker update flow
 - [ ] Update README and developer docs after remediation
 
+## Targeted UX/Design Consistency Patch — 2026-05-19
+
+> Section summary: single-pass remediation for reported auth/UI regressions and design alignment gaps.
+
+- [x] Reduce auth false-positive rate-limit lockouts by using stable session/user fingerprints in auth routes
+- [x] Replace topbar green text brand with logo asset and keep responsive rendering
+- [x] Restore visible theme toggle while authenticated (desktop + mobile)
+- [x] Improve post options dropdown reliability and map preview rendering in post cards
+- [x] Improve suggestions container responsiveness for mobile/tablet/desktop
+- [x] Apply green/tokenized default link styling instead of browser blue link defaults
+- [x] Update footer link groups to a responsive multi-column grid
+- [x] Improve post creation modal usability with tooltips, quick-tag utilities, and clearer guidance
+- [x] Reframe marketplace and explore copy for planned Transact + future events/ticketing integrations
+
 ## Feature Sprint — Env + Email + Seed
 
 > Section summary: Development environment routing, email service integration, and local DB readiness.

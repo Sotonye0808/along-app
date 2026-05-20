@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { cache } from '@/lib/cache/redis';
-import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { rateLimitByAction } from '@/lib/utils/rateLimiter';
 import { validateRegisterData } from '@/lib/utils/validation';
 import { handlePrismaError } from '@/lib/utils/prismaErrors';
 import { sendOtpVerificationEmail } from '@/lib/services/emailService';
+import { getAuthRateLimitIdentifier } from '@/lib/utils/requestClient';
 import bcrypt from 'bcryptjs';
 
 // Generate 6-digit OTP
@@ -14,16 +15,19 @@ function generateOTP(): string {
 
 export async function POST(request: NextRequest) {
     try {
-        // Rate limit check (10 registrations per hour per IP)
-        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 10, windowSeconds: 3600 });
+        // Initial rate limit for malformed/oversized-body abuse protection
+        const preRateLimitIdentifier = getAuthRateLimitIdentifier(request);
+        const preRateLimit = await rateLimitByAction('auth:register:pre', preRateLimitIdentifier, {
+            maxRequests: 20,
+            windowSeconds: 3600,
+        });
 
-        if (!rateLimit.success) {
+        if (!preRateLimit.success) {
             return NextResponse.json(
                 { error: 'Too many registration attempts. Please try again later.' },
                 {
                     status: 429,
-                    headers: { 'Retry-After': String(rateLimit.reset) }
+                    headers: { 'Retry-After': String(preRateLimit.reset) }
                 }
             );
         }
@@ -40,6 +44,23 @@ export async function POST(request: NextRequest) {
         }
 
         const { userName, firstName, lastName, email, password } = body;
+
+        // Credential-aware rate limit after payload validation
+        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, email || userName);
+        const rateLimit = await rateLimitByAction('auth:register', rateLimitIdentifier, {
+            maxRequests: 10,
+            windowSeconds: 3600,
+        });
+
+        if (!rateLimit.success) {
+            return NextResponse.json(
+                { error: 'Too many registration attempts. Please try again later.' },
+                {
+                    status: 429,
+                    headers: { 'Retry-After': String(rateLimit.reset) }
+                }
+            );
+        }
 
         // Check if email already exists
         const existingEmail = await prisma.user.findUnique({

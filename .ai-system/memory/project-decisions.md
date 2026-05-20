@@ -380,3 +380,22 @@ The codebase contains several areas of drift after multi-session refactors: them
 
 **Implications:**
 Future changes should follow the compliance-audit plan, with docs kept in sync after each remediation batch and environment variables maintained through .env.example.
+
+---
+
+## Auth Rate Limiting Uses Session/User Fingerprints
+
+**Decision:** Auth endpoints use `rateLimitByAction` with a fingerprint key combining client IP, auth identifier (email/username when available), and user-agent instead of IP-only keys.
+**Date:** 2026-05-19
+**Made by:** AI agent
+
+**Reason:**
+IP-only auth throttling caused false-positive lockouts when requests were proxied or fell back to `unknown`, creating shared buckets across users. Fingerprint-based keys preserve anti-abuse controls while reducing accidental lockouts in multi-user/shared-network environments.
+
+**Alternatives Considered:**
+
+- Keep IP-only keys and just raise limits: rejected because it masks but does not solve shared-key collisions.
+- Remove auth rate limits: rejected for security reasons.
+
+**Implications:**
+Future auth endpoints should reuse the same client-fingerprint utility for throttling to keep behavior consistent and user-safe.

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/db/prisma';
-import { rateLimitByIP } from '@/lib/utils/rateLimiter';
+import { rateLimitByAction } from '@/lib/utils/rateLimiter';
 import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { getAuthRateLimitIdentifier } from '@/lib/utils/requestClient';
 import { z } from 'zod';
 
 const tokenPayloadSchema = z.object({
@@ -11,9 +12,12 @@ const tokenPayloadSchema = z.object({
 
 export async function GET(request: NextRequest) {
     try {
-        // Rate limit check (60 auth verification attempts per hour per IP)
-        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 60, windowSeconds: 3600 });
+        // Rate limit check (120 auth verification attempts per hour per session fingerprint)
+        const rateLimitIdentifier = getAuthRateLimitIdentifier(request);
+        const rateLimit = await rateLimitByAction('auth:verify', rateLimitIdentifier, {
+            maxRequests: 120,
+            windowSeconds: 3600,
+        });
 
         if (!rateLimit.success) {
             return NextResponse.json(

@@ -1,5 +1,27 @@
 # Development History
 
+## 2026-05-19 — Auth/UI Consistency Single-Pass Patch
+
+**Summary:**
+Implemented a focused remediation pass for reported auth lockout and design inconsistencies. Auth routes now use session/user fingerprint keys for rate limiting to prevent shared-IP false positives. Navigation, feed cards, footer, suggestions, and post creation UX were aligned with design intent, and marketplace/explore copy was updated to reflect planned platform integrations.
+
+**Completed:**
+
+- Added request client fingerprint utility and applied it to auth login/register/verify/verify-otp/logout/refresh rate limiting
+- Replaced desktop/mobile topbar text brand with `/logo.svg`
+- Restored always-available theme toggle in authenticated nav states
+- Improved AppDropdown action dispatch and post card option menu reliability
+- Added map previews to post cards when coordinates are available
+- Improved suggestions panel responsiveness and footer link-grid behavior
+- Added tokenized global link defaults to avoid browser-blue anchors
+- Improved ShareRouteModal usability with guidance, tooltips, and quick-tag controls
+- Updated marketplace/explore messaging for Transact + future events/ticketing integration expectations
+- Synced ai-system task queue and checkpoint log for continuation
+
+**Known Blockers:**
+
+- Large pre-existing lint debt remains outside the scope of this patch.
+
 ## 2026-05-12 — Env + Email + Cookie Sprint
 
 **Summary:**

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { LogIn, LogOut, Moon, Search, Sun, User, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
@@ -66,9 +67,16 @@ export function MobileTopBar() {
         </div>
       ) : (
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-[var(--color-primary)]">Along</h1>
-          </div>
+          <Link href={APP_ROUTES.DASHBOARD} aria-label="Along home" className="flex items-center">
+            <Image
+              src="/logo.svg"
+              alt="Along"
+              width={94}
+              height={28}
+              priority
+              className="h-7 w-auto"
+            />
+          </Link>
 
           <div className="flex items-center gap-4">
             <AppButton
@@ -78,20 +86,17 @@ export function MobileTopBar() {
               ariaLabel="Search routes and users"
             />
 
-            {isAuthenticated && user ? (
-              <NotificationsDropdown userId={user.id} />
-            ) : (
-              <AppButton
-                variant="icon"
-                icon={theme === "dark" ? Sun : Moon}
-                onClick={toggleTheme}
-                ariaLabel={
-                  theme === "dark"
-                    ? "Switch to light mode"
-                    : "Switch to dark mode"
-                }
-              />
-            )}
+            {isAuthenticated && user ? <NotificationsDropdown userId={user.id} /> : null}
+            <AppButton
+              variant="icon"
+              icon={theme === "dark" ? Sun : Moon}
+              onClick={toggleTheme}
+              ariaLabel={
+                theme === "dark"
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+              }
+            />
 
             {isAuthenticated && user ? (
               <AppDropdown items={userMenuItems} placement="bottomRight">

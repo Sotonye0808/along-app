@@ -3,10 +3,19 @@ import Link from "next/link";
 import { FOOTER_CONFIG } from "@/lib/config";
 
 export function AppFooter(): React.ReactElement {
+  const footerSections = [
+    ...FOOTER_CONFIG.sections,
+    {
+      title: "Social",
+      links: FOOTER_CONFIG.social,
+      external: true,
+    },
+  ];
+
   return (
     <footer className="mt-10 border-t border-[var(--color-border)] bg-[var(--color-bg-elevated)]/70">
       <div className="mx-auto w-full max-w-6xl px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="space-y-6">
           <div>
             <h3 className="text-xl font-bold text-[var(--color-primary)]">
               {FOOTER_CONFIG.brand.name}
@@ -16,7 +25,8 @@ export function AppFooter(): React.ReactElement {
             </p>
           </div>
 
-          {FOOTER_CONFIG.sections.map((section) => (
+          <div className="grid grid-cols-3 gap-4 md:gap-6">
+            {footerSections.map((section) => (
             <div key={section.title}>
               <h4 className="font-semibold text-[var(--color-text-primary)]">
                 {section.title}
@@ -24,34 +34,26 @@ export function AppFooter(): React.ReactElement {
               <ul className="mt-2 space-y-1.5 text-sm">
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
-                      {link.label}
-                    </Link>
+                    {"external" in section && section.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-
-          <div>
-            <h4 className="font-semibold text-[var(--color-text-primary)]">
-              Social
-            </h4>
-            <ul className="mt-2 space-y-1.5 text-sm">
-              {FOOTER_CONFIG.social.map((item) => (
-                <li key={item.href}>
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
 

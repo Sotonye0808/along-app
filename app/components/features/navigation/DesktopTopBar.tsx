@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Moon, Sun, User, LogOut, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
@@ -49,27 +50,29 @@ export function DesktopTopBar() {
 
   return (
     <header className="fixed left-20 right-0 top-0 z-50 hidden items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-base)] px-6 py-3 md:flex">
-      <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">
-          Along
-        </h1>
-      </div>
+      <Link href={APP_ROUTES.DASHBOARD} aria-label="Along home" className="flex items-center">
+        <Image
+          src="/logo.svg"
+          alt="Along"
+          width={112}
+          height={32}
+          priority
+          className="h-8 w-auto"
+        />
+      </Link>
 
       <div className="mx-8 max-w-2xl flex-1">
         <SearchBar />
       </div>
 
       <div className="flex items-center gap-4">
-        {isAuthenticated && user ? (
-          <NotificationsDropdown userId={user.id} />
-        ) : (
-          <AppButton
-            variant="icon"
-            icon={theme === "dark" ? Sun : Moon}
-            ariaLabel="Toggle theme"
-            onClick={toggleTheme}
-          />
-        )}
+        {isAuthenticated && user ? <NotificationsDropdown userId={user.id} /> : null}
+        <AppButton
+          variant="icon"
+          icon={theme === "dark" ? Sun : Moon}
+          ariaLabel={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          onClick={toggleTheme}
+        />
 
         {isAuthenticated && user ? (
           <AppDropdown items={menuItems} placement="bottomRight">

@@ -2,13 +2,14 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Link2, MapPin, Plus, Trash2, X } from "lucide-react";
+import { CircleHelp, Link2, MapPin, Plus, Trash2, WandSparkles, X } from "lucide-react";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppInput } from "@/components/ui/AppInput";
 import { AppModal } from "@/components/ui/AppModal";
 import { AppSelect } from "@/components/ui/AppSelect";
 import { AppTag } from "@/components/ui/AppTag";
 import { AppTextarea } from "@/components/ui/AppTextarea";
+import { AppTooltip } from "@/components/ui/AppTooltip";
 import { DraftingCoach } from "./DraftingCoach";
 import { PlaceAutocomplete, type PlaceResult } from "@/components/features/map";
 import { RouteTracingService } from "@/lib/services/RouteTracingService";
@@ -38,6 +39,8 @@ interface LocalUploadFile {
   url: string;
   thumbUrl: string;
 }
+
+const QUICK_TAGS = ["commute", "budget", "safe", "rush-hour", "night", "shortcut"];
 
 function createInitialRoute(order: number): RouteInput {
   return {
@@ -90,6 +93,11 @@ export function ShareRouteModal({
   const [endLat, setEndLat] = useState<number | undefined>(undefined);
   const [endLng, setEndLng] = useState<number | undefined>(undefined);
   const [region, setRegion] = useState("");
+  const tagsSet = useMemo(() => new Set(tags), [tags]);
+  const availableQuickTags = useMemo(
+    () => QUICK_TAGS.filter((quickTag) => !tagsSet.has(quickTag)),
+    [tagsSet],
+  );
 
   // Auto-computed from coordinates
   const geoComputed = useMemo(() => {
@@ -361,6 +369,16 @@ export function ShareRouteModal({
         footer={null}
       >
         <div className="space-y-4">
+          <div className="rounded-[var(--radius-card)] border border-[var(--color-border-light)] bg-[var(--color-bg-elevated)] px-3 py-2.5 text-xs text-[var(--color-text-secondary)]">
+            <p className="inline-flex items-center gap-1 font-medium text-[var(--color-text-primary)]">
+              <WandSparkles size={13} aria-hidden="true" />
+              Quick route authoring guide
+            </p>
+            <p className="mt-1">
+              Keep each segment short and actionable, then add map points and links for better route quality.
+            </p>
+          </div>
+
           <DraftingCoach draft={draftState} className="mb-2" />
 
           <AppInput
@@ -372,10 +390,17 @@ export function ShareRouteModal({
 
           {/* Geographic fields */}
           <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] p-3 space-y-3">
-            <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide flex items-center gap-1">
-              <MapPin size={12} aria-hidden="true" />
-              Route coordinates (optional)
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide flex items-center gap-1">
+                <MapPin size={12} aria-hidden="true" />
+                Route coordinates (optional)
+              </p>
+              <AppTooltip title="Adding start/end points unlocks map previews and auto distance estimates.">
+                <span className="inline-flex text-[var(--color-text-muted)]">
+                  <CircleHelp size={13} aria-hidden="true" />
+                </span>
+              </AppTooltip>
+            </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <PlaceAutocomplete
                 placeholder="Start location"
@@ -433,13 +458,17 @@ export function ShareRouteModal({
                       Link
                     </AppButton>
 
-                    <AppButton
-                      variant="ghost"
-                      size="sm"
-                      icon={Trash2}
-                      onClick={() => removeRoute(route.tempId)}
-                      ariaLabel={`Remove segment ${index + 1}`}
-                    />
+                    <AppTooltip title="Remove this segment">
+                      <span className="inline-flex">
+                        <AppButton
+                          variant="ghost"
+                          size="sm"
+                          icon={Trash2}
+                          onClick={() => removeRoute(route.tempId)}
+                          ariaLabel={`Remove segment ${index + 1}`}
+                        />
+                      </span>
+                    </AppTooltip>
                   </div>
                 </div>
 
@@ -523,6 +552,19 @@ export function ShareRouteModal({
               </AppButton>
             </div>
 
+            <div className="flex flex-wrap gap-2">
+              {availableQuickTags.map((quickTag) => (
+                <AppTag
+                  key={quickTag}
+                  label={`#${quickTag}`}
+                  variant="default"
+                  size="xs"
+                  onClick={() => setTags((prev) => [...prev, quickTag])}
+                  aria-label={`Add ${quickTag} tag`}
+                />
+              ))}
+            </div>
+
             {tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
@@ -553,9 +595,13 @@ export function ShareRouteModal({
 
             <div className="flex items-center gap-3">
               <label htmlFor="share-route-images" className="cursor-pointer">
-                <AppButton variant="ghost" icon={Plus}>
-                  Upload images
-                </AppButton>
+                <AppTooltip title="Add photos for landmarks, bus stops, or route checkpoints.">
+                  <span className="inline-flex">
+                    <AppButton variant="ghost" icon={Plus}>
+                      Upload images
+                    </AppButton>
+                  </span>
+                </AppTooltip>
               </label>
 
               {fileList.length > 0 ? (

@@ -26,18 +26,24 @@ export function AppDropdown({
   trigger = ["click"],
   placement = "bottomRight",
 }: AppDropdownProps): React.ReactElement {
+  const itemActionMap = new Map(items.map((item) => [String(item.key), item.onClick]));
+
   const menuItems: MenuProps["items"] = items.map((item) => ({
     key: item.key,
     label: item.label,
     icon: item.icon,
     danger: item.danger,
     disabled: item.disabled,
-    onClick: item.onClick,
   }));
 
   return (
     <Dropdown
-      menu={{ items: menuItems }}
+      menu={{
+        items: menuItems,
+        onClick: ({ key }) => {
+          itemActionMap.get(String(key))?.();
+        },
+      }}
       trigger={trigger}
       placement={placement}>
       {children}
