@@ -3,18 +3,20 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
+  Award,
   Calendar,
   CheckCircle,
   Edit,
   Link as LinkIcon,
   MapPin,
+  Route,
   UserMinus,
   UserPlus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PostCard } from "@/components/features/posts/PostCard";
 import { CommentSection } from "@/components/features/posts/CommentSection";
-import { formatDate } from "@/lib/utils/format";
+import { formatDate, formatNumber } from "@/lib/utils/format";
 import { APP_ROUTES } from "@/lib/constants";
 import { ModalService } from "@/lib/services/modalService";
 import { ToastService } from "@/lib/services/toastService";
@@ -134,101 +136,120 @@ export function UserProfile({
 
   return (
     <div className="mx-auto max-w-4xl">
-      {/* Profile Header */}
-      <AppCard variant="default" className="mb-6">
-        <div className="flex flex-col gap-6 md:flex-row">
-          <div className="flex justify-center md:justify-start">
-            <AppAvatar user={user} size={120} linkToProfile={false} showVerifiedBadge />
-          </div>
+      {/* Profile Header with Cover */}
+      <div className="relative mb-16">
+        {/* Cover Image */}
+        <div className="h-48 w-full rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] overflow-hidden">
+          {user.coverImage && (
+            <img src={user.coverImage} alt="Cover" className="w-full h-full object-cover" />
+          )}
+        </div>
 
-          <div className="flex-1">
-            <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
-                    {user.firstName} {user.lastName}
-                  </h1>
-                  {user.verified ? (
-                    <CheckCircle
-                      size={18}
-                      className="shrink-0 text-[var(--color-primary)]"
-                      aria-label="Verified"
-                    />
-                  ) : null}
-                </div>
-                <p className="text-[var(--color-text-secondary)]">
-                  @{user.userName}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                {isOwnProfile ? (
-                  <AppButton icon={Edit} onClick={onEditProfile}>
-                    Edit Profile
-                  </AppButton>
-                ) : (
-                  <AppButton
-                    variant={isFollowing ? "secondary" : "primary"}
-                    icon={isFollowing ? UserMinus : UserPlus}
-                    onClick={() => void handleFollowClick()}>
-                    {isFollowing ? "Following" : "Follow"}
-                  </AppButton>
-                )}
-                <AppButton
-                  variant="secondary"
-                  icon={LinkIcon}
-                  onClick={handleCopyProfileLink}
-                  ariaLabel="Share profile">
-                  Share
-                </AppButton>
-              </div>
+        {/* Avatar - overlapping cover */}
+        <div className="absolute -bottom-12 left-6">
+          <div className="relative">
+            <AppAvatar user={user} size={96} linkToProfile={false} showVerifiedBadge />
+            <div className="absolute -bottom-1 -right-1 bg-white dark:bg-[var(--color-bg-card)] rounded-full p-0.5">
+              <Route size={20} className="text-[var(--color-primary)]" />
             </div>
+          </div>
+        </div>
+
+        {/* Edit Cover Button (own profile) */}
+        {isOwnProfile && (
+          <button className="absolute top-3 right-3 px-3 py-1.5 bg-black/50 text-white text-sm rounded-lg hover:bg-black/70 transition-colors flex items-center gap-1.5">
+            <Edit size={14} />
+            Edit Cover
+          </button>
+        )}
+      </div>
+
+      {/* Profile Info Card */}
+      <AppCard variant="default" className="mb-6 -mt-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="pl-24 md:pl-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                {user.firstName} {user.lastName}
+              </h1>
+              {user.verified ? (
+                <CheckCircle
+                  size={18}
+                  className="shrink-0 text-[var(--color-primary)]"
+                  aria-label="Verified"
+                />
+              ) : null}
+            </div>
+            <p className="text-[var(--color-text-secondary)] mb-3">
+              @{user.userName}
+            </p>
 
             {user.bio ? (
-              <p className="mb-4 whitespace-pre-wrap text-[var(--color-text-primary)]">
+              <p className="mb-4 whitespace-pre-wrap text-[var(--color-text-primary)] max-w-lg">
                 {user.bio}
               </p>
             ) : null}
 
-            <div className="mb-4 flex gap-6">
-              <div>
-                <span className="font-bold text-[var(--color-text-primary)]">
-                  {posts.length}
-                </span>
-                <span className="ml-1 text-[var(--color-text-secondary)]">
-                  Posts
-                </span>
+            {/* Stats Row */}
+            <div className="flex gap-6">
+              <div className="text-center">
+                <div className="text-xl font-bold text-[var(--color-text-primary)]">{posts.length}</div>
+                <div className="text-xs text-[var(--color-text-muted)]">Posts</div>
               </div>
-              <div>
-                <span className="font-bold text-[var(--color-text-primary)]">
-                  {user.followers ?? 0}
-                </span>
-                <span className="ml-1 text-[var(--color-text-secondary)]">
-                  Followers
-                </span>
+              <div className="text-center">
+                <div className="text-xl font-bold text-[var(--color-text-primary)]">{formatNumber(user.followers ?? 0)}</div>
+                <div className="text-xs text-[var(--color-text-muted)]">Followers</div>
               </div>
-              <div>
-                <span className="font-bold text-[var(--color-text-primary)]">
-                  {user.following?.length ?? 0}
-                </span>
-                <span className="ml-1 text-[var(--color-text-secondary)]">
-                  Following
-                </span>
+              <div className="text-center">
+                <div className="text-xl font-bold text-[var(--color-text-primary)]">{user.following?.length ?? 0}</div>
+                <div className="text-xs text-[var(--color-text-muted)]">Following</div>
               </div>
+              <div className="text-center">
+                <div className="text-xl font-bold text-[var(--color-text-primary)]">{formatNumber((user as any).routes ?? 0)}</div>
+                <div className="text-xs text-[var(--color-text-muted)]">Routes</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            {/* Reward Tier Badge */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-full">
+              <Award size={16} className="text-amber-500" />
+              <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Explorer</span>
             </div>
 
-            <div className="flex flex-col gap-2 text-sm text-[var(--color-text-secondary)]">
-              {user.location ? (
-                <div className="flex items-center gap-2">
-                  <MapPin size={14} aria-hidden="true" />
-                  <span>{user.location}</span>
-                </div>
-              ) : null}
-              <div className="flex items-center gap-2">
-                <Calendar size={14} aria-hidden="true" />
-                <span>Joined {formatDate(user.createdAt)}</span>
-              </div>
+            {isOwnProfile ? (
+              <AppButton icon={Edit} onClick={onEditProfile}>
+                Edit Profile
+              </AppButton>
+            ) : (
+              <AppButton
+                variant={isFollowing ? "secondary" : "primary"}
+                icon={isFollowing ? UserMinus : UserPlus}
+                onClick={() => void handleFollowClick()}>
+                {isFollowing ? "Following" : "Follow"}
+              </AppButton>
+            )}
+            <AppButton
+              variant="secondary"
+              icon={LinkIcon}
+              onClick={handleCopyProfileLink}
+              ariaLabel="Share profile">
+              Share
+            </AppButton>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 text-sm text-[var(--color-text-secondary)] mt-4 pl-24 md:pl-0">
+          {user.location ? (
+            <div className="flex items-center gap-2">
+              <MapPin size={14} aria-hidden="true" />
+              <span>{user.location}</span>
             </div>
+          ) : null}
+          <div className="flex items-center gap-2">
+            <Calendar size={14} aria-hidden="true" />
+            <span>Joined {formatDate(user.createdAt)}</span>
           </div>
         </div>
       </AppCard>

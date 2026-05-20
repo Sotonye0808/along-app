@@ -8,26 +8,33 @@ import {
 
 export default function DashboardPage() {
   return (
-    <div className="w-full mx-auto px-1 py-3">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Main Feed Column */}
-        <div className="order-2 lg:order-1 lg:col-span-7 xl:col-span-8">
-          <Feed />
-        </div>
-
-        {/* Sidebar Column */}
-        <div className="order-1 lg:order-2 lg:block lg:col-span-5 xl:col-span-4">
+    <div className="w-full mx-auto px-1 py-3 max-w-[1200px]">
+      <div className="flex gap-6">
+        {/* Sidebar Column - 240px */}
+        <aside className="hidden lg:block w-[240px] shrink-0">
           <div className="sticky top-20 space-y-6">
-          <div className="mb-4 hidden md:block">
-            <ShareRouteButton />
-          </div>
+            <div className="mb-4">
+              <ShareRouteButton />
+            </div>
             <SuggestionsPanel />
           </div>
-        </div>
+        </aside>
+
+        {/* Main Feed Column - 680px */}
+        <main className="flex-1 min-w-0 max-w-[680px]">
+          <Feed />
+        </main>
+
+        {/* Suggestions Column - 280px */}
+        <aside className="hidden xl:block w-[280px] shrink-0">
+          <div className="sticky top-20 space-y-6">
+            <SuggestionsPanel />
+          </div>
+        </aside>
       </div>
 
       {/* Mobile Share Button (Floating) */}
-      <div className="md:hidden">
+      <div className="lg:hidden">
         <ShareRouteButton />
       </div>
     </div>

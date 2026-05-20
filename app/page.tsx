@@ -38,7 +38,7 @@ export default function HomePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">Welcome to Along</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="mb-8 text-[var(--color-text-secondary)]">
             Share and discover amazing travel routes
           </p>
           <div className="space-x-4">
@@ -49,7 +49,7 @@ export default function HomePage() {
             </a>
             <a
               href="/register"
-              className="inline-block px-6 py-3 border border-[#00623B] text-[#00623B] rounded-lg hover:bg-gray-50 transition">
+              className="inline-block px-6 py-3 border border-[var(--color-primary)] text-[var(--color-primary)] rounded-lg hover:bg-[var(--color-bg-elevated)] transition">
               Sign Up
             </a>
           </div>

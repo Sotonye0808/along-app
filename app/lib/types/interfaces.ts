@@ -1,12 +1,7 @@
+import type { AvatarConfig } from "@/lib/config/avatar";
+
 // Core Types
 declare global {
-    interface AvatarConfig {
-        style: string;
-        seed: string;
-        backgroundColor?: string;
-        radius?: number;
-    }
-
     interface User {
         id: string;
         userName: string;
@@ -27,6 +22,8 @@ declare global {
         role?: "USER" | "ADMIN";
         rewardPoints?: number;
         rewardTier?: "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
+        coverImage?: string;
+        routes?: number;
     }
 
     interface Link {
@@ -67,6 +64,7 @@ declare global {
         estimatedMins?: number;
         views?: number;
         shares?: number;
+        saves?: number;
         createdAt: string;
         updatedAt: string;
     }
@@ -98,7 +96,7 @@ declare global {
     interface AppNotification { // renamed AppNotification to prevent conflict with native TS Notification interface
         id: string;
         userId: string;
-        type: 'like' | 'comment' | 'follow' | 'mention';
+        type: 'like' | 'comment' | 'follow' | 'mention' | 'reward';
         message: string;
         postId?: string;
         read: boolean;

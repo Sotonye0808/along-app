@@ -636,7 +636,7 @@ export function ShareRouteModal({
                         variant="icon"
                         icon={X}
                         ariaLabel={`Remove ${file.name}`}
-                        className="!absolute !right-1 !top-1 !bg-white/85"
+                        className="!absolute !right-1 !top-1 !bg-white/85 !text-[var(--color-text-primary)]"
                         onClick={() => {
                           setFileList((prev) =>
                             prev.filter((entry) => entry.uid !== file.uid),

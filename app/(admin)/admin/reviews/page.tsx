@@ -8,6 +8,7 @@ import {
   REVIEW_STATUS_OPTIONS,
 } from "@/lib/config";
 import { AppButton } from "@/components/ui/AppButton";
+import type { AvatarConfig } from "@/lib/config/avatar";
 import { AppCard } from "@/components/ui/AppCard";
 import { AppSpinner } from "@/components/ui/AppSpinner";
 import { AppTable } from "@/components/ui/AppTable";

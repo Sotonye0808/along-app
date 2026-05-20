@@ -36,6 +36,8 @@ export interface RouteMapProps {
   className?: string;
   /** If true, wrap in a collapsible panel (mobile-friendly) */
   collapsible?: boolean;
+  /** If true, enable map interactions (default: false) */
+  interactive?: boolean;
 }
 
 interface ViewState {

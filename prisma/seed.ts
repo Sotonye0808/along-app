@@ -32,6 +32,12 @@ interface SeedPost {
     tags: string[];
     routes: Route[];
     images: string[];
+    startLat?: number;
+    startLng?: number;
+    endLat?: number;
+    endLng?: number;
+    region?: string;
+    totalDistanceKm?: number;
 }
 
 interface SeedComment {
@@ -255,7 +261,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 150,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/route-lagos-brt.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/ikeja-bus-stop.jpg',
+            ],
+            startLat: 6.6059,
+            startLng: 3.3494,
+            endLat: 6.4281,
+            endLng: 3.4193,
+            region: 'Lagos',
+            totalDistanceKm: 12.5,
         },
         {
             userId: users[1].id, // Ada
@@ -290,7 +305,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 150,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/ojota-park.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/ibadan-road.jpg',
+            ],
+            startLat: 6.6059,
+            startLng: 3.3494,
+            endLat: 7.3775,
+            endLng: 3.9470,
+            region: 'Lagos-Ibadan',
+            totalDistanceKm: 145,
         },
         {
             userId: users[2].id, // Emeka
@@ -325,7 +349,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 150,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/kubwa-junction.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/abuja-bus.jpg',
+            ],
+            startLat: 9.1584,
+            startLng: 7.3240,
+            endLat: 9.0559,
+            endLng: 7.4891,
+            region: 'Abuja',
+            totalDistanceKm: 18,
         },
         {
             userId: users[4].id, // Tunde
@@ -369,7 +402,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 0,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/niger-bridge.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/lagos-ibadan-expressway.jpg',
+            ],
+            startLat: 6.6059,
+            startLng: 3.3494,
+            endLat: 9.0765,
+            endLng: 7.3986,
+            region: 'Lagos-Abuja',
+            totalDistanceKm: 750,
         },
         {
             userId: users[3].id, // Ngozi
@@ -404,7 +446,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 200,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/enugu-museum.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/okpara-square.jpg',
+            ],
+            startLat: 6.4511,
+            startLng: 7.5022,
+            endLat: 6.4493,
+            endLng: 7.5098,
+            region: 'Enugu',
+            totalDistanceKm: 1.2,
         },
         {
             userId: users[6].id, // Bola
@@ -439,7 +490,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 0,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/calabar-carnival.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/marian-road.jpg',
+            ],
+            startLat: 4.9751,
+            startLng: 8.3402,
+            endLat: 4.9749,
+            endLng: 8.3377,
+            region: 'Cross River',
+            totalDistanceKm: 2,
         },
         {
             userId: users[7].id, // Ifeanyi
@@ -474,7 +534,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 200,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/owerri-park.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/portharcourt-road.jpg',
+            ],
+            startLat: 5.4776,
+            startLng: 7.0138,
+            endLat: 4.7777,
+            endLng: 7.0133,
+            region: 'Rivers',
+            totalDistanceKm: 88,
         },
         {
             userId: users[5].id, // Zainab
@@ -509,7 +578,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 0,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/dala-hill.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/kurmi-market.jpg',
+            ],
+            startLat: 12.0022,
+            startLng: 8.5193,
+            endLat: 12.0013,
+            endLng: 8.5155,
+            region: 'Kano',
+            totalDistanceKm: 1.5,
         },
         {
             userId: users[8].id, // Amina
@@ -544,7 +622,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 1000,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/shere-hills.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/jos-landscape.jpg',
+            ],
+            startLat: 10.5105,
+            startLng: 7.4177,
+            endLat: 9.8965,
+            endLng: 8.8583,
+            region: 'Plateau',
+            totalDistanceKm: 95,
         },
         {
             userId: users[9].id, // John
@@ -570,7 +657,16 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 1500,
                 },
             ],
-            images: [],
+            images: [
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/lekki-road.jpg',
+                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/ajah-beach.jpg',
+            ],
+            startLat: 6.4281,
+            startLng: 3.5646,
+            endLat: 6.4106,
+            endLng: 3.5996,
+            region: 'Lagos',
+            totalDistanceKm: 8,
         },
     ];
 
@@ -581,13 +677,19 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 userId: postData.userId,
                 title: postData.title,
                 tags: postData.tags,
-                routes: postData.routes as any, // Cast to any to satisfy Prisma's JSON type
+                routes: postData.routes as any,
                 images: postData.images,
                 likes: Math.floor(Math.random() * 50) + 10,
                 dislikes: Math.floor(Math.random() * 5),
                 comments: Math.floor(Math.random() * 20),
                 bookmarks: Math.floor(Math.random() * 30),
                 views: Math.floor(Math.random() * 200) + 50,
+                startLat: postData.startLat ?? undefined,
+                startLng: postData.startLng ?? undefined,
+                endLat: postData.endLat ?? undefined,
+                endLng: postData.endLng ?? undefined,
+                region: postData.region ?? undefined,
+                totalDistanceKm: postData.totalDistanceKm ?? undefined,
             },
         });
         createdPosts.push(post);

@@ -5,13 +5,14 @@ import { requireAuth } from "@/lib/utils/auth-server";
 import { rateLimitByUser } from "@/lib/utils/rateLimiter";
 import { cache, CACHE_KEYS } from "@/lib/cache/redis";
 import { handlePrismaError } from "@/lib/utils/prismaErrors";
-import { AVATAR_STYLES } from "@/lib/config/avatar";
+import { AVATAR_STYLES, AVATAR_STYLE_CONFIGS } from "@/lib/config/avatar";
 
 const avatarConfigSchema = z.object({
   style: z.enum(AVATAR_STYLES as unknown as [string, ...string[]]),
   seed: z.string().min(1).max(100),
   backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   radius: z.number().int().min(0).max(50).optional(),
+  backgroundType: z.enum(["solid", "gradientLinear"]).optional(),
 });
 
 /**
@@ -47,11 +48,45 @@ export async function PATCH(
     }
 
     const body: unknown = await request.json();
-    const avatarConfig = avatarConfigSchema.parse(body);
+    const validatedData = avatarConfigSchema.parse(body);
+
+    const styleConfig = AVATAR_STYLE_CONFIGS[validatedData.style];
+    if (!styleConfig) {
+      return NextResponse.json(
+        { error: "Invalid avatar style" },
+        { status: 400 },
+      );
+    }
+
+    const extraFields: Record<string, string> = {};
+    for (const opt of styleConfig.options) {
+      if (opt.type === "select") {
+        const value = (body as Record<string, unknown>)[opt.key];
+        if (typeof value === "string" && value !== "none") {
+          const validValues = opt.options?.map((o) => o.value) ?? [];
+          if (validValues.length === 0 || validValues.includes(value)) {
+            extraFields[opt.key] = value;
+          }
+        }
+      } else if (opt.type === "color") {
+        const value = (body as Record<string, unknown>)[opt.key];
+        if (typeof value === "string" && /^#[0-9A-Fa-f]{6}$/.test(value)) {
+          extraFields[opt.key] = value;
+        }
+      }
+    }
+
+    const avatarConfig = {
+      style: validatedData.style,
+      seed: validatedData.seed,
+      backgroundColor: validatedData.backgroundColor,
+      radius: validatedData.radius,
+      ...extraFields,
+    };
 
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: { avatarConfig },
+      data: { avatarConfig: avatarConfig as object },
       select: { id: true, avatarConfig: true },
     });
 

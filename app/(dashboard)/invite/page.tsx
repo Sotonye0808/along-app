@@ -179,7 +179,7 @@ export default function InvitePage() {
           <AppCard variant="elevated">
             <div className="flex flex-col items-center gap-5 sm:flex-row">
               {invite && (
-                <div className="shrink-0 rounded-xl border border-[var(--color-border)] p-2 bg-white">
+                <div className="shrink-0 rounded-xl border border-[var(--color-border)] p-2 bg-[var(--color-bg-base)]">
                   <QRCodeSVG value={invite.inviteUrl} size={120} />
                 </div>
               )}

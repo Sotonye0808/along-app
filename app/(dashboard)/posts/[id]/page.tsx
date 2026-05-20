@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Spin, App, Button, Skeleton, Card } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeft, Eye, Share2, Bookmark, ThumbsUp, MessageCircle } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { PostCard } from "@/components/features/posts/PostCard";
 import { CommentSection } from "@/components/features/posts/CommentSection";
@@ -13,6 +13,8 @@ import { StructuredData } from "@/components/ui/StructuredData";
 import { generateArticleSchema } from "@/lib/utils/structuredData";
 import { getSiteUrl } from "@/lib/utils/metadata";
 import { RouteMap } from "@/components/features/map";
+import { formatNumber } from "@/lib/utils/format";
+import Link from "next/link";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -459,7 +461,7 @@ export default function PostPage() {
       <div className="max-w-3xl mx-auto p-4">
         <Button
           type="text"
-          icon={<ArrowLeftOutlined />}
+          icon={<ArrowLeft />}
           onClick={() => router.back()}
           className="mb-4">
           Back
@@ -515,13 +517,29 @@ export default function PostPage() {
     <div className="max-w-3xl mx-auto p-4">
       <StructuredData data={articleSchema} />
 
-      <Button
-        type="text"
-        icon={<ArrowLeftOutlined />}
-        onClick={() => router.back()}
-        className="mb-4">
-        Back
-      </Button>
+      <div className="flex items-center justify-between mb-4">
+        <Button
+          type="text"
+          icon={<ArrowLeft />}
+          onClick={() => router.back()}>
+          Back
+        </Button>
+
+        <div className="flex items-center gap-4 text-sm text-[var(--color-text-secondary)]">
+          <span className="flex items-center gap-1.5">
+            <Eye size={16} />
+            {formatNumber(post.views || 0)}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Share2 size={16} />
+            {formatNumber(post.shares || 0)}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Bookmark size={16} />
+            {formatNumber(post.saves || 0)}
+          </span>
+        </div>
+      </div>
 
       <PostCard
         post={post}
@@ -536,6 +554,21 @@ export default function PostPage() {
         isDisliked={userInteractions.dislikes.has(post.id)}
         isBookmarked={userInteractions.bookmarks.has(post.id)}
       />
+
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        {[
+          { icon: ThumbsUp, label: "Likes", value: post.likes },
+          { icon: MessageCircle, label: "Comments", value: post.comments },
+          { icon: Eye, label: "Views", value: post.views || 0 },
+          { icon: Share2, label: "Shares", value: post.shares || 0 },
+        ].map((stat) => (
+          <div key={stat.label} className="bg-[var(--color-bg-elevated)] rounded-lg p-3 text-center">
+            <stat.icon size={18} className="mx-auto mb-1 text-[var(--color-text-secondary)]" />
+            <div className="text-lg font-semibold text-[var(--color-text-primary)]">{formatNumber(stat.value)}</div>
+            <div className="text-xs text-[var(--color-text-muted)]">{stat.label}</div>
+          </div>
+        ))}
+      </div>
 
       {/* Route Map — inline on desktop, collapsible on mobile */}
       <div className="mt-4">
@@ -577,6 +610,20 @@ export default function PostPage() {
           }}
         />
       )}
+
+      <div className="mb-4">
+        <h3 className="text-base font-semibold mb-3 text-[var(--color-text-primary)]">Related Routes</h3>
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
+          {(post.tags.length > 0 ? post.tags.slice(0, 5) : ["Lagos", "Adventure", "Food Tour"]).map((tag) => (
+            <Link
+              key={tag}
+              href={`/explore?tag=${encodeURIComponent(tag)}`}
+              className="flex-none px-4 py-2 rounded-full bg-[var(--color-bg-elevated)] text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors">
+              #{tag}
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

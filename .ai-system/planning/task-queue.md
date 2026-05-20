@@ -28,12 +28,12 @@
 - [x] Create compliance audit report and remediation roadmap
 - [x] Add .env.example with full variable list
 - [x] Sync ai-system architecture, repo map, dependency graph, and project plan
-- [ ] Normalize theme tokens across layouts, shared components, and feature UI
-- [ ] Replace remaining direct Ant Design usage in feature components
-- [ ] Replace remaining Ant icons and emoji in UI with Lucide icons
+- [x] Normalize theme tokens across layouts, shared components, and feature UI
+- [x] Replace remaining direct Ant Design usage in feature components
+- [x] Replace remaining Ant icons and emoji in UI with Lucide icons
 - [x] Remove dead route references and fix nav consistency
 - [x] Stabilize PWA install prompt and service worker update flow
-- [ ] Update README and developer docs after remediation
+- [x] Update README and developer docs after remediation
 
 ## Targeted UX/Design Consistency Patch — 2026-05-19
 
@@ -49,6 +49,20 @@
 - [x] Improve post creation modal usability with tooltips, quick-tag utilities, and clearer guidance
 - [x] Reframe marketplace and explore copy for planned Transact + future events/ticketing integrations
 
+## Comprehensive Quality Remediation — 2026-05-20
+
+> Section summary: Full audit and fix of OAuth, theme tokens, seed data, and avatar customization.
+
+- [x] Fix empty GOOGLE_REDIRECT_URI causing OAuth "not configured" error
+- [x] Audit hardcoded hex colors and gray utilities across all components — replaced with CSS vars
+- [x] Audit theme token consistency (bg-white, bg-gray-50, text-gray-600, text-gray-900) — all replaced
+- [x] Add Cloudinary image URLs to all 10 seed posts (2 images per post = 20 images)
+- [x] Add geographic coordinates (startLat/lng, endLat/lng, region, totalDistanceKm) to all seed posts for map rendering
+- [x] Enhance DiceBear AvatarEditor with per-style customization (skin tone, hair color, headwear, expressions)
+- [x] Create AVATAR_STYLE_CONFIGS with full option specs for all 9 avatar styles
+- [x] Update avatar API route to validate and store per-style custom options
+- [x] Write remediation plan to .ai-system/checkpoints/remediation-plan-2026-05-20.md
+
 ## Feature Sprint — Env + Email + Seed
 
 > Section summary: Development environment routing, email service integration, and local DB readiness.
@@ -56,7 +70,7 @@
 - [x] Audit cookie notice compliance and patch against design system + cookie-based consent
 - [x] Add PROJECT_ENV-based env resolver (Prisma/Cloudinary/Redis dev namespace)
 - [x] Integrate Resend email service with templates, wrapper, and admin-editable config fallbacks
-- [ ] Run Prisma migrations and add comprehensive local seed for LOCAL_DB
+- [x] Run Prisma migrations and add comprehensive local seed for LOCAL_DB (images + map coords)
 
 ## Up Next
 

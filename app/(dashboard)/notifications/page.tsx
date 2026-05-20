@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Gift, Bell, BellOff, CheckCheck } from "lucide-react";
 import { useAuth } from "../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
@@ -18,6 +19,7 @@ export default function NotificationsPage(): React.ReactElement {
   const { user: currentUser, isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"all" | "unread" | "rewards">("all");
   const router = useRouter();
 
   const fetchNotifications = useCallback(async () => {
@@ -104,9 +106,16 @@ export default function NotificationsPage(): React.ReactElement {
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const rewardsCount = notifications.filter((n) => n.type === "reward").length;
+
+  const filteredNotifications = notifications.filter((n) => {
+    if (activeTab === "unread") return !n.read;
+    if (activeTab === "rewards") return n.type === "reward";
+    return true;
+  });
 
   return (
-    <div className="mx-auto max-w-4xl p-4 md:p-6">
+    <div className="mx-auto max-w-[640px] p-4 md:p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
@@ -118,28 +127,57 @@ export default function NotificationsPage(): React.ReactElement {
             </p>
           ) : null}
         </div>
-        {unreadCount > 0 ? (
-          <AppButton variant="ghost" size="sm" onClick={() => void markAllAsRead()}>
-            Mark all as read
-          </AppButton>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 ? (
+            <AppButton variant="ghost" size="sm" icon={CheckCheck} onClick={() => void markAllAsRead()}>
+              Mark all read
+            </AppButton>
+          ) : null}
+        </div>
       </div>
 
-      <div className="mb-6">
-        <NotificationSettings />
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 p-1 bg-[var(--color-bg-elevated)] rounded-lg w-fit">
+        {[
+          { key: "all" as const, label: "All", icon: Bell, count: notifications.length },
+          { key: "unread" as const, label: "Unread", icon: BellOff, count: unreadCount },
+          { key: "rewards" as const, label: "Rewards", icon: Gift, count: rewardsCount },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setActiveTab(tab.key)}
+            className={[
+              "flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all",
+              activeTab === tab.key
+                ? "bg-white dark:bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
+            ].join(" ")}>
+            <tab.icon size={16} />
+            {tab.label}
+            {tab.count > 0 && (
+              <span className={[
+                "px-1.5 py-0.5 text-xs rounded-full",
+                activeTab === tab.key ? "bg-[var(--color-primary)] text-white" : "bg-[var(--color-border)]",
+              ].join(" ")}>
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
-      {notifications.length === 0 ? (
+      {filteredNotifications.length === 0 ? (
         <AppCard variant="default">
           <AppEmptyState
-            title={EMPTY_STATES.noNotifications.title}
-            description={EMPTY_STATES.noNotifications.description}
+            title={activeTab === "rewards" ? "No rewards yet" : EMPTY_STATES.noNotifications.title}
+            description={activeTab === "rewards" ? "Earn rewards by sharing routes and engaging with the community." : EMPTY_STATES.noNotifications.description}
             icon={EMPTY_STATES.noNotifications.icon}
           />
         </AppCard>
       ) : (
         <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-base)]">
-          {notifications.map((notification, idx) => (
+          {filteredNotifications.map((notification, idx) => (
             <div
               key={notification.id}
               className={[

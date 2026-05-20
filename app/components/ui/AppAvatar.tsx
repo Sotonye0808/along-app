@@ -17,7 +17,7 @@ export interface AvatarUser {
 
 export interface AppAvatarProps {
   user: AvatarUser;
-  size?: 24 | 32 | 40 | 56 | 80 | 120;
+  size?: 24 | 32 | 40 | 56 | 80 | 96 | 120;
   linkToProfile?: boolean;
   showVerifiedBadge?: boolean;
   className?: string;

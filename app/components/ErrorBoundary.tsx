@@ -38,7 +38,7 @@ export class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-elevated)] px-4">
           <Result
             status="error"
             title="Something went wrong"

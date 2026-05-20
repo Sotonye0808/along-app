@@ -479,7 +479,7 @@ export default function ProfilePage() {
         duration: 0.1,
         btn: (
           <button
-            className="px-3 py-1 bg-[#00623B] text-white rounded hover:bg-[#004d2e] text-sm"
+            className="px-3 py-1 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-light)] text-sm"
             onClick={() => {
               undoClicked = true;
               notification.destroy(key);

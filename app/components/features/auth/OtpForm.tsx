@@ -134,9 +134,9 @@ export function OtpForm() {
   return (
     <div className="w-full max-w-md">
       <h1 className="text-2xl font-semibold mb-2">Enter Verification Code</h1>
-      <p className="text-sm text-gray-600 mb-8">
+      <p className="text-sm text-[var(--color-text-secondary)] mb-8">
         We have just sent a verification code to{" "}
-        <span className="font-medium text-gray-900">{email}</span>
+        <span className="font-medium text-[var(--color-text-primary)]">{email}</span>
       </p>
 
       <div className="flex justify-between gap-2 mb-8" onPaste={handlePaste}>
@@ -159,7 +159,7 @@ export function OtpForm() {
               value={digit}
               onChange={(e) => handleCodeChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-12 h-14 text-center text-2xl font-semibold bg-gray-100 border-2 border-gray-300 rounded-lg focus:border-[#00623B] focus:outline-none transition-colors"
+              className="w-12 h-14 text-center text-2xl font-semibold bg-[var(--color-bg-elevated)] border-2 border-[var(--color-border)] rounded-lg focus:border-[var(--color-primary)] focus:outline-none transition-colors"
               autoComplete="one-time-code"
             />
           </>

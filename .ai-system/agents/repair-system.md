@@ -166,7 +166,85 @@
 
 > **Section summary:** Errors that have been fully resolved and are unlikely to recur. Kept for reference.
 
-[Entries move here when the underlying cause has been permanently fixed]
+---
+
+## Theme Token Drift From Hardcoded Colors
+
+**Symptom:**
+UI elements keep bright white/gray backgrounds or brand hex colors in dark mode, making the theme feel inconsistent. Some components used `text-gray-600`, `text-gray-900`, `bg-gray-50`, `bg-white`, or hardcoded hex `#00623B` instead of CSS variables.
+
+**Root Cause:**
+Legacy components introduced during multi-session refactors used raw Tailwind utilities and hex values not mapped to CSS variables, creating dark mode inconsistency and hardcoded brand colors that don't respect theme tokens.
+
+**Fix Applied:**
+Swept codebase for non-tokenized colors in:
+- `app/page.tsx`: `text-gray-600` → `text-[var(--color-text-secondary)]`, `#00623B` → `var(--color-primary)`, `hover:bg-gray-50` → `hover:bg-[var(--color-bg-elevated)]`
+- `app/components/features/auth/OtpForm.tsx`: `text-gray-600`, `text-gray-900`, `bg-gray-100`, `border-gray-300`, `#00623B` → CSS vars
+- `app/components/features/posts/ShareRouteModal.tsx`: added `!text-[var(--color-text-primary)]`
+- `app/(dashboard)/profile/page.tsx` and `app/(dashboard)/profile/[username]/page.tsx`: `#00623B` / `#004d2e` → `var(--color-primary)` / `var(--color-primary-light)`
+- `app/(dashboard)/invite/page.tsx`: `bg-white` → `bg-[var(--color-bg-base)]`
+- `app/components/ErrorBoundary.tsx`: `bg-gray-50` → `bg-[var(--color-bg-elevated)]`
+
+**Prevention:**
+All new components must use CSS variables (`var(--color-*)`) for all color values. No raw hex, gray-*, or bg-white in feature/page code.
+
+**Files Affected:**
+- app/page.tsx
+- app/components/features/auth/OtpForm.tsx
+- app/components/features/posts/ShareRouteModal.tsx
+- app/(dashboard)/profile/page.tsx
+- app/(dashboard)/profile/[username]/page.tsx
+- app/(dashboard)/invite/page.tsx
+- app/components/ErrorBoundary.tsx
+
+**Date:** 2026-05-20
+
+---
+
+## Google OAuth Empty Redirect URI
+
+**Symptom:**
+`/api/auth/google` returned `{ error: "Google OAuth is not configured" }` even though `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` were set in `.env`.
+
+**Root Cause:**
+`GOOGLE_REDIRECT_URI` environment variable was empty, causing the check `if (!clientId || !redirectUri)` to fail in `app/api/auth/google/route.ts`.
+
+**Fix Applied:**
+Set `GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback` in `.env`.
+
+**Prevention:**
+Always provide `GOOGLE_REDIRECT_URI` when setting OAuth credentials. Add to `.env.example` as a required field.
+
+**Files Affected:**
+- .env
+- .ai-system/planning/task-queue.md
+
+**Date:** 2026-05-20
+
+---
+
+## Seed Data Missing Images and Map Coordinates
+
+**Symptom:**
+All 10 seed posts had `images: []` (empty), so PostCard image galleries never rendered. No `startLat`/`startLng`/`endLat`/`endLng`/`region`/`totalDistanceKm` fields, so RouteMap never displayed for seed data.
+
+**Root Cause:**
+Seed data was created with placeholder empty image arrays and no geographic data, leaving PostCard map previews empty and image galleries non-functional.
+
+**Fix Applied:**
+- Extended `SeedPost` interface with optional geo fields
+- Added 2 Cloudinary placeholder image URLs per post (20 total)
+- Added real Nigerian coordinates for all 10 posts across Lagos, Ibadan, Abuja, Enugu, Cross River, Imo, Rivers, Kano, Plateau
+- Added region labels and approximate distances
+- Updated Prisma create call to include all geo fields
+
+**Prevention:**
+Always include images and geo coordinates in seed data. Update seed after schema changes that add new fields.
+
+**Files Affected:**
+- prisma/seed.ts
+
+**Date:** 2026-05-20
 
 ---
 
