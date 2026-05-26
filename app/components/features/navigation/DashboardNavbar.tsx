@@ -1,20 +1,16 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, MapPin, LogIn, Sun, Moon } from "lucide-react";
-import {
-  filterNavItems,
-  type NavigationItem,
-  type UserRole,
-} from "@/lib/config/navigation";
+import { ChevronLeft, LogIn } from "lucide-react";
+import { filterNavItems, type UserRole } from "@/lib/config/navigation";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { useTheme } from "@/app/providers/ThemeProvider";
 import { useNotifications } from "@/lib/hooks/useNotifications";
 import { AppAvatar } from "@/components/ui/AppAvatar";
 import { AppButton } from "@/components/ui/AppButton";
+import { ShareRouteButton } from "@/components/features/dashboard/ShareRouteButton";
 
 interface DashboardNavbarProps {
   userId?: string;
@@ -34,34 +30,41 @@ function isActivePath(pathname: string | null, href: string): boolean {
 export function DashboardNavbar({ userId }: DashboardNavbarProps) {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const role = getRoleFromUser(isAuthenticated ? user : null);
   const { unreadCount } = useNotifications(userId || "");
   const [collapsed, setCollapsed] = useState(false);
 
-  const { primarySidebarItems, adminSidebarItems, bottomItems } = useMemo(() => {
-    const sidebarItems = filterNavItems(role, { sidebarOnly: true });
-    const itemsForBottom = filterNavItems(role, { bottomNavOnly: true });
+  const { primarySidebarItems, adminSidebarItems, bottomItems } =
+    useMemo(() => {
+      const sidebarItems = filterNavItems(role, { sidebarOnly: true });
+      const itemsForBottom = filterNavItems(role, { bottomNavOnly: true });
 
-    return {
-      primarySidebarItems: sidebarItems.filter(
-        (item) => !(item.roles.length === 1 && item.roles[0] === "admin"),
-      ),
-      adminSidebarItems: sidebarItems.filter(
-        (item) => item.roles.length === 1 && item.roles[0] === "admin",
-      ),
-      bottomItems: itemsForBottom,
-    };
-  }, [role]);
+      return {
+        primarySidebarItems: sidebarItems.filter(
+          (item) => !(item.roles.length === 1 && item.roles[0] === "admin"),
+        ),
+        adminSidebarItems: sidebarItems.filter(
+          (item) => item.roles.length === 1 && item.roles[0] === "admin",
+        ),
+        bottomItems: itemsForBottom,
+      };
+    }, [role]);
 
   const sidebarWidth = collapsed ? "w-20" : "w-60";
+
+  useEffect(() => {
+    const width = collapsed ? "80px" : "240px";
+    document.documentElement.style.setProperty("--sidebar-width", width);
+    return () => {
+      document.documentElement.style.removeProperty("--sidebar-width");
+    };
+  }, [collapsed]);
 
   return (
     <>
       {/* Desktop Sidebar - Collapsible */}
       <nav
-        className={`fixed left-0 top-0 z-40 hidden h-screen ${sidebarWidth} flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-base)] transition-all duration-200 md:flex`}
-      >
+        className={`fixed left-0 top-0 z-40 hidden h-screen ${sidebarWidth} flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-base)] transition-all duration-200 md:flex`}>
         {/* Logo */}
         <div className="flex items-center gap-2.5 border-b border-[var(--color-border)] px-5 py-4">
           <Image
@@ -95,8 +98,7 @@ export function DashboardNavbar({ userId }: DashboardNavbarProps) {
                       ? "bg-[var(--color-primary)] text-white"
                       : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text-primary)]"
                   } ${collapsed ? "justify-center px-2" : ""}`}
-                  title={item.label}
-                >
+                  title={item.label}>
                   <Icon size={20} aria-hidden="true" />
                   {!collapsed && <span>{item.label}</span>}
                   {showBadge && !collapsed && (
@@ -130,8 +132,7 @@ export function DashboardNavbar({ userId }: DashboardNavbarProps) {
                         active
                           ? "bg-[var(--color-primary)] text-white"
                           : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text-primary)]"
-                      }`}
-                    >
+                      }`}>
                       <Icon size={20} aria-hidden="true" />
                       <span>{item.label}</span>
                     </Link>
@@ -142,15 +143,17 @@ export function DashboardNavbar({ userId }: DashboardNavbarProps) {
           )}
         </div>
 
-        {/* Bottom Section: Collapse Toggle + Profile */}
+        {/* Bottom Section: Share Route + Collapse Toggle + Profile */}
         <div className="border-t border-[var(--color-border)] p-3">
+          <div className={collapsed ? "mb-3 flex justify-center" : "mb-3"}>
+            <ShareRouteButton variant="sidebar" compact={collapsed} />
+          </div>
           {/* Collapse toggle */}
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
             className="mb-2 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] transition-colors"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
             <ChevronLeft
               size={16}
               className={`transition-transform ${collapsed ? "rotate-180" : ""}`}
@@ -158,24 +161,12 @@ export function DashboardNavbar({ userId }: DashboardNavbarProps) {
             {!collapsed && <span>Collapse</span>}
           </button>
 
-          {/* Theme toggle */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="mb-2 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] transition-colors"
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-            {!collapsed && <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>}
-          </button>
-
           {/* Profile Mini-Card */}
           {isAuthenticated && user ? (
             <Link
               href="/profile"
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--color-bg-elevated)] ${collapsed ? "justify-center px-2" : ""}`}
-              title={`${user.firstName} ${user.lastName}`}
-            >
+              title={`${user.firstName} ${user.lastName}`}>
               <AppAvatar
                 user={{
                   userName: user.userName,
@@ -198,7 +189,9 @@ export function DashboardNavbar({ userId }: DashboardNavbarProps) {
               )}
             </Link>
           ) : (
-            <Link href="/login" className={collapsed ? "flex justify-center" : ""}>
+            <Link
+              href="/login"
+              className={collapsed ? "flex justify-center" : ""}>
               <AppButton size="sm" icon={LogIn} fullWidth={!collapsed}>
                 {collapsed ? "" : "Sign In"}
               </AppButton>
@@ -222,9 +215,11 @@ export function DashboardNavbar({ userId }: DashboardNavbarProps) {
                 active
                   ? "text-[var(--color-primary)]"
                   : "text-[var(--color-text-secondary)]"
-              }`}
-            >
+              }`}>
               <Icon size={24} aria-hidden="true" />
+              <span className="text-[10px] font-semibold tracking-wide">
+                {item.label}
+              </span>
               {showBadge ? (
                 <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-[var(--color-error)]" />
               ) : null}
@@ -233,15 +228,9 @@ export function DashboardNavbar({ userId }: DashboardNavbarProps) {
         })}
 
         {/* FAB - Share Route */}
-        <Link
-          href="#"
-          className="absolute -top-5 left-1/2 z-50 -translate-x-1/2"
-          aria-label="Share a route"
-        >
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-[0_8px_32px_rgba(0,98,59,0.15)] transition-transform hover:scale-105 active:scale-95">
-            <MapPin size={24} />
-          </div>
-        </Link>
+        <div className="absolute -top-5 left-1/2 z-50 -translate-x-1/2">
+          <ShareRouteButton variant="fab" />
+        </div>
       </nav>
     </>
   );

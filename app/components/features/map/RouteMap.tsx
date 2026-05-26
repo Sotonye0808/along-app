@@ -9,8 +9,9 @@ import { AppSpinner } from "@/components/ui/AppSpinner";
 // Defer heavy maplibre imports to client-side only
 let Map: typeof import("react-map-gl/maplibre").default | null = null;
 let Marker: typeof import("react-map-gl/maplibre").Marker | null = null;
-let NavigationControl: typeof import("react-map-gl/maplibre").NavigationControl | null =
-  null;
+let NavigationControl:
+  | typeof import("react-map-gl/maplibre").NavigationControl
+  | null = null;
 
 const MAP_STYLE =
   process.env.NEXT_PUBLIC_MAPTILER_STYLE_URL ??
@@ -31,8 +32,8 @@ export interface RouteMapProps {
     | "region"
     | "title"
   >;
-  /** Height of the map in px (default: 300) */
-  height?: number;
+  /** Height of the map in px (default: 300) or "full" for parent-fill */
+  height?: number | "full";
   className?: string;
   /** If true, wrap in a collapsible panel (mobile-friendly) */
   collapsible?: boolean;
@@ -44,6 +45,18 @@ interface ViewState {
   longitude: number;
   latitude: number;
   zoom: number;
+}
+
+const HEIGHT_CLASS_MAP: Record<number, string> = {
+  220: "h-[220px]",
+  240: "h-[240px]",
+  300: "h-[300px]",
+};
+
+interface RouteMapInnerProps {
+  post: RouteMapProps["post"];
+  className?: string;
+  heightClassName: string;
 }
 
 function haversineKm(
@@ -73,9 +86,9 @@ function getZoomForDistance(km: number): number {
 
 function RouteMapInner({
   post,
-  height = 300,
   className,
-}: Omit<RouteMapProps, "collapsible">) {
+  heightClassName,
+}: RouteMapInnerProps) {
   const hasCoords =
     post.startLat != null &&
     post.startLng != null &&
@@ -116,14 +129,19 @@ function RouteMapInner({
   const NavControl = NavigationControl;
 
   return (
-    <div className={["relative rounded-xl overflow-hidden", className ?? ""].join(" ")} style={{ height }}>
-      <MapComponent
-        {...vs}
-        onMove={(evt) => setVs(evt.viewState)}
-        mapStyle={MAP_STYLE}
-        style={{ width: "100%", height: "100%" }}
-        attributionControl={false}
-      >
+     <div
+       className={[
+         "relative rounded-xl overflow-hidden h-full w-full",
+         heightClassName,
+         className ?? "",
+       ]
+       .join(" ")
+       .trim()}>
+       <MapComponent
+         {...vs}
+         onMove={(evt) => setVs(evt.viewState)}
+         mapStyle={MAP_STYLE}
+         attributionControl={false}>
         <NavControl position="bottom-right" />
 
         {hasCoords && (
@@ -131,8 +149,7 @@ function RouteMapInner({
             <MarkerComponent
               longitude={post.startLng as number}
               latitude={post.startLat as number}
-              anchor="bottom"
-            >
+              anchor="bottom">
               <div className="flex flex-col items-center">
                 <div className="w-3 h-3 rounded-full bg-[var(--color-primary)] border-2 border-white shadow-md" />
               </div>
@@ -141,8 +158,7 @@ function RouteMapInner({
             <MarkerComponent
               longitude={post.endLng as number}
               latitude={post.endLat as number}
-              anchor="bottom"
-            >
+              anchor="bottom">
               <div className="flex flex-col items-center">
                 <div className="w-3 h-3 rounded-full bg-red-500 border-2 border-white shadow-md" />
               </div>
@@ -194,6 +210,34 @@ function RouteMapInner({
   );
 }
 
+function RouteMapFallback({
+  post,
+  className,
+  heightClassName,
+}: RouteMapInnerProps) {
+  return (
+    <div
+      className={[
+        "relative overflow-hidden rounded-xl border border-[var(--color-border)]",
+        heightClassName,
+        className ?? "",
+      ]
+        .join(" ")
+        .trim()}>
+      <div className="absolute inset-0 bg-[var(--color-bg-elevated)]" />
+      <div className="absolute inset-0 opacity-50 route-map-fallback-pattern" />
+      <div className="relative flex h-full items-center justify-center">
+        <div className="flex items-center gap-2 rounded-full bg-[var(--color-bg-base)]/80 px-3 py-1.5 text-xs text-[var(--color-text-secondary)] shadow-card">
+          <MapPin size={14} className="text-[var(--color-primary)]" />
+          <span>
+            {post.region ? `${post.region} preview` : "Route map preview"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function RouteMap({
   post,
   height = 300,
@@ -224,16 +268,22 @@ export function RouteMap({
       });
   }, []);
 
-  if (!ready) {
-    if (collapsible) return null;
-    return (
-      <div
-        className="flex items-center justify-center rounded-xl bg-[var(--color-bg-elevated)]"
-        style={{ height }}>
-        <AppSpinner size={18} />
-      </div>
-    );
-  }
+  const heightClassName =
+    height === "full" ? "h-full" : (HEIGHT_CLASS_MAP[height] ?? "h-[300px]");
+
+  const mapContent = ready ? (
+    <RouteMapInner
+      post={post}
+      className={className}
+      heightClassName={heightClassName}
+    />
+  ) : (
+    <RouteMapFallback
+      post={post}
+      className={className}
+      heightClassName={heightClassName}
+    />
+  );
 
   if (collapsible) {
     return (
@@ -249,14 +299,10 @@ export function RouteMap({
             {open ? "Hide" : "Show"}
           </span>
         </button>
-        {open && (
-          <div className="mt-2">
-            <RouteMapInner post={post} height={height} />
-          </div>
-        )}
+        {open && <div className="mt-2">{mapContent}</div>}
       </div>
     );
   }
 
-  return <RouteMapInner post={post} height={height} className={className} />;
+  return mapContent;
 }

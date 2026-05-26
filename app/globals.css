@@ -49,10 +49,11 @@
     --color-warning-text: #cc7914;
     --color-error: #e4626f;
     --color-error-text: #8c1823;
-    --color-glass-bg: rgba(255, 255, 255, 0.10);
-    --color-glass-border: rgba(255, 255, 255, 0.20);
+    --color-glass-bg: rgba(255, 255, 255, 0.1);
+    --color-glass-border: rgba(255, 255, 255, 0.2);
     --color-suggestion-bg: rgba(0, 168, 98, 0.04);
     --color-suggestion-border: #00a862;
+    --sidebar-width: 240px;
   }
 
   .dark {
@@ -74,7 +75,7 @@
     --color-warning: #fbbf24;
     --color-error: #ef4444;
     --color-glass-bg: rgba(15, 15, 15, 0.55);
-    --color-glass-border: rgba(255, 255, 255, 0.20);
+    --color-glass-border: rgba(255, 255, 255, 0.2);
     --color-suggestion-bg: rgba(0, 168, 98, 0.08);
     --color-suggestion-border: #00a862;
   }
@@ -95,6 +96,10 @@
 
   a:hover {
     color: var(--color-primary-light);
+  }
+
+  a:visited {
+    color: var(--color-primary);
   }
 
   /* Smooth transitions for all interactive elements */
@@ -124,6 +129,7 @@
   /* Focus visible styles for keyboard navigation */
   .glass {
     background: var(--color-glass-bg);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid var(--color-glass-border);
     border-radius: 16px;
@@ -132,6 +138,7 @@
 
   .glass-strong {
     background: rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
     backdrop-filter: blur(24px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 16px;
@@ -139,7 +146,7 @@
   }
 
   .dark .glass-strong {
-    background: rgba(0, 0, 0, 0.60);
+    background: rgba(0, 0, 0, 0.6);
   }
 
   :focus-visible {
@@ -169,7 +176,9 @@
   }
 
   .shadow-modal {
-    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.10), 0 8px 10px rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 20px 25px rgba(0, 0, 0, 0.1),
+      0 8px 10px rgba(0, 0, 0, 0.04);
   }
 
   .shadow-float {
@@ -215,14 +224,33 @@
 
   /* Shimmer skeleton loader (1.5s loop) */
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   .shimmer {
-    background: linear-gradient(90deg, var(--color-bg-elevated) 25%, var(--color-bg-base) 50%, var(--color-bg-elevated) 75%);
+    background: linear-gradient(
+      90deg,
+      var(--color-bg-elevated) 25%,
+      var(--color-bg-base) 50%,
+      var(--color-bg-elevated) 75%
+    );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
+  }
+
+  .route-map-fallback-pattern {
+    background-image:
+      radial-gradient(
+        circle at 20% 20%,
+        rgba(0, 98, 59, 0.12),
+        transparent 45%
+      ),
+      radial-gradient(circle at 80% 70%, rgba(0, 98, 59, 0.08), transparent 50%);
   }
 
   /* Slide down animation for notifications */
@@ -372,7 +400,7 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
 }
 
 /* Override Ant Design Tag default backgrounds for dark/light mode */
-.ant-tag {
+.ant-tag:not(.along-tag) {
   background: var(--color-bg-elevated) !important;
   border-color: var(--color-border) !important;
   color: var(--color-text-secondary) !important;
@@ -383,11 +411,23 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   background: var(--color-bg-card) !important;
   border: 1px solid var(--color-border) !important;
   border-radius: var(--radius-card) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  padding: 6px !important;
+  min-width: 180px;
 }
 
 .ant-dropdown .ant-dropdown-menu-item {
   color: var(--color-text-primary) !important;
+  border-radius: 8px;
+  margin: 2px 0;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.ant-dropdown .ant-dropdown-menu-title-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .ant-dropdown .ant-dropdown-menu-item:hover {

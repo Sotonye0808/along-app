@@ -12,7 +12,7 @@ export interface RewardTier {
     label: string;
     minPoints: number;
     badgeLabel: string;
-    colorToken: string;
+    colorClass: string;
 }
 
 export interface PointsConfig {
@@ -25,10 +25,10 @@ export interface PointsConfig {
 }
 
 export const REWARD_TIERS: RewardTier[] = [
-    { key: "bronze", label: "Bronze", minPoints: 0, badgeLabel: "Developing", colorToken: "var(--color-warning-text)" },
-    { key: "silver", label: "Silver", minPoints: 300, badgeLabel: "Verified", colorToken: "var(--color-success-text)" },
-    { key: "gold", label: "Gold", minPoints: 900, badgeLabel: "Trusted", colorToken: "var(--color-primary)" },
-    { key: "platinum", label: "Platinum", minPoints: 1800, badgeLabel: "Elite", colorToken: "var(--color-primary-dark)" },
+    { key: "bronze", label: "Bronze", minPoints: 0, badgeLabel: "Developing", colorClass: "text-[var(--color-warning-text)]" },
+    { key: "silver", label: "Silver", minPoints: 300, badgeLabel: "Verified", colorClass: "text-[var(--color-success-text)]" },
+    { key: "gold", label: "Gold", minPoints: 900, badgeLabel: "Trusted", colorClass: "text-[var(--color-primary)]" },
+    { key: "platinum", label: "Platinum", minPoints: 1800, badgeLabel: "Elite", colorClass: "text-[var(--color-primary-dark)]" },
 ];
 
 export const POINTS_CONFIG: PointsConfig = {

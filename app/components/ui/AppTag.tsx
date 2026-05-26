@@ -27,18 +27,18 @@ export interface AppTagProps {
 
 const variantClasses: Record<NonNullable<AppTagProps["variant"]>, string> = {
   default:
-    "bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] border-[var(--color-border)]",
+    "!bg-[var(--color-bg-elevated)] !text-[var(--color-text-secondary)] !border-[var(--color-border)]",
   primary:
-    "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/30",
+    "!bg-[var(--color-primary)]/10 !text-[var(--color-primary)] !border-[var(--color-primary)]/30",
   success:
-    "bg-[var(--color-success)] text-[var(--color-success-text)] border-[var(--color-success-text)]/30",
+    "!bg-[var(--color-success)] !text-[var(--color-success-text)] !border-[var(--color-success-text)]/30",
   warning:
-    "bg-[var(--color-warning)]/30 text-[var(--color-warning-text)] border-[var(--color-warning-text)]/30",
+    "!bg-[var(--color-warning)]/30 !text-[var(--color-warning-text)] !border-[var(--color-warning-text)]/30",
   error:
-    "bg-[var(--color-error)]/20 text-[var(--color-error-text)] border-[var(--color-error-text)]/30",
-  info: "bg-[var(--color-primary)]/10 text-[var(--color-text-primary)] border-[var(--color-primary)]/30",
+    "!bg-[var(--color-error)]/20 !text-[var(--color-error-text)] !border-[var(--color-error-text)]/30",
+  info: "!bg-[var(--color-primary)]/10 !text-[var(--color-text-primary)] !border-[var(--color-primary)]/30",
   muted:
-    "bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)] border-[var(--color-border)]",
+    "!bg-[var(--color-bg-elevated)] !text-[var(--color-text-muted)] !border-[var(--color-border)]",
 };
 
 const sizeClasses: Record<NonNullable<AppTagProps["size"]>, string> = {
@@ -66,7 +66,7 @@ export function AppTag({
       onClose={onRemove}
       onClick={onClick}
       className={[
-        "!inline-flex !items-center gap-1 !border",
+        "along-tag !inline-flex !items-center gap-1 !border",
         variantClasses[variant],
         sizeClasses[size],
         pill ? "!rounded-[var(--radius-pill)]" : "!rounded-md",

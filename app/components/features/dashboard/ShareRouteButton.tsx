@@ -17,11 +17,21 @@ const ShareRouteModal = lazy(() =>
   })),
 );
 
+type ShareRouteButtonVariant = "sidebar" | "fab";
+
 interface ShareRouteButtonProps {
   onPostCreated?: (post: Post) => void;
+  variant?: ShareRouteButtonVariant;
+  compact?: boolean;
+  className?: string;
 }
 
-export function ShareRouteButton({ onPostCreated }: ShareRouteButtonProps) {
+export function ShareRouteButton({
+  onPostCreated,
+  variant = "sidebar",
+  compact = false,
+  className,
+}: ShareRouteButtonProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -71,7 +81,32 @@ export function ShareRouteButton({ onPostCreated }: ShareRouteButtonProps) {
 
   return (
     <>
-      <div className="hidden md:block">
+      {variant === "fab" ? (
+        <button
+          type="button"
+          onClick={() => {
+            void handleButtonClick();
+          }}
+          className={[
+            "flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-[0_8px_32px_rgba(0,98,59,0.15)] transition-transform hover:scale-105 active:scale-95",
+            className ?? "",
+          ]
+            .join(" ")
+            .trim()}
+          aria-label="Share a route">
+          <MapPin size={24} aria-hidden="true" />
+        </button>
+      ) : compact ? (
+        <AppButton
+          variant="icon"
+          icon={MapPin}
+          ariaLabel="Share a route"
+          onClick={() => {
+            void handleButtonClick();
+          }}
+          className={className}
+        />
+      ) : (
         <AppButton
           size="lg"
           icon={MapPin}
@@ -79,20 +114,10 @@ export function ShareRouteButton({ onPostCreated }: ShareRouteButtonProps) {
           onClick={() => {
             void handleButtonClick();
           }}
-          className="h-12 text-base">
+          className={["h-12 text-base", className ?? ""].join(" ").trim()}>
           Share a route
         </AppButton>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => {
-          void handleButtonClick();
-        }}
-        className="fixed bottom-24 right-6 z-40 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-[0_8px_32px_rgba(0,98,59,0.15)] transition-transform hover:scale-105 active:scale-95 md:hidden"
-        aria-label="Share a route">
-        <MapPin size={26} aria-hidden="true" />
-      </button>
+      )}
 
       {modalOpen && (
         <Suspense

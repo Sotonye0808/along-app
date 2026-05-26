@@ -32,17 +32,6 @@ export function MobileTopBar() {
       onClick: () => router.push(APP_ROUTES.PROFILE),
     },
     {
-      key: "theme",
-      icon:
-        theme === "dark" ? (
-          <Sun size={16} aria-hidden="true" />
-        ) : (
-          <Moon size={16} aria-hidden="true" />
-        ),
-      label: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
-      onClick: toggleTheme,
-    },
-    {
       key: "logout",
       icon: <LogOut size={16} aria-hidden="true" />,
       label: "Logout",
@@ -67,7 +56,10 @@ export function MobileTopBar() {
         </div>
       ) : (
         <div className="flex items-center justify-between">
-          <Link href={APP_ROUTES.DASHBOARD} aria-label="Along home" className="flex items-center">
+          <Link
+            href={APP_ROUTES.DASHBOARD}
+            aria-label="Along home"
+            className="flex items-center">
             <Image
               src="/logo.svg"
               alt="Along"
@@ -86,7 +78,9 @@ export function MobileTopBar() {
               ariaLabel="Search routes and users"
             />
 
-            {isAuthenticated && user ? <NotificationsDropdown userId={user.id} /> : null}
+            {isAuthenticated && user ? (
+              <NotificationsDropdown userId={user.id} />
+            ) : null}
             <AppButton
               variant="icon"
               icon={theme === "dark" ? Sun : Moon}

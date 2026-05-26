@@ -36,13 +36,13 @@ describe("LoginForm", () => {
     expect(screen.getByText("Sign in")).toBeInTheDocument();
     expect(screen.getByText("Welcome back to Along")).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("youremail@example.com")
+      screen.getByPlaceholderText("youremail@example.com"),
     ).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("Enter your password")
+      screen.getByPlaceholderText("Enter your password"),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Sign In/i })
+      screen.getByRole("button", { name: /Sign In/i }),
     ).toBeInTheDocument();
   });
 
@@ -50,7 +50,6 @@ describe("LoginForm", () => {
     render(<LoginForm />, { initialUser: null });
 
     expect(screen.getByRole("button", { name: /Google/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Apple/i })).toBeInTheDocument();
   });
 
   it("should render sign up link", () => {
@@ -71,7 +70,7 @@ describe("LoginForm", () => {
     await waitFor(() => {
       expect(screen.getByText("Please enter your email")).toBeInTheDocument();
       expect(
-        screen.getByText("Please enter your password")
+        screen.getByText("Please enter your password"),
       ).toBeInTheDocument();
     });
   });
@@ -88,7 +87,7 @@ describe("LoginForm", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Please enter a valid email")
+        screen.getByText("Please enter a valid email"),
       ).toBeInTheDocument();
     });
   });
@@ -108,7 +107,7 @@ describe("LoginForm", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Password must be at least 8 characters")
+        screen.getByText("Password must be at least 8 characters"),
       ).toBeInTheDocument();
     });
   });
@@ -156,7 +155,7 @@ describe("LoginForm", () => {
   it("should show loading state during login", async () => {
     const user = userEvent.setup();
     mockLogin.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 1000))
+      () => new Promise((resolve) => setTimeout(resolve, 1000)),
     );
 
     render(<LoginForm />, { initialUser: null });
@@ -224,17 +223,12 @@ describe("LoginForm", () => {
 
     // OAuth is not implemented yet, so we just check the button is clickable
     expect(googleButton).toBeInTheDocument();
-
-    const appleButton = screen.getByRole("button", { name: /Apple/i });
-    await user.click(appleButton);
-
-    expect(appleButton).toBeInTheDocument();
   });
 
   it("should disable submit button while loading", async () => {
     const user = userEvent.setup();
     mockLogin.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 1000))
+      () => new Promise((resolve) => setTimeout(resolve, 1000)),
     );
 
     render(<LoginForm />, { initialUser: null });

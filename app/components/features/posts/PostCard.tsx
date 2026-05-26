@@ -8,13 +8,17 @@ import {
   BookmarkCheck,
   DollarSign,
   Ellipsis,
+  EyeOff,
   ExternalLink,
+  Flag,
   MapPin,
   MessageCircle,
+  Pencil,
   Share2,
   Sparkles,
   ThumbsDown,
   ThumbsUp,
+  Trash2,
   UserMinus,
   UserPlus,
 } from "lucide-react";
@@ -72,26 +76,30 @@ export const PostCard = memo(function PostCard({
   const [loadingAction, setLoadingAction] = useState<ActionName | null>(null);
 
   const isOwnPost = currentUserId === post.userId;
-  const validityScore = typeof post.validityScore === "number" ? post.validityScore : null;
+  const validityScore =
+    typeof post.validityScore === "number" ? post.validityScore : null;
 
-  const menuItems = useMemo(() => {
-    const items = [] as {
-      key: string;
-      label: React.ReactNode;
-      danger?: boolean;
-      onClick?: () => void;
-    }[];
+   const menuItems = useMemo(() => {
+     const items = [] as {
+       key: string;
+       label: React.ReactNode;
+       icon?: React.ReactNode;
+       danger?: boolean;
+       onClick?: () => void;
+     }[];
 
     if (isOwnPost) {
       items.push(
         {
           key: "edit",
           label: "Edit post",
+          icon: <Pencil size={16} aria-hidden="true" />,
           onClick: () => onEdit?.(post),
         },
         {
           key: "delete",
           label: "Delete post",
+          icon: <Trash2 size={16} aria-hidden="true" />,
           danger: true,
           onClick: () => onDelete?.(post.id),
         },
@@ -102,10 +110,12 @@ export const PostCard = memo(function PostCard({
       {
         key: "report",
         label: "Report post",
+        icon: <Flag size={16} aria-hidden="true" />,
       },
       {
         key: "hide",
         label: "Hide this post",
+        icon: <EyeOff size={16} aria-hidden="true" />,
       },
     );
 
@@ -115,6 +125,11 @@ export const PostCard = memo(function PostCard({
         label: isFollowing
           ? `Unfollow @${author.userName}`
           : `Follow @${author.userName}`,
+        icon: isFollowing ? (
+          <UserMinus size={16} aria-hidden="true" />
+        ) : (
+          <UserPlus size={16} aria-hidden="true" />
+        ),
         onClick: () => {
           void handleAction("follow", () => onFollow?.(author.id));
         },
@@ -190,6 +205,7 @@ export const PostCard = memo(function PostCard({
             <AppButton
               variant={isFollowing ? "secondary" : "primary"}
               size="sm"
+              className="!h-8 !rounded-full !px-3"
               icon={isFollowing ? UserMinus : UserPlus}
               loading={loadingAction === "follow"}
               disabled={loadingAction !== null && loadingAction !== "follow"}
@@ -216,7 +232,7 @@ export const PostCard = memo(function PostCard({
       <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-primary)]">
         <Link
           href={`/posts/${post.id}`}
-          className="hover:underline"
+          className="text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:underline"
           onClick={(e) => e.stopPropagation()}>
           {post.title}
         </Link>
@@ -245,8 +261,12 @@ export const PostCard = memo(function PostCard({
                   </p>
                   <AppTooltip title={statusConfig.description}>
                     <span
-                      className="inline-flex items-center gap-1 text-xs"
-                      style={{ color: statusConfig.colorToken }}>
+                      className={[
+                        "inline-flex items-center gap-1 text-xs",
+                        statusConfig.colorClass,
+                      ]
+                        .join(" ")
+                        .trim()}>
                       <StatusIcon size={14} aria-hidden="true" />
                       {statusConfig.label}
                     </span>
@@ -309,7 +329,7 @@ export const PostCard = memo(function PostCard({
             <button
               key={`${post.id}-image-${index}`}
               type="button"
-              className="relative aspect-video overflow-hidden rounded-lg"
+              className="relative aspect-video overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]"
               onClick={() => setPreviewImage(image)}>
               <Image
                 src={image}
@@ -331,18 +351,27 @@ export const PostCard = memo(function PostCard({
 
       {hasMapCoordinates ? (
         <div className="mb-4">
-          <RouteMap post={post} height={220} className="w-full" />
+          <RouteMap
+            post={post}
+            height={220}
+            className="w-full border border-[var(--color-border)]"
+          />
         </div>
       ) : null}
 
-      {(post.tags.length > 0 || post.region) ? (
+      {post.tags.length > 0 || post.region ? (
         <div className="mb-4 flex flex-wrap gap-2">
           {post.region ? (
             <Link
               key={`${post.id}-region`}
               href={`/explore?region=${encodeURIComponent(post.region)}`}
               onClick={(e) => e.stopPropagation()}>
-              <AppTag label={post.region} size="sm" variant="info" icon={MapPin} />
+              <AppTag
+                label={post.region}
+                size="sm"
+                variant="info"
+                icon={MapPin}
+              />
             </Link>
           ) : null}
           {post.tags.map((tag) => (

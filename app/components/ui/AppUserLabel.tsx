@@ -19,6 +19,7 @@ export interface AppUserLabelProps {
   avatarSize?: 24 | 32 | 40;
   showHandle?: boolean;
   showFullName?: boolean;
+  meta?: React.ReactNode;
   layout?: "horizontal" | "vertical";
   linkToProfile?: boolean;
   className?: string;
@@ -29,6 +30,7 @@ export function AppUserLabel({
   avatarSize = 32,
   showHandle = true,
   showFullName = true,
+  meta,
   layout = "horizontal",
   linkToProfile = true,
   className,
@@ -50,18 +52,23 @@ export function AppUserLabel({
           linkToProfile ? (
             <Link
               href={`/profile/${user.userName}`}
-              className="font-medium hover:underline"
+              className="font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:underline"
               onClick={(event) => event.stopPropagation()}>
               {fullName}
             </Link>
           ) : (
-            <span className="font-medium">{fullName}</span>
+            <span className="font-medium text-[var(--color-text-primary)]">
+              {fullName}
+            </span>
           )
         ) : null}
         {showHandle ? (
           <div className="text-xs text-[var(--color-text-secondary)]">
             @{user.userName}
           </div>
+        ) : null}
+        {meta ? (
+          <div className="text-xs text-[var(--color-text-muted)]">{meta}</div>
         ) : null}
       </div>
     </div>

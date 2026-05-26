@@ -1,5 +1,23 @@
 # Development History
 
+## 2026-05-26 — Design Reconciliation Pass
+
+**Summary:**
+Reconciled the dashboard UI against Stitch comps and reported discrepancies. Sidebar collapse now drives layout offsets, duplicate share/suggestion affordances were removed, tag/dropdown/button styling was normalized across themes, map previews gained a visible fallback, and the landing page regained theme toggle access. Apple auth remnants were removed from login.
+
+**Completed:**
+
+- Added collapse-aware sidebar width variable and synced main layout/topbar offsets
+- Moved Share Route into the sidebar and mobile FAB; removed duplicate floating share CTA
+- Consolidated suggestions to a single right-column panel and improved follower text layout
+- Normalized AppTag variants and dropdown styling to match light/dark contrast expectations
+- Added RouteMap fallback visuals and removed inline style tokens for status/notification/rewards colors
+- Added landing page theme toggle and removed Apple auth test/button references
+
+**Known Blockers:**
+
+- Pre-existing lint debt remains outside this pass; continue compliance cleanup as planned.
+
 ## 2026-05-19 — Auth/UI Consistency Single-Pass Patch
 
 **Summary:**

@@ -49,6 +49,15 @@
 - [x] Improve post creation modal usability with tooltips, quick-tag utilities, and clearer guidance
 - [x] Reframe marketplace and explore copy for planned Transact + future events/ticketing integrations
 
+## Design Reconciliation Pass — 2026-05-26
+
+> Section summary: Alignment pass against Stitch comps and reported UI discrepancies.
+
+- [x] Align dashboard layout and collapsible sidebar behavior to Stitch reference
+- [x] Remove duplicate share/suggestion affordances and fix follow button visibility
+- [x] Normalize tags, links, and dropdown styling across light/dark themes
+- [x] Restore theme toggle access on landing and remove Apple auth remnants
+
 ## Comprehensive Quality Remediation — 2026-05-20
 
 > Section summary: Full audit and fix of OAuth, theme tokens, seed data, and avatar customization.

@@ -1,5 +1,45 @@
 # Development Checkpoints — Session Log
 
+## Session 18 — 2026-05-26
+
+**Completed:**
+Aligned the dashboard UI with Stitch comps: collapsible sidebar now drives layout offsets, duplicate share/suggestion affordances were removed, tags/dropdowns/buttons normalized for light/dark contrast, and map/image visibility improved with RouteMap fallbacks. Theme toggle is now accessible on the landing page, and Apple auth remnants were removed from login.
+
+**Files Modified:**
+
+- app/globals.css
+- app/(dashboard)/layout.tsx
+- app/(dashboard)/home/page.tsx
+- app/(dashboard)/explore/page.tsx
+- app/page.tsx
+- app/components/features/navigation/DashboardNavbar.tsx
+- app/components/features/navigation/DesktopTopBar.tsx
+- app/components/features/navigation/MobileTopBar.tsx
+- app/components/features/navigation/NotificationItem.tsx
+- app/components/features/dashboard/SuggestionsPanel.tsx
+- app/components/features/dashboard/ShareRouteButton.tsx
+- app/components/features/map/RouteMap.tsx
+- app/components/features/posts/PostCard.tsx
+- app/components/features/rewards/RewardsPanel.tsx
+- app/components/features/auth/LoginForm.tsx
+- app/components/features/auth/**tests**/LoginForm.test.tsx
+- app/components/ui/AppButton.tsx
+- app/components/ui/AppDropdown.tsx
+- app/components/ui/AppTag.tsx
+- app/components/ui/AppUserLabel.tsx
+- app/lib/config/routeStatus.ts
+- app/lib/config/notifications.ts
+- app/lib/config/rewards.ts
+- .ai-system/planning/task-queue.md
+- .ai-system/checkpoints/session-log.md
+
+**Next Task:**
+Run visual QA across home/feed/explore/post detail in light + dark modes, then continue remaining Phase 6 compliance cleanup.
+
+**Notes / Blockers:**
+
+- Pre-existing lint debt still exists outside the scope of this UI pass.
+
 ## Session 17 — 2026-05-19
 
 **Completed:**

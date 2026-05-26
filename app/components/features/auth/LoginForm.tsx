@@ -32,13 +32,9 @@ export function LoginForm() {
     }
   }
 
-  function handleOAuthLogin(provider: "google" | "apple"): void {
-    if (provider === "google") {
-      // redirect to server route that starts Google OAuth
-      window.location.href = "/api/auth/google";
-      return;
-    }
-    message.info(`${provider} login will be implemented soon`);
+  function handleGoogleLogin(): void {
+    // redirect to server route that starts Google OAuth
+    window.location.href = "/api/auth/google";
   }
 
   return (
@@ -60,7 +56,7 @@ export function LoginForm() {
           variant="secondary"
           icon={Chrome}
           fullWidth
-          onClick={() => handleOAuthLogin("google")}>
+          onClick={handleGoogleLogin}>
           Continue with Google
         </AppButton>
       </div>

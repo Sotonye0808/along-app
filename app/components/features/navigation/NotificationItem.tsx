@@ -28,8 +28,12 @@ export function NotificationItem({
         .join(" ")
         .trim()}>
       <span
-        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-bg-elevated)]"
-        style={{ color: config.colorToken }}>
+        className={[
+          "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-bg-elevated)]",
+          config.colorClass,
+        ]
+          .join(" ")
+          .trim()}>
         <Icon size={16} aria-hidden="true" />
       </span>
 
@@ -61,20 +65,14 @@ export function NotificationItem({
 
   if (href) {
     return (
-      <Link
-        href={href}
-        className="block"
-        onClick={onClick}>
+      <Link href={href} className="block" onClick={onClick}>
         {inner}
       </Link>
     );
   }
 
   return (
-    <button
-      type="button"
-      className="w-full"
-      onClick={onClick}>
+    <button type="button" className="w-full" onClick={onClick}>
       {inner}
     </button>
   );

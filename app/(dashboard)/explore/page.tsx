@@ -8,7 +8,15 @@ import React, {
   useState,
 } from "react";
 import Link from "next/link";
-import { ArrowUp, Globe, MapPin, Search, TrendingUp, Users, X } from "lucide-react";
+import {
+  ArrowUp,
+  Globe,
+  MapPin,
+  Search,
+  TrendingUp,
+  Users,
+  X,
+} from "lucide-react";
 import { App } from "antd";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppCard } from "@/components/ui/AppCard";
@@ -51,7 +59,10 @@ function useExplorePosts() {
         api.get<User[]>(API_ENDPOINTS.USERS),
       ]);
       setPosts(
-        combinePostsWithAuthors(postsRes.data ?? [], usersRes.data ?? []) as PostWithAuthor[],
+        combinePostsWithAuthors(
+          postsRes.data ?? [],
+          usersRes.data ?? [],
+        ) as PostWithAuthor[],
       );
     } catch {
       message.error("Failed to load routes");
@@ -81,8 +92,7 @@ function BackToTopFab() {
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="Back to top"
-      className="fixed bottom-24 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition hover:bg-[var(--color-primary)]/90 md:bottom-8"
-    >
+      className="fixed bottom-24 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition hover:bg-[var(--color-primary)]/90 md:bottom-8">
       <ArrowUp size={20} />
     </button>
   );
@@ -176,8 +186,8 @@ export default function ExplorePage() {
           <div className="absolute inset-0 z-0">
             <RouteMap
               post={mapPost}
-              height={window.innerHeight}
-              className="w-full"
+              height="full"
+              className="w-full h-full"
               interactive
             />
             {selectedPost && (
@@ -190,7 +200,9 @@ export default function ExplorePage() {
         )}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-bg-elevated)]">
-            <div className="text-[var(--color-text-secondary)]">Loading map...</div>
+            <div className="text-[var(--color-text-secondary)]">
+              Loading map...
+            </div>
           </div>
         )}
       </div>
@@ -201,14 +213,30 @@ export default function ExplorePage() {
           {/* Stats Header */}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-[var(--color-bg-elevated)] rounded-lg p-3 text-center">
-              <Globe size={18} className="mx-auto mb-1 text-[var(--color-primary)]" />
-              <div className="text-lg font-bold text-[var(--color-text-primary)]">{formatNumber(posts.length)}</div>
-              <div className="text-xs text-[var(--color-text-muted)]">Routes</div>
+              <Globe
+                size={18}
+                className="mx-auto mb-1 text-[var(--color-primary)]"
+              />
+              <div className="text-lg font-bold text-[var(--color-text-primary)]">
+                {formatNumber(posts.length)}
+              </div>
+              <div className="text-xs text-[var(--color-text-muted)]">
+                Routes
+              </div>
             </div>
             <div className="bg-[var(--color-bg-elevated)] rounded-lg p-3 text-center">
-              <Users size={18} className="mx-auto mb-1 text-[var(--color-primary)]" />
-              <div className="text-lg font-bold text-[var(--color-text-primary)]">{formatNumber(posts.reduce((acc, p) => acc + (p.likes || 0), 0))}</div>
-              <div className="text-xs text-[var(--color-text-muted)]">Engagements</div>
+              <Users
+                size={18}
+                className="mx-auto mb-1 text-[var(--color-primary)]"
+              />
+              <div className="text-lg font-bold text-[var(--color-text-primary)]">
+                {formatNumber(
+                  posts.reduce((acc, p) => acc + (p.likes || 0), 0),
+                )}
+              </div>
+              <div className="text-xs text-[var(--color-text-muted)]">
+                Engagements
+              </div>
             </div>
           </div>
 
@@ -217,7 +245,12 @@ export default function ExplorePage() {
             placeholder="Search routes, tags, or regions..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            prefix={<Search size={15} className="text-[var(--color-text-secondary)]" />}
+            prefix={
+              <Search
+                size={15}
+                className="text-[var(--color-text-secondary)]"
+              />
+            }
             suffix={
               search ? (
                 <button onClick={() => setSearch("")} aria-label="Clear search">
@@ -230,7 +263,11 @@ export default function ExplorePage() {
           {/* Region filter chips */}
           <div className="flex flex-wrap gap-2">
             {REGION_FILTERS.map((r) => (
-              <button key={r} onClick={() => setActiveRegion(r)}>
+              <button
+                key={r}
+                onClick={() => setActiveRegion(r)}
+                aria-label={`Filter by ${r}`}
+                title={`Filter by ${r}`}>
                 <AppTag
                   label={r}
                   variant={activeRegion === r ? "primary" : "default"}
@@ -244,20 +281,33 @@ export default function ExplorePage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp size={16} className="text-[var(--color-primary)]" />
-              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Trending Routes</h3>
+              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                Trending Routes
+              </h3>
             </div>
             <div className="space-y-2">
               {filtered.slice(0, 5).map((post, idx) => (
                 <Link key={post.id} href={`/posts/${post.id}`}>
                   <AppCard variant="default" hover className="!p-3">
                     <div className="flex items-start gap-2">
-                      <span className="text-lg font-bold text-[var(--color-text-muted)]">{idx + 1}</span>
+                      <span className="text-lg font-bold text-[var(--color-text-muted)]">
+                        {idx + 1}
+                      </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-1">{post.title}</p>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-1">
+                          {post.title}
+                        </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-[var(--color-text-muted)]">@{post.author.userName}</span>
+                          <span className="text-xs text-[var(--color-text-muted)]">
+                            @{post.author.userName}
+                          </span>
                           {post.region && (
-                            <AppTag label={post.region} variant="info" size="xs" icon={MapPin} />
+                            <AppTag
+                              label={post.region}
+                              variant="info"
+                              size="xs"
+                              icon={MapPin}
+                            />
                           )}
                         </div>
                       </div>
@@ -270,9 +320,13 @@ export default function ExplorePage() {
 
           {/* Post list */}
           <div ref={listRef} className="space-y-3">
-            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">All Routes ({filtered.length})</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+              All Routes ({filtered.length})
+            </h3>
             {loading ? (
-              Array.from({ length: 4 }).map((_, i) => <PostCardSkeleton key={i} />)
+              Array.from({ length: 4 }).map((_, i) => (
+                <PostCardSkeleton key={i} />
+              ))
             ) : filtered.length === 0 ? (
               <AppEmptyState
                 icon={EMPTY_STATES.noResults?.icon}
@@ -290,8 +344,7 @@ export default function ExplorePage() {
                   hover
                   clickable
                   onClick={() => setSelectedPost(post)}
-                  className="cursor-pointer"
-                >
+                  className="cursor-pointer">
                   <div className="flex items-start gap-2">
                     <AppUserLabel
                       user={{
@@ -304,13 +357,25 @@ export default function ExplorePage() {
                       avatarSize={32}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-1">{post.title}</p>
+                      <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-1">
+                        {post.title}
+                      </p>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {post.region && (
-                          <AppTag label={post.region} variant="info" size="xs" icon={MapPin} />
+                          <AppTag
+                            label={post.region}
+                            variant="info"
+                            size="xs"
+                            icon={MapPin}
+                          />
                         )}
                         {post.tags.slice(0, 2).map((tag) => (
-                          <AppTag key={tag} label={`#${tag}`} variant="primary" size="xs" />
+                          <AppTag
+                            key={tag}
+                            label={`#${tag}`}
+                            variant="primary"
+                            size="xs"
+                          />
                         ))}
                       </div>
                     </div>

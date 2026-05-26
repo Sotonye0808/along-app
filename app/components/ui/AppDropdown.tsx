@@ -26,18 +26,29 @@ export function AppDropdown({
   trigger = ["click"],
   placement = "bottomRight",
 }: AppDropdownProps): React.ReactElement {
-  const itemActionMap = new Map(items.map((item) => [String(item.key), item.onClick]));
+  const itemActionMap = new Map(
+    items.map((item) => [String(item.key), item.onClick]),
+  );
 
-  const menuItems: MenuProps["items"] = items.map((item) => ({
-    key: item.key,
-    label: item.label,
-    icon: item.icon,
-    danger: item.danger,
-    disabled: item.disabled,
-  }));
+  const menuItems = items.map((item) => {
+    const labelWithIcon = item.icon ? (
+      <>{item.icon}&nbsp;{item.label}</>
+    ) : (
+      item.label
+    );
+
+    return {
+      key: item.key,
+      label: labelWithIcon,
+      danger: item.danger,
+      disabled: item.disabled,
+      onClick: item.onClick,
+    };
+  }); // We'll fix the type in a moment
 
   return (
     <Dropdown
+      overlayClassName="app-dropdown"
       menu={{
         items: menuItems,
         onClick: ({ key }) => {

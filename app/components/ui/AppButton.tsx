@@ -43,7 +43,7 @@ const variantClassMap: Record<
     "!bg-transparent !text-[var(--color-text-secondary)] !border-[var(--color-border)] hover:!bg-[var(--color-bg-elevated)] hover:!text-[var(--color-text-primary)]",
   destructive:
     "!bg-[var(--color-error)] hover:brightness-90 !text-white !border-transparent",
-  icon: "!rounded-full !p-2 !min-w-0 !h-auto !border-transparent bg-transparent hover:!bg-[var(--color-bg-elevated)]",
+  icon: "!rounded-full !p-2 !min-w-0 !h-auto !border-transparent bg-transparent !text-[var(--color-text-secondary)] hover:!bg-[var(--color-bg-elevated)] hover:!text-[var(--color-text-primary)]",
 };
 
 export function AppButton({

@@ -62,10 +62,14 @@ function calculateSuggestionScore(
       reasons.push("You bookmarked their posts");
     }
 
-    const currentUserPosts = allPosts.filter((p) => p.userId === currentUser.id);
+    const currentUserPosts = allPosts.filter(
+      (p) => p.userId === currentUser.id,
+    );
     const currentUserTags = new Set(currentUserPosts.flatMap((p) => p.tags));
     const userTags = new Set(userPosts.flatMap((p) => p.tags));
-    const commonTags = Array.from(currentUserTags).filter((tag) => userTags.has(tag));
+    const commonTags = Array.from(currentUserTags).filter((tag) =>
+      userTags.has(tag),
+    );
     if (commonTags.length > 0) {
       score += Math.min(commonTags.length * 5, 20);
       reasons.push(`${commonTags.length} common interests`);
@@ -73,7 +77,9 @@ function calculateSuggestionScore(
 
     const currentUserFollowing = new Set(currentUser.following ?? []);
     const userFollowing = new Set(user.following ?? []);
-    const mutualCount = Array.from(currentUserFollowing).filter((id) => userFollowing.has(id)).length;
+    const mutualCount = Array.from(currentUserFollowing).filter((id) =>
+      userFollowing.has(id),
+    ).length;
     if (mutualCount > 0) {
       score += Math.min(mutualCount * 5, 10);
       reasons.push(`${mutualCount} mutual connections`);
@@ -157,11 +163,16 @@ export function SuggestionsPanel(): React.ReactElement {
       setSuggestedUsers((prev) =>
         prev.map((u) =>
           u.id === userId
-            ? { ...u, followers: (u.followers || 0) + (alreadyFollowing ? -1 : 1) }
+            ? {
+                ...u,
+                followers: (u.followers || 0) + (alreadyFollowing ? -1 : 1),
+              }
             : u,
         ),
       );
-      await api.post(API_ENDPOINTS.USER_FOLLOW(userId), { userId: currentUser.id });
+      await api.post(API_ENDPOINTS.USER_FOLLOW(userId), {
+        userId: currentUser.id,
+      });
     } catch {
       // rollback
       setFollowingIds((prev) => {
@@ -176,7 +187,10 @@ export function SuggestionsPanel(): React.ReactElement {
       setSuggestedUsers((prev) =>
         prev.map((u) =>
           u.id === userId
-            ? { ...u, followers: (u.followers || 0) + (alreadyFollowing ? 1 : -1) }
+            ? {
+                ...u,
+                followers: (u.followers || 0) + (alreadyFollowing ? 1 : -1),
+              }
             : u,
         ),
       );
@@ -204,11 +218,11 @@ export function SuggestionsPanel(): React.ReactElement {
           size="sm"
         />
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+        <div className="space-y-3">
           {suggestedUsers.map((user) => (
             <div
               key={user.id}
-              className="flex min-w-0 flex-col items-start justify-between gap-2 rounded-[var(--radius-card)] border border-[var(--color-border-light)] p-2.5 lg:flex-row lg:items-center">
+              className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-[var(--color-border-light)] bg-[var(--color-bg-elevated)]/40 p-3">
               <div className="min-w-0 flex-1">
                 <AppUserLabel
                   user={{
@@ -222,18 +236,18 @@ export function SuggestionsPanel(): React.ReactElement {
                   showHandle
                   showFullName
                   linkToProfile
+                  meta={`${formatNumber(user.followers || 0)} followers`}
                 />
-                <p className="mt-0.5 pl-[52px] text-xs text-[var(--color-text-muted)]">
-                  {formatNumber(user.followers || 0)} followers
-                </p>
               </div>
               <AppButton
                 variant={followingIds.has(user.id) ? "secondary" : "primary"}
                 size="sm"
-                className="w-full lg:w-auto"
+                className="!h-8 !rounded-full !px-3"
                 icon={followingIds.has(user.id) ? UserMinus : UserPlus}
                 loading={loadingFollowId === user.id}
-                disabled={loadingFollowId !== null && loadingFollowId !== user.id}
+                disabled={
+                  loadingFollowId !== null && loadingFollowId !== user.id
+                }
                 onClick={() => void handleFollow(user.id)}>
                 {followingIds.has(user.id) ? "Following" : "Follow"}
               </AppButton>

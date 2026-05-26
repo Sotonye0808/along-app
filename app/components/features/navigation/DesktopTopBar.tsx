@@ -27,17 +27,6 @@ export function DesktopTopBar() {
       onClick: () => router.push(APP_ROUTES.PROFILE),
     },
     {
-      key: "theme",
-      label: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
-      icon:
-        theme === "dark" ? (
-          <Sun size={16} aria-hidden="true" />
-        ) : (
-          <Moon size={16} aria-hidden="true" />
-        ),
-      onClick: toggleTheme,
-    },
-    {
       key: "logout",
       label: "Logout",
       icon: <LogOut size={16} aria-hidden="true" />,
@@ -49,8 +38,11 @@ export function DesktopTopBar() {
   ];
 
   return (
-    <header className="fixed left-60 right-0 top-0 z-50 hidden items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-base)] px-6 py-3 md:flex">
-      <Link href={APP_ROUTES.DASHBOARD} aria-label="Along home" className="flex items-center">
+    <header className="fixed left-[var(--sidebar-width)] right-0 top-0 z-50 hidden items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-base)] px-6 py-3 md:flex">
+      <Link
+        href={APP_ROUTES.DASHBOARD}
+        aria-label="Along home"
+        className="flex items-center">
         <Image
           src="/logo.svg"
           alt="Along"
@@ -66,11 +58,15 @@ export function DesktopTopBar() {
       </div>
 
       <div className="flex items-center gap-4">
-        {isAuthenticated && user ? <NotificationsDropdown userId={user.id} /> : null}
+        {isAuthenticated && user ? (
+          <NotificationsDropdown userId={user.id} />
+        ) : null}
         <AppButton
           variant="icon"
           icon={theme === "dark" ? Sun : Moon}
-          ariaLabel={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          ariaLabel={
+            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+          }
           onClick={toggleTheme}
         />
 
