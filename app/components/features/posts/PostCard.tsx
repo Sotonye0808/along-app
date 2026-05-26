@@ -222,12 +222,6 @@ export const PostCard = memo(function PostCard({
         </Link>
       </h2>
 
-      {validityScore !== null ? (
-        <div className="mb-3">
-          <TrustBadge score={validityScore} size="small" />
-        </div>
-      ) : null}
-
       <div className="mb-4 space-y-3">
         {post.routes.map((route, index) => {
           const statusConfig = ROUTE_STATUS_REGISTRY[route.status];
@@ -404,7 +398,10 @@ export const PostCard = memo(function PostCard({
             </AppButton>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            {validityScore !== null ? (
+              <TrustBadge score={validityScore} size="small" />
+            ) : null}
             <AppButton
               variant="ghost"
               icon={isBookmarked ? BookmarkCheck : Bookmark}

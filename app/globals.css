@@ -19,8 +19,8 @@
   --color-error-text: #8c1823;
   --color-border: #e5e7eb;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --radius-input: 6px;
-  --radius-button: 8px;
+  --radius-input: 8px;
+  --radius-button: 6px;
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-sheet: 24px;
@@ -28,7 +28,6 @@
 }
 
 @layer base {
-  /* Keep :root custom properties for runtime theme systems (Ant Design + legacy usage). */
   :root {
     --color-primary: #00623b;
     --color-primary-light: #00a862;
@@ -50,21 +49,10 @@
     --color-warning-text: #cc7914;
     --color-error: #e4626f;
     --color-error-text: #8c1823;
-  }
-
-  @keyframes slide-down {
-    from {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .animate-slide-down {
-    animation: slide-down 0.3s ease-out;
+    --color-glass-bg: rgba(255, 255, 255, 0.10);
+    --color-glass-border: rgba(255, 255, 255, 0.20);
+    --color-suggestion-bg: rgba(0, 168, 98, 0.04);
+    --color-suggestion-border: #00a862;
   }
 
   .dark {
@@ -85,6 +73,10 @@
     --color-success: #34d399;
     --color-warning: #fbbf24;
     --color-error: #ef4444;
+    --color-glass-bg: rgba(15, 15, 15, 0.55);
+    --color-glass-border: rgba(255, 255, 255, 0.20);
+    --color-suggestion-bg: rgba(0, 168, 98, 0.08);
+    --color-suggestion-border: #00a862;
   }
 
   /* Apply global color scheme */
@@ -114,25 +106,40 @@
     @apply transition-all duration-200 ease-in-out;
   }
 
-  /* Focus visible styles for keyboard navigation */
-  .glass {
-    background: rgb(255 255 255 / 10%);
-    backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgb(255 255 255 / 20%);
+  @keyframes slide-down {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 
-  .dark .glass {
-    background: rgb(15 15 15 / 55%);
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
+  /* Focus visible styles for keyboard navigation */
+  .glass {
+    background: var(--color-glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   }
 
   .glass-strong {
-    background: rgb(255 255 255 / 15%);
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid rgb(255 255 255 / 25%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
   }
 
   .dark .glass-strong {
-    background: rgb(0 0 0 / 60%);
+    background: rgba(0, 0, 0, 0.60);
   }
 
   :focus-visible {
@@ -151,50 +158,43 @@
 }
 
 @layer components {
-  /* Design system shadows */
+  /* Design system shadows — per spec: card 0 2px 16px rgba(0,0,0,0.08), primary 0 8px 32px rgba(0,98,59,0.15) */
   .shadow-card {
-    box-shadow: 0 1px 3px rgb(0 0 0 / 5%), 0 1px 2px rgb(0 0 0 / 10%);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   }
 
   .shadow-card-hover {
-    box-shadow: 0 4px 6px rgb(0 0 0 / 7%), 0 2px 4px rgb(0 0 0 / 6%);
+    box-shadow: 0 8px 32px rgba(0, 98, 59, 0.15);
+    transform: translateY(-2px);
   }
 
   .shadow-modal {
-    box-shadow: 0 20px 25px rgb(0 0 0 / 10%), 0 8px 10px rgb(0 0 0 / 4%);
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.10), 0 8px 10px rgba(0, 0, 0, 0.04);
   }
 
   .shadow-float {
-    box-shadow: 0 10px 40px rgb(0 0 0 / 15%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   }
 
-  /* Smooth card hover effects */
-  .ant-card {
-    @apply transition-shadow duration-300 ease-in-out;
+  /* Animation tokens per design spec */
+  .animate-fast {
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
   }
 
-  /* Smooth modal animations */
-  .ant-modal {
-    @apply transition-all duration-300 ease-out;
+  .animate-base {
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
   }
 
-  /* Smooth button hover effects */
-  .ant-btn {
-    @apply transition-all duration-200 ease-in-out;
+  .animate-page {
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
   }
 
-  .ant-btn:hover:not(:disabled) {
-    @apply transform scale-105;
-  }
-
-  /* Smooth dropdown animations */
-  .ant-dropdown {
-    @apply transition-all duration-200 ease-in-out;
-  }
-
-  /* Smooth tag animations */
-  .ant-tag {
-    @apply transition-all duration-150 ease-in-out;
+  .animate-slide {
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Fade in animation for page content */
@@ -213,6 +213,18 @@
     animation: fadeIn 0.3s ease-out;
   }
 
+  /* Shimmer skeleton loader (1.5s loop) */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, var(--color-bg-elevated) 25%, var(--color-bg-base) 50%, var(--color-bg-elevated) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
   /* Slide down animation for notifications */
   @keyframes slideDown {
     from {
@@ -227,6 +239,28 @@
 
   .animate-slideDown {
     animation: slideDown 0.3s ease-out;
+  }
+
+  /* Along Suggestion card border styling */
+  .suggestion-card {
+    border-left: 4px solid var(--color-suggestion-border);
+    background-color: var(--color-suggestion-bg);
+  }
+
+  /* Bento grid cell variants for explore/admin/analytics */
+  .bento-cell-large {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .bento-cell-medium {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+
+  .bento-cell-small {
+    grid-column: span 1;
+    grid-row: span 1;
   }
 
   /* Smooth scroll behavior */

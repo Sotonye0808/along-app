@@ -33,12 +33,12 @@ export default function DashboardLayout({
         <DesktopTopBar />
 
         {/* Main Content */}
-        <main className="mb-20 mt-8 md:mb-0 md:ml-20 md:mt-12">
-          <div className="max-w-7xl mx-auto p-1 md:p-4">{children}</div>
+        <main className="mb-20 mt-8 md:mb-0 md:ml-60 md:mt-16">
+          <div className="mx-auto max-w-7xl p-1 md:p-4">{children}</div>
         </main>
 
         {/* Footer */}
-        <div className="md:ml-20">
+        <div className="md:ml-60">
           <AppFooter />
         </div>
 

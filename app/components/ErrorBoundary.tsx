@@ -54,7 +54,7 @@ export class ErrorBoundary extends React.Component<
                 size="large"
                 icon={<ReloadOutlined />}
                 onClick={this.handleReset}
-                className="bg-[#00623B]">
+                className="bg-[var(--color-primary)]">
                 Refresh Page
               </Button>,
               <Button

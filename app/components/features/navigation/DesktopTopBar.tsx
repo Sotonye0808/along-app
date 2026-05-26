@@ -49,7 +49,7 @@ export function DesktopTopBar() {
   ];
 
   return (
-    <header className="fixed left-20 right-0 top-0 z-50 hidden items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-base)] px-6 py-3 md:flex">
+    <header className="fixed left-60 right-0 top-0 z-50 hidden items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-base)] px-6 py-3 md:flex">
       <Link href={APP_ROUTES.DASHBOARD} aria-label="Along home" className="flex items-center">
         <Image
           src="/logo.svg"

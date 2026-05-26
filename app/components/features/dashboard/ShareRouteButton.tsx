@@ -1,7 +1,7 @@
 "use client";
 
 import React, { lazy, Suspense, useState } from "react";
-import { Edit3, Plus } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, API_ENDPOINTS } from "@/lib/constants";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -74,12 +74,12 @@ export function ShareRouteButton({ onPostCreated }: ShareRouteButtonProps) {
       <div className="hidden md:block">
         <AppButton
           size="lg"
-          icon={Edit3}
+          icon={MapPin}
           fullWidth
           onClick={() => {
             void handleButtonClick();
           }}
-          className="h-12">
+          className="h-12 text-base">
           Share a route
         </AppButton>
       </div>
@@ -89,9 +89,9 @@ export function ShareRouteButton({ onPostCreated }: ShareRouteButtonProps) {
         onClick={() => {
           void handleButtonClick();
         }}
-        className="fixed bottom-24 right-6 z-40 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition-transform hover:scale-105 md:hidden"
+        className="fixed bottom-24 right-6 z-40 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-[0_8px_32px_rgba(0,98,59,0.15)] transition-transform hover:scale-105 active:scale-95 md:hidden"
         aria-label="Share a route">
-        <Plus size={24} aria-hidden="true" />
+        <MapPin size={26} aria-hidden="true" />
       </button>
 
       {modalOpen && (

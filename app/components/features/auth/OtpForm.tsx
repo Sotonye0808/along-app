@@ -170,14 +170,14 @@ export function OtpForm() {
         <button
           onClick={handleResendCode}
           disabled={countdown > 0 || resendLoading}
-          className="text-sm font-semibold text-[#00623B] hover:underline disabled:text-gray-400 disabled:no-underline text-left">
+          className="text-sm font-semibold text-[var(--color-primary)] hover:underline disabled:text-gray-400 disabled:no-underline text-left">
           {countdown > 0
             ? `Resend code in ${countdown}s`
             : "Send me the code again"}
         </button>
         <button
           onClick={handleChangeNumber}
-          className="text-sm font-semibold text-[#00623B] hover:underline text-left">
+          className="text-sm font-semibold text-[var(--color-primary)] hover:underline text-left">
           Change email address
         </button>
       </div>

@@ -2,7 +2,9 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { MapPin, LogIn } from "lucide-react";
 import {
   filterNavItems,
   type NavigationItem,
@@ -10,6 +12,8 @@ import {
 } from "@/lib/config/navigation";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useNotifications } from "@/lib/hooks/useNotifications";
+import { AppAvatar } from "@/components/ui/AppAvatar";
+import { AppButton } from "@/components/ui/AppButton";
 
 interface DashboardNavbarProps {
   userId?: string;
@@ -24,98 +28,183 @@ function getRoleFromUser(user: User | null): UserRole {
 }
 
 function isActivePath(pathname: string | null, href: string): boolean {
-  if (!pathname) {
-    return false;
-  }
-
+  if (!pathname) return false;
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function renderNavLink(
-  item: NavigationItem,
-  pathname: string | null,
-  unreadCount: number,
-  compact = false,
-): React.ReactElement {
-  const active = isActivePath(pathname, item.href);
-  const Icon = item.icon;
-  const showNotificationDot = item.key === "notifications" && unreadCount > 0;
-
-  return (
-    <Link
-      key={item.key}
-      href={item.href}
-      className={[
-        "relative inline-flex items-center gap-2 rounded-xl transition-colors",
-        compact ? "h-12 w-12 justify-center" : "px-3 py-2",
-        active
-          ? "bg-[var(--color-primary)] text-white"
-          : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)]",
-      ].join(" ")}
-      title={item.label}
-      aria-current={active ? "page" : undefined}>
-      <Icon size={20} aria-hidden="true" />
-      {!compact ? (
-        <span className="text-sm font-medium">{item.label}</span>
-      ) : null}
-      {showNotificationDot ? (
-        <span
-          className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--color-error)]"
-          aria-label={`${unreadCount} unread notifications`}
-        />
-      ) : null}
-    </Link>
-  );
 }
 
 export function DashboardNavbar({ userId }: DashboardNavbarProps) {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
   const role = getRoleFromUser(isAuthenticated ? user : null);
-
   const { unreadCount } = useNotifications(userId || "");
 
-  const { primarySidebarItems, adminSidebarItems, bottomItems } =
-    useMemo(() => {
-      const sidebarItems = filterNavItems(role, { sidebarOnly: true });
-      const itemsForBottom = filterNavItems(role, { bottomNavOnly: true });
+  const { primarySidebarItems, adminSidebarItems, bottomItems } = useMemo(() => {
+    const sidebarItems = filterNavItems(role, { sidebarOnly: true });
+    const itemsForBottom = filterNavItems(role, { bottomNavOnly: true });
 
-      return {
-        primarySidebarItems: sidebarItems.filter(
-          (item) => !(item.roles.length === 1 && item.roles[0] === "admin"),
-        ),
-        adminSidebarItems: sidebarItems.filter(
-          (item) => item.roles.length === 1 && item.roles[0] === "admin",
-        ),
-        bottomItems: itemsForBottom,
-      };
-    }, [role]);
+    return {
+      primarySidebarItems: sidebarItems.filter(
+        (item) => !(item.roles.length === 1 && item.roles[0] === "admin"),
+      ),
+      adminSidebarItems: sidebarItems.filter(
+        (item) => item.roles.length === 1 && item.roles[0] === "admin",
+      ),
+      bottomItems: itemsForBottom,
+    };
+  }, [role]);
 
   return (
     <>
-      <nav className="fixed left-0 top-0 z-40 hidden h-screen w-20 flex-col items-center border-r border-[var(--color-border)] bg-[var(--color-bg-base)] py-4 md:flex">
-        <div className="flex w-full flex-1 flex-col items-center gap-3">
-          {primarySidebarItems.map((item) =>
-            renderNavLink(item, pathname, unreadCount, true),
-          )}
+      {/* Desktop Sidebar - 240px */}
+      <nav className="fixed left-0 top-0 z-40 hidden h-screen w-60 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-base)] md:flex">
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 border-b border-[var(--color-border)] px-5 py-4">
+          <Image
+            src="/logo-icon.svg"
+            alt="Along"
+            width={28}
+            height={28}
+            className="h-7 w-7"
+          />
+          <span className="text-lg font-extrabold tracking-tight text-[var(--color-text-primary)]">
+            Along
+          </span>
         </div>
 
-        {adminSidebarItems.length > 0 ? (
-          <div className="mt-4 w-full border-t border-[var(--color-border)] pt-4">
-            <div className="mb-2 px-2 text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
-              Admin
-            </div>
-            <div className="flex flex-col items-center gap-3">
-              {adminSidebarItems.map((item) =>
-                renderNavLink(item, pathname, unreadCount, true),
-              )}
-            </div>
+        {/* Primary Nav Items */}
+        <div className="flex-1 overflow-y-auto px-3 py-4">
+          <div className="space-y-1">
+            {primarySidebarItems.map((item) => {
+              const active = isActivePath(pathname, item.href);
+              const Icon = item.icon;
+              const showBadge = item.key === "notifications" && unreadCount > 0;
+
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                    active
+                      ? "bg-[var(--color-primary)] text-white"
+                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text-primary)]"
+                  }`}
+                  title={item.label}
+                >
+                  <Icon size={20} aria-hidden="true" />
+                  <span>{item.label}</span>
+                  {showBadge ? (
+                    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-error)] px-1.5 text-[10px] font-bold text-white">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  ) : null}
+                </Link>
+              );
+            })}
           </div>
-        ) : null}
+
+          {/* Admin Section */}
+          {adminSidebarItems.length > 0 ? (
+            <div className="mt-6 border-t border-[var(--color-border)] pt-4">
+              <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                Admin
+              </div>
+              <div className="space-y-1">
+                {adminSidebarItems.map((item) => {
+                  const active = isActivePath(pathname, item.href);
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.key}
+                      href={item.href}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                        active
+                          ? "bg-[var(--color-primary)] text-white"
+                          : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text-primary)]"
+                      }`}
+                    >
+                      <Icon size={20} aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Profile Mini-Card at Bottom */}
+        <div className="border-t border-[var(--color-border)] p-3">
+          {isAuthenticated && user ? (
+            <Link
+              href="/profile"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--color-bg-elevated)]"
+            >
+              <AppAvatar
+                user={{
+                  userName: user.userName,
+                  firstName: user.firstName,
+                  avatar: user.avatar,
+                  verified: user.verified,
+                }}
+                size={32}
+                linkToProfile={false}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
+                  {user.firstName} {user.lastName}
+                </div>
+                <div className="truncate text-xs text-[var(--color-text-secondary)]">
+                  @{user.userName}
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <AppButton size="sm" icon={LogIn} fullWidth>
+                Sign In
+              </AppButton>
+            </Link>
+          )}
+        </div>
       </nav>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-[var(--color-border)] bg-[var(--color-bg-base)] px-2 py-2 md:hidden">
-        {bottomItems.map((item) => renderNavLink(item, pathname, unreadCount))}
+      {/* Mobile Bottom Nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-[var(--color-border)] bg-[var(--color-bg-base)] px-2 py-1 md:hidden">
+        {bottomItems.map((item) => {
+          const active = isActivePath(pathname, item.href);
+          const Icon = item.icon;
+          const showBadge = item.key === "notifications" && unreadCount > 0;
+
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={`relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                active
+                  ? "text-[var(--color-primary)]"
+                  : "text-[var(--color-text-secondary)]"
+              }`}
+            >
+              <Icon size={22} aria-hidden="true" />
+              <span>{item.label}</span>
+              {showBadge ? (
+                <span className="absolute right-1 top-0 h-2 w-2 rounded-full bg-[var(--color-error)]" />
+              ) : null}
+            </Link>
+          );
+        })}
+
+        {/* FAB - Share Route */}
+        <Link
+          href="#"
+          className="absolute -top-5 left-1/2 z-50 -translate-x-1/2"
+          aria-label="Share a route"
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-[0_8px_32px_rgba(0,98,59,0.15)] transition-transform hover:scale-105 active:scale-95">
+            <MapPin size={24} />
+          </div>
+        </Link>
       </nav>
     </>
   );

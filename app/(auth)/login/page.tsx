@@ -24,17 +24,18 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
-      <div className="hidden lg:flex lg:w-3/5 bg-[linear-gradient(135deg,#00623B_0%,#003D24_100%)] flex-col items-center justify-center p-12 relative overflow-hidden">
+      {/* Brand Panel - 40% on desktop */}
+      <div className="hidden lg:flex lg:w-2/5 bg-[linear-gradient(135deg,#00623B_0%,#003D24_100%)] flex-col items-center justify-center p-12 relative overflow-hidden">
         <div className="relative z-10 text-center max-w-lg">
           <div className="flex items-center justify-center gap-3 mb-6">
             <img src="/logo-icon.svg" alt="Along" className="w-12 h-12" />
             <span className="text-4xl font-bold text-white tracking-tight">Along</span>
           </div>
           <h1 className="text-3xl font-semibold text-white mb-3">
-            Your Journey, Connected
+            Navigate Together
           </h1>
           <p className="text-white/80 text-lg">
-            Discover routes, share adventures, and connect with travelers worldwide.
+            Share verified routes, discover trusted paths, and navigate your city with confidence.
           </p>
         </div>
         <div className="absolute inset-0 opacity-10">
@@ -50,9 +51,12 @@ export default function LoginPage() {
         <div className="absolute top-20 left-10 w-48 h-48 rounded-full bg-white/5 blur-3xl"/>
       </div>
 
-      <div className="w-full lg:w-2/5 flex items-center justify-center p-6 sm:p-8">
+      {/* Form Panel - 60% on desktop */}
+      <div className="w-full lg:w-3/5 flex items-center justify-center p-6 sm:p-8 bg-[var(--color-bg-elevated)]/50">
         <div className="w-full max-w-md">
-          <LoginForm />
+          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-base)] p-8 shadow-sm">
+            <LoginForm />
+          </div>
         </div>
       </div>
     </div>

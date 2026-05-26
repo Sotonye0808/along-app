@@ -59,7 +59,7 @@ interface UserProfileProps {
   };
 }
 
-type ProfileTab = "posts" | "comments";
+type ProfileTab = "posts" | "liked" | "bookmarks" | "routes";
 
 export function UserProfile({
   user,
@@ -129,9 +129,11 @@ export function UserProfile({
     ToastService.success("Profile link copied");
   };
 
-  const tabs: { key: ProfileTab; label: string }[] = [
-    { key: "posts", label: `Posts (${posts.length})` },
-    { key: "comments", label: `Comments (${comments.length})` },
+  const tabs: { key: ProfileTab; label: string; count: number }[] = [
+    { key: "posts", label: "Posts", count: posts.length },
+    { key: "liked", label: "Liked", count: 0 },
+    ...(isOwnProfile ? [{ key: "bookmarks" as const, label: "Bookmarks", count: 0 }] : []),
+    { key: "routes", label: "Routes", count: posts.filter((p) => p.routes?.length > 0).length },
   ];
 
   return (
@@ -261,7 +263,7 @@ export function UserProfile({
             key={tab.key}
             type="button"
             className={[
-              "px-4 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors",
               activeTab === tab.key
                 ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
@@ -270,6 +272,9 @@ export function UserProfile({
               .trim()}
             onClick={() => setActiveTab(tab.key)}>
             {tab.label}
+            {tab.count > 0 ? (
+              <span className="text-xs text-[var(--color-text-muted)]">({tab.count})</span>
+            ) : null}
           </button>
         ))}
       </div>
@@ -308,57 +313,42 @@ export function UserProfile({
             ))
           )}
         </div>
-      ) : (
+      ) : activeTab === "routes" ? (
         <div className="space-y-4">
-          {comments.length === 0 ? (
+          {posts.filter((p) => p.routes?.length > 0).length === 0 ? (
             <AppEmptyState
-              title="No comments yet"
-              description={
-                isOwnProfile
-                  ? "You haven't commented on any posts yet."
-                  : `${user.firstName} hasn't commented on any posts yet.`
-              }
+              title="No routes yet"
+              description="Routes with map data will appear here."
               icon={EMPTY_STATES.noPosts.icon}
             />
           ) : (
-            comments.map((comment) => (
-              <AppCard key={comment.id} variant="default" hover>
-                <div className="flex flex-col gap-3">
-                  <div className="text-sm text-[var(--color-text-secondary)]">
-                    Commented on{" "}
-                    <Link
-                      href={`/posts/${comment.post.id}`}
-                      className="font-semibold text-[var(--color-text-primary)] hover:underline"
-                      onClick={(e) => e.stopPropagation()}>
-                      {comment.post.title}
-                    </Link>
-                  </div>
-                  <p className="text-[var(--color-text-primary)]">
-                    {comment.text}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[var(--color-text-muted)]">
-                      {formatDate(comment.createdAt)}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {comment.likes > 0 ? (
-                        <AppTag
-                          label={String(comment.likes)}
-                          size="xs"
-                          variant="success"
-                        />
-                      ) : null}
-                      <Link
-                        href={`/posts/${comment.postId}`}
-                        className="text-sm font-medium text-[var(--color-primary)] hover:underline">
-                        View Thread
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </AppCard>
+            posts.filter((p) => p.routes?.length > 0).map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                author={post.author}
+                currentUserId={currentUserId}
+                onLike={onLike}
+                onDislike={onDislike}
+                onComment={onComment}
+                onBookmark={onBookmark}
+                onShare={onShare}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                isLiked={userInteractions.likes.has(post.id)}
+                isDisliked={userInteractions.dislikes.has(post.id)}
+                isBookmarked={userInteractions.bookmarks.has(post.id)}
+              />
             ))
           )}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center py-16">
+          <AppEmptyState
+            title="Coming soon"
+            description="This tab will show your liked and bookmarked content."
+            icon={EMPTY_STATES.noPosts.icon}
+          />
         </div>
       )}
 

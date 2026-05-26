@@ -23,7 +23,7 @@ const variantClasses: Record<NonNullable<AppCardProps["variant"]>, string> = {
     "bg-[var(--color-bg-base)] border border-[var(--color-border)] shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
   flat: "bg-[var(--color-bg-elevated)] border border-transparent shadow-none",
   suggestion:
-    "bg-[var(--color-primary)]/[0.03] border-l-4 border-l-[var(--color-primary)] border border-[var(--color-border)]",
+    "bg-[var(--color-suggestion-bg)] border-l-4 border-l-[var(--color-suggestion-border)] border border-[var(--color-border)]",
 };
 
 const paddingClasses: Record<NonNullable<AppCardProps["padding"]>, string> = {

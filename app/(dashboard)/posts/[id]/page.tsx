@@ -482,7 +482,7 @@ export default function PostPage() {
         <Button
           type="primary"
           onClick={() => router.push("/home")}
-          className="bg-[#00623B]">
+          className="bg-[var(--color-primary)]">
           Back to Feed
         </Button>
       </div>
@@ -498,7 +498,7 @@ export default function PostPage() {
         <Button
           type="primary"
           onClick={() => router.push("/home")}
-          className="bg-[#00623B]">
+          className="bg-[var(--color-primary)]">
           Back to Feed
         </Button>
       </div>

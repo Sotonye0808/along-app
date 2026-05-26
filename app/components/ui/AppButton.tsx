@@ -36,9 +36,9 @@ const variantClassMap: Record<
   string
 > = {
   primary:
-    "bg-[var(--color-primary)] hover:!bg-[var(--color-primary-light)] !text-white !border-transparent",
+    "bg-[var(--color-primary)] hover:!bg-[var(--color-primary-light)] !text-white !border-transparent shadow-[0_2px_8px_rgba(0,98,59,0.12)]",
   secondary:
-    "bg-transparent !text-[var(--color-primary)] !border-[var(--color-primary)] hover:!bg-[var(--color-primary)]/10",
+    "bg-transparent !text-[var(--color-primary)] !border-[var(--color-primary)] hover:!bg-[var(--color-primary)]/10 hover:!border-[var(--color-primary-light)]",
   ghost:
     "bg-transparent !text-[var(--color-text-secondary)] !border-transparent hover:!bg-[var(--color-bg-elevated)]",
   destructive:

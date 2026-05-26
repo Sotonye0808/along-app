@@ -96,7 +96,7 @@ interface GlassPopupProps {
 function GlassPopup({ post, onClose }: GlassPopupProps) {
   return (
     <div className="absolute left-3 bottom-3 z-10 w-64 pointer-events-auto">
-      <AppCard variant="glass" padding="sm" className="!rounded-xl shadow-xl backdrop-blur-md">
+      <div className="glass !rounded-xl p-3">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
@@ -128,7 +128,7 @@ function GlassPopup({ post, onClose }: GlassPopupProps) {
           className="block w-full text-center text-xs font-medium text-[var(--color-primary)] hover:underline">
           View route →
         </Link>
-      </AppCard>
+      </div>
     </div>
   );
 }
