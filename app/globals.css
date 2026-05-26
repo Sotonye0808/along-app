@@ -370,3 +370,113 @@ Helper class for suitable value as max-height, used in the index.tsx for main-pa
   font-size: 14px;
   pointer-events: auto;
 }
+
+/* Override Ant Design Tag default backgrounds for dark/light mode */
+.ant-tag {
+  background: var(--color-bg-elevated) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+}
+
+/* Override Ant Design Dropdown panel theming */
+.ant-dropdown .ant-dropdown-menu {
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item:hover {
+  background: var(--color-bg-elevated) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item-danger {
+  color: var(--color-error) !important;
+}
+
+/* Override Ant Design Button default link colors */
+.ant-btn:not(.ant-btn-primary):not(.ant-btn-dashed):not(.ant-btn-link) {
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.ant-btn-link {
+  color: var(--color-primary) !important;
+}
+
+.ant-btn-link:hover {
+  color: var(--color-primary-light) !important;
+}
+
+/* Ensure Ant Design breadcrumbs, tabs, and links use theme colors */
+.ant-tabs-nav .ant-tabs-tab {
+  color: var(--color-text-secondary) !important;
+}
+
+.ant-tabs-nav .ant-tabs-tab-active {
+  color: var(--color-primary) !important;
+}
+
+.ant-tabs-ink-bar {
+  background: var(--color-primary) !important;
+}
+
+/* Override Ant Design Input styles */
+.ant-input,
+.ant-input-affix-wrapper {
+  background: var(--color-bg-elevated) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+  border-radius: var(--radius-input) !important;
+}
+
+.ant-input::placeholder {
+  color: var(--color-text-muted) !important;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(0, 98, 59, 0.1) !important;
+}
+
+/* Fix Ant Design Select dropdown theming */
+.ant-select-dropdown {
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.ant-select-item {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select-item-option-active {
+  background: var(--color-bg-elevated) !important;
+}
+
+/* Fix Ant Design Modal theming */
+.ant-modal-content {
+  background: var(--color-bg-card) !important;
+  border-radius: var(--radius-modal) !important;
+}
+
+.ant-modal-header {
+  background: transparent !important;
+}
+
+.ant-modal-title {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-modal-close {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Ensure consistent ant-btn icon spacing */
+.ant-btn .anticon {
+  vertical-align: middle !important;
+}

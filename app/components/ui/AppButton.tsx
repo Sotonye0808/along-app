@@ -40,7 +40,7 @@ const variantClassMap: Record<
   secondary:
     "bg-transparent !text-[var(--color-primary)] !border-[var(--color-primary)] hover:!bg-[var(--color-primary)]/10 hover:!border-[var(--color-primary-light)]",
   ghost:
-    "bg-transparent !text-[var(--color-text-secondary)] !border-transparent hover:!bg-[var(--color-bg-elevated)]",
+    "!bg-transparent !text-[var(--color-text-secondary)] !border-[var(--color-border)] hover:!bg-[var(--color-bg-elevated)] hover:!text-[var(--color-text-primary)]",
   destructive:
     "!bg-[var(--color-error)] hover:brightness-90 !text-white !border-transparent",
   icon: "!rounded-full !p-2 !min-w-0 !h-auto !border-transparent bg-transparent hover:!bg-[var(--color-bg-elevated)]",

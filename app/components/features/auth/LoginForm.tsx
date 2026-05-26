@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { App } from "antd";
-import { Apple, Chrome } from "lucide-react";
+import { Chrome } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import { LOGIN_FIELDS } from "@/lib/config/forms";
@@ -55,18 +55,13 @@ export function LoginForm() {
         onSubmit={(values) => handleSubmit(values)}
       />
 
-      <div className="mb-6 mt-4 grid grid-cols-2 gap-3">
+      <div className="mb-6 mt-4">
         <AppButton
           variant="secondary"
           icon={Chrome}
+          fullWidth
           onClick={() => handleOAuthLogin("google")}>
-          Google
-        </AppButton>
-        <AppButton
-          variant="secondary"
-          icon={Apple}
-          onClick={() => handleOAuthLogin("apple")}>
-          Apple
+          Continue with Google
         </AppButton>
       </div>
 
