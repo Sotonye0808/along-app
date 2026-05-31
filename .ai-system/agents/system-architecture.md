@@ -96,12 +96,24 @@ Client -> app/api/... -> auth check -> rate limit -> cache -> Prisma -> response
 
 ---
 
-## Known Constraints
+## Key Data Models
 
-- app/conflicting is read-only (never modify or import).
+| Model | Field | Type | Purpose |
+|-------|-------|------|---------|
+| Post | routes | Json (JSONB) | Array of Route objects (steps, links, vehicles, fare) |
+| Post | waypoints | Json (JSONB) | Array of `{lat, lng}` intermediate coordinates for map polyline |
+| Post | images | String[] | Cloudinary URLs for post content images |
+| Post | startLat/Lng, endLat/Lng | Float? | Start/end coordinates for map markers |
+| Post | totalDistanceKm | Float? | Route distance in kilometers |
+| Post | estimatedMins | Int? | Estimated travel time in minutes |
+
+## Key Constraints
+
+- `app/conflicting` is read-only (never modify or import).
 - All DB access must go through repositories in app/lib/db.
 - No raw hex values in components; use CSS vars from globals.css.
 - No emoji in UI; Lucide icons only.
 - All destructive actions require ModalService.confirm.
+- RouteMap renders polylines via react-map-gl `Source` + `Layer` (not @mapbox/polyline).
 - Some legacy lint debt remains (eslint.ignoreDuringBuilds set in next.config.mjs).
 - postcss.config.js and postcss.config.mjs both exist; keep in sync.

@@ -192,24 +192,31 @@ export function UserProfile({
               </p>
             ) : null}
 
-            {/* Stats Row */}
-            <div className="flex gap-6">
-              <div className="text-center">
-                <div className="text-xl font-bold text-[var(--color-text-primary)]">{posts.length}</div>
-                <div className="text-xs text-[var(--color-text-muted)]">Posts</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl font-bold text-[var(--color-text-primary)]">{formatNumber(user.followers ?? 0)}</div>
-                <div className="text-xs text-[var(--color-text-muted)]">Followers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl font-bold text-[var(--color-text-primary)]">{user.following?.length ?? 0}</div>
-                <div className="text-xs text-[var(--color-text-muted)]">Following</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl font-bold text-[var(--color-text-primary)]">{formatNumber((user as any).routes ?? 0)}</div>
-                <div className="text-xs text-[var(--color-text-muted)]">Routes</div>
-              </div>
+            {/* Stats Row — badge-style per design spec */}
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-medium text-[var(--color-text-secondary)]">
+                {posts.length} Posts
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-medium text-[var(--color-text-secondary)]">
+                {formatNumber(user.followers ?? 0)} Followers
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-medium text-[var(--color-text-secondary)]">
+                {user.following?.length ?? 0} Following
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-medium text-[var(--color-text-secondary)]">
+                {formatNumber((user as any).routes ?? 0)} Routes
+              </span>
+              {posts.length > 0 ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-transparent bg-[var(--color-success-text)]/10 px-3 py-1 text-xs font-medium text-[var(--color-success-text)]">
+                  {Math.round(
+                    posts.reduce((acc, p) => acc + (typeof p.validityScore === "number" ? p.validityScore : 0), 0) /
+                      posts.filter((p) => typeof p.validityScore === "number").length || 0
+                  )}% Validity
+                </span>
+              ) : null}
+              <span className="inline-flex items-center gap-1 rounded-full border border-transparent bg-[var(--color-primary)]/10 px-3 py-1 text-xs font-medium text-[var(--color-primary)]">
+                {(user as any).tier ?? posts.length >= 10 ? "Gold" : posts.length >= 5 ? "Silver" : "Bronze"} Tier
+              </span>
             </div>
           </div>
 
@@ -281,17 +288,19 @@ export function UserProfile({
 
       {/* Tab Content */}
       {activeTab === "posts" ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {posts.length === 0 ? (
-            <AppEmptyState
-              title={EMPTY_STATES.noPosts.title}
-              description={
-                isOwnProfile
-                  ? "You haven't shared any routes yet."
-                  : `${user.firstName} hasn't shared any routes yet.`
-              }
-              icon={EMPTY_STATES.noPosts.icon}
-            />
+            <div className="col-span-full">
+              <AppEmptyState
+                title={EMPTY_STATES.noPosts.title}
+                description={
+                  isOwnProfile
+                    ? "You haven't shared any routes yet."
+                    : `${user.firstName} hasn't shared any routes yet.`
+                }
+                icon={EMPTY_STATES.noPosts.icon}
+              />
+            </div>
           ) : (
             posts.map((post) => (
               <PostCard
@@ -314,13 +323,15 @@ export function UserProfile({
           )}
         </div>
       ) : activeTab === "routes" ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {posts.filter((p) => p.routes?.length > 0).length === 0 ? (
-            <AppEmptyState
-              title="No routes yet"
-              description="Routes with map data will appear here."
-              icon={EMPTY_STATES.noPosts.icon}
-            />
+            <div className="col-span-full">
+              <AppEmptyState
+                title="No routes yet"
+                description="Routes with map data will appear here."
+                icon={EMPTY_STATES.noPosts.icon}
+              />
+            </div>
           ) : (
             posts.filter((p) => p.routes?.length > 0).map((post) => (
               <PostCard

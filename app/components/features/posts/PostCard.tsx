@@ -195,8 +195,13 @@ export const PostCard = memo(function PostCard({
             }}
             avatarSize={40}
           />
-          <div className="text-xs text-[var(--color-text-secondary)]">
-            {formatDate(post.createdAt)}
+          <div className="flex items-center gap-2">
+            {validityScore !== null ? (
+              <TrustBadge score={validityScore} size="small" showScore={false} />
+            ) : null}
+            <div className="text-xs text-[var(--color-text-secondary)]">
+              {formatDate(post.createdAt)}
+            </div>
           </div>
         </div>
 
@@ -428,9 +433,6 @@ export const PostCard = memo(function PostCard({
           </div>
 
           <div className="flex items-center gap-2">
-            {validityScore !== null ? (
-              <TrustBadge score={validityScore} size="small" />
-            ) : null}
             <AppButton
               variant="ghost"
               icon={isBookmarked ? BookmarkCheck : Bookmark}

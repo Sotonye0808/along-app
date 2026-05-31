@@ -9,6 +9,8 @@ import { AppSpinner } from "@/components/ui/AppSpinner";
 // Defer heavy maplibre imports to client-side only
 let Map: typeof import("react-map-gl/maplibre").default | null = null;
 let Marker: typeof import("react-map-gl/maplibre").Marker | null = null;
+let Source: typeof import("react-map-gl/maplibre").Source | null = null;
+let Layer: typeof import("react-map-gl/maplibre").Layer | null = null;
 let NavigationControl:
   | typeof import("react-map-gl/maplibre").NavigationControl
   | null = null;
@@ -27,6 +29,7 @@ export interface RouteMapProps {
     | "startLng"
     | "endLat"
     | "endLng"
+    | "waypoints"
     | "totalDistanceKm"
     | "estimatedMins"
     | "region"
@@ -122,7 +125,24 @@ function RouteMapInner({
 
   const [vs, setVs] = useState<ViewState>(viewState);
 
-  if (!Map || !Marker || !NavigationControl) return null;
+  const geojson = useMemo(() => {
+    if (!hasCoords) return null;
+    const coords: [number, number][] = [
+      [post.startLng as number, post.startLat as number],
+      ...((post.waypoints as Coordinate[] | undefined)?.map(
+        (wp) => [wp.lng, wp.lat] as [number, number],
+      ) ?? []),
+      [post.endLng as number, post.endLat as number],
+    ];
+    return {
+      type: "Feature" as const,
+      geometry: { type: "LineString" as const, coordinates: coords },
+      properties: {},
+    };
+  }, [hasCoords, post]);
+
+  if (!Map || !Marker || !Source || !Layer || !NavigationControl)
+    return null;
 
   const MapComponent = Map;
   const MarkerComponent = Marker;
@@ -151,7 +171,12 @@ function RouteMapInner({
               latitude={post.startLat as number}
               anchor="bottom">
               <div className="flex flex-col items-center">
-                <div className="w-3 h-3 rounded-full bg-[var(--color-primary)] border-2 border-white shadow-md" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-primary)] text-xs font-bold text-white shadow-lg border-2 border-white">
+                  S
+                </div>
+                <div className="mt-0.5 whitespace-nowrap rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white">
+                  Start
+                </div>
               </div>
             </MarkerComponent>
 
@@ -160,9 +185,44 @@ function RouteMapInner({
               latitude={post.endLat as number}
               anchor="bottom">
               <div className="flex flex-col items-center">
-                <div className="w-3 h-3 rounded-full bg-red-500 border-2 border-white shadow-md" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-lg border-2 border-white">
+                  E
+                </div>
+                <div className="mt-0.5 whitespace-nowrap rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white">
+                  End
+                </div>
               </div>
             </MarkerComponent>
+
+            {/* Waypoint markers */}
+            {(post.waypoints as Coordinate[] | undefined)?.map(
+              (wp, i) => (
+                <MarkerComponent
+                  key={i}
+                  longitude={wp.lng}
+                  latitude={wp.lat}
+                  anchor="center">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-primary)]/80 text-[10px] font-bold text-white shadow border-2 border-white">
+                    {i + 1}
+                  </div>
+                </MarkerComponent>
+              ),
+            )}
+
+            {/* Route polyline */}
+            {geojson && (
+              <Source id="route-line" type="geojson" data={geojson}>
+                <Layer
+                  id="route-line-layer"
+                  type="line"
+                  paint={{
+                    "line-color": "#3b82f6",
+                    "line-width": 3,
+                    "line-opacity": 0.7,
+                  }}
+                />
+              </Source>
+            )}
           </>
         )}
       </MapComponent>
@@ -260,6 +320,8 @@ export function RouteMap({
       .then(([, mapglModule]) => {
         Map = mapglModule.default;
         Marker = mapglModule.Marker;
+        Source = mapglModule.Source;
+        Layer = mapglModule.Layer;
         NavigationControl = mapglModule.NavigationControl;
         setReady(true);
       })

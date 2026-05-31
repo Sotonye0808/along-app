@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Gift, Bell, BellOff, CheckCheck } from "lucide-react";
+import { Gift, Bell, BellOff, CheckCheck, X } from "lucide-react";
 import { useAuth } from "../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
@@ -199,12 +199,11 @@ export default function NotificationsPage(): React.ReactElement {
               <AppButton
                 variant="ghost"
                 size="sm"
-                icon={undefined}
+                icon={X}
                 className="m-2 shrink-0 opacity-0 group-hover:opacity-100"
                 ariaLabel="Delete notification"
-                onClick={() => void deleteNotification(notification.id)}>
-                ×
-              </AppButton>
+                onClick={() => void deleteNotification(notification.id)}
+              />
             </div>
           ))}
         </div>

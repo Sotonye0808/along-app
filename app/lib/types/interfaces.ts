@@ -26,6 +26,11 @@ declare global {
         routes?: number;
     }
 
+    interface Coordinate {
+        lat: number;
+        lng: number;
+    }
+
     interface Link {
         text: string;
         url: string;
@@ -60,6 +65,7 @@ declare global {
         startLng?: number;
         endLat?: number;
         endLng?: number;
+        waypoints?: Coordinate[];
         totalDistanceKm?: number;
         estimatedMins?: number;
         views?: number;

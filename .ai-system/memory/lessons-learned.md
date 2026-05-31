@@ -77,6 +77,32 @@ Any component or route that handles image uploads.
 
 ---
 
+## Prisma Data Proxy Not Reachable From Some Environments
+
+**Context:**
+During development, `npx prisma migrate dev` and `npx prisma db seed` failed with network timeouts because `pooled.db.prisma.io:5432` was unreachable from the agent environment.
+
+**What We Learned:**
+Prisma Data Proxy connections (pooled.db.prisma.io) require specific network access that may not be available in all CI/agent environments. Always verify database connectivity before running migrations. For unreachable databases, generate migration SQL via `prisma migrate diff --from-migrations --to-schema ... --script` or write the ALTER TABLE SQL manually.
+
+**Apply When:**
+Any time Prisma migrations need to be generated but the database is behind a firewall or not directly accessible.
+
+---
+
+## RouteMap Polyline via react-map-gl Source + Layer
+
+**Context:**
+The map component needed to draw a route polyline connecting start → waypoints → end coordinates to match the explore-map design.
+
+**What We Learned:**
+react-map-gl's `Source` and `Layer` components (wrapping MapLibre GL) can render GeoJSON LineStrings without any additional library like `@mapbox/polyline`. Build a GeoJSON Feature with geometry type `LineString`, pass it to `<Source type="geojson" data={...}>`, and render with `<Layer type="line">`. No extra dependencies needed.
+
+**Apply When:**
+Drawing polylines or other vector geometries on the RouteMap or any react-map-gl instance.
+
+---
+
 ## `app/conflicting/` Is Read-Only Reference
 
 **Context:**

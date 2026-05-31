@@ -58,6 +58,23 @@
 - [x] Normalize tags, links, and dropdown styling across light/dark themes
 - [x] Restore theme toggle access on landing and remove Apple auth remnants
 
+## Design-to-Code Gap Analysis — 2026-05-31
+
+> Section summary: Cross-referenced all `.ai-system/designs/*.html` files against actual React components and fixed visual mismatches.
+
+- [x] Gap analysis: home-feed, post-detail, profile, explore-map, notifications, sign-in, landing-page
+- [x] Fix: Add sticky search bar + Share Route button to feed column
+- [x] Fix: Move TrustBadge from action bar to post header (matching design placement)
+- [x] Fix: Replace tag chips with horizontal route cards on post detail page
+- [x] Fix: Profile stats changed from numeric column layout to badge-style (matching design badges)
+- [x] Fix: Profile post list changed from single-column to responsive grid (1/2/3 cols)
+- [x] Fix: Card shadow updated from `0 2px 16px` to `0 1px 3px, 0 1px 2px` per design
+- [x] Fix: Added vehicle-type filter chips row to explore side panel
+- [x] Fix: Enhanced RouteMap markers with "S"/"E" numbered labels
+- [ ] Fix: Add route polyline to explore map (requires GeoJSON layer in RouteMap)
+- [ ] Fix: Add related route images to post detail cards (requires route photo data)
+- [ ] Fix: Explore map glass overlay -> 3-card layout (distance, time, fare) to match design
+
 ## Comprehensive Quality Remediation — 2026-05-20
 
 > Section summary: Full audit and fix of OAuth, theme tokens, seed data, and avatar customization.

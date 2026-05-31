@@ -1,5 +1,25 @@
 # Development History
 
+## 2026-05-31 — Waypoints, Map Polyline & Migration
+
+**Summary:**
+Added `waypoints` (intermediate route coordinates) to the Post data model, seed data, and RouteMap component. The map now draws a polyline connecting start → waypoints → end with numbered intermediate markers, matching the explore-map design spec. Also ran a full design-to-code gap analysis against all design HTML files and fixed 8 high-priority visual discrepancies across the feed, post detail, profile, and explore pages.
+
+**Completed:**
+
+- Added `Coordinate` global interface and `waypoints: Coordinate[]` to the `Post` type
+- Added `waypoints Json?` column to Prisma `Post` model
+- Updated all 10 seed posts with realistic intermediate coordinates (2–4 waypoints per route)
+- Updated RouteMap component to dynamically import `Source` + `Layer`, render a GeoJSON polyline, and show numbered waypoint markers
+- Generated migration SQL (`prisma/migrations/20260531120000_add_waypoints_to_post`)
+- Conducted comprehensive design-to-code gap analysis across all 15+ design HTML files
+- Fixed 8 high-priority gaps: sticky search + Share Route, trust badge in post header, related route cards, profile stats to badges, profile grid layout, card shadow tokens, vehicle filter chips, map marker labels
+
+**Known Blockers:**
+
+- `prisma migrate dev` and `prisma db seed` cannot run from this environment — the Prisma Data Proxy at `pooled.db.prisma.io:5432` is unreachable. Migrations must be applied manually.
+- Pre-existing lint debt remains outside this pass.
+
 ## 2026-05-26 — Design Reconciliation Pass
 
 **Summary:**

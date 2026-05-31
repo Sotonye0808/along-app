@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Route Detail — Along</title>
+  <link rel="stylesheet" href="css/along.css">
+  <style>
+    .top-bar__toggle {
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+    .top-bar__toggle:hover {
+      background: var(--hover);
+    }
+    .top-bar__right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
+</head>
+<body class="mobile-page">
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar__left">
+      <a href="index.html" class="top-bar__back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </a>
+      <span class="top-bar__title">Route Detail</span>
+    </div>
+    <div class="top-bar__right">
+      <button class="top-bar__toggle" onclick="document.documentElement.classList.toggle('dark'); this.classList.toggle('toggle--active')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <button class="top-bar__share">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/>
+          <circle cx="6" cy="12" r="3"/>
+          <circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <main style="padding: 16px; padding-bottom: 96px;">
+
+    <!-- Author Row -->
+    <div class="author-row" style="padding-top: 4px;">
+      <div class="author-row__avatar">AO</div>
+      <div class="author-row__info">
+        <div class="author-row__name">
+          Amara Okafor
+          <span class="trust-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Verified
+          </span>
+        </div>
+        <div class="author-row__handle">@amara_lagos · 2h ago</div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <section style="margin-bottom: 20px;">
+      <div class="map-wrapper card">
+        <div class="map-placeholder">
+          <svg class="map-placeholder__polyline" viewBox="0 0 360 300" preserveAspectRatio="none">
+            <polyline points="40,250 100,180 180,120 260,80 320,60"
+                      fill="none" stroke="#00A862" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" opacity="0.7"/>
+            <polyline points="40,250 100,180 180,120 260,80 320,60"
+                      fill="none" stroke="#00623B" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"
+                      stroke-dasharray="6,4" opacity="0.9"/>
+          </svg>
+          <div class="map-placeholder__marker" style="left: 40px; top: 250px;">
+            <div class="map-placeholder__marker-dot map-placeholder__marker-dot--start">1</div>
+            <span class="map-placeholder__marker-label">Falomo</span>
+          </div>
+          <div class="map-placeholder__marker" style="left: 180px; top: 120px;">
+            <div class="map-placeholder__marker-dot map-placeholder__marker-dot--mid">2</div>
+            <span class="map-placeholder__marker-label">3rd Mainland</span>
+          </div>
+          <div class="map-placeholder__marker" style="left: 320px; top: 60px;">
+            <div class="map-placeholder__marker-dot map-placeholder__marker-dot--end">3</div>
+            <span class="map-placeholder__marker-label">Oshodi</span>
+          </div>
+          <div class="map-glass">
+            <div class="map-glass__stat">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              12.4 km
+            </div>
+            <div class="map-glass__divider"></div>
+            <div class="map-glass__stat">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              45 min
+            </div>
+            <div class="map-glass__divider"></div>
+            <div class="map-glass__stat">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              ₦200–₦1,200
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Route Steps -->
+    <section class="card" style="padding: 16px; margin-bottom: 20px;">
+      <h2 class="section__title" style="margin-bottom: 12px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Route Breakdown
+      </h2>
+      <ul class="route-steps">
+        <li class="route-step">
+          <div class="route-step__connector">
+            <div class="route-step__number">1</div>
+            <div class="route-step__line"></div>
+          </div>
+          <div class="route-step__content">
+            <div class="route-step__text">Start at Falomo Roundabout, Ikoyi — catch a danfo bus heading North</div>
+            <div class="route-step__badges">
+              <span class="route-step__vehicle">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="1" y="7" width="22" height="12" rx="2"/><path d="M4 19v2M20 19v2M4 11h16"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/>
+                </svg>
+                Bus
+              </span>
+              <span class="route-step__fare">₦200–₦500</span>
+            </div>
+          </div>
+        </li>
+        <li class="route-step">
+          <div class="route-step__connector">
+            <div class="route-step__number">2</div>
+            <div class="route-step__line"></div>
+          </div>
+          <div class="route-step__content">
+            <div class="route-step__text">Cross Third Mainland Bridge — switch to bike for the island crossing</div>
+            <div class="route-step__badges">
+              <span class="route-step__vehicle">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M10 17l2-11 5 2.5M10 17l4-7M15 17l-1-5.5"/>
+                </svg>
+                Bike
+              </span>
+              <span class="route-step__fare">₦300–₦800</span>
+            </div>
+          </div>
+        </li>
+        <li class="route-step">
+          <div class="route-step__connector">
+            <div class="route-step__number route-step__number--end">3</div>
+            <div class="route-step__line"></div>
+          </div>
+          <div class="route-step__content">
+            <div class="route-step__text">Arrive at Oshodi Bus Terminal — final stop via keke NAPEP</div>
+            <div class="route-step__badges">
+              <span class="route-step__vehicle">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 18v2M18 18v2M2 11h20"/><circle cx="7" cy="15" r="2"/><circle cx="17" cy="15" r="2"/><path d="M9 6l-1 5h8L15 6"/>
+                </svg>
+                Car
+              </span>
+              <span class="route-step__fare">₦400–₦1,200</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Images -->
+    <section style="margin-bottom: 20px;">
+      <h2 class="section__title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+        </svg>
+        Route Photos
+      </h2>
+      <div class="image-grid">
+        <div class="image-grid__item image-grid__item--primary">
+          <div class="image-placeholder image-placeholder--sunset">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span style="color:#fff;opacity:0.6;font-size:12px;">Third Mainland Bridge at sunset</span>
+          </div>
+        </div>
+        <div class="image-grid__item">
+          <div class="image-placeholder image-placeholder--bridge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span style="color:#fff;opacity:0.6;font-size:11px;">Falomo approach</span>
+          </div>
+        </div>
+        <div class="image-grid__item">
+          <div class="image-placeholder image-placeholder--market">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span style="color:#fff;opacity:0.6;font-size:11px;">Oshodi market scene</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Engagement Bar -->
+    <div class="engagement-bar" style="margin-bottom: 20px;">
+      <button class="engagement-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <span class="engagement-btn__count">142</span>
+      </button>
+      <button class="engagement-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M15 2h2.5a2.2 2.2 0 0 1 2.5 2.5V11h-5"/>
+        </svg>
+        <span class="engagement-btn__count">23</span>
+      </button>
+      <button class="engagement-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="engagement-btn__count">89</span>
+      </button>
+      <div class="engagement-spacer"></div>
+      <button class="engagement-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        <span>Share</span>
+      </button>
+    </div>
+
+    <!-- Comments -->
+    <section style="margin-bottom: 20px;">
+      <h2 class="section__title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Comments (12)
+      </h2>
+
+      <div class="comment-input">
+        <div class="comment-input__avatar">YK</div>
+        <input class="comment-input__field" type="text" placeholder="Add a comment..." />
+        <button class="comment-input__send">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="comment-thread">
+        <div class="comment-thread__avatar" style="background:linear-gradient(135deg,#8B5CF6,#6366F1);">TO</div>
+        <div class="comment-thread__body">
+          <div class="comment-thread__header">
+            <span class="comment-thread__name">Tunde Ogunlade</span>
+            <span class="comment-thread__time">1h</span>
+          </div>
+          <div class="comment-thread__text">Solid route. I take it daily — the bike switch at the bridge saves 20 mins during rush hour.</div>
+          <div class="comment-thread__actions">
+            <button class="comment-thread__action">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              12
+            </button>
+            <button class="comment-thread__action">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Reply
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="comment-thread">
+        <div class="comment-thread__avatar" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">CN</div>
+        <div class="comment-thread__body">
+          <div class="comment-thread__header">
+            <span class="comment-thread__name">Chidinma Nwosu</span>
+            <span class="comment-thread__time">2h</span>
+          </div>
+          <div class="comment-thread__text">How bad was traffic at Falomo around 6pm? Planning to use this for a meeting in Ikeja.</div>
+          <div class="comment-thread__actions">
+            <button class="comment-thread__action">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              5
+            </button>
+            <button class="comment-thread__action">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Reply
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="comment-thread">
+        <div class="comment-thread__avatar" style="background:linear-gradient(135deg,#06B6D4,#0284C7);">FO</div>
+        <div class="comment-thread__body">
+          <div class="comment-thread__header">
+            <span class="comment-thread__name">Fatima Okonkwo</span>
+            <span class="comment-thread__time">3h</span>
+          </div>
+          <div class="comment-thread__text">Pro tip: leave by 7am — bridge takes 10 mins. After 8am, budget 35+. Download GOKADA app for island bike guys.</div>
+          <div class="comment-thread__actions">
+            <button class="comment-thread__action">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              24
+            </button>
+            <button class="comment-thread__action">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Reply
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Back Link -->
+    <div style="text-align: center; padding: 16px 0 8px;">
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:10px 20px;border-radius:var(--radius-sm);background:var(--bg-elevated);transition:background 0.15s;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back to Feed
+      </a>
+    </div>
+
+  </main>
+
+  <!-- Tab Bar -->
+  <nav class="tab-bar">
+    <a href="#" class="tab-bar__item tab-bar__item--active">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span class="tab-bar__label">Home</span>
+    </a>
+    <a href="#" class="tab-bar__item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+      </svg>
+      <span class="tab-bar__label">Explore</span>
+    </a>
+    <a href="#" class="tab-bar__item tab-bar__item--fab">
+      <div class="tab-bar__fab">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </div>
+    </a>
+    <a href="#" class="tab-bar__item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span class="tab-bar__label">Bookmarks</span>
+    </a>
+    <a href="#" class="tab-bar__item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span class="tab-bar__label">Profile</span>
+    </a>
+  </nav>
+
+  <script>
+    (function() {
+      var toggleBtn = document.querySelector('.top-bar__toggle');
+      if (document.documentElement.classList.contains('dark')) {
+        toggleBtn.classList.add('toggle--active');
+      }
+      toggleBtn.addEventListener('click', function() {
+        document.documentElement.classList.toggle('dark');
+        this.classList.toggle('toggle--active');
+      });
+    })();
+  </script>
+
+</body>
+</html>

@@ -46,9 +46,11 @@ export function GlobalConfirmModal(): React.ReactElement {
           </AppButton>
         </div>
       }>
-      <div className="text-sm text-[var(--color-text-secondary)]">
-        Proceed with this action?
-      </div>
+      {modalState.description && (
+        <div className="text-sm text-[var(--color-text-secondary)]">
+          {modalState.description}
+        </div>
+      )}
     </AppModal>
   );
 }

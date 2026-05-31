@@ -24,6 +24,8 @@ import { AppButton } from "@/components/ui/AppButton";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PostCardSkeleton } from "@/components/ui/AppSkeleton";
 import { EMPTY_STATES } from "@/lib/config/emptyStates";
+import { SearchBar } from "@/components/features/dashboard/SearchBar";
+import { ShareRouteButton } from "@/components/features/dashboard/ShareRouteButton";
 
 export function Feed() {
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -166,6 +168,14 @@ export function Feed() {
           </AppButton>
         </div>
       ) : null}
+
+      {/* Sticky Search + Share Route — per design spec */}
+      <div className="sticky top-0 z-10 bg-[var(--color-bg-base)] pb-4 pt-2">
+        <SearchBar />
+        <div className="mt-3">
+          <ShareRouteButton variant="sidebar" />
+        </div>
+      </div>
 
       <div className="space-y-4">
         {(posts || []).map((post) => (

@@ -66,9 +66,8 @@ app/components/ui/*
 | jsonwebtoken / bcrypt        | Auth                        | auth routes and utils            |
 | zod                          | Validation                  | API routes                       |
 | axios                        | HTTP client                 | client API helpers               |
-| maplibre-gl / react-map-gl   | Maps                        | RouteMap                         |
+| maplibre-gl / react-map-gl   | Maps, polyline Source+Layer   | RouteMap                         |
 | supercluster                 | Map clustering              | map features                     |
-| @mapbox/polyline             | Polyline helpers            | map features                     |
 | react-markdown / remark      | Markdown pages              | public pages                     |
 | @ant-design/charts           | Charts                      | analytics                        |
 | rxjs                         | Reactive feed               | feed hooks                       |

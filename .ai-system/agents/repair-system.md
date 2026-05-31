@@ -137,6 +137,55 @@
 
 ---
 
+## Prisma Seed Fails with ECONNREFUSED When Run Via npx tsx
+
+**Symptom:**
+`npx tsx prisma/seed.ts` fails immediately with `ECONNREFUSED` on the first Prisma query (`prisma.siteConfig.upsert()`). `npx prisma db seed` works fine.
+
+**Root Cause:**
+`npx tsx prisma/seed.ts` does NOT load `.env` automatically. The seed script imports `prisma` from `app/lib/db/prisma.ts` which reads `process.env.LOCAL_DB`. When that's undefined, it falls back to `'postgresql://dummy@localhost/dummy'` which triggers ECONNREFUSED. In contrast, `prisma db seed` calls `prisma.config.ts` which runs `import "dotenv/config"` before spawning the seed child process.
+
+**Fix Applied:**
+Use `npx prisma db seed` instead of `npx tsx prisma/seed.ts`. The Prisma CLI loads environment variables correctly via the config file.
+
+**Prevention:**
+Always use `npx prisma db seed` (the configured seed command) rather than invoking `tsx` directly. The seed command is defined in `prisma.config.ts` under `migrations.seed`.
+
+**Files Affected:**
+- .env (must have LOCAL_DB set)
+- prisma.config.ts (loads dotenv)
+
+**Date:** 2026-05-31
+
+---
+
+## Prisma Client EACCES / Missing Column on Post Create During Seed
+
+**Symptom:**
+After successful user creation, `prisma.post.create()` fails with `EACCES` error. The Post table already exists but lacks the `waypoints` column.
+
+**Root Cause:**
+The schema was updated (adding `waypoints Json?`) but the migration was never applied to the database. The Prisma client (regenerated via `prisma generate`) expects the column to exist, but the database table doesn't have it yet. Since `prisma db push` and `prisma migrate dev` also fail from this environment (P1001 TLS timeout), the column must be added another way.
+
+**Fix Applied:**
+Added a raw SQL migration at the top of `prisma/seed.ts`'s `main()` function:
+```ts
+await prisma.$executeRawUnsafe(
+    'ALTER TABLE "Post" ADD COLUMN IF NOT EXISTS "waypoints" JSONB',
+);
+```
+This safely adds the column if missing (idempotent — harmless on re-run).
+
+**Prevention:**
+Include `ADD COLUMN IF NOT EXISTS` raw SQL in the seed script for newly added columns when the Prisma Data Proxy is unreachable. Alternatively, apply migrations from a machine with direct DB access.
+
+**Files Affected:**
+- prisma/seed.ts
+
+**Date:** 2026-05-31
+
+---
+
 ## Entry Template
 
 ```

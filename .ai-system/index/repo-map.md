@@ -59,7 +59,7 @@ along-app/
 | app/lib/config          | Config registries | navigation.ts, forms.ts, seo.ts, etc            |
 | app/lib/services        | Business logic    | ValidityEngine, DraftingCoachService, etc       |
 | app/lib/db              | Prisma access     | prisma.ts, repositories                         |
-| prisma                  | ORM schema        | schema.prisma, migrations/                      |
+| prisma                  | ORM schema        | schema.prisma, migrations/, seed.ts     |
 | public                  | PWA assets        | manifest.json, sw.js, icons                     |
 
 ---

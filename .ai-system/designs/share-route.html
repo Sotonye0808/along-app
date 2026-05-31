@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Share Route — Along</title>
+  <link rel="stylesheet" href="css/along.css">
+  <style>
+    .sr-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-base); }
+    .sr-topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px var(--gutter-mobile); border-bottom: 1px solid var(--border); background: var(--bg-base); position: sticky; top: 0; z-index: 50; }
+    .sr-topbar .left { display: flex; align-items: center; gap: 8px; }
+    .sr-topbar .left .back-link { color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px; font-size: 13px; }
+    .sr-topbar .left .back-link:hover { color: var(--primary); }
+    .sr-topbar h2 { font-size: 18px; font-weight: 700; }
+    .sr-topbar .close-btn { width: 36px; height: 36px; border: none; background: transparent; color: var(--text-secondary); border-radius: 50%; display: grid; place-items: center; cursor: pointer; }
+    .sr-topbar .close-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .sr-body { flex: 1; overflow-y: auto; padding: var(--gutter-mobile); display: flex; flex-direction: column; gap: 24px; padding-bottom: 100px; }
+    .sr-body .field { display: flex; flex-direction: column; gap: 6px; }
+    .sr-body .field label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .sr-section-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .sr-section-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .sr-route-steps { display: flex; flex-direction: column; gap: 12px; }
+    .sr-route-step { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; position: relative; }
+    .sr-route-step .step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .sr-route-step .step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+    .sr-route-step .step-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+    .sr-route-step .step-input { width: 100%; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-base); color: var(--text-primary); font-size: 13px; font-family: inherit; outline: none; }
+    .sr-route-step .step-input:focus { border-color: var(--primary); }
+    .sr-route-step .step-input::placeholder { color: var(--text-muted); }
+    .sr-route-step .vehicle-chips { display: flex; gap: 8px; margin-top: 10px; }
+    .sr-route-step .vehicle-chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--radius-full); border: 1.5px solid var(--border); background: var(--bg-base); color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .sr-route-step .vehicle-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .sr-route-step .vehicle-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .sr-route-step .vehicle-chip svg { width: 16px; height: 16px; }
+    .sr-route-step .fare-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .sr-route-step .fare-row span { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .sr-route-step .fare-row .step-input { width: auto; flex: 1; max-width: 140px; }
+    .sr-add-stop { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: transparent; border: 1.5px dashed var(--border); border-radius: var(--radius-lg); color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; justify-content: center; transition: all 0.15s; }
+    .sr-add-stop:hover { border-color: var(--primary); color: var(--primary); }
+    .sr-add-stop svg { width: 16px; height: 16px; }
+    .sr-map-preview { width: 100%; height: 200px; border-radius: var(--radius-lg); background: var(--bg-elevated); border: 1px solid var(--border); position: relative; overflow: hidden; }
+    .sr-map-preview .grid-overlay { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 24px 24px; opacity: 0.5; }
+    .sr-map-preview svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .sr-map-preview .map-marker { position: absolute; width: 24px; height: 24px; display: grid; place-items: center; }
+    .sr-map-preview .map-marker .marker-circle { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+    .sr-map-preview .map-marker .marker-circle.origin { background: var(--primary); }
+    .sr-map-preview .map-marker .marker-circle.waypoint { background: white; color: var(--primary); border-color: var(--primary); }
+    .sr-map-preview .map-marker .marker-circle.dest { background: #003d23; }
+    .sr-map-preview .map-marker-1 { top: 18%; left: 18%; }
+    .sr-map-preview .map-marker-2 { top: 45%; left: 52%; }
+    .sr-map-preview .map-marker-3 { top: 72%; left: 32%; }
+    .sr-coach { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .sr-coach .coach-header { display: flex; align-items: center; justify-content: space-between; padding: 14px; cursor: pointer; background: var(--bg-elevated); }
+    .sr-coach .coach-header .coach-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+    .sr-coach .coach-header .coach-title svg { width: 18px; height: 18px; color: var(--primary); }
+    .sr-coach .coach-header .chevron { transition: transform 0.2s; color: var(--text-muted); }
+    .sr-coach .coach-header .chevron.open { transform: rotate(180deg); }
+    .sr-coach .coach-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+    .sr-coach .coach-body.hidden { display: none; }
+    .sr-coach .progress-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .sr-coach .progress-wrap .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+    .sr-coach .progress-wrap .progress-track { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .sr-coach .progress-wrap .progress-track .progress-fill { height: 100%; border-radius: 999px; background: var(--primary-light); transition: width 0.6s ease-out; }
+    .sr-coach .coach-tip { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: rgba(0,168,98,0.06); border: 1px solid rgba(0,168,98,0.15); border-radius: var(--radius-md); font-size: 12px; color: var(--text-secondary); }
+    .sr-coach .coach-tip svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; margin-top: 1px; }
+    .sr-submit { width: 100%; padding: 14px; font-size: 16px; border-radius: var(--radius-sm); margin-top: auto; }
+  </style>
+</head>
+<body>
+  <div class="sr-page">
+    <div class="sr-topbar">
+      <div class="left">
+        <a href="index.html" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </a>
+      </div>
+      <h2>Share Route</h2>
+      <button class="close-btn" onclick="window.location.href='index.html'" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="sr-body">
+      <div class="field">
+        <label for="route-title">Route Title</label>
+        <input id="route-title" class="input" placeholder="Give your route a name" value="Lagos Island to VI via Marina">
+      </div>
+
+      <div>
+        <div class="sr-section-title">Route Stops</div>
+        <div class="sr-section-sub">Add stops along your route</div>
+      </div>
+
+      <div class="sr-route-steps">
+        <div class="sr-route-step">
+          <div class="step-header">
+            <div class="step-num">1</div>
+            <span class="step-label">Starting point</span>
+          </div>
+          <input class="step-input" value="Lagos Island" placeholder="Starting point">
+          <div class="vehicle-chips">
+            <button class="vehicle-chip active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg> Car</button>
+            <button class="vehicle-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v7h6V6z"/><path d="M3 17h2.5M18.5 17H21"/></svg> Bike</button>
+            <button class="vehicle-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg> Bus</button>
+          </div>
+          <div class="fare-row">
+            <span>Fare:</span>
+            <input class="step-input" value="₦0" placeholder="₦0">
+          </div>
+        </div>
+
+        <div class="sr-route-step">
+          <div class="step-header">
+            <div class="step-num">2</div>
+            <span class="step-label">Stop</span>
+          </div>
+          <input class="step-input" value="Marina" placeholder="Stop location">
+          <div class="vehicle-chips">
+            <button class="vehicle-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg> Car</button>
+            <button class="vehicle-chip active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v7h6V6z"/><path d="M3 17h2.5M18.5 17H21"/></svg> Bike</button>
+            <button class="vehicle-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg> Bus</button>
+          </div>
+          <div class="fare-row">
+            <span>Fare:</span>
+            <input class="step-input" value="₦200-₦300" placeholder="₦0">
+          </div>
+        </div>
+
+        <div class="sr-route-step">
+          <div class="step-header">
+            <div class="step-num">3</div>
+            <span class="step-label">Destination</span>
+          </div>
+          <input class="step-input" value="VI" placeholder="Destination">
+          <div class="vehicle-chips">
+            <button class="vehicle-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg> Car</button>
+            <button class="vehicle-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v7h6V6z"/><path d="M3 17h2.5M18.5 17H21"/></svg> Bike</button>
+            <button class="vehicle-chip active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg> Bus</button>
+          </div>
+          <div class="fare-row">
+            <span>Fare:</span>
+            <input class="step-input" value="₦500" placeholder="₦0">
+          </div>
+        </div>
+      </div>
+
+      <button class="sr-add-stop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add stop
+      </button>
+
+      <div>
+        <div class="sr-section-title" style="margin-bottom:8px">Route Map</div>
+        <div class="sr-map-preview">
+          <div class="grid-overlay"></div>
+          <svg viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="75,40 180,100 110,155" stroke="var(--primary-light)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="75" cy="40" r="4" fill="var(--primary)"/>
+            <circle cx="180" cy="100" r="4" fill="var(--primary)"/>
+            <circle cx="110" cy="155" r="4" fill="var(--primary-dark)" stroke="var(--primary-dark)" stroke-width="2"/>
+          </svg>
+          <div class="map-marker map-marker-1"><div class="marker-circle origin">1</div></div>
+          <div class="map-marker map-marker-2"><div class="marker-circle waypoint">2</div></div>
+          <div class="map-marker map-marker-3"><div class="marker-circle dest">3</div></div>
+        </div>
+      </div>
+
+      <div class="sr-coach">
+        <div class="coach-header" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.chevron').classList.toggle('open')">
+          <div class="coach-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Route Quality
+          </div>
+          <svg class="chevron open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="coach-body">
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span>Draft score</span>
+              <span>75%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:75%"></div>
+            </div>
+          </div>
+          <div class="coach-tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Add more detail to improve visibility — include landmarks, traffic tips, and exact fares.</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary sr-submit" onclick="alert('Route shared!')">Share Route</button>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const html = document.documentElement;
+      const t = localStorage.getItem('along-theme');
+      if (t === 'dark') { html.classList.add('dark'); }
+
+      document.querySelectorAll('.vehicle-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const parent = chip.closest('.sr-route-step');
+          parent.querySelectorAll('.vehicle-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+        });
+      });
+
+      document.querySelectorAll('.coach-header').forEach(h => {
+        if (localStorage.getItem('sr-coach-closed') === 'true') {
+          h.nextElementSibling.classList.add('hidden');
+          h.querySelector('.chevron').classList.remove('open');
+        }
+        h.addEventListener('click', () => {
+          const body = h.nextElementSibling;
+          const ch = h.querySelector('.chevron');
+          localStorage.setItem('sr-coach-closed', body.classList.contains('hidden') ? 'false' : 'true');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

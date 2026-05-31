@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { Star } from "lucide-react";
 import { TEAM_MEMBERS } from "@/lib/config/teamConfig";
 import { AppCard } from "@/components/ui/AppCard";
 import { getFallbackAvatarUrl } from "@/lib/config/avatar";
@@ -31,15 +33,12 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <span
+        <Star
           key={i}
-          className={
-            i < rating ? "text-[var(--color-warning-text)]" : "text-[var(--color-border)]"
-          }
+          size={16}
+          className={i < rating ? "fill-[var(--color-warning-text)] text-[var(--color-warning-text)]" : "text-[var(--color-border)]"}
           aria-hidden="true"
-        >
-          ★
-        </span>
+        />
       ))}
     </div>
   );
@@ -70,8 +69,7 @@ export default function AboutPage() {
           {TEAM_MEMBERS.map((member) => (
             <AppCard key={member.id} variant="elevated" hover>
               <div className="flex flex-col items-center gap-3 text-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={getFallbackAvatarUrl(member.avatarSeed)}
                   alt={`${member.name} avatar`}
                   width={64}

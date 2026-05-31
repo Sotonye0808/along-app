@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Chidi Obi — Along</title>
+  <link rel="stylesheet" href="css/along.css">
+  <style>
+    .profile-mobile-page {
+      padding-bottom: 80px;
+      min-height: 100vh;
+    }
+    .profile-cover-mobile {
+      height: 150px;
+      background: linear-gradient(135deg, #00623B, #00A862);
+    }
+    .profile-body-mobile {
+      padding: 0 16px 20px;
+    }
+    .profile-avatar-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      margin-top: -40px;
+      margin-bottom: 12px;
+    }
+    .profile-avatar-row .avatar-80 {
+      border: 4px solid var(--bg-base);
+    }
+    .profile-avatar-row .avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .profile-avatar-row .avatar-wrap .verified-tick {
+      position: absolute;
+      bottom: 2px; right: 0;
+      width: 20px; height: 20px;
+      background: var(--primary);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+      border: 3px solid var(--bg-base);
+    }
+    .profile-name-mobile {
+      flex: 1;
+      padding-top: 30px;
+    }
+    .profile-name-mobile h1 {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .profile-name-mobile .handle {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .profile-name-mobile .location {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .profile-stats-mobile {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .profile-bio-mobile {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .profile-tabs-mobile {
+      margin: 0 -16px;
+      padding: 0 16px;
+    }
+    .profile-tabs-mobile .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px 8px;
+      font-size: 13px;
+    }
+    .post-list-mobile {
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .mobile-topbar .icon-btn.settings-btn {
+      width: 36px; height: 36px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .mobile-topbar .icon-btn.settings-btn:hover { background: var(--bg-elevated); }
+    .theme-toggle-inline {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+    }
+    .theme-toggle-inline button {
+      width: 28px; height: 28px;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      transition: all 0.15s;
+    }
+    .theme-toggle-inline button.active {
+      background: var(--primary);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="profile-mobile-page">
+
+  <!-- ========== MOBILE TOP BAR ========== -->
+  <div class="mobile-topbar">
+    <div class="actions">
+      <a href="index.html" class="icon-btn" style="text-decoration:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+    </div>
+    <div class="title">Profile</div>
+    <div class="actions">
+      <div class="theme-toggle-inline">
+        <button onclick="document.documentElement.classList.remove('dark')" class="active" aria-label="Light mode">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <button onclick="document.documentElement.classList.add('dark')" aria-label="Dark mode">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+      <button class="icon-btn settings-btn" aria-label="Settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== PROFILE HEADER ========== -->
+  <div class="profile-cover-mobile"></div>
+
+  <div class="profile-body-mobile">
+
+    <div class="profile-avatar-row">
+      <div class="avatar-wrap">
+        <div class="avatar avatar-80" style="background:linear-gradient(135deg,#00623B,#00A862);font-size:30px;font-weight:700;">CO</div>
+        <div class="verified-tick">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="profile-name-mobile">
+        <h1>Chidi Obi</h1>
+        <div class="handle">@chidi_abuja</div>
+        <div class="location">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Lagos, Nigeria
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-stats-mobile">
+      <span class="badge badge-neutral">142 Posts</span>
+      <span class="badge badge-neutral">2.3k Followers</span>
+      <span class="badge badge-neutral">184 Following</span>
+      <span class="badge badge-success">87% Validity</span>
+      <span class="badge badge-primary">Gold Tier</span>
+    </div>
+
+    <div class="profile-bio-mobile">
+      Navigating Nigerian roads daily. Sharing routes that save you time and money.
+    </div>
+
+    <button class="btn btn-secondary" style="width:100%;">Edit Profile</button>
+
+  </div>
+
+  <!-- ========== TABS ========== -->
+  <div class="tabs profile-tabs-mobile">
+    <button class="tab active">Posts</button>
+    <button class="tab">Liked</button>
+    <button class="tab">Bookmarks</button>
+    <button class="tab">Routes</button>
+  </div>
+
+  <!-- ========== POST LIST ========== -->
+  <div class="post-list-mobile" style="padding:16px;">
+
+    <!-- Post 1 -->
+    <div class="card post-card">
+      <div class="post-header">
+        <div class="avatar avatar-40" style="background:linear-gradient(135deg,#00623B,#00A862);font-weight:600;">CO</div>
+        <div class="post-meta">
+          <div class="name-row">
+            <span class="username">Chidi Obi</span>
+            <span class="handle">@chidi_abuja</span>
+            <span class="timestamp">· 2h ago</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-title">Lekki Phase 1 → VI Island — morning route</div>
+      <ul class="route-steps">
+        <li class="route-step">
+          <span class="step-num">A</span>
+          <div class="step-content">
+            <div class="step-text">Lekki Phase 1 Gate</div>
+            <div class="step-fare">🚌 Bus stop — ₦200</div>
+          </div>
+        </li>
+        <li class="route-step">
+          <span class="step-num">B</span>
+          <div class="step-content">
+            <div class="step-text">Ahmadu Bello Way</div>
+            <div class="step-fare">🚕 Danfo — ₦300</div>
+          </div>
+        </li>
+        <li class="route-step">
+          <span class="step-num">C</span>
+          <div class="step-content">
+            <div class="step-text">Victoria Island (Eko Hotel)</div>
+            <div class="step-fare">✅ Arrival — 35 min</div>
+          </div>
+        </li>
+      </ul>
+      <div class="post-actions">
+        <button class="action-btn liked">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="count">48</span>
+        </button>
+        <button class="action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="count">12</span>
+        </button>
+        <button class="action-btn bookmarked">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span class="count">8</span>
+        </button>
+        <button class="overflow-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Post 2 -->
+    <div class="card post-card">
+      <div class="post-header">
+        <div class="avatar avatar-40" style="background:linear-gradient(135deg,#00623B,#00A862);font-weight:600;">CO</div>
+        <div class="post-meta">
+          <div class="name-row">
+            <span class="username">Chidi Obi</span>
+            <span class="handle">@chidi_abuja</span>
+            <span class="timestamp">· yesterday</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-title">CMS → Obalende bus rapid route</div>
+      <ul class="route-steps">
+        <li class="route-step">
+          <span class="step-num">A</span>
+          <div class="step-content">
+            <div class="step-text">CMS Bus Stop</div>
+            <div class="step-fare">🚌 BRT — ₦250</div>
+          </div>
+        </li>
+        <li class="route-step">
+          <span class="step-num">B</span>
+          <div class="step-content">
+            <div class="step-text">Marina Axe</div>
+            <div class="step-fare">🛑 5 min wait</div>
+          </div>
+        </li>
+        <li class="route-step">
+          <span class="step-num">C</span>
+          <div class="step-content">
+            <div class="step-text">Obalende</div>
+            <div class="step-fare">✅ Arrival — 20 min</div>
+          </div>
+        </li>
+      </ul>
+      <div class="post-actions">
+        <button class="action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="count">32</span>
+        </button>
+        <button class="action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="count">7</span>
+        </button>
+        <button class="action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span class="count">15</span>
+        </button>
+        <button class="overflow-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Post 3 -->
+    <div class="card post-card">
+      <div class="post-header">
+        <div class="avatar avatar-40" style="background:linear-gradient(135deg,#00623B,#00A862);font-weight:600;">CO</div>
+        <div class="post-meta">
+          <div class="name-row">
+            <span class="username">Chidi Obi</span>
+            <span class="handle">@chidi_abuja</span>
+            <span class="timestamp">· 3d ago</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-title">Yaba → Surulere — afternoon short cut</div>
+      <ul class="route-steps">
+        <li class="route-step">
+          <span class="step-num">A</span>
+          <div class="step-content">
+            <div class="step-text">Yaba (Unilag gate)</div>
+            <div class="step-fare">🚕 Keke — ₦150</div>
+          </div>
+        </li>
+        <li class="route-step">
+          <span class="step-num">B</span>
+          <div class="step-content">
+            <div class="step-text">Akoka crossing</div>
+            <div class="step-fare">🚶 Walk 5 min</div>
+          </div>
+        </li>
+        <li class="route-step">
+          <span class="step-num">C</span>
+          <div class="step-content">
+            <div class="step-text">Surulere (Bode Thomas)</div>
+            <div class="step-fare">✅ Arrival — 25 min</div>
+          </div>
+        </li>
+      </ul>
+      <div class="post-actions">
+        <button class="action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="count">56</span>
+        </button>
+        <button class="action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="count">19</span>
+        </button>
+        <button class="action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span class="count">11</span>
+        </button>
+        <button class="overflow-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== MOBILE BOTTOM TABS ========== -->
+  <nav class="mobile-tabs">
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+      <span>Explore</span>
+    </button>
+    <button class="fab" aria-label="Share route">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <span>Bookmarks</span>
+    </button>
+    <button class="tab-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </button>
+  </nav>
+
+</div>
+
+</body>
+</html>

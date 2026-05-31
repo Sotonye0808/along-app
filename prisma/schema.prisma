@@ -134,6 +134,7 @@ model Post {
   startLng        Float?
   endLat          Float?
   endLng          Float?
+  waypoints       Json?
   region          String?
   totalDistanceKm Float?
   estimatedMins   Int?

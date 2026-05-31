@@ -14,6 +14,7 @@ import { generateArticleSchema } from "@/lib/utils/structuredData";
 import { getSiteUrl } from "@/lib/utils/metadata";
 import { RouteMap } from "@/components/features/map";
 import { formatNumber } from "@/lib/utils/format";
+import { combinePostsWithAuthors } from "@/lib/utils/feedHelpers";
 import Link from "next/link";
 
 interface PostWithAuthor extends Post {
@@ -28,6 +29,7 @@ export default function PostPage() {
   const [comments, setComments] = useState<(PostComment & { author: User })[]>(
     [],
   );
+  const [relatedPosts, setRelatedPosts] = useState<PostWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [userInteractions, setUserInteractions] = useState({
@@ -49,6 +51,25 @@ export default function PostPage() {
     fetchUserInteractions();
   }, [currentUser, postId]);
 
+  const fetchRelatedPosts = async (tags: string[]) => {
+    if (tags.length === 0) return;
+    try {
+      const [postsRes, usersRes] = await Promise.all([
+        api.get<Post[]>(API_ENDPOINTS.POSTS),
+        api.get<User[]>(API_ENDPOINTS.USERS),
+      ]);
+      const allPosts = postsRes.data ?? [];
+      const related = allPosts
+        .filter((p) => p.id !== postId && p.tags.some((t) => tags.includes(t)))
+        .slice(0, 4);
+      setRelatedPosts(
+        combinePostsWithAuthors(related, usersRes.data ?? []) as PostWithAuthor[],
+      );
+    } catch {
+      // silent
+    }
+  };
+
   const fetchPost = async () => {
     try {
       setLoading(true);
@@ -57,10 +78,12 @@ export default function PostPage() {
         `${API_ENDPOINTS.USERS}/${postRes.data.userId}`,
       );
 
-      setPost({
+      const postData = {
         ...postRes.data,
         author: authorRes.data,
-      });
+      };
+      setPost(postData);
+      void fetchRelatedPosts(postData.tags);
     } catch (error) {
       console.error("Failed to fetch post:", error);
       message.error("Post not found");
@@ -611,17 +634,60 @@ export default function PostPage() {
         />
       )}
 
+      {/* Related Routes — per design spec: horizontal cards */}
       <div className="mb-4">
-        <h3 className="text-base font-semibold mb-3 text-[var(--color-text-primary)]">Related Routes</h3>
+        <h3 className="text-base font-semibold mb-3 text-[var(--color-text-primary)]">
+          Related Routes
+        </h3>
         <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
-          {(post.tags.length > 0 ? post.tags.slice(0, 5) : ["Lagos", "Adventure", "Food Tour"]).map((tag) => (
-            <Link
-              key={tag}
-              href={`/explore?tag=${encodeURIComponent(tag)}`}
-              className="flex-none px-4 py-2 rounded-full bg-[var(--color-bg-elevated)] text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors">
-              #{tag}
-            </Link>
-          ))}
+          {relatedPosts.length > 0
+            ? relatedPosts.slice(0, 4).map((rp) => (
+                <Link
+                  key={rp.id}
+                  href={`/posts/${rp.id}`}
+                  className="flex-none w-56 group">
+                  <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-base)] overflow-hidden transition-all hover:shadow-[0_8px_32px_rgba(0,98,59,0.15)] hover:-translate-y-0.5">
+                    {/* Image placeholder */}
+                    <div className="h-28 bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary-light)]/10 flex items-center justify-center">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                      </svg>
+                    </div>
+                    {/* Card body */}
+                    <div className="p-3">
+                      <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-1 group-hover:text-[var(--color-primary)]">
+                        {rp.title}
+                      </p>
+                      <div className="text-xs text-[var(--color-text-muted)] mt-1">
+                        {rp.totalDistanceKm ? `${rp.totalDistanceKm} km` : ""}
+                        {rp.totalDistanceKm && rp.estimatedMins ? " · " : ""}
+                        {rp.estimatedMins ? `${rp.estimatedMins} min` : ""}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <div className="w-5 h-5 rounded-full bg-[var(--color-primary)]/20 text-[10px] font-semibold flex items-center justify-center text-[var(--color-primary)]">
+                          {(rp.author?.firstName?.[0] ?? "U").toUpperCase()}
+                        </div>
+                        <span className="text-xs text-[var(--color-text-secondary)] truncate">
+                          {rp.author?.firstName ?? "User"}
+                        </span>
+                        {typeof rp.validityScore === "number" && (
+                          <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium">
+                            {rp.validityScore >= 80 ? "Trusted" : rp.validityScore >= 60 ? "Verified" : rp.validityScore >= 30 ? "Developing" : "Low"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            : post.tags.slice(0, 4).map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/explore?tag=${encodeURIComponent(tag)}`}
+                  className="flex-none px-4 py-2 rounded-full bg-[var(--color-bg-elevated)] text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors">
+                  #{tag}
+                </Link>
+              ))}
         </div>
       </div>
     </div>

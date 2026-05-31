@@ -137,6 +137,7 @@ export const PostScalarFieldEnum = {
   startLng: 'startLng',
   endLat: 'endLat',
   endLng: 'endLng',
+  waypoints: 'waypoints',
   region: 'region',
   totalDistanceKm: 'totalDistanceKm',
   estimatedMins: 'estimatedMins',

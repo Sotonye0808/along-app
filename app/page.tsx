@@ -11,6 +11,7 @@ import {
   generateWebSiteSchema,
 } from "@/lib/utils/structuredData";
 import { Route, ShieldCheck, Users, MapPin, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export const metadata: Metadata = {
@@ -154,26 +155,27 @@ export default function HomePage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
+              <Link
                 href="/register"
                 className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-[var(--color-primary)] px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-[var(--color-primary-light)] hover:shadow-[0_8px_32px_rgba(0,98,59,0.15)]">
                 Get Started
                 <ArrowRight size={18} />
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/login"
                 className="inline-flex items-center gap-2 rounded-[var(--radius-button)] border border-[var(--color-primary)] bg-transparent px-8 py-3.5 text-base font-semibold text-[var(--color-primary)] transition-all hover:bg-[var(--color-primary)]/5">
                 Sign In
-              </a>
+              </Link>
             </div>
 
             {/* Guest link */}
             <div className="mt-6">
-              <a
+              <Link
                 href="/home"
-                className="text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-primary)]">
-                Continue as guest →
-              </a>
+                className="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-primary)]">
+                Continue as guest
+                <ArrowRight size={14} />
+              </Link>
             </div>
           </div>
 
@@ -237,18 +239,18 @@ export default function HomePage() {
               </span>
             </div>
             <div className="flex items-center gap-6 text-xs text-[var(--color-text-muted)]">
-              <a href="/about" className="hover:text-[var(--color-primary)]">
+              <Link href="/about" className="hover:text-[var(--color-primary)]">
                 About
-              </a>
-              <a href="/privacy" className="hover:text-[var(--color-primary)]">
+              </Link>
+              <Link href="/privacy" className="hover:text-[var(--color-primary)]">
                 Privacy
-              </a>
-              <a href="/terms" className="hover:text-[var(--color-primary)]">
+              </Link>
+              <Link href="/terms" className="hover:text-[var(--color-primary)]">
                 Terms
-              </a>
-              <a href="/contact" className="hover:text-[var(--color-primary)]">
+              </Link>
+              <Link href="/contact" className="hover:text-[var(--color-primary)]">
                 Contact
-              </a>
+              </Link>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-[var(--color-text-muted)]">

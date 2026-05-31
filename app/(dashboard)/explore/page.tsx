@@ -9,10 +9,12 @@ import React, {
 } from "react";
 import Link from "next/link";
 import {
+  ArrowRight,
   ArrowUp,
   Globe,
   MapPin,
   Search,
+  ShieldCheck,
   TrendingUp,
   Users,
   X,
@@ -27,6 +29,7 @@ import { AppUserLabel } from "@/components/ui/AppUserLabel";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { PostCardSkeleton } from "@/components/ui/AppSkeleton";
 import { RouteMap } from "@/components/features/map";
+import { VEHICLE_REGISTRY } from "@/lib/config/vehicles";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { combinePostsWithAuthors } from "@/lib/utils/feedHelpers";
@@ -136,7 +139,7 @@ function GlassPopup({ post, onClose }: GlassPopupProps) {
         <Link
           href={`/posts/${post.id}`}
           className="block w-full text-center text-xs font-medium text-[var(--color-primary)] hover:underline">
-          View route →
+            <span className="inline-flex items-center gap-1">View route <ArrowRight size={12} /></span>
         </Link>
       </div>
     </div>
@@ -147,6 +150,7 @@ export default function ExplorePage() {
   const { posts, loading } = useExplorePosts();
   const [search, setSearch] = useState("");
   const [activeRegion, setActiveRegion] = useState("All");
+  const [activeVehicle, setActiveVehicle] = useState<string>("All");
   const [selectedPost, setSelectedPost] = useState<PostWithAuthor | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -155,15 +159,20 @@ export default function ExplorePage() {
       const matchRegion =
         activeRegion === "All" ||
         (p.region?.toLowerCase().includes(activeRegion.toLowerCase()) ?? false);
+      const matchVehicle =
+        activeVehicle === "All" ||
+        p.routes.some((r) =>
+          r.vehicles.some((v) => v.toLowerCase() === activeVehicle.toLowerCase()),
+        );
       const q = search.trim().toLowerCase();
       const matchSearch =
         !q ||
         p.title.toLowerCase().includes(q) ||
         p.tags.some((t) => t.toLowerCase().includes(q)) ||
         (p.region?.toLowerCase().includes(q) ?? false);
-      return matchRegion && matchSearch;
+      return matchRegion && matchVehicle && matchSearch;
     });
-  }, [posts, search, activeRegion]);
+  }, [posts, search, activeRegion, activeVehicle]);
 
   // Map post with best geo for the overview map
   const mapPost = useMemo(
@@ -259,6 +268,28 @@ export default function ExplorePage() {
               ) : null
             }
           />
+
+          {/* Vehicle type filter chips — per design spec */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {[
+              { key: "All", Icon: Globe },
+              ...Object.values(VEHICLE_REGISTRY).map((v) => ({ key: v.label, Icon: v.icon })),
+              { key: "Trusted", Icon: ShieldCheck },
+            ].map(({ key, Icon }) => (
+              <button
+                key={key}
+                onClick={() => setActiveVehicle(key)}
+                className={[
+                  "inline-flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                  activeVehicle === key
+                    ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                    : "bg-[var(--color-bg-base)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]",
+                ].join(" ").trim()}>
+                <Icon size={14} />
+                {key}
+              </button>
+            ))}
+          </div>
 
           {/* Region filter chips */}
           <div className="flex flex-wrap gap-2">

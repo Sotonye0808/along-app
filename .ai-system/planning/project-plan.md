@@ -28,8 +28,13 @@
 
 ---
 
-## Phase 7 (Planned)
+## Phase 7 — Design Reconciliation & Data Model
 
+- [x] Design-to-code gap analysis against all 15+ design HTML files
+- [x] Fix high-priority visual gaps (sticky search, trust badge, related cards, profile grid/stats, card shadow, vehicle filters, map markers)
+- [x] Add `waypoints` (Json) to Post model for map polyline rendering
+- [x] Add waypoint data and estimatedMins to seed data
+- [x] Update RouteMap with polyline + numbered waypoint markers
 - [ ] Accessibility audit (WCAG AA)
 - [ ] Performance audit (Core Web Vitals)
 - [ ] Final lint/test debt cleanup

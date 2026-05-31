@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { OtpForm } from "@/components/features/auth/OtpForm";
 import type { Metadata } from "next";
 
@@ -28,7 +29,7 @@ export default function OtpPage() {
       <div className="hidden lg:flex lg:w-2/5 bg-[linear-gradient(135deg,#00623B_0%,#003D24_100%)] flex-col items-center justify-center p-12 relative overflow-hidden">
         <div className="relative z-10 text-center max-w-lg">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <img src="/logo-icon.svg" alt="Along" className="w-12 h-12" />
+            <Image src="/logo-icon.svg" alt="Along" width={48} height={48} className="w-12 h-12" />
             <span className="text-4xl font-bold text-white tracking-tight">Along</span>
           </div>
           <h1 className="text-3xl font-semibold text-white mb-3">

@@ -17,6 +17,7 @@ const ShareRouteModal = lazy(() =>
 import { useAuth } from "../../providers/AuthProvider";
 import { api } from "@/lib/utils/api";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { ToastService } from "@/lib/services/toastService";
 
 interface PostWithAuthor extends Post {
   author: User;
@@ -42,7 +43,7 @@ export default function ProfilePage() {
     dislikes: new Set<string>(),
     bookmarks: new Set<string>(),
   });
-  const { message, notification } = App.useApp();
+  const { message } = App.useApp();
 
   useEffect(() => {
     if (currentUser) {
@@ -465,55 +466,23 @@ export default function ProfilePage() {
   };
 
   const handleDelete = async (postId: string) => {
-    const key = `delete-post-${postId}`;
     let undoClicked = false;
-    let countdown = 10;
 
-    const updateNotification = () => {
-      notification.open({
-        key,
-        message: "Post deleted",
-        description: `Undo within ${countdown} second${
-          countdown !== 1 ? "s" : ""
-        }`,
-        duration: 0.1,
-        btn: (
-          <button
-            className="px-3 py-1 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-light)] text-sm"
-            onClick={() => {
-              undoClicked = true;
-              notification.destroy(key);
-              message.info("Deletion cancelled");
-            }}>
-            Undo
-          </button>
-        ),
-      });
-    };
+    ToastService.undo("Post deleted", () => {
+      undoClicked = true;
+      ToastService.info("Deletion cancelled");
+    }, 10000);
 
-    updateNotification();
-
-    const interval = setInterval(() => {
-      countdown--;
-      if (countdown > 0) {
-        updateNotification();
-      } else {
-        clearInterval(interval);
-        notification.destroy(key);
-        if (!undoClicked) {
-          api
-            .delete(`${API_ENDPOINTS.POSTS}/${postId}`)
-            .then(() => {
-              setPosts((prev) => prev.filter((p) => p.id !== postId));
-              message.success("Post deleted permanently");
-            })
-            .catch((error) => {
-              console.error("Failed to delete post:", error);
-              message.error("Failed to delete post");
-            });
-        }
+    setTimeout(async () => {
+      if (undoClicked) return;
+      try {
+        await api.delete(`${API_ENDPOINTS.POSTS}/${postId}`);
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+      } catch (error) {
+        console.error("Failed to delete post:", error);
+        ToastService.error("Failed to delete post");
       }
-    }, 1000);
+    }, 10000);
   };
 
   if (loading) {
