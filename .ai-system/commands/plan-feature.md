@@ -41,5 +41,4 @@ Examples:
 Directive: implement role-based authentication with JWT and refresh tokens
 Directive: add a real-time notifications system using WebSockets
 Directive: build a configurable export module that supports CSV, PDF, and JSON
-Directive: add a marketplace feature for selling route guides
 ```

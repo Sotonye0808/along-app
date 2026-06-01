@@ -1,40 +1,65 @@
 # Project Plan
 
-> Overview: High-level plan and status for Along.
+> **Overview:** High-level feature checklist for the project. Agents update checkboxes as work is completed. Sections represent major development phases. See task-queue.md for granular, sprint-level tasks.
 
 ---
 
-## Phase 0-5 (Complete)
+## Phase 1 — Foundation
 
-- [x] Config registry and universal components
-- [x] Global services (modal, toast, undo)
-- [x] Prisma schema and services
-- [x] SEO system and structured data
-- [x] MapLibre migration and explore map
-- [x] Admin suite and bug reporting
-- [x] Push notifications, QStash workers, Sentry
-- [x] PWA audit and CI pipeline
+> **Section summary:** Core infrastructure that everything else depends on.
 
----
-
-## Phase 6 (Active) - Compliance Remediation
-
-- [ ] Remove hardcoded colors in UI and align to CSS vars
-- [ ] Replace direct Ant Design usage in feature components
-- [ ] Replace Ant icons and emoji with Lucide icons
-- [x] Fix dead routes (settings) and nav alignment
-- [x] Stabilize PWA install prompt and service worker update flow
-- [ ] Update README and ai-system docs to current state
+- [ ] Repository structure and folder conventions established
+- [ ] Configuration system implemented (env vars, config files)
+- [ ] Logging framework in place
+- [ ] Error handling middleware / global error boundaries
+- [ ] CI/CD pipeline (if applicable)
 
 ---
 
-## Phase 7 — Design Reconciliation & Data Model
+## Phase 2 — Core Features
 
-- [x] Design-to-code gap analysis against all 15+ design HTML files
-- [x] Fix high-priority visual gaps (sticky search, trust badge, related cards, profile grid/stats, card shadow, vehicle filters, map markers)
-- [x] Add `waypoints` (Json) to Post model for map polyline rendering
-- [x] Add waypoint data and estimatedMins to seed data
-- [x] Update RouteMap with polyline + numbered waypoint markers
-- [ ] Accessibility audit (WCAG AA)
-- [ ] Performance audit (Core Web Vitals)
-- [ ] Final lint/test debt cleanup
+> **Section summary:** The primary features that define the product's value.
+
+- [ ] [Feature 1]
+- [ ] [Feature 2]
+- [ ] [Feature 3]
+
+---
+
+## Phase 3 — Secondary Features
+
+> **Section summary:** Supporting features that enhance the core experience.
+
+- [ ] [Feature 4]
+- [ ] [Feature 5]
+
+---
+
+## Phase 4 — Quality & Polish
+
+> **Section summary:** Reliability, performance, and user experience improvements.
+
+- [ ] Unit test coverage for core modules
+- [ ] Integration tests for critical paths
+- [ ] Performance audit and optimisation
+- [ ] Accessibility audit
+- [ ] Error states and loading states complete
+
+---
+
+## Phase 5 — Launch Preparation
+
+> **Section summary:** Final steps before production deployment.
+
+- [ ] Production environment configured
+- [ ] Security audit (auth, input validation, secrets)
+- [ ] Documentation complete
+- [ ] Deployment pipeline tested
+
+---
+
+## Completed
+
+> **Section summary:** Features fully shipped. Archived here for reference.
+
+- [x] [Completed item]

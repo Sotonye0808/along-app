@@ -17,19 +17,19 @@ Steps:
 3. Create or update the following files with accurate, project-specific content:
 
 FILES TO GENERATE:
-- .ai-context.md                               → project overview, stack, key modules
-- .ai-system/agents/system-architecture.md    → actual architecture based on code scan
-- .ai-system/agents/design-system.md          → UI/UX patterns detected or to be defined
-- .ai-system/agents/project-context.md        → goals, constraints, stakeholders
-- .ai-system/agents/repair-system.md          → known issues and error patterns (empty if new project)
-- .ai-system/planning/project-plan.md         → high-level feature checklist
-- .ai-system/planning/task-queue.md           → immediate actionable tasks
-- .ai-system/index/repo-map.md               → folder structure and purpose of each directory
-- .ai-system/index/dependency-graph.md       → module relationships
-- .ai-system/checkpoints/session-log.md      → blank checkpoint template
-- .ai-system/memory/project-decisions.md     → blank decisions log
-- .ai-system/memory/lessons-learned.md       → blank lessons log
-- .ai-system/summaries/dev-history.md        → blank history log
+- .ai-system/ai-context.md        → project overview, stack, key modules
+- .ai-system/agents/system-architecture.md  → actual architecture based on code scan
+- .ai-system/agents/design-system.md        → UI/UX patterns detected or to be defined
+- .ai-system/agents/project-context.md      → goals, constraints, stakeholders
+- .ai-system/agents/repair-system.md        → known issues and error patterns (empty if new project)
+- .ai-system/planning/project-plan.md       → high-level feature checklist
+- .ai-system/planning/task-queue.md         → immediate actionable tasks
+- .ai-system/index/repo-map.md             → folder structure and purpose of each directory
+- .ai-system/index/dependency-graph.md     → module relationships
+- .ai-system/checkpoints/session-log.md    → blank checkpoint template
+- .ai-system/memory/project-decisions.md   → blank decisions log
+- .ai-system/memory/lessons-learned.md     → blank lessons log
+- .ai-system/summaries/dev-history.md      → blank history log
 
 REQUIREMENTS FOR ALL FILES:
 - Begin every file with a short overview summary (3–5 sentences max)
