@@ -1,0 +1,40 @@
+# Along — Design System
+
+> "Navigate Together."
+> Version 1.0 · Complete visual and interaction specification for Along UI.
+
+## Index
+
+| File | Screen | Components | Status |
+|------|--------|------------|--------|
+| [`01-design-system-tokens.html`](./01-design-system-tokens.html) | Colour & Typography — Token Reference | Core palette (light/dark), semantic colors, trust levels, vehicle colors, type scale, shadows, glass morphism, spacing & border radius, responsive grids, Lucide icon system | Complete |
+| [`02-design-system-components.html`](./02-design-system-components.html) | Component Library | AppButton (5 variants × states), AppCard (5 variants), AppInput/AppSelect/AppTextarea (4 states), AppTag/AppBadge, AppAvatar (6 sizes), AppUserLabel, TrustBadge (4 levels + tooltip), AppModal (5 sizes), AppEmptyState (3 sizes), AppTable (row states + skeleton), DashboardSidebar, MobileTopBar, MobileBottomNav (FAB), PostCard (full spec + Suggestion variant), VehicleChip (7 types), DraftingCoach (3 states) | Complete |
+| [`03-landing-light.html`](./03-landing-light.html) | Landing Page — Light Theme | LandingPage (7 zones), TopNav (glass), Hero (green gradient), FeatureCard (3-up), SocialProof, PostCard (standard + Suggestion), TrustBadge, AppFooter | Complete |
+| [`04-landing-dark.html`](./04-landing-dark.html) | Landing Page — Dark Theme | Same as 03, dark mode via `.dark` class, mobile 375px portrait | Complete |
+| [`05-auth-flow.html`](./05-auth-flow.html) | Auth Flow — Login / Register / OTP | LoginPage, RegisterPage, OTPPage (6-box input + paste fill), AppCard elevated (40px padding), Google sign-in, split layout (45/55) | Complete |
+| [`06-home-feed-light.html`](./06-home-feed-light.html) | Home Feed — Light Theme (Mobile 375px + Desktop 1280px) | DashboardSidebar (240px), MobileTopBar, MobileBottomNav (FAB), PostCard (3 variants: 3-step Bus/Keke/Trekking, 2-step Taxi liked, Along Suggestion), TrustBadge (4 levels + tooltip), VehicleChip (7 types), PostCardSkeleton (shimmer), ComposeCard, RightSidebar (Who to follow, Trending tags, Events near you), Back-to-top FAB | Complete |
+| [`07-home-feed-dark.html`](./07-home-feed-dark.html) | Home Feed — Dark Theme (Mobile 375px) | MobileTopBar, MobileBottomNav, PostCard (3 variants), TrustBadge, VehicleChip, PostCardSkeleton — all dark mode tokens per DESIGN.md §9 | Complete |
+| [`08-share-route-modal.html`](./08-share-route-modal.html) | Share Route Modal — Desktop Overlay | AppModal xl (800px), ShareRouteForm (title, 3-step route builder with GripVertical drag handles, MapPin location, AppTextarea, VehicleChip selector row, fare with ₦ prefix, image upload zone, tokenized tags), RouteMap preview (3 numbered pins + green polyline), DraftingCoach (score 45/100, AppProgress orange fill, AppAlert info nudge, completed chips), AppInput/AppSelect/AppTextarea focus/error states | Complete |
+| [`09-explore-map.html`](./09-explore-map.html) | Explore Map — Light Theme (Mobile 375px + Desktop 1280px) | Full-viewport map with glass overlays, Search + filter chip row (7 VehicleChip + 2 trust level filters), "Near me" LocateFixed button, Left side panel (320px glass, mini PostCards, sort), Map cluster pins (primary green, white count), Selected pin glass popup card (AppCard glass, title, AppUserLabel, TrustBadge, VehicleChips, "View Route"), Mobile bottom sheet (40vh, drag handle, 2 mini PostCards), "Share this view" AppButton ghost + Link2 icon | Complete |
+| [`10-post-detail-light.html`](./10-post-detail-light.html) | Post Detail — Light Theme (Mobile 375px + Desktop 1280px) | Top bar (back ArrowLeft + breadcrumb + share + bookmark), Post title display-md 28px/700, AppUserLabel large (40px), TrustBadge full size + tooltip, Tag row (4 default + 1 region MapPin), RouteMap 280px (3 numbered pins + polyline + glass summary card), Route steps full (numbered connector, VehicleChips, fare chips), Image gallery (3 images: left 50% + right 2-stacked, click-to-lightbox), Engagement bar (Heart, ThumbsDown, MessageCircle, Bookmark, Share2), Transact CTA (AppCard elevated, "Buy Route Guide", ₦2,500), Comments section (CommentInput + Send + 3 comment rows with @mention), Related Routes (horizontal scroll, 3 mini PostCards) | Complete |
+| [`11-post-detail-dark.html`](./11-post-detail-dark.html) | Post Detail — Dark Theme (Mobile 375px) | Same as 10, dark mode tokens per §2, dark map tile style (#1A2A1A), dark-adapted vehicle chip colours, dark glass card — mobile 375px portrait | Complete |
+| [`12-profile-page.html`](./12-profile-page.html) | Profile Page — Light Theme (Mobile 375px + Desktop 1280px) | Cover (180px green gradient), AppAvatar 80px (3px white border, camera overlay for OWN), Name + BadgeCheck icon, @handle, bio, stats row (Posts/Followers/Following/Avg Score), "Edit Profile" AppButton secondary, RewardsPanel (Gold shield, 2,140 pts, progress bar, recent activity), Tabs (Posts/Liked/Bookmarks/Routes), PostCard tab content, "Follow/Following→Unfollow" for OTHER variant | Complete |
+| [`13-notifications.html`](./13-notifications.html) | Notifications — Light Theme (Mobile 375px + Desktop 1280px) | "Notifications" heading + "Mark all as read" AppButton ghost, Tabs (All/Unread/Rewards), 6 notification types (LIKE/COMMENT/FOLLOW/MENTION/ROUTE_VERIFIED/REWARD) with coloured icon badges, AppAvatar 40px + type icon overlay, unread dot, AppEmptyState noNotifications for empty Rewards tab | Complete |
+| [`14-bookmarks.html`](./14-bookmarks.html) | Bookmarks — Light Theme (Mobile 375px) | "Bookmarks" heading + count, 2 saved PostCards with hover-remove button, dimmed AppEmptyState noBookmarks reference, tag chips linking to /explore?tag= | Complete |
+| [`15-admin-dashboard.html`](./15-admin-dashboard.html) | Admin Dashboard — Desktop 1280px | DashboardSidebar (240px, Admin section with Shield + nav items), 4-stat Bento row (Total Users, Posts Today, Avg Validity, Open Bug Reports), Signups line chart (7-day, primary green), Top Routes by Validity (horizontal bar chart, 5 routes), Users AppTable (role tags: Admin/Mod/User, reward tier badges, AppStatusDot active/banned, actions dropdown open on first row) | Complete |
+| [`16-analytics.html`](./16-analytics.html) | Analytics — Desktop 1280px | Bento 2-col grid: Engagement over time (3-line chart: views/likes/bookmarks), Top 5 posts by validity (horizontal bar chart), Follower growth (area chart, primary green), Tag distribution (donut chart with 5 segments + legend), KPI row (4 stat cards: total views, total likes, avg score, total posts) | Complete |
+| [`17-about-contact.html`](./17-about-contact.html) | About & Contact | About Desktop 1280px: Hero (green gradient, "Our Story"), Feature highlights (3 icons), Team grid (3-col AppCard elevated, 80px avatars, role AppTag, social icons), Reviews carousel (3 glass cards on green-tinted bg, 5 stars, prev/next/dots). Contact Mobile 375px: Form (Name/Email/Subject/Message inputs with label+required), Success state (CheckCircle icon, "Message sent!"), AppEmptyState pattern | Complete |
+
+## Key conventions
+
+- **CSS variables** use exact names from `DESIGN.md §2` (`--color-primary`, `--color-bg-card`, etc.)
+- **Named styles** follow `{theme}/{category}/{name}` (e.g. `light/brand/primary`)
+- **Text styles** follow `{role}/{weight}` (e.g. `display-xl/extrabold`)
+- **Zero emoji** — all iconography uses Lucide stroke icons at 20px or 24px
+- **Font**: Inter (400/500/600/700/800) throughout
+- **Interactive states** via CSS `:hover`, `:focus-visible`, `:disabled`, `[data-state]`
+- **Dark mode** via `.dark` class on `<html>` element (tokens file includes toggle)
+
+## Usage
+
+Open the HTML files directly in any browser. The tokens file includes a dark mode toggle. The components file links to the tokens file via the top navigation bar.

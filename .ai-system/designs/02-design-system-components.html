@@ -1,0 +1,1372 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="along-route" content="design-system" />
+  <meta name="along-component" content="AppButton, AppCard, AppInput, AppSelect, AppTextarea, AppTag, AppBadge, AppAvatar, AppUserLabel, TrustBadge, AppModal, AppEmptyState, AppTable, DashboardSidebar, MobileTopBar, MobileBottomNav, PostCard, VehicleChip, DraftingCoach" />
+  <title>Components — Along Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       Along Design System — Component Library
+       All CSS custom properties from DESIGN.md §2.
+       Every component annotated with token references.
+       ═══════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Light theme tokens (DESIGN.md §2) ────────────────────── */
+    :root {
+      --color-primary: #00623B;
+      --color-primary-light: #00A862;
+      --color-primary-dark: #004A2C;
+      --color-primary-muted: #E6F4EE;
+      --color-bg-base: #FFFFFF;
+      --color-bg-elevated: #F7F7F7;
+      --color-bg-card: #FFFFFF;
+      --color-bg-overlay: rgba(0,0,0,0.48);
+      --color-text-primary: #1A1A1A;
+      --color-text-secondary: #6B7280;
+      --color-text-muted: #9CA3AF;
+      --color-text-inverse: #FFFFFF;
+      --color-border: #E5E7EB;
+      --color-border-strong: #D1D5DB;
+      --color-success: #D1FAE5;
+      --color-success-text: #065F46;
+      --color-success-border: #6EE7B7;
+      --color-warning: #FEF3C7;
+      --color-warning-text: #92400E;
+      --color-warning-border: #FCD34D;
+      --color-error: #FEE2E2;
+      --color-error-text: #7F1D1D;
+      --color-error-border: #FCA5A5;
+      --color-info: #DBEAFE;
+      --color-info-text: #1E3A8A;
+      --color-info-border: #93C5FD;
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-2xl: 24px;
+      --radius-pill: 999px;
+      --radius-circle: 50%;
+      --shadow-xs: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-xl: 0 16px 48px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08);
+      --shadow-primary: 0 8px 32px rgba(0,98,59,0.20), 0 2px 8px rgba(0,98,59,0.12);
+      --duration-fast: 120ms;
+      --duration-base: 200ms;
+      --duration-moderate: 300ms;
+    }
+
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      color: var(--color-text-primary);
+      background: var(--color-bg-base);
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    .nav-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--color-bg-card);
+      border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 64px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    .nav-logo svg { width: 32px; height: 32px; }
+    .nav-logo span { font-weight: 700; font-size: 20px; letter-spacing: -0.02em; color: var(--color-primary); }
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-links a {
+      text-decoration: none; padding: 8px 16px; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500; color: var(--color-text-secondary);
+      transition: background var(--duration-fast) ease-out, color var(--duration-fast) ease-out;
+    }
+    .nav-links a:hover { background: var(--color-bg-elevated); color: var(--color-text-primary); }
+    .nav-links a.active { background: var(--color-primary-muted); color: var(--color-primary); }
+
+    /* ── Page layout ─────────────────────────────────────────── */
+    .page { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Section ─────────────────────────────────────────────── */
+    .section { padding: 48px 0; border-bottom: 1px solid var(--color-border); }
+    .section-ref {
+      font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--color-text-muted); margin-bottom: 4px;
+    }
+    .section-title {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .section-subtitle { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 32px; }
+
+    /* ── Component preview card ──────────────────────────────── */
+    .component-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); margin-bottom: 24px; overflow: hidden;
+    }
+    .component-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .component-header h3 { font-size: 16px; font-weight: 600; }
+    .component-header .token-ref {
+      font-size: 11px; font-weight: 500;
+      background: var(--color-primary-muted); color: var(--color-primary);
+      padding: 2px 8px; border-radius: var(--radius-xs);
+    }
+    .component-body {
+      padding: 24px 20px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start;
+    }
+    .component-variant-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--color-text-muted); margin-bottom: 6px;
+    }
+    .state-row {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    .state-label {
+      font-size: 10px; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--color-text-muted);
+      min-width: 56px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.1 AppButton
+       ═══════════════════════════════════════════════════════════════ */
+    .app-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: 'Inter', sans-serif; font-weight: 500; cursor: pointer;
+      border: none; border-radius: var(--radius-md); transition: all var(--duration-base) ease;
+      text-decoration: none; white-space: nowrap; line-height: 1;
+      /* bg: var(--color-primary) — text: var(--color-text-inverse) */
+    }
+    .app-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .app-btn.sm { height: 32px; padding: 0 12px; font-size: 13px; }
+    .app-btn.md { height: 40px; padding: 0 16px; font-size: 14px; }
+    .app-btn.lg { height: 48px; padding: 0 24px; font-size: 16px; }
+    /* Primary */
+    .app-btn.primary { background: var(--color-primary); color: var(--color-text-inverse); }
+    .app-btn.primary:hover:not(:disabled) { background: var(--color-primary-light); box-shadow: var(--shadow-primary); }
+    .app-btn.primary:active:not(:disabled) { background: var(--color-primary-dark); }
+    .app-btn.primary:disabled { background: var(--color-primary); }
+    /* Secondary */
+    .app-btn.secondary {
+      background: transparent; color: var(--color-primary);
+      border: 1.5px solid var(--color-primary);
+    }
+    .app-btn.secondary:hover:not(:disabled) { background: var(--color-primary-muted); }
+    .app-btn.secondary:active:not(:disabled) { background: var(--color-primary-muted); border-color: var(--color-primary-dark); }
+    /* Ghost */
+    .app-btn.ghost { background: transparent; color: var(--color-text-secondary); }
+    .app-btn.ghost:hover:not(:disabled) { background: var(--color-bg-elevated); }
+    .app-btn.ghost:active:not(:disabled) { background: var(--color-bg-elevated); }
+    /* Destructive */
+    .app-btn.destructive { background: var(--color-error-text); color: var(--color-text-inverse); }
+    .app-btn.destructive:hover:not(:disabled) { filter: brightness(0.92); }
+    .app-btn.destructive:active:not(:disabled) { filter: brightness(0.84); }
+    /* Icon */
+    .app-btn.icon-only {
+      background: transparent; color: var(--color-text-secondary);
+      width: 40px; height: 40px; padding: 0; border-radius: var(--radius-circle);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .app-btn.icon-only:hover:not(:disabled) { background: var(--color-bg-elevated); }
+    .app-btn.icon-only:active:not(:disabled) { background: var(--color-bg-elevated); }
+    .app-btn.icon-only.sm { width: 32px; height: 32px; }
+    .app-btn.icon-only.lg { width: 48px; height: 48px; }
+    .app-btn.icon-only:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .app-btn .spin { animation: spin 1s linear infinite; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.2 AppCard
+       ═══════════════════════════════════════════════════════════════ */
+    .app-card {
+      border-radius: var(--radius-lg); padding: 20px; transition: all var(--duration-base) ease;
+      /* default: bg: var(--color-bg-card), border: 1px solid var(--color-border), shadow-sm */
+    }
+    .app-card.default {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+    .app-card.elevated {
+      background: var(--color-bg-card); border: none;
+      box-shadow: var(--shadow-md);
+    }
+    .app-card.glass {
+      background: rgba(255,255,255,0.72); backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.48); border-radius: var(--radius-xl);
+    }
+    .app-card.flat {
+      background: var(--color-bg-elevated); border: 1px solid var(--color-border);
+      box-shadow: none;
+    }
+    .app-card.suggestion {
+      background: var(--color-primary-muted); border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm); border-left: 4px solid var(--color-primary);
+    }
+    .app-card.hover-lift:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.3 AppInput / AppTextarea / AppSelect
+       ═══════════════════════════════════════════════════════════════ */
+    .app-input, .app-textarea, .app-select {
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400;
+      color: var(--color-text-primary); background: var(--color-bg-card);
+      border: 1.5px solid var(--color-border); border-radius: var(--radius-sm);
+      padding: 10px 12px; width: 100%; outline: none;
+      transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+    }
+    .app-input::placeholder, .app-textarea::placeholder { color: var(--color-text-muted); }
+    .app-input:focus, .app-textarea:focus, .app-select:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(0,98,59,0.12);
+    }
+    .app-input.error, .app-textarea.error, .app-select.error {
+      border-color: var(--color-error-border);
+    }
+    .app-input.error:focus, .app-textarea.error:focus, .app-select.error:focus {
+      box-shadow: 0 0 0 3px rgba(252,165,165,0.3);
+    }
+    .app-input:disabled, .app-textarea:disabled, .app-select:disabled {
+      opacity: 0.5; cursor: not-allowed; background: var(--color-bg-elevated);
+    }
+    .app-textarea { min-height: 80px; resize: vertical; }
+    .app-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.7 AppTag / AppBadge
+       ═══════════════════════════════════════════════════════════════ */
+    .app-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      border-radius: var(--radius-pill); font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap;
+      letter-spacing: 0.02em;
+      /* bg: var(--color-bg-elevated), text: var(--color-text-secondary) */
+    }
+    .app-tag.xs { padding: 2px 8px; }
+    .app-tag.sm { padding: 4px 10px; }
+    .app-tag.md { padding: 4px 12px; }
+    .app-tag.default-variant { background: var(--color-bg-elevated); color: var(--color-text-secondary); }
+    .app-tag.primary { background: var(--color-primary-muted); color: var(--color-primary); }
+    .app-tag.success { background: var(--color-success); color: var(--color-success-text); }
+    .app-tag.warning { background: var(--color-warning); color: var(--color-warning-text); }
+    .app-tag.error { background: var(--color-error); color: var(--color-error-text); }
+    .app-tag.muted { background: var(--color-bg-elevated); color: var(--color-text-muted); }
+    .app-tag .removable { cursor: pointer; width: 12px; height: 12px; }
+    .app-tag .removable:hover { color: var(--color-text-primary); }
+
+    .app-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: var(--radius-pill); font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 600; line-height: 1; min-width: 20px; height: 20px;
+      padding: 0 6px;
+    }
+    .app-badge.primary { background: var(--color-primary); color: var(--color-text-inverse); }
+    .app-badge.success { background: var(--color-success-text); color: var(--color-text-inverse); }
+    .app-badge.error { background: var(--color-error-text); color: var(--color-text-inverse); }
+    .app-badge.warning { background: var(--color-warning-text); color: var(--color-text-inverse); }
+    .app-badge.dot { width: 8px; height: 8px; min-width: 8px; padding: 0; border-radius: var(--radius-circle); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.8 AppAvatar
+       ═══════════════════════════════════════════════════════════════ */
+    .app-avatar {
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: var(--radius-circle); overflow: hidden; flex-shrink: 0;
+      background: var(--color-primary-muted); color: var(--color-primary);
+      font-weight: 600; font-size: 14px; position: relative;
+    }
+    .app-avatar.x24 { width: 24px; height: 24px; font-size: 10px; }
+    .app-avatar.x32 { width: 32px; height: 32px; font-size: 12px; }
+    .app-avatar.x40 { width: 40px; height: 40px; font-size: 14px; }
+    .app-avatar.x56 { width: 56px; height: 56px; font-size: 20px; }
+    .app-avatar.x80 { width: 80px; height: 80px; font-size: 28px; }
+    .app-avatar.x120 { width: 120px; height: 120px; font-size: 42px; }
+    .app-avatar .verified-badge {
+      position: absolute; bottom: -1px; right: -1px; width: 14px; height: 14px;
+      color: var(--color-primary);
+    }
+    .app-avatar .link-indicator {
+      position: absolute; bottom: -1px; left: -1px; width: 12px; height: 12px;
+      color: var(--color-text-muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.8 AppUserLabel
+       ═══════════════════════════════════════════════════════════════ */
+    .app-user-label { display: inline-flex; align-items: center; gap: 8px; }
+    .app-user-label.vertical { flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+    .user-label-name { font-size: 14px; font-weight: 600; color: var(--color-text-primary); line-height: 1.3; }
+    .user-label-handle { font-size: 13px; font-weight: 400; color: var(--color-text-secondary); line-height: 1.3; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.10 TrustBadge
+       ═══════════════════════════════════════════════════════════════ */
+    .trust-badge {
+      display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+      border-radius: var(--radius-pill); font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 600; line-height: 1; cursor: default;
+      position: relative;
+    }
+    .trust-badge.low { background: #FEE2E2; color: #7F1D1D; }
+    .trust-badge.developing { background: #FEF3C7; color: #92400E; }
+    .trust-badge.verified { background: #D1FAE5; color: #065F46; }
+    .trust-badge.trusted { background: #DBEAFE; color: #1E3A8A; }
+    .trust-badge.compact { padding: 2px 6px; font-size: 11px; }
+    .trust-badge svg { width: 12px; height: 12px; }
+    .trust-badge .tooltip {
+      display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 16px;
+      min-width: 220px; z-index: 50; white-space: nowrap;
+    }
+    .trust-badge:hover .tooltip { display: block; }
+    .tooltip-bar { height: 6px; border-radius: var(--radius-pill); margin-top: 4px; margin-bottom: 8px; }
+    .tooltip-bar.community { background: linear-gradient(90deg, #FEE2E2, #FEF3C7, #D1FAE5, #DBEAFE); width: 100%; }
+    .tooltip-bar.detail { background: linear-gradient(90deg, #FEE2E2, #FEF3C7, #D1FAE5, #DBEAFE); width: 85%; }
+    .tooltip-bar.corroboration { background: linear-gradient(90deg, #FEE2E2, #FEF3C7, #D1FAE5, #DBEAFE); width: 70%; }
+    .tooltip-bar.recency { background: linear-gradient(90deg, #FEE2E2, #FEF3C7, #D1FAE5, #DBEAFE); width: 90%; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.5 AppModal
+       ═══════════════════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0; background: var(--color-bg-overlay);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 80px; z-index: 200;
+    }
+    .modal-window {
+      background: var(--color-bg-card); border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl); width: 100%;
+      animation: fadeSlideUp 0.3s ease-out;
+    }
+    .modal-window.sm { max-width: 400px; }
+    .modal-window.md { max-width: 520px; }
+    .modal-window.lg { max-width: 680px; }
+    .modal-window.xl { max-width: 800px; }
+    .modal-window.fullscreen { max-width: 100vw; max-height: 100vh; border-radius: 0; }
+    .modal-header {
+      padding: 24px 24px 0; display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 18px; font-weight: 600; line-height: 1.3; }
+    .modal-header .subtitle { font-size: 14px; color: var(--color-text-secondary); margin-top: 4px; }
+    .modal-close {
+      width: 32px; height: 32px; border: none; background: transparent;
+      cursor: pointer; border-radius: var(--radius-circle); display: grid; place-items: center;
+      color: var(--color-text-muted); flex-shrink: 0;
+    }
+    .modal-close:hover { background: var(--color-bg-elevated); color: var(--color-text-primary); }
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px; border-top: 1px solid var(--color-border);
+      display: flex; gap: 8px; justify-content: flex-end;
+    }
+    .modal-footer.destructive { justify-content: space-between; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.6 AppEmptyState
+       ═══════════════════════════════════════════════════════════════ */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 240px; text-align: center;
+    }
+    .empty-state.sm { min-height: 160px; }
+    .empty-state.lg { min-height: 360px; }
+    .empty-state-icon {
+      width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+      background: var(--color-bg-elevated); border-radius: var(--radius-xl);
+      color: var(--color-text-muted); margin-bottom: 12px;
+    }
+    .empty-state-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .empty-state-desc { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 24px; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.4 AppTable
+       ═══════════════════════════════════════════════════════════════ */
+    .app-table { width: 100%; border-collapse: collapse; }
+    .app-table thead { background: var(--color-bg-elevated); }
+    .app-table th {
+      font-size: 13px; font-weight: 500; color: var(--color-text-secondary);
+      text-transform: uppercase; letter-spacing: 0.04em; text-align: left;
+      padding: 12px 16px; border-bottom: 1px solid var(--color-border-strong);
+    }
+    .app-table td {
+      padding: 12px 16px; border-bottom: 1px solid var(--color-border);
+      font-size: 14px;
+    }
+    .app-table tbody tr { height: 56px; transition: background var(--duration-fast) ease; }
+    .app-table tbody tr:hover { background: var(--color-bg-elevated); }
+    .app-table tbody tr.selected { background: var(--color-primary-muted); }
+    .app-table tbody tr.clickable { cursor: pointer; }
+    .app-table tbody tr.clickable:hover { background: var(--color-bg-elevated); }
+    .app-table .empty-row td { text-align: center; padding: 60px 16px; color: var(--color-text-muted); }
+    .app-table .skeleton { height: 16px; border-radius: var(--radius-xs); background: var(--color-bg-elevated); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .app-table .skeleton { background: linear-gradient(90deg, var(--color-bg-elevated) 25%, var(--color-border) 50%, var(--color-bg-elevated) 75%); background-size: 200% 100%; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.13 Navigation
+       ═══════════════════════════════════════════════════════════════ */
+    .sidebar {
+      width: 240px; background: var(--color-bg-card); border-right: 1px solid var(--color-border);
+      height: 100%; display: flex; flex-direction: column; padding: 0;
+    }
+    .sidebar-logo { padding: 24px 20px; display: flex; align-items: center; gap: 10px; }
+    .sidebar-logo svg { width: 28px; height: 28px; }
+    .sidebar-logo span { font-weight: 700; font-size: 18px; color: var(--color-primary); }
+    .sidebar-nav { flex: 1; padding: 8px; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      border-radius: var(--radius-md); cursor: pointer; height: 44px;
+      font-size: 14px; font-weight: 500; color: var(--color-text-secondary);
+      transition: all var(--duration-fast) ease-out;
+      /* bg hover: var(--color-bg-elevated) */
+    }
+    .sidebar-item:hover { background: var(--color-bg-elevated); color: var(--color-text-primary); }
+    .sidebar-item.active {
+      background: var(--color-primary-muted); color: var(--color-primary);
+    }
+    .sidebar-item.active svg { color: var(--color-primary); }
+    .sidebar-divider {
+      height: 1px; background: var(--color-border); margin: 8px 16px;
+    }
+    .sidebar-section-label {
+      font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 12px 20px 4px;
+    }
+    .sidebar-footer {
+      padding: 12px 16px; border-top: 1px solid var(--color-border);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    /* Mobile top bar */
+    .mobile-topbar {
+      height: 56px; background: var(--color-bg-card); border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+    }
+    .mobile-topbar .logo { display: flex; align-items: center; gap: 6px; }
+    .mobile-topbar .logo svg { width: 24px; height: 24px; }
+    .mobile-topbar .logo span { font-weight: 700; font-size: 16px; color: var(--color-primary); }
+
+    /* Mobile bottom nav */
+    .mobile-bottom-nav {
+      display: flex; align-items: center; justify-content: space-around;
+      height: 64px; background: var(--color-bg-card);
+      border-top: 1px solid var(--color-border);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      /* bg: var(--color-bg-card) + glass blur */
+      position: relative;
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      cursor: pointer; color: var(--color-text-muted); font-size: 10px; font-weight: 500;
+      transition: color var(--duration-fast) ease; border: none; background: none; padding: 4px 12px;
+    }
+    .mobile-bottom-nav .nav-item.active { color: var(--color-primary); }
+    .mobile-bottom-nav .fab {
+      width: 56px; height: 56px; border-radius: var(--radius-circle);
+      background: var(--color-primary); color: var(--color-text-inverse);
+      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-primary); margin-top: -28px; transition: transform var(--duration-base) ease;
+    }
+    .mobile-bottom-nav .fab:hover { transform: scale(1.05); }
+    .mobile-bottom-nav .fab svg { width: 24px; height: 24px; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.9 PostCard
+       ═══════════════════════════════════════════════════════════════ */
+    .post-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      overflow: hidden; transition: all var(--duration-base) ease;
+    }
+    .post-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .post-card.suggestion {
+      background: var(--color-primary-muted); border-left: 4px solid var(--color-primary);
+    }
+    .post-header {
+      display: flex; align-items: center; gap: 10px; padding: 16px 16px 0;
+    }
+    .post-header-info { flex: 1; }
+    .post-header-name { font-size: 14px; font-weight: 600; }
+    .post-header-handle { font-size: 13px; color: var(--color-text-secondary); }
+    .post-header-time { font-size: 12px; color: var(--color-text-muted); }
+    .post-header-more { color: var(--color-text-muted); cursor: pointer; padding: 4px; }
+    .post-vehicles { display: flex; gap: 4px; flex-wrap: wrap; padding: 6px 16px 0; }
+    .post-title {
+      font-size: 18px; font-weight: 600; line-height: 1.4;
+      padding: 12px 16px 0; margin: 0;
+    }
+    .post-route { padding: 8px 16px 0; }
+    .route-step {
+      display: flex; align-items: flex-start; gap: 12px; position: relative;
+      padding-bottom: 12px;
+    }
+    .route-step::before {
+      content: ''; position: absolute; left: 9px; top: 24px; bottom: 0;
+      width: 2px; background: var(--color-border);
+    }
+    .route-step:last-child::before { display: none; }
+    .route-step-num {
+      width: 20px; height: 20px; border-radius: var(--radius-circle);
+      background: var(--color-primary); color: var(--color-text-inverse);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; flex-shrink: 0;
+    }
+    .route-step-content { flex: 1; font-size: 14px; line-height: 1.5; }
+    .route-step-fare {
+      font-size: 13px; font-weight: 600; color: var(--color-primary); white-space: nowrap;
+    }
+    .route-step-vehicles { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+    .post-image-grid {
+      display: grid; gap: 4px; padding: 12px 16px 0;
+    }
+    .post-image-grid .img-1 { grid-template-columns: 1fr; }
+    .post-image-grid .img-2 { grid-template-columns: 1fr 1fr; }
+    .post-image-grid .img-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    .post-image-grid .img-3 .img-item:first-child { grid-row: span 2; }
+    .img-item {
+      background: var(--color-bg-elevated); border-radius: var(--radius-md);
+      aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;
+      color: var(--color-text-muted); font-size: 13px; overflow: hidden;
+    }
+    .post-map-preview {
+      height: 100px; background: var(--color-bg-elevated); margin: 12px 16px 0;
+      border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
+      color: var(--color-text-muted); font-size: 12px;
+    }
+    .post-action-bar {
+      display: flex; align-items: center; gap: 4px; padding: 12px 16px;
+      border-top: 1px solid var(--color-border); margin-top: 12px;
+    }
+    .post-action {
+      display: flex; align-items: center; gap: 4px; cursor: pointer;
+      color: var(--color-text-secondary); font-size: 13px; padding: 4px 8px;
+      border-radius: var(--radius-sm); transition: all var(--duration-fast) ease;
+      border: none; background: none; font-family: 'Inter', sans-serif;
+    }
+    .post-action:hover { background: var(--color-bg-elevated); }
+    .post-action.liked { color: var(--color-error-text); }
+    .post-action.bookmarked { color: var(--color-primary); }
+    .post-card.suggestion .suggestion-chip {
+      display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+      border-radius: var(--radius-pill); background: var(--color-primary);
+      color: var(--color-text-inverse); font-size: 11px; font-weight: 500;
+      margin: 12px 16px 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6.11 DraftingCoach
+       ═══════════════════════════════════════════════════════════════ */
+    .drafting-coach {
+      border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+      background: var(--color-bg-card); overflow: hidden;
+    }
+    .coach-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; cursor: pointer; user-select: none;
+      /* bg:hover: var(--color-bg-elevated) */
+    }
+    .coach-header:hover { background: var(--color-bg-elevated); }
+    .coach-header-left { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+    .coach-body { padding: 0 16px 16px; }
+    .score-bar {
+      height: 8px; border-radius: var(--radius-pill);
+      background: linear-gradient(90deg, var(--color-error-text) 0%, var(--color-warning-text) 40%, var(--color-success-text) 80%, #1E3A8A 90%);
+      margin: 8px 0; position: relative; overflow: hidden;
+    }
+    .score-fill {
+      height: 100%; border-radius: inherit;
+      background: var(--color-bg-elevated); opacity: 0.7;
+      position: absolute; right: 0; top: 0;
+    }
+    .score-label {
+      display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary);
+    }
+    .coach-nudge {
+      display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px;
+      background: var(--color-info); border-radius: var(--radius-sm); margin: 12px 0;
+      font-size: 13px; color: var(--color-info-text);
+    }
+    .coach-completed { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    /* ── Layout helpers ──────────────────────────────────────── */
+    .flex { display: flex; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .gap-4 { gap: 4px; }
+    .gap-8 { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .gap-16 { gap: 16px; }
+    .gap-24 { gap: 24px; }
+    .mb-8 { margin-bottom: 8px; }
+    .mb-12 { margin-bottom: 12px; }
+    .mb-16 { margin-bottom: 16px; }
+    .mb-24 { margin-bottom: 24px; }
+    .mt-24 { margin-top: 24px; }
+    .p-16 { padding: 16px; }
+    .p-24 { padding: 24px; }
+    .w-full { width: 100%; }
+    .max-w-400 { max-width: 400px; }
+    .max-w-600 { max-width: 600px; }
+    .text-secondary { color: var(--color-text-secondary); }
+    .text-muted { color: var(--color-text-muted); }
+    .text-primary-color { color: var(--color-primary); }
+    .bg-elevated { background: var(--color-bg-elevated); }
+    .bg-card { background: var(--color-bg-card); }
+    .border { border: 1px solid var(--color-border); }
+    .rounded-lg { border-radius: var(--radius-lg); }
+    .overflow-hidden { overflow: hidden; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════ NAV ════════════════════════════════ -->
+  <nav class="nav-bar">
+    <div class="nav-logo">
+      <svg viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" fill="var(--color-primary)"/>
+        <path d="M10 20 L16 8 L22 20 L16 16 Z" fill="#fff"/>
+        <circle cx="10" cy="20" r="2.5" fill="#fff"/>
+        <circle cx="22" cy="20" r="2.5" fill="#fff"/>
+      </svg>
+      <span>Along</span>
+    </div>
+    <div class="nav-links">
+      <a href="01-design-system-tokens.html">Tokens</a>
+      <a href="02-design-system-components.html" class="active">Components</a>
+      <a href="03-landing-light.html">Landing</a>
+      <a href="04-landing-dark.html">Dark</a>
+      <a href="05-auth-flow.html">Auth</a>
+      <a href="06-home-feed-light.html">Feed</a>
+      <a href="07-home-feed-dark.html">Feed Dark</a>
+      <a href="08-share-route-modal.html">Share</a>
+      <a href="09-explore-map.html">Explore</a>
+      <a href="10-post-detail-light.html">Post</a>
+      <a href="11-post-detail-dark.html">Post Dark</a>
+    <a href="12-profile-page.html">Profile</a>
+    <a href="13-notifications.html">Notif</a>
+    <a href="14-bookmarks.html">Bmks</a>
+</div>
+  </nav>
+
+  <div class="page">
+
+    <div style="padding:32px 0 0;">
+      <h1 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;">Component Library</h1>
+      <p style="font-size:14px;color:var(--color-text-secondary);margin-top:8px;">All components from <strong>DESIGN.md §6</strong>. Annotated with token references and interactive states via CSS <code>:hover</code>, <code>:focus-visible</code>, and <code>:disabled</code>.</p>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.1 AppButton
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.1 AppButton -->
+    <div class="section">
+      <div class="section-ref">§6.1</div>
+      <h2 class="section-title">AppButton</h2>
+      <p class="section-subtitle">5 variants × 3 sizes. Primary, Secondary, Ghost, Destructive, Icon-only. States: default, hover, active, disabled, loading.</p>
+
+      <!-- Primary -->
+      <div class="component-card">
+        <div class="component-header">
+          <h3>Primary</h3>
+          <span class="token-ref">bg: var(--color-primary)</span>
+        </div>
+        <div class="component-body flex-col gap-8">
+          <div class="state-row"><span class="state-label">Default</span><button class="app-btn primary md">Share Route</button><button class="app-btn primary sm">Share</button><button class="app-btn primary lg">Share Route</button></div>
+          <div class="state-row"><span class="state-label">Hover</span><button class="app-btn primary md" style="background:var(--color-primary-light);box-shadow:var(--shadow-primary)">Share Route</button></div>
+          <div class="state-row"><span class="state-label">Active</span><button class="app-btn primary md" style="background:var(--color-primary-dark)">Share Route</button></div>
+          <div class="state-row"><span class="state-label">Disabled</span><button class="app-btn primary md" disabled>Share Route</button></div>
+          <div class="state-row"><span class="state-label">Loading</span><button class="app-btn primary md"><svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Share Route</button></div>
+        </div>
+      </div>
+
+      <!-- Secondary -->
+      <div class="component-card">
+        <div class="component-header">
+          <h3>Secondary</h3>
+          <span class="token-ref">border: 1.5px var(--color-primary)</span>
+        </div>
+        <div class="component-body flex-col gap-8">
+          <div class="state-row"><span class="state-label">Default</span><button class="app-btn secondary md">Follow</button><button class="app-btn secondary sm">Follow</button><button class="app-btn secondary lg">Follow</button></div>
+          <div class="state-row"><span class="state-label">Hover</span><button class="app-btn secondary md" style="background:var(--color-primary-muted)">Follow</button></div>
+          <div class="state-row"><span class="state-label">Disabled</span><button class="app-btn secondary md" disabled>Follow</button></div>
+        </div>
+      </div>
+
+      <!-- Ghost -->
+      <div class="component-card">
+        <div class="component-header">
+          <h3>Ghost</h3>
+          <span class="token-ref">text: var(--color-text-secondary)</span>
+        </div>
+        <div class="component-body flex-col gap-8">
+          <div class="state-row"><span class="state-label">Default</span><button class="app-btn ghost md">Cancel</button><button class="app-btn ghost sm">Cancel</button></div>
+          <div class="state-row"><span class="state-label">Hover</span><button class="app-btn ghost md" style="background:var(--color-bg-elevated)">Cancel</button></div>
+          <div class="state-row"><span class="state-label">Disabled</span><button class="app-btn ghost md" disabled>Cancel</button></div>
+        </div>
+      </div>
+
+      <!-- Destructive -->
+      <div class="component-card">
+        <div class="component-header">
+          <h3>Destructive</h3>
+          <span class="token-ref">bg: var(--color-error-text)</span>
+        </div>
+        <div class="component-body flex-col gap-8">
+          <div class="state-row"><span class="state-label">Default</span><button class="app-btn destructive md">Delete Post</button><button class="app-btn destructive sm">Delete</button></div>
+          <div class="state-row"><span class="state-label">Hover</span><button class="app-btn destructive md" style="filter:brightness(0.92)">Delete Post</button></div>
+          <div class="state-row"><span class="state-label">Disabled</span><button class="app-btn destructive md" disabled>Delete Post</button></div>
+        </div>
+      </div>
+
+      <!-- Icon-only -->
+      <div class="component-card">
+        <div class="component-header">
+          <h3>Icon-Only</h3>
+          <span class="token-ref">radius: var(--radius-circle)</span>
+        </div>
+        <div class="component-body flex-col gap-8">
+          <div class="state-row"><span class="state-label">Default</span>
+            <button class="app-btn icon-only md" aria-label="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+            <button class="app-btn icon-only sm" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <button class="app-btn icon-only lg" aria-label="More"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+          </div>
+          <div class="state-row"><span class="state-label">Hover</span><button class="app-btn icon-only md" style="background:var(--color-bg-elevated)" aria-label="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.2 AppCard
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.2 AppCard -->
+    <div class="section">
+      <div class="section-ref">§6.2</div>
+      <h2 class="section-title">AppCard</h2>
+      <p class="section-subtitle">5 card variants with optional hover lift (translateY(-2px) + shadow-md).</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+        <div class="app-card default"><div class="component-variant-label">Default</div><div style="font-size:14px;font-weight:600;margin-bottom:4px;">Route Share</div><div style="font-size:13px;color:var(--color-text-secondary);">Standard card with border + shadow-sm</div><div style="margin-top:8px;font-size:11px;color:var(--color-text-muted);">bg: var(--color-bg-card) · border: 1px var(--color-border)</div></div>
+        <div class="app-card elevated"><div class="component-variant-label">Elevated</div><div style="font-size:14px;font-weight:600;margin-bottom:4px;">Premium Route</div><div style="font-size:13px;color:var(--color-text-secondary);">No border, shadow-md for depth</div><div style="margin-top:8px;font-size:11px;color:var(--color-text-muted);">bg: var(--color-bg-card) · shadow: var(--shadow-md)</div></div>
+        <div class="app-card glass"><div class="component-variant-label">Glass</div><div style="font-size:14px;font-weight:600;margin-bottom:4px;">Map Overlay</div><div style="font-size:13px;color:var(--color-text-secondary);">Blur + saturate glass effect</div><div style="margin-top:8px;font-size:11px;color:var(--color-text-muted);">backdrop-filter: blur(16px) saturate(180%)</div></div>
+        <div class="app-card flat"><div class="component-variant-label">Flat</div><div style="font-size:14px;font-weight:600;margin-bottom:4px;">Compose Area</div><div style="font-size:13px;color:var(--color-text-secondary);">Elevated background, no shadow</div><div style="margin-top:8px;font-size:11px;color:var(--color-text-muted);">bg: var(--color-bg-elevated) · no shadow</div></div>
+        <div class="app-card suggestion"><div class="component-variant-label">Suggestion</div><div style="font-size:14px;font-weight:600;margin-bottom:4px;">Along Suggestion</div><div style="font-size:13px;color:var(--color-text-secondary);">Primary border-left + muted tint</div><div style="margin-top:8px;font-size:11px;color:var(--color-text-muted);">border-left: 4px var(--color-primary) · bg: var(--color-primary-muted)</div></div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="app-card default hover-lift" style="max-width:320px;cursor:default;">
+          <div class="component-variant-label">Hover Lift (hover-lift class)</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Try hovering me</div>
+          <div style="font-size:13px;color:var(--color-text-secondary);">translateY(-2px) + shadow-md on hover, 200ms ease.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.3 AppInput / AppTextarea / AppSelect
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.3 AppInput / AppTextarea / AppSelect -->
+    <div class="section">
+      <div class="section-ref">§6.3</div>
+      <h2 class="section-title">AppInput / AppTextarea / AppSelect</h2>
+      <p class="section-subtitle">Form controls with 4 states each: default, focus, error, disabled. 1.5px border, radius-sm.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;">
+        <div>
+          <div class="component-variant-label">AppInput</div>
+          <div style="margin-bottom:8px;"><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Route Title</label><input class="app-input" placeholder="e.g. CMS to Obalende" /></div>
+          <div style="margin-bottom:8px;"><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Focused</label><input class="app-input" placeholder="e.g. CMS to Obalende" style="border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,98,59,0.12);" /></div>
+          <div style="margin-bottom:8px;"><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Error state</label><input class="app-input error" placeholder="e.g. CMS to Obalende" value="invalid" /><div style="font-size:13px;color:var(--color-error-text);margin-top:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>This field is required</div></div>
+          <div><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Disabled</label><input class="app-input" placeholder="Disabled input" disabled /></div>
+        </div>
+        <div>
+          <div class="component-variant-label">AppTextarea</div>
+          <div style="margin-bottom:8px;"><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Route Description</label><textarea class="app-textarea" placeholder="Describe the route in detail..." style="height:80px;"></textarea></div>
+          <div style="margin-bottom:8px;"><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Error</label><textarea class="app-textarea error" placeholder="Describe..." style="height:56px;"></textarea></div>
+          <div><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Disabled</label><textarea class="app-textarea" disabled placeholder="Disabled" style="height:56px;"></textarea></div>
+        </div>
+        <div>
+          <div class="component-variant-label">AppSelect</div>
+          <div style="margin-bottom:8px;"><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Vehicle Type</label><select class="app-select"><option>Select vehicle</option><option>Bus</option><option>Keke</option><option>Taxi</option></select></div>
+          <div style="margin-bottom:8px;"><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Error</label><select class="app-select error"><option>Select vehicle</option></select></div>
+          <div><label style="font-size:14px;font-weight:500;display:block;margin-bottom:4px;">Disabled</label><select class="app-select" disabled><option>Disabled</option></select></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.7 AppTag / AppBadge
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.7 AppTag / AppBadge -->
+    <div class="section">
+      <div class="section-ref">§6.7</div>
+      <h2 class="section-title">AppTag &amp; AppBadge</h2>
+      <p class="section-subtitle">Pill-shaped tags and badges with variant colors. 3 sizes (xs, sm, md), removable option.</p>
+
+      <div class="component-card">
+        <div class="component-header"><h3>AppTag — Variants</h3><span class="token-ref">radius: var(--radius-pill) · font: label-sm</span></div>
+        <div class="component-body flex-col gap-8">
+          <div class="state-row"><span class="state-label">Default</span><span class="app-tag md default-variant">Route</span><span class="app-tag md primary">Lagos</span><span class="app-tag md success">Verified</span><span class="app-tag md warning">Pending</span><span class="app-tag md error">Blocked</span><span class="app-tag md muted">₦200</span></div>
+          <div class="state-row"><span class="state-label">Sizes</span><span class="app-tag xs primary">XS</span><span class="app-tag sm primary">SM</span><span class="app-tag md primary">MD</span></div>
+          <div class="state-row"><span class="state-label">Removable</span><span class="app-tag md primary">Bus <svg class="removable" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></div>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-header"><h3>AppBadge</h3><span class="token-ref">min-width: 20px · font: 11px/600</span></div>
+        <div class="component-body flex-col gap-8">
+          <div class="state-row"><span class="state-label">Solid</span><span class="app-badge primary">3</span><span class="app-badge success">12</span><span class="app-badge error">!</span><span class="app-badge warning">5</span></div>
+          <div class="state-row"><span class="state-label">Dot</span><span class="app-badge dot primary"></span><span class="app-badge dot success"></span><span class="app-badge dot error"></span><span class="app-badge dot warning"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.8 AppAvatar
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.8 AppAvatar -->
+    <div class="section">
+      <div class="section-ref">§6.8</div>
+      <h2 class="section-title">AppAvatar</h2>
+      <p class="section-subtitle">6 sizes (24–120px), circular. Verified badge + profile-link indicator overlays.</p>
+
+      <div class="component-card">
+        <div class="component-header"><h3>Avatar Sizes</h3><span class="token-ref">radius: var(--radius-circle)</span></div>
+        <div class="component-body items-center flex-wrap gap-16">
+          <div style="text-align:center;"><div class="app-avatar x24" aria-label="User's avatar">A</div><div style="font-size:10px;color:var(--color-text-muted);margin-top:4px;">24px</div></div>
+          <div style="text-align:center;"><div class="app-avatar x32" aria-label="User's avatar">A</div><div style="font-size:10px;color:var(--color-text-muted);margin-top:4px;">32px</div></div>
+          <div style="text-align:center;"><div class="app-avatar x40" aria-label="User's avatar">A</div><div style="font-size:10px;color:var(--color-text-muted);margin-top:4px;">40px</div></div>
+          <div style="text-align:center;"><div class="app-avatar x56" aria-label="User's avatar">A</div><div style="font-size:10px;color:var(--color-text-muted);margin-top:4px;">56px</div></div>
+          <div style="text-align:center;"><div class="app-avatar x80" aria-label="User's avatar">A</div><div style="font-size:10px;color:var(--color-text-muted);margin-top:4px;">80px</div></div>
+          <div style="text-align:center;"><div class="app-avatar x120" aria-label="User's avatar">A</div><div style="font-size:10px;color:var(--color-text-muted);margin-top:4px;">120px</div></div>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-header"><h3>Avatar with Overlays</h3><span class="token-ref">verified-badge: 14px, var(--color-primary)</span></div>
+        <div class="component-body items-center gap-16">
+          <div class="app-avatar x40" aria-label="User's avatar">
+            A
+            <svg class="verified-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="app-avatar x56" aria-label="User's avatar">
+            A
+            <svg class="verified-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="app-avatar x40" aria-label="User's avatar">
+            A
+            <svg class="link-indicator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.8 AppUserLabel
+    ════════════════════════════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-ref">§6.8</div>
+      <h2 class="section-title">AppUserLabel</h2>
+      <p class="section-subtitle">Horizontal and vertical layouts, with/without handle. Composed with AppAvatar.</p>
+
+      <div class="flex gap-24 flex-wrap">
+        <div class="border rounded-lg p-16" style="max-width:280px;">
+          <div class="component-variant-label">Horizontal · with handle</div>
+          <div class="app-user-label" style="margin-top:8px;">
+            <div class="app-avatar x32" aria-label="Chidi's avatar">C</div>
+            <div>
+              <div class="user-label-name">Chidi Okonkwo</div>
+              <div class="user-label-handle">@chidi_ok</div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--color-text-muted);">bg: var(--color-bg-card) · text: var(--color-text-primary)</div>
+        </div>
+        <div class="border rounded-lg p-16">
+          <div class="component-variant-label">Vertical · with handle</div>
+          <div class="app-user-label vertical" style="margin-top:8px;">
+            <div class="app-avatar x40" aria-label="Aminat's avatar">A</div>
+            <div>
+              <div class="user-label-name">Aminat Bello</div>
+              <div class="user-label-handle">@aminat_b</div>
+            </div>
+          </div>
+        </div>
+        <div class="border rounded-lg p-16">
+          <div class="component-variant-label">Horizontal · name only</div>
+          <div class="app-user-label" style="margin-top:8px;">
+            <div class="app-avatar x32" aria-label="Emeka's avatar">E</div>
+            <div class="user-label-name">Emeka Nwosu</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.10 TrustBadge
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.10 TrustBadge -->
+    <div class="section">
+      <div class="section-ref">§6.10</div>
+      <h2 class="section-title">TrustBadge</h2>
+      <p class="section-subtitle">4 trust levels in compact and default sizes. Hover for tooltip panel with 4 progress bars.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:32px;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="component-variant-label">Default size</div>
+          <div class="trust-badge low"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Low Trust · 25</div>
+          <div class="trust-badge developing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Developing · 48</div>
+          <div class="trust-badge verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Verified · 72</div>
+          <div class="trust-badge trusted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Trusted · 94</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="component-variant-label">Compact size</div>
+          <div class="trust-badge compact low"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 25</div>
+          <div class="trust-badge compact developing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 48</div>
+          <div class="trust-badge compact verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 72</div>
+          <div class="trust-badge compact trusted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 94</div>
+        </div>
+        <div>
+          <div class="component-variant-label">With tooltip (hover me)</div>
+          <div class="trust-badge verified" style="margin-top:8px;position:relative;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Verified · 72
+            <div class="tooltip" style="text-align:left;">
+              <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Trust Breakdown</div>
+              <div style="font-size:12px;margin-bottom:2px;">Community validation</div><div class="tooltip-bar community"></div>
+              <div style="font-size:12px;margin-bottom:2px;">Route detail level</div><div class="tooltip-bar detail"></div>
+              <div style="font-size:12px;margin-bottom:2px;">Corroboration</div><div class="tooltip-bar corroboration"></div>
+              <div style="font-size:12px;margin-bottom:2px;">Recency</div><div class="tooltip-bar recency"></div>
+              <div style="font-size:11px;color:var(--color-text-muted);margin-top:4px;">Score: 72/100 · Verified tier</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.5 AppModal
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.5 AppModal -->
+    <div class="section">
+      <div class="section-ref">§6.5</div>
+      <h2 class="section-title">AppModal</h2>
+      <p class="section-subtitle">5 sizes (sm, md, lg, xl, fullscreen). Header with optional subtitle, close button, footer with action buttons.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;">
+        <div class="border rounded-lg overflow-hidden bg-card">
+          <div style="padding:16px;border-bottom:1px solid var(--color-border);"><div class="component-variant-label">Modal sm · 400px</div></div>
+          <div class="modal-window sm" style="position:static;box-shadow:var(--shadow-md);animation:none;">
+            <div class="modal-header"><div><h3>Confirm Delete</h3><div class="subtitle">This action cannot be undone</div></div><div class="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+            <div class="modal-body" style="font-size:14px;color:var(--color-text-secondary);">Are you sure you want to delete this route?</div>
+            <div class="modal-footer"><button class="app-btn ghost md">Cancel</button><button class="app-btn destructive md">Delete</button></div>
+          </div>
+        </div>
+        <div class="border rounded-lg overflow-hidden bg-card">
+          <div style="padding:16px;border-bottom:1px solid var(--color-border);"><div class="component-variant-label">Modal lg · 680px</div></div>
+          <div class="modal-window lg" style="position:static;box-shadow:var(--shadow-md);animation:none;">
+            <div class="modal-header"><div><h3>Share a Route</h3><div class="subtitle">Fill in the route details below</div></div><div class="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+            <div class="modal-body"><div style="height:120px;background:var(--color-bg-elevated);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);font-size:14px;">Form content area</div></div>
+            <div class="modal-footer"><button class="app-btn ghost md">Save Draft</button><button class="app-btn primary md">Share Route</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.6 AppEmptyState
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.6 AppEmptyState -->
+    <div class="section">
+      <div class="section-ref">§6.6</div>
+      <h2 class="section-title">AppEmptyState</h2>
+      <p class="section-subtitle">3 sizes (sm, default, lg) with icon, title, description, and action button.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;">
+        <div class="border rounded-lg p-16 bg-card">
+          <div class="empty-state sm">
+            <div class="empty-state-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <div class="empty-state-title">No results</div>
+            <div class="empty-state-desc">sm variant</div>
+          </div>
+        </div>
+        <div class="border rounded-lg p-16 bg-card">
+          <div class="empty-state">
+            <div class="empty-state-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <div class="empty-state-title">No posts yet</div>
+            <div class="empty-state-desc">Be the first to share a route in your area.</div>
+            <button class="app-btn primary md">Share a Route</button>
+          </div>
+        </div>
+        <div class="border rounded-lg p-16 bg-card">
+          <div class="empty-state lg">
+            <div class="empty-state-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <div class="empty-state-title">You're all caught up</div>
+            <div class="empty-state-desc">Check back later or explore new routes on the map.</div>
+            <button class="app-btn primary md">Explore Map</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.4 AppTable
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.4 AppTable -->
+    <div class="section">
+      <div class="section-ref">§6.4</div>
+      <h2 class="section-title">AppTable</h2>
+      <p class="section-subtitle">Header (elevated bg, uppercase tracking), row states (default, hover, selected, clickable), empty state, loading skeleton.</p>
+
+      <div class="component-card">
+        <div class="component-header"><h3>Table with data</h3><span class="token-ref">th: 13px/500 uppercase · row: 56px</span></div>
+        <div style="overflow-x:auto;">
+          <table class="app-table">
+            <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Posts</th><th>Trust</th></tr></thead>
+            <tbody>
+              <tr class="clickable"><td><div class="flex items-center gap-8"><div class="app-avatar x32">C</div>Chidi Okonkwo</div></td><td><span class="app-tag sm primary">Moderator</span></td><td><span class="app-tag sm success">Active</span></td><td>42</td><td><div class="trust-badge compact verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 72</div></td></tr>
+              <tr class="clickable selected"><td><div class="flex items-center gap-8"><div class="app-avatar x32">A</div>Aminat Bello</div></td><td><span class="app-tag sm default-variant">User</span></td><td><span class="app-tag sm success">Active</span></td><td>28</td><td><div class="trust-badge compact trusted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 94</div></td></tr>
+              <tr class="clickable"><td><div class="flex items-center gap-8"><div class="app-avatar x32">E</div>Emeka Nwosu</div></td><td><span class="app-tag sm default-variant">User</span></td><td><span class="app-tag sm warning">Suspended</span></td><td>7</td><td><div class="trust-badge compact low"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 25</div></td></tr>
+              <tr class="clickable"><td><div class="flex items-center gap-8"><div class="app-avatar x32">F</div>Fatima Yusuf</div></td><td><span class="app-tag sm primary">Admin</span></td><td><span class="app-tag sm success">Active</span></td><td>156</td><td><div class="trust-badge compact trusted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 88</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:12px 16px;border-top:1px solid var(--color-border);font-size:12px;color:var(--color-text-muted);">
+          Row states: default · hover (try me) · <span style="background:var(--color-primary-muted);padding:2px 6px;border-radius:4px;">selected</span> · clickable (cursor:pointer)
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-header"><h3>Empty state</h3></div>
+        <table class="app-table">
+          <thead><tr><th>User</th><th>Role</th><th>Posts</th></tr></thead>
+          <tbody><tr class="empty-row"><td colspan="3"><div class="empty-state sm"><div class="empty-state-title">No users found</div></div></td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="component-card">
+        <div class="component-header"><h3>Loading skeleton</h3></div>
+        <table class="app-table">
+          <thead><tr><th>User</th><th>Role</th><th>Posts</th></tr></thead>
+          <tbody>
+            <tr><td><div class="skeleton" style="width:160px;"></div></td><td><div class="skeleton" style="width:80px;"></div></td><td><div class="skeleton" style="width:40px;"></div></td></tr>
+            <tr><td><div class="skeleton" style="width:140px;"></div></td><td><div class="skeleton" style="width:80px;"></div></td><td><div class="skeleton" style="width:40px;"></div></td></tr>
+            <tr><td><div class="skeleton" style="width:150px;"></div></td><td><div class="skeleton" style="width:80px;"></div></td><td><div class="skeleton" style="width:40px;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.13 Navigation
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.13 Navigation -->
+    <div class="section">
+      <div class="section-ref">§6.13</div>
+      <h2 class="section-title">Navigation</h2>
+      <p class="section-subtitle">Desktop sidebar (240px), mobile top bar (56px), and mobile bottom nav with center FAB (56px circle).</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;">
+        <!-- Desktop Sidebar -->
+        <div class="border rounded-lg overflow-hidden">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--color-border);font-size:12px;font-weight:600;color:var(--color-text-muted);">Desktop Sidebar — 240px</div>
+          <div class="sidebar" style="height:480px;border-right:none;">
+            <div class="sidebar-logo">
+              <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="var(--color-primary)"/><path d="M10 20 L16 8 L22 20 L16 16 Z" fill="#fff"/><circle cx="10" cy="20" r="2.5" fill="#fff"/><circle cx="22" cy="20" r="2.5" fill="#fff"/></svg>
+              <span>Along</span>
+            </div>
+            <div class="sidebar-nav">
+              <div class="sidebar-item active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Home</div>
+              <div class="sidebar-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Explore</div>
+              <div class="sidebar-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmarks</div>
+              <div class="sidebar-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Notifications</div>
+              <div class="sidebar-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile</div>
+              <div class="sidebar-divider"></div>
+              <div class="sidebar-section-label">Admin</div>
+              <div class="sidebar-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Dashboard</div>
+              <div class="sidebar-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg> Analytics</div>
+            </div>
+            <div class="sidebar-footer">
+              <div class="app-avatar x32">C</div>
+              <div><div style="font-size:14px;font-weight:600;">Chidi O.</div><span class="app-tag xs primary">Moderator</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Top Bar -->
+        <div class="border rounded-lg overflow-hidden">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--color-border);font-size:12px;font-weight:600;color:var(--color-text-muted);">Mobile Top Bar — 56px</div>
+          <div class="mobile-topbar">
+            <div class="logo">
+              <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="var(--color-primary)"/><path d="M10 20 L16 8 L22 20 L16 16 Z" fill="#fff"/><circle cx="10" cy="20" r="2.5" fill="#fff"/><circle cx="22" cy="20" r="2.5" fill="#fff"/></svg>
+              <span>Along</span>
+            </div>
+            <div class="flex items-center gap-8">
+              <button class="app-btn icon-only sm" aria-label="Search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+              <button class="app-btn icon-only sm" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Bottom Nav -->
+        <div class="border rounded-lg overflow-hidden">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--color-border);font-size:12px;font-weight:600;color:var(--color-text-muted);">Mobile Bottom Nav — with FAB</div>
+          <div style="background:var(--color-bg-elevated);padding:24px 0;">
+            <div class="mobile-bottom-nav" style="margin:0 8px;border-radius:var(--radius-lg);">
+              <button class="nav-item active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+              <button class="nav-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span>Explore</span></button>
+              <button class="fab" aria-label="Share a route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
+              <button class="nav-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span>Saved</span></button>
+              <button class="nav-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></button>
+            </div>
+            <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--color-text-muted);">FAB: 56px, var(--color-primary), shadow-primary, MapPin icon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.9 PostCard
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.9 PostCard -->
+    <div class="section">
+      <div class="section-ref">§6.9</div>
+      <h2 class="section-title">PostCard</h2>
+      <p class="section-subtitle">Full spec: user header, vehicle chips, numbered connector route list, image grids (1/2/3-up), map preview, action bar, Along Suggestion variant.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:24px;">
+        <!-- Default PostCard -->
+        <div class="post-card">
+          <!-- zone: header -->
+          <div class="post-header">
+            <div class="app-avatar x40" aria-label="Chidi's avatar">C</div>
+            <div class="post-header-info">
+              <div class="post-header-name">Chidi Okonkwo <span class="app-tag xs success" style="margin-left:4px;">Verified</span></div>
+              <div class="post-header-handle">@chidi_ok · <span class="post-header-time">2h ago</span></div>
+            </div>
+            <div class="post-header-more"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+          </div>
+          <!-- zone: vehicle chips -->
+          <div class="post-vehicles">
+            <span class="app-tag xs muted"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px;"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"/><circle cx="8" cy="15" r="2"/><circle cx="17" cy="15" r="2"/></svg>Bus</span>
+            <span class="app-tag xs muted"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px;"><path d="M3 10h5l4 8"/><circle cx="10" cy="17" r="4"/><path d="M13 6h5l3 5-4 2"/></svg>Keke</span>
+          </div>
+          <!-- zone: title -->
+          <div class="post-title">CMS to Obalende via Ajah — the fastest route</div>
+          <!-- zone: route steps -->
+          <div class="post-route">
+            <div class="route-step">
+              <div class="route-step-num">1</div>
+              <div class="route-step-content">Start at CMS Bus Terminal, take a BRT bus towards Ajah <div class="route-step-vehicles"><span class="app-tag xs muted">Bus</span></div></div>
+              <div class="route-step-fare">₦400</div>
+            </div>
+            <div class="route-step">
+              <div class="route-step-num">2</div>
+              <div class="route-step-content">Get off at Ajah roundabout, take a Keke to Obalende <div class="route-step-vehicles"><span class="app-tag xs muted">Keke</span></div></div>
+              <div class="route-step-fare">₦200</div>
+            </div>
+            <div class="route-step">
+              <div class="route-step-num">3</div>
+              <div class="route-step-content">Walk 5 mins to Obalende Bus Stop — you've arrived</div>
+              <div class="route-step-fare">—</div>
+            </div>
+          </div>
+          <!-- zone: image grid (3-up) -->
+          <div class="post-image-grid">
+            <div class="img-3" style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;">
+              <div class="img-item" style="grid-row:span 2;aspect-ratio:auto;">CMS terminal</div>
+              <div class="img-item">Ajah junction</div>
+              <div class="img-item">Obalende stop</div>
+            </div>
+          </div>
+          <!-- zone: map preview -->
+          <div class="post-map-preview">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Map preview — 3 pins
+          </div>
+          <!-- zone: action bar -->
+          <div class="post-action-bar">
+            <button class="post-action liked"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 42</button>
+            <button class="post-action"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 12</button>
+            <button class="post-action"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+            <button class="post-action"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+            <div style="flex:1;"></div>
+            <div class="trust-badge compact verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 72</div>
+          </div>
+        </div>
+
+        <!-- Along Suggestion variant -->
+        <div class="post-card suggestion">
+          <div class="suggestion-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18m-9-9h18"/></svg> Along Suggestion</div>
+          <div class="post-header" style="padding-top:8px;">
+            <div class="app-avatar x40" style="background:var(--color-primary);color:var(--color-text-inverse);">A</div>
+            <div class="post-header-info">
+              <div class="post-header-name">Along AI</div>
+              <div class="post-header-handle">Suggested route · <span class="post-header-time">Just now</span></div>
+            </div>
+            <div class="post-header-more"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+          </div>
+          <div class="post-vehicles">
+            <span class="app-tag xs muted"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="18" r="3.5"/><circle cx="18.5" cy="18" r="3.5"/><path d="M12 18V5l-7 3v10"/></svg>Bike</span>
+          </div>
+          <div class="post-title">Try biking from CMS to Mariana — faster than driving</div>
+          <div class="post-route">
+            <div class="route-step">
+              <div class="route-step-num">1</div>
+              <div class="route-step-content">Pick up a bike at CMS cycle hub</div>
+              <div class="route-step-fare">₦100</div>
+            </div>
+            <div class="route-step">
+              <div class="route-step-num">2</div>
+              <div class="route-step-content">Follow the coastal path to Mariana market (25 min)</div>
+              <div class="route-step-fare">—</div>
+            </div>
+          </div>
+          <div class="post-action-bar">
+            <button class="post-action"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 18</button>
+            <button class="post-action"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 5</button>
+            <button class="post-action"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    VehicleChip (derived from §2.4 + §6.9)
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §2.4 VehicleChip -->
+    <div class="section">
+      <div class="section-ref">§2.4 · §6.9</div>
+      <h2 class="section-title">VehicleChip</h2>
+      <p class="section-subtitle">All 7 vehicle types with Lucide icon + label + colour per DESIGN.md §2.4. Used inline in route steps and post headers.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span class="app-tag sm" style="background:#fefce8;color:#854d0e;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+          Taxi
+        </span>
+        <span class="app-tag sm" style="background:#fff7ed;color:#9a3412;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="18" r="3.5"/><circle cx="18.5" cy="18" r="3.5"/><path d="M12 18V5l-7 3v10"/><path d="M16 12h-2"/></svg>
+          Bike
+        </span>
+        <span class="app-tag sm" style="background:#f0fdf4;color:#166534;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h5l4 8"/><circle cx="10" cy="17" r="4"/><path d="M13 6h5l3 5-4 2"/><line x1="7" y1="8" x2="10" y2="8"/></svg>
+          Keke
+        </span>
+        <span class="app-tag sm" style="background:#eff6ff;color:#1d4ed8;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"/><path d="M6 11H4v2h2"/><circle cx="8" cy="15" r="2"/><circle cx="17" cy="15" r="2"/><path d="M18 11h2v2h-2"/></svg>
+          Bus
+        </span>
+        <span class="app-tag sm" style="background:#f9fafb;color:#374151;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/><circle cx="12" cy="12" r="4"/></svg>
+          Trekking
+        </span>
+        <span class="app-tag sm" style="background:#eef2ff;color:#3730a3;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+          Car
+        </span>
+        <span class="app-tag sm" style="background:#f7fee7;color:#3f6212;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18" r="2.5"/><circle cx="18.5" cy="18" r="2.5"/></svg>
+          Bolt
+        </span>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+    §6.11 DraftingCoach
+    ════════════════════════════════════════════════════════════════════ -->
+    <!-- §6.11 DraftingCoach -->
+    <div class="section" style="border-bottom:none;">
+      <div class="section-ref">§6.11</div>
+      <h2 class="section-title">DraftingCoach</h2>
+      <p class="section-subtitle">Collapsible panel inside ShareRouteModal. Score bar with gradient, top nudge alert, completed chips.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;">
+        <!-- Expanded state -->
+        <div class="drafting-coach">
+          <div class="coach-header">
+            <div class="coach-header-left">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+              Route Quality Score
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coach-body">
+            <div class="score-bar"><div class="score-fill" style="width:35%;"></div></div>
+            <div class="score-label"><span>Predicted: <strong>65</strong></span><span>Needs improvement</span></div>
+            <div class="coach-nudge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <div>Add fare amounts to each step to improve your score by 15 points.</div>
+            </div>
+            <div class="coach-completed">
+              <span class="app-tag xs success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Title added</span>
+              <span class="app-tag xs success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 2 stops</span>
+              <span class="app-tag xs success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Vehicles set</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapsed state -->
+        <div class="drafting-coach">
+          <div class="coach-header">
+            <div class="coach-header-left">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+              Route Quality Score
+            </div>
+            <div class="flex items-center gap-8">
+              <span class="app-tag xs success" style="font-size:10px;">75</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed state -->
+        <div class="drafting-coach">
+          <div class="coach-header">
+            <div class="coach-header-left">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+              Route Quality Score
+            </div>
+            <div class="flex items-center gap-8">
+              <span class="app-tag xs success" style="font-size:10px;">92</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+            </div>
+          </div>
+          <div class="coach-body">
+            <div class="score-bar"><div class="score-fill" style="width:8%;"></div></div>
+            <div class="score-label"><span>Predicted: <strong>92</strong></span><span>Great route!</span></div>
+            <div class="coach-completed" style="margin-top:8px;">
+              <span class="app-tag xs success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> All checkpoints complete</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* Interactive state toggles for demo purposes — hover/active handled by CSS */
+    console.log('Along Design System — Component Library loaded');
+  </script>
+</body>
+</html>

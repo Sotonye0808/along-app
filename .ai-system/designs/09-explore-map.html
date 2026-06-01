@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="along-route" content="design-system" />
+  <meta name="along-component" content="ExploreMap, AppInput, AppButton, AppTag, AppCard, VehicleChip, TrustBadge, PostCard, AppUserLabel, AppAvatar" />
+  <title>Explore Map — Along Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Inter',-apple-system,system-ui,sans-serif;color:var(--color-text-primary);background:var(--color-bg-base)}
+
+    :root{
+      --color-primary:#00623B;--color-primary-light:#00A862;--color-primary-dark:#004A2C;--color-primary-muted:#E6F4EE;
+      --color-bg-base:#FFFFFF;--color-bg-elevated:#F7F7F7;--color-bg-card:#FFFFFF;--color-bg-overlay:rgba(0,0,0,0.48);
+      --color-text-primary:#1A1A1A;--color-text-secondary:#6B7280;--color-text-muted:#9CA3AF;--color-text-inverse:#FFFFFF;
+      --color-border:#E5E7EB;--color-border-strong:#D1D5DB;
+      --color-success:#D1FAE5;--color-success-text:#065F46;--color-success-border:#6EE7B7;
+      --color-warning:#FEF3C7;--color-warning-text:#92400E;--color-warning-border:#FCD34D;
+      --color-error:#FEE2E2;--color-error-text:#7F1D1D;--color-error-border:#FCA5A5;
+      --color-info:#DBEAFE;--color-info-text:#1E3A8A;--color-info-border:#93C5FD;
+      --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--radius-2xl:24px;--radius-pill:999px;--radius-circle:50%;
+      --shadow-xs:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm:0 2px 8px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --shadow-md:0 4px 16px rgba(0,0,0,0.10),0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg:0 8px 32px rgba(0,0,0,0.12),0 4px 16px rgba(0,0,0,0.06);
+      --shadow-xl:0 16px 48px rgba(0,0,0,0.14),0 8px 24px rgba(0,0,0,0.08);
+      --shadow-primary:0 8px 32px rgba(0,98,59,0.20),0 2px 8px rgba(0,98,59,0.12);
+      --duration-fast:120ms;--duration-base:200ms;--duration-moderate:300ms;
+    }
+
+    .nav-bar{position:sticky;top:0;z-index:100;background:var(--color-bg-card);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo svg{width:32px;height:32px}
+    .nav-logo span{font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--color-primary)}
+    .nav-links{display:flex;gap:4px;align-items:center}
+    .nav-links a{text-decoration:none;padding:8px 16px;border-radius:var(--radius-md);font-size:14px;font-weight:500;color:var(--color-text-secondary);transition:background var(--duration-fast) ease-out,color var(--duration-fast) ease-out}
+    .nav-links a:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+    .nav-links a.active{background:var(--color-primary-muted);color:var(--color-primary)}
+    .page{max-width:1280px;margin:0 auto;padding:0 24px}
+    .section{padding:48px 0;border-bottom:1px solid var(--color-border)}
+    .section-ref{font-size:12px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:4px}
+    .section-title{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px}
+    .section-subtitle{font-size:14px;color:var(--color-text-secondary);margin-bottom:32px}
+
+    .device-row{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;padding:32px}
+    .device-frame{border-radius:var(--radius-xl);border:1px solid var(--color-border);overflow:hidden;box-shadow:var(--shadow-md)}
+    .device-frame .device-label{padding:8px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted);background:var(--color-bg-elevated);border-bottom:1px solid var(--color-border);text-align:center}
+    .frame-mobile{width:375px;min-height:812px}
+    .frame-desktop{width:100%;max-width:1280px;min-height:auto}
+
+    .zone-chip{display:inline-flex;align-items:center;gap:6px;background:var(--color-primary-muted);color:var(--color-primary);font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--radius-pill);letter-spacing:0.04em}
+    .zone-chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ═══════════════════════════════════════════════════════════════
+       EXPLORE MAP — Light Theme (DESIGN.md §7.4)
+       Full-viewport map base, glass overlays
+       ═══════════════════════════════════════════════════════════════ */
+
+    /* ── Map base layer ── */
+    .exp-map{position:relative;width:100%;height:100%;background:#E8F0E8;overflow:hidden}
+    .exp-map-bg{position:absolute;inset:0;opacity:0.3;pointer-events:none}
+    .exp-map-bg svg{width:100%;height:100%}
+
+    /* ── Desktop: glass top overlay bar ── */
+    .exp-top{position:absolute;top:0;left:0;right:0;z-index:15;display:flex;align-items:center;gap:12px;padding:12px 20px;background:rgba(255,255,255,0.72);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid rgba(255,255,255,0.48)}
+    .exp-top .exp-search{position:relative;width:360px;flex-shrink:0}
+    .exp-top .exp-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--color-text-muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+    .exp-top .exp-search input{width:100%;height:40px;padding:10px 12px 10px 36px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;outline:none;background:var(--color-bg-base);color:var(--color-text-primary);transition:border-color var(--duration-fast),box-shadow var(--duration-fast)}
+    .exp-top .exp-search input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,98,59,0.12)}
+    .exp-top .exp-search input::placeholder{color:var(--color-text-muted)}
+    .exp-top .exp-filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .exp-top .exp-nearme{width:40px;height:40px;border-radius:var(--radius-md);border:1.5px solid var(--color-border);background:var(--color-bg-card);color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background var(--duration-fast),color var(--duration-fast)}
+    .exp-top .exp-nearme:hover{background:var(--color-bg-elevated);color:var(--color-primary)}
+    .exp-top .exp-nearme svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── Filter chip ── */
+    .exp-filter-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:500;border:1.5px solid var(--color-border);background:var(--color-bg-card);color:var(--color-text-secondary);cursor:pointer;transition:all var(--duration-fast);font-family:'Inter',sans-serif;white-space:nowrap}
+    .exp-filter-chip:hover{border-color:var(--color-primary-muted);background:var(--color-primary-muted);color:var(--color-primary)}
+    .exp-filter-chip.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+    .exp-filter-chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── Desktop left panel (320px, glass, slides from left) ── */
+    .exp-panel{position:absolute;top:68px;left:0;bottom:0;width:320px;z-index:12;display:flex;flex-direction:column;background:rgba(255,255,255,0.88);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border-right:1px solid rgba(255,255,255,0.48);overflow:hidden;transition:transform var(--duration-moderate) cubic-bezier(0.34,1.56,0.64,1)}
+    .exp-panel.collapsed{transform:translateX(-100%)}
+    .exp-panel-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--color-border)}
+    .exp-panel-head .eph-title{font-size:14px;font-weight:600}
+    .exp-panel-head .eph-count{font-size:13px;color:var(--color-text-secondary)}
+    .exp-panel-head .eph-toggle{width:32px;height:32px;border-radius:var(--radius-circle);border:none;background:var(--color-bg-elevated);color:var(--color-text-secondary);cursor:pointer;display:grid;place-items:center;transition:background var(--duration-fast)}
+    .exp-panel-head .eph-toggle:hover{background:var(--color-primary-muted);color:var(--color-primary)}
+    .exp-panel-head .eph-toggle svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .exp-panel-body{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+    .exp-panel-body .exp-sort{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+    .exp-panel-body .exp-sort select{height:32px;padding:0 8px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:12px;font-family:'Inter',sans-serif;color:var(--color-text-primary);background:var(--color-bg-base);outline:none}
+    .exp-panel-body .exp-sort label{font-size:12px;color:var(--color-text-secondary)}
+
+    /* ── Mini PostCard for explore panel ── */
+    .exp-mini-post{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:12px;cursor:pointer;transition:box-shadow var(--duration-base),transform var(--duration-base);box-shadow:var(--shadow-xs)}
+    .exp-mini-post:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+    .exp-mini-post .emp-head{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+    .exp-mini-post .emp-avatar{width:24px;height:24px;border-radius:var(--radius-circle);background:var(--color-primary-muted);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--color-primary);flex-shrink:0}
+    .exp-mini-post .emp-name{font-size:12px;font-weight:600}
+    .exp-mini-post .emp-title{font-size:13px;font-weight:600;margin-bottom:4px;cursor:pointer}
+    .exp-mini-post .emp-title:hover{text-decoration:underline}
+    .exp-mini-post .emp-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-text-muted)}
+    .exp-mini-post .emp-meta svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .exp-mini-post .emp-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+    .exp-mini-post .emp-tag{display:inline-flex;padding:1px 6px;border-radius:var(--radius-pill);font-size:10px;font-weight:500;background:var(--color-bg-elevated);color:var(--color-text-secondary);text-decoration:none}
+    .exp-mini-post .emp-tag:hover{background:var(--color-primary-muted);color:var(--color-primary)}
+    .exp-mini-post .emp-tbadge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:var(--radius-pill);font-size:10px;font-weight:600;margin-left:auto}
+    .exp-mini-post .emp-tbadge svg{width:10px;height:10px}
+    .exp-mini-post .emp-tbadge.verified{background:var(--color-success);color:var(--color-success-text)}
+    .exp-mini-post .emp-tbadge.developing{background:var(--color-warning);color:var(--color-warning-text)}
+    .exp-mini-post .emp-tbadge.trusted{background:var(--color-info);color:var(--color-info-text)}
+    .exp-mini-post .emp-tbadge.low{background:var(--color-error);color:var(--color-error-text)}
+
+    /* ── Map pin cluster ── */
+    .exp-cluster{position:absolute;z-index:8;pointer-events:none}
+    .exp-cluster .ec-circle{width:40px;height:40px;border-radius:var(--radius-circle);background:var(--color-primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,98,59,0.3);border:2.5px solid rgba(255,255,255,0.8)}
+    .exp-cluster .ec-pin-sm{width:24px;height:24px;border-radius:var(--radius-circle);background:var(--color-primary);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,98,59,0.25);border:2px solid #fff;cursor:pointer;pointer-events:auto;transition:transform var(--duration-base)}
+    .exp-cluster .ec-pin-sm:hover{transform:scale(1.15)}
+
+    /* ── Popup card (selected pin) ── */
+    .exp-popup{position:absolute;z-index:20;width:280px;background:rgba(255,255,255,0.88);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.48);border-radius:var(--radius-xl);padding:16px;box-shadow:var(--shadow-lg);animation:scaleIn 200ms ease-out}
+    @keyframes scaleIn{from{transform:scale(0.92);opacity:0}to{transform:scale(1);opacity:1}}
+    .exp-popup .pp-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .exp-popup .pp-avatar{width:32px;height:32px;border-radius:var(--radius-circle);background:var(--color-primary-muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--color-primary);flex-shrink:0}
+    .exp-popup .pp-name{font-size:13px;font-weight:600}
+    .exp-popup .pp-handle{font-size:11px;color:var(--color-text-secondary)}
+    .exp-popup .pp-title{font-size:15px;font-weight:600;margin-bottom:8px}
+    .exp-popup .pp-chips{display:flex;gap:4px;margin-bottom:10px}
+    .exp-popup .pp-vchip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:var(--radius-pill);font-size:10px;font-weight:500}
+    .exp-popup .pp-vchip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .exp-popup .pp-vchip.bus{background:#EFF6FF;color:#1E40AF}
+    .exp-popup .pp-vchip.keke{background:#F0FDF4;color:#166534}
+    .exp-popup .pp-vchip.taxi{background:#FFFBEB;color:#92400E}
+    .exp-popup .pp-btn{display:inline-flex;align-items:center;justify-content:center;height:34px;padding:0 14px;border-radius:var(--radius-md);border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--color-primary);color:#fff;font-family:'Inter',sans-serif;width:100%;transition:background var(--duration-fast)}
+    .exp-popup .pp-btn:hover{background:var(--color-primary-light)}
+    .exp-popup .pp-tbadge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:var(--radius-pill);font-size:10px;font-weight:600}
+    .exp-popup .pp-tbadge svg{width:10px;height:10px}
+    .exp-popup .pp-tbadge.verified{background:var(--color-success);color:var(--color-success-text)}
+    .exp-popup .pp-tbadge.developing{background:var(--color-warning);color:var(--color-warning-text)}
+    .exp-popup .pp-tbadge.trusted{background:var(--color-info);color:var(--color-info-text)}
+
+    /* ── "Share this view" button ── */
+    .exp-share-view{position:absolute;bottom:24px;right:24px;z-index:15;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius-md);border:1px solid var(--color-border);background:rgba(255,255,255,0.88);backdrop-filter:blur(12px) saturate(180%);color:var(--color-text-secondary);font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:background var(--duration-fast),color var(--duration-fast);box-shadow:var(--shadow-sm)}
+    .exp-share-view:hover{background:var(--color-bg-card);color:var(--color-primary)}
+    .exp-share-view svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .exp-share-view.desktop{display:inline-flex}
+    .exp-share-view.mobile{display:none}
+
+    /* ── Mobile layout ── */
+    .exp-mobile{position:relative;width:100%;height:100%;min-height:812px;background:#E8F0E8;overflow:hidden}
+    .exp-mobile .exp-top-mob{position:absolute;top:0;left:0;right:0;z-index:15;display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,0.72);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
+    .exp-mobile .exp-top-mob .exp-search{position:relative;flex:1}
+    .exp-mobile .exp-top-mob .exp-search input{width:100%;height:40px;padding:10px 12px 10px 36px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;outline:none;background:var(--color-bg-base);color:var(--color-text-primary);transition:border-color var(--duration-fast),box-shadow var(--duration-fast)}
+    .exp-mobile .exp-top-mob .exp-search input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,98,59,0.12)}
+    .exp-mobile .exp-top-mob .exp-search input::placeholder{color:var(--color-text-muted)}
+    .exp-mobile .exp-top-mob .exp-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--color-text-muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+    .exp-mobile .exp-top-mob .exp-filter-btn{width:40px;height:40px;border-radius:var(--radius-md);border:1.5px solid var(--color-border);background:var(--color-bg-card);color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .exp-mobile .exp-top-mob .exp-filter-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── Mobile bottom sheet ── */
+    .exp-bottom-sheet{position:absolute;left:0;right:0;bottom:0;z-index:15;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border-top:1px solid rgba(255,255,255,0.48);border-radius:var(--radius-2xl) var(--radius-2xl) 0 0;max-height:75vh;overflow-y:auto;transition:height var(--duration-moderate) cubic-bezier(0.34,1.56,0.64,1);padding-bottom:12px}
+    .exp-bottom-sheet .ebs-handle{display:flex;justify-content:center;padding:10px 0 6px}
+    .exp-bottom-sheet .ebs-handle-bar{width:40px;height:4px;background:var(--color-border);border-radius:var(--radius-pill)}
+    .exp-bottom-sheet .ebs-header{display:flex;align-items:center;justify-content:space-between;padding:0 16px 10px}
+    .exp-bottom-sheet .ebs-header span{font-size:13px;font-weight:600}
+    .exp-bottom-sheet .ebs-header .ebs-count{font-size:12px;color:var(--color-text-secondary)}
+    .exp-bottom-sheet .ebs-list{display:flex;flex-direction:column;gap:8px;padding:0 16px}
+
+    /* ═══════════════════════════════════════════════════════════════
+       MAP POLYLINES + PINS (decorative SVG inside map area)
+       ═══════════════════════════════════════════════════════════════ */
+    .exp-deco-pins{position:absolute;inset:0;pointer-events:none;z-index:5}
+    .exp-deco-pins .ed-pin{position:absolute;width:16px;height:16px;border-radius:var(--radius-circle);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff;border:1.5px solid #fff}
+    .exp-deco-pins .ed-pin.origin{background:var(--color-primary);width:18px;height:18px}
+    .exp-deco-pins .ed-pin.waypoint{background:#fff;border-color:var(--color-primary);color:var(--color-primary)}
+    .exp-deco-pins .ed-pin.dest{background:var(--color-primary-dark);width:18px;height:18px}
+    .exp-deco-polyline{position:absolute;z-index:4;pointer-events:none;opacity:0.6}
+    .exp-deco-polyline svg{overflow:visible}
+    .exp-deco-polyline path{fill:none;stroke:var(--color-primary);stroke-width:3;opacity:0.8;stroke-linejoin:round}
+
+    .exp-city-label{position:absolute;font-size:20px;font-weight:700;color:rgba(0,98,59,0.15);letter-spacing:0.04em;pointer-events:none;text-transform:uppercase;z-index:2}
+
+    @media(min-width:1024px){
+      .exp-mobile{display:none}
+      .exp-share-view.desktop{display:inline-flex}
+      .exp-share-view.mobile{display:none}
+    }
+    @media(max-width:1023px){
+      .exp-desktop{display:none}
+      .exp-share-view.desktop{display:none}
+      .exp-share-view.mobile{display:inline-flex}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- NAVBAR                                            -->
+<!-- ══════════════════════════════════════════════════ -->
+<nav class="nav-bar">
+  <a class="nav-logo" href="./README.md">
+    <svg viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="14" stroke="var(--color-primary)" stroke-width="2"/>
+      <circle cx="12" cy="12" r="3" fill="var(--color-primary)" stroke="var(--color-primary)" stroke-width="1.5"/>
+      <circle cx="22" cy="20" r="3" fill="var(--color-primary)" stroke="var(--color-primary)" stroke-width="1.5"/>
+      <path d="M14 14L20 18" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span>Along</span>
+  </a>
+  <div class="nav-links">
+    <a href="01-design-system-tokens.html">Tokens</a>
+    <a href="02-design-system-components.html">Components</a>
+    <a href="03-landing-light.html">Landing</a>
+    <a href="04-landing-dark.html">Dark</a>
+    <a href="05-auth-flow.html">Auth</a>
+    <a href="06-home-feed-light.html">Feed</a>
+    <a href="07-home-feed-dark.html">Feed Dark</a>
+    <a href="08-share-route-modal.html">Share</a>
+    <a class="active" href="09-explore-map.html">Explore</a>
+    <a href="10-post-detail-light.html">Post</a>
+    <a href="11-post-detail-dark.html">Post Dark</a>
+    <a href="12-profile-page.html">Profile</a>
+    <a href="13-notifications.html">Notif</a>
+    <a href="14-bookmarks.html">Bmks</a>
+    <a href="15-admin-dashboard.html">Admin</a>
+    <a href="16-analytics.html">Analytics</a>
+    <a href="17-about-contact.html">About</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="section">
+    <div class="section-ref">DESIGN.md §7.4</div>
+    <h1 class="section-title">Explore Map — Light Theme</h1>
+    <p class="section-subtitle">Mobile 375px · Desktop 1280px. Full-viewport MapLibre map with glass overlays, filter chips, clustered pins, bottom sheet / left panel. Per DESIGN.md §7.4.</p>
+
+    <div class="device-row">
+      <!-- ══════════════════════════════════════════════ -->
+      <!-- MOBILE 375px — LIGHT                          -->
+      <!-- Full-viewport map, top search, bottom sheet    -->
+      <!-- ══════════════════════════════════════════════ -->
+      <div class="device-frame frame-mobile">
+        <div class="device-label">📱 Mobile 375px · Light</div>
+        <div style="width:375px;font-family:'Inter',sans-serif;color:var(--color-text-primary);line-height:1.5;position:relative">
+
+          <!-- §7.4 — Mobile Explore -->
+          <div class="exp-mobile">
+
+            <!-- Map base (decorative) -->
+            <!-- §7.4 Map: full-viewport MapLibre base layer -->
+            <svg width="375" height="812" viewBox="0 0 375 812" fill="none" style="position:absolute;inset:0;z-index:0;width:100%;height:100%">
+              <rect width="375" height="812" fill="#E8F0E8"/>
+              <!-- Grid lines -->
+              <line x1="0" y1="200" x2="375" y2="200" stroke="rgba(0,98,59,0.08)" stroke-width="1"/>
+              <line x1="0" y1="400" x2="375" y2="400" stroke="rgba(0,98,59,0.08)" stroke-width="1"/>
+              <line x1="0" y1="600" x2="375" y2="600" stroke="rgba(0,98,59,0.08)" stroke-width="1"/>
+              <line x1="0" y1="800" x2="375" y2="800" stroke="rgba(0,98,59,0.08)" stroke-width="1"/>
+              <line x1="80" y1="0" x2="80" y2="812" stroke="rgba(0,98,59,0.08)" stroke-width="1"/>
+              <line x1="180" y1="0" x2="180" y2="812" stroke="rgba(0,98,59,0.08)" stroke-width="1"/>
+              <line x1="300" y1="0" x2="300" y2="812" stroke="rgba(0,98,59,0.08)" stroke-width="1"/>
+              <!-- Route polyline: green, 3px, 0.8 opacity -->
+              <path d="M80 500 L160 380 L260 420" stroke="#00623B" stroke-width="3" opacity="0.8" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M280 280 L320 200" stroke="#00623B" stroke-width="3" opacity="0.6" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- Clustered pins -->
+              <circle cx="80" cy="500" r="20" fill="#00623B" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+              <text x="80" y="505" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="'Inter',sans-serif">14</text>
+              <circle cx="160" cy="380" r="20" fill="#00623B" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+              <text x="160" y="385" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="'Inter',sans-serif">8</text>
+              <circle cx="260" cy="420" r="20" fill="#00623B" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+              <text x="260" y="425" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="'Inter',sans-serif">23</text>
+              <!-- Small pins -->
+              <circle cx="280" cy="280" r="12" fill="#00623B" stroke="#fff" stroke-width="2"/>
+              <text x="280" y="284" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="'Inter',sans-serif">1</text>
+              <circle cx="320" cy="200" r="12" fill="#00623B" stroke="#fff" stroke-width="2"/>
+              <text x="320" y="204" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="'Inter',sans-serif">3</text>
+            </svg>
+
+            <!-- §7.4 — Top overlay bar: Search + filter icon (mobile) -->
+            <!-- Glass morphism: rgba white bg, blur 16px, saturate 180% -->
+            <div class="exp-top-mob">
+              <div class="exp-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" placeholder="Search routes, places..." />
+              </div>
+              <!-- SlidersHorizontal icon button -->
+              <button class="exp-filter-btn" aria-label="Filters">
+                <svg viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="15"/><line x1="16" y1="3" x2="14" y2="15"/></svg>
+              </button>
+            </div>
+
+            <!-- §7.4 — Mobile bottom sheet (40vh collapsed, 80vh expanded) -->
+            <!-- Glass: rgba white 0.92, blur 16px, saturate 180%, 24px top radius -->
+            <div class="exp-bottom-sheet" style="height:340px">
+              <div class="ebs-handle">
+                <div class="ebs-handle-bar"></div>
+              </div>
+              <div class="ebs-header">
+                <span>Nearby routes</span>
+                <span class="ebs-count">47 found</span>
+              </div>
+              <div class="ebs-list">
+
+                <!-- Mini PostCard 1 -->
+                <div class="exp-mini-post">
+                  <div class="emp-head">
+                    <div class="emp-avatar">TC</div>
+                    <div class="emp-name" style="flex:1">Tega Coker</div>
+                    <!-- TrustBadge Verified sm -->
+                    <span class="emp-tbadge verified">
+                      <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                      72
+                    </span>
+                  </div>
+                  <div class="emp-title">Marina → Yaba via Obalende</div> <!-- links to /posts/[id] -->
+                  <div class="emp-meta">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    3 steps
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 6v12"/><path d="M9 9h6"/></svg>
+                    ₦200–₦350
+                  </div>
+                  <div class="emp-tags">
+                    <a class="emp-tag" href="/explore?tag=lagos">#lagos</a>
+                    <a class="emp-tag" href="/explore?tag=bus">#bus</a>
+                  </div>
+                </div>
+
+                <!-- Mini PostCard 2 -->
+                <div class="exp-mini-post">
+                  <div class="emp-head">
+                    <div class="emp-avatar" style="background:var(--color-warning);color:var(--color-warning-text)">FO</div>
+                    <div class="emp-name" style="flex:1">Femi Ogunlade</div>
+                    <!-- TrustBadge Trusted sm -->
+                    <span class="emp-tbadge trusted">
+                      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                      88
+                    </span>
+                  </div>
+                  <div class="emp-title">Ikeja to Lekki — Express Route</div> <!-- links to /posts/[id] -->
+                  <div class="emp-meta">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    2 steps
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 6v12"/><path d="M9 9h6"/></svg>
+                    ₦800–₦1,200
+                  </div>
+                  <div class="emp-tags">
+                    <a class="emp-tag" href="/explore?tag=ikeja">#ikeja</a>
+                    <a class="emp-tag" href="/explore?tag=lekki">#lekki</a>
+                    <a class="emp-tag" href="/explore?tag=taxi">#taxi</a>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div><!-- /exp-mobile -->
+
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════ -->
+      <!-- DESKTOP 1280px — LIGHT                        -->
+      <!-- Full-viewport map + glass overlays             -->
+      <!-- ══════════════════════════════════════════════ -->
+      <div class="device-frame frame-desktop">
+        <div class="device-label">🖥️ Desktop 1280px · Light · Explore Map</div>
+        <div style="font-family:'Inter',sans-serif;color:var(--color-text-primary);line-height:1.5;background:var(--color-bg-base)">
+
+          <!-- §7.4 — Desktop Explore: full-viewport map container -->
+          <div class="exp-map" style="height:720px">
+
+            <!-- Map base layer (decorative map grid + city labels) -->
+            <svg width="100%" height="100%" viewBox="0 0 1280 720" preserveAspectRatio="none" class="exp-map-bg" style="position:absolute;inset:0;z-index:0">
+              <rect width="1280" height="720" fill="#E8F0E8"/>
+              <!-- Map tiles/grid -->
+              <line x1="0" y1="120" x2="1280" y2="120" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="0" y1="240" x2="1280" y2="240" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="0" y1="360" x2="1280" y2="360" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="0" y1="480" x2="1280" y2="480" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="0" y1="600" x2="1280" y2="600" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="160" y1="0" x2="160" y2="720" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="320" y1="0" x2="320" y2="720" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="480" y1="0" x2="480" y2="720" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="640" y1="0" x2="640" y2="720" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="800" y1="0" x2="800" y2="720" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="960" y1="0" x2="960" y2="720" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <line x1="1120" y1="0" x2="1120" y2="720" stroke="rgba(0,98,59,0.06)" stroke-width="1"/>
+              <!-- City labels -->
+              <text x="100" y="160" font-size="28" font-weight="700" fill="rgba(0,98,59,0.10)" font-family="'Inter',sans-serif" letter-spacing="1">LAGOS</text>
+              <text x="550" y="400" font-size="22" font-weight="700" fill="rgba(0,98,59,0.08)" font-family="'Inter',sans-serif" letter-spacing="1">IKEJA</text>
+              <text x="900" y="250" font-size="24" font-weight="700" fill="rgba(0,98,59,0.08)" font-family="'Inter',sans-serif" letter-spacing="1">LEKKI</text>
+              <text x="350" y="530" font-size="18" font-weight="700" fill="rgba(0,98,59,0.07)" font-family="'Inter',sans-serif" letter-spacing="1">OSHODI</text>
+              <text x="1000" y="540" font-size="20" font-weight="700" fill="rgba(0,98,59,0.08)" font-family="'Inter',sans-serif" letter-spacing="1">V.I.</text>
+              <!-- River/lagoon area -->
+              <ellipse cx="640" cy="500" rx="300" ry="100" fill="rgba(0,98,59,0.04)" stroke="rgba(0,98,59,0.08)" stroke-width="1"/>
+              <!-- Route polyline 1 -->
+              <path d="M160 280 L320 320 L480 260 L560 340" stroke="#00623B" stroke-width="3" opacity="0.8" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- Route polyline 2 -->
+              <path d="M720 180 L880 220 L960 160" stroke="#00623B" stroke-width="3" opacity="0.6" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- Route polyline 3 (suggestion, dashed) -->
+              <path d="M320 480 L560 520 L720 460" stroke="#00A862" stroke-width="2.5" opacity="0.6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="8 4"/>
+              <!-- Clusters -->
+              <circle cx="320" cy="320" r="22" fill="#00623B" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+              <text x="320" y="326" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="'Inter',sans-serif">14</text>
+              <circle cx="480" cy="260" r="22" fill="#00623B" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+              <text x="480" y="266" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="'Inter',sans-serif">8</text>
+              <circle cx="880" cy="220" r="22" fill="#00623B" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+              <text x="880" y="226" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="'Inter',sans-serif">23</text>
+              <!-- Smaller pins -->
+              <circle cx="560" cy="340" r="12" fill="#00623B" stroke="#fff" stroke-width="2"/>
+              <text x="560" y="344" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="'Inter',sans-serif">3</text>
+              <circle cx="960" cy="160" r="12" fill="#00623B" stroke="#fff" stroke-width="2"/>
+              <text x="960" y="164" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="'Inter',sans-serif">5</text>
+              <circle cx="720" cy="460" r="12" fill="#00A862" stroke="#fff" stroke-width="2"/>
+              <text x="720" y="464" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="'Inter',sans-serif">2</text>
+            </svg>
+
+            <!-- §7.4 — Top overlay bar (glass): Search + filter chips + Near me -->
+            <div class="exp-top">
+              <div class="exp-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" placeholder="Search routes, places..." />
+              </div>
+              <div class="exp-filters">
+                <!-- §2.4 VehicleChip filters: Lucide icon names annotated -->
+                <button class="exp-filter-chip active"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Bus</button>
+                <button class="exp-filter-chip"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-6h15L21 9"/><path d="M3 9v9a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1"/><path d="M17 18a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg>Keke</button>
+                <button class="exp-filter-chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><path d="M9 20l3-9 3 9"/><path d="M6 12h12"/></svg>Trekking</button>
+                <button class="exp-filter-chip"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Taxi</button>
+                <button class="exp-filter-chip active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Verified</button>
+                <button class="exp-filter-chip"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>Trusted</button>
+              </div>
+              <!-- "Near me" LocateFixed button -->
+              <button class="exp-nearme" aria-label="Near me">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+              </button>
+            </div>
+
+            <!-- §7.4 — Left side panel (320px, glass, slides from left) -->
+            <div class="exp-panel">
+              <div class="exp-panel-head">
+                <div>
+                  <div class="eph-title">Nearby routes</div>
+                  <div class="eph-count">47 routes found</div>
+                </div>
+                <button class="eph-toggle" aria-label="Collapse panel">
+                  <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+              </div>
+              <div class="exp-panel-body">
+                <!-- Sort: Validity / Recency / Distance -->
+                <div class="exp-sort">
+                  <label for="sort-select">Sort by</label>
+                  <select id="sort-select">
+                    <option>Validity score</option>
+                    <option>Recency</option>
+                    <option>Distance</option>
+                  </select>
+                </div>
+
+                <!-- Mini PostCard list (no nested map) -->
+                <div class="exp-mini-post">
+                  <div class="emp-head">
+                    <div class="emp-avatar">TC</div>
+                    <div class="emp-name" style="flex:1">Tega Coker</div>
+                    <span class="emp-tbadge verified"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>72</span>
+                  </div>
+                  <div class="emp-title">Marina → Yaba via Obalende</div>
+                  <div class="emp-meta">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    3 steps · <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 6v12"/><path d="M9 9h6"/></svg>₦200–₦350
+                  </div>
+                  <div class="emp-tags">
+                    <a class="emp-tag" href="/explore?tag=lagos">#lagos</a>
+                    <a class="emp-tag" href="/explore?tag=bus">#bus</a>
+                  </div>
+                </div>
+
+                <div class="exp-mini-post">
+                  <div class="emp-head">
+                    <div class="emp-avatar" style="background:var(--color-warning);color:var(--color-warning-text)">FO</div>
+                    <div class="emp-name" style="flex:1">Femi Ogunlade</div>
+                    <span class="emp-tbadge trusted"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>88</span>
+                  </div>
+                  <div class="emp-title">Ikeja to Lekki — Express</div>
+                  <div class="emp-meta">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    2 steps · <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 6v12"/><path d="M9 9h6"/></svg>₦800–₦1,200
+                  </div>
+                  <div class="emp-tags">
+                    <a class="emp-tag" href="/explore?tag=ikeja">#ikeja</a>
+                    <a class="emp-tag" href="/explore?tag=taxi">#taxi</a>
+                  </div>
+                </div>
+
+                <div class="exp-mini-post">
+                  <div class="emp-head">
+                    <div class="emp-avatar" style="background:var(--color-info);color:var(--color-info-text)">AC</div>
+                    <div class="emp-name" style="flex:1">Amara Chukwu</div>
+                    <span class="emp-tbadge developing"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>44</span>
+                  </div>
+                  <div class="emp-title">Mile 2 → Ojota via Ikorodu Rd</div>
+                  <div class="emp-meta">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    3 steps · <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 6v12"/><path d="M9 9h6"/></svg>₦300–₦800
+                  </div>
+                  <div class="emp-tags">
+                    <a class="emp-tag" href="/explore?tag=lagos">#lagos</a>
+                    <a class="emp-tag" href="/explore?tag=ikorodu">#ikorodu</a>
+                  </div>
+                </div>
+
+                <div class="exp-mini-post">
+                  <div class="emp-head">
+                    <div class="emp-avatar" style="background:var(--color-success);color:var(--color-success-text)">BS</div>
+                    <div class="emp-name" style="flex:1">Blessing Samuel</div>
+                    <span class="emp-tbadge verified"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>65</span>
+                  </div>
+                  <div class="emp-title">Surulere → VI via Eko Bridge</div>
+                  <div class="emp-meta">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    2 steps · <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 6v12"/><path d="M9 9h6"/></svg>₦500–₦700
+                  </div>
+                  <div class="emp-tags">
+                    <a class="emp-tag" href="/explore?tag=lagos">#lagos</a>
+                    <a class="emp-tag" href="/explore?tag=keke">#keke</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- §7.4 — Selected pin popup card (AppCard glass, 280px) -->
+            <!-- Positioned over a cluster on the map -->
+            <div class="exp-popup" style="top:200px;left:420px">
+              <div class="pp-head">
+                <div class="pp-avatar">TC</div>
+                <div>
+                  <div class="pp-name">Tega Coker</div>
+                  <div class="pp-handle">@tega_c · 2h ago</div>
+                </div>
+              </div>
+              <div class="pp-title">Marina → Yaba via Obalende</div> <!-- links to /posts/[id] -->
+              <!-- VehicleChips -->
+              <div class="pp-chips">
+                <span class="pp-vchip bus"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Bus</span>
+                <span class="pp-vchip keke"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-6h15L21 9"/><path d="M3 9v9a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1"/><path d="M17 18a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg>Keke</span>
+              </div>
+              <!-- TrustBadge Verified sm -->
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+                <span class="pp-tbadge verified"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Verified 72</span>
+              </div>
+              <!-- "View Route" AppButton primary sm -->
+              <button class="pp-btn">View Route</button>
+            </div>
+
+            <!-- "Share this view" AppButton ghost sm + Link2 icon -->
+            <button class="exp-share-view desktop" aria-label="Share this view">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Share this view
+            </button>
+
+          </div><!-- /exp-map -->
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

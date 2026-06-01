@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="along-route" content="design-system" />
+  <meta name="along-component" content="AdminDashboard, DashboardSidebar, AppCard, AppTable, AppButton, AppTag, AppAvatar, AppUserLabel, AppDropdown, AppStatusDot" />
+  <title>Admin Dashboard — Along Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Inter',-apple-system,system-ui,sans-serif;color:var(--color-text-primary);background:var(--color-bg-base)}
+
+    :root{
+      --color-primary:#00623B;--color-primary-light:#00A862;--color-primary-dark:#004A2C;--color-primary-muted:#E6F4EE;
+      --color-bg-base:#FFFFFF;--color-bg-elevated:#F7F7F7;--color-bg-card:#FFFFFF;--color-bg-overlay:rgba(0,0,0,0.48);
+      --color-text-primary:#1A1A1A;--color-text-secondary:#6B7280;--color-text-muted:#9CA3AF;--color-text-inverse:#FFFFFF;
+      --color-border:#E5E7EB;--color-border-strong:#D1D5DB;
+      --color-success:#D1FAE5;--color-success-text:#065F46;--color-success-border:#6EE7B7;
+      --color-warning:#FEF3C7;--color-warning-text:#92400E;--color-warning-border:#FCD34D;
+      --color-error:#FEE2E2;--color-error-text:#7F1D1D;--color-error-border:#FCA5A5;
+      --color-info:#DBEAFE;--color-info-text:#1E3A8A;--color-info-border:#93C5FD;
+      --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--radius-2xl:24px;--radius-pill:999px;--radius-circle:50%;
+      --shadow-xs:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm:0 2px 8px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --shadow-md:0 4px 16px rgba(0,0,0,0.10),0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg:0 8px 32px rgba(0,0,0,0.12),0 4px 16px rgba(0,0,0,0.06);
+      --shadow-xl:0 16px 48px rgba(0,0,0,0.14),0 8px 24px rgba(0,0,0,0.08);
+      --shadow-primary:0 8px 32px rgba(0,98,59,0.20),0 2px 8px rgba(0,98,59,0.12);
+      --duration-fast:120ms;--duration-base:200ms;--duration-moderate:300ms;
+    }
+
+    .nav-bar{position:sticky;top:0;z-index:100;background:var(--color-bg-card);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo svg{width:32px;height:32px}
+    .nav-logo span{font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--color-primary)}
+    .nav-links{display:flex;gap:4px;align-items:center}
+    .nav-links a{text-decoration:none;padding:8px 16px;border-radius:var(--radius-md);font-size:14px;font-weight:500;color:var(--color-text-secondary);transition:background var(--duration-fast) ease-out,color var(--duration-fast) ease-out}
+    .nav-links a:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+    .nav-links a.active{background:var(--color-primary-muted);color:var(--color-primary)}
+    .page{max-width:1280px;margin:0 auto;padding:0 24px}
+    .section{padding:48px 0;border-bottom:1px solid var(--color-border)}
+    .section-ref{font-size:12px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:4px}
+    .section-title{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px}
+    .section-subtitle{font-size:14px;color:var(--color-text-secondary);margin-bottom:32px}
+
+    .device-row{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;padding:32px}
+    .device-frame{border-radius:var(--radius-xl);border:1px solid var(--color-border);overflow:hidden;box-shadow:var(--shadow-md)}
+    .device-frame .device-label{padding:8px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted);background:var(--color-bg-elevated);border-bottom:1px solid var(--color-border);text-align:center}
+    .frame-mobile{width:375px;min-height:812px}
+    .frame-desktop{width:100%;max-width:1280px;min-height:auto}
+
+    .zone-chip{display:inline-flex;align-items:center;gap:6px;background:var(--color-primary-muted);color:var(--color-primary);font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--radius-pill);letter-spacing:0.04em}
+    .zone-chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ═══════════════════════════════════════════════════════════════
+       ADMIN DASHBOARD — Desktop 1280px (DESIGN.md §7.8)
+       ═══════════════════════════════════════════════════════════════ */
+
+    .ad-layout{display:flex;min-height:100vh;max-width:1280px;margin:0 auto}
+
+    /* ── DashboardSidebar (DESIGN.md §6.13) ── */
+    .ad-sidebar{width:240px;flex-shrink:0;background:var(--color-bg-card);border-right:1px solid var(--color-border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+    .ad-sidebar .ad-sb-brand{display:flex;align-items:center;gap:8px;padding:24px 20px 16px;text-decoration:none}
+    .ad-sidebar .ad-sb-brand svg{width:28px;height:28px}
+    .ad-sidebar .ad-sb-brand span{font-weight:700;font-size:18px;letter-spacing:-0.02em;color:var(--color-primary)}
+    .ad-sidebar .ad-nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:0 12px 2px;border-radius:var(--radius-md);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;cursor:pointer;transition:background var(--duration-fast),color var(--duration-fast)}
+    .ad-sidebar .ad-nav-item:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+    .ad-sidebar .ad-nav-item.active{background:var(--color-primary-muted);color:var(--color-primary)}
+    .ad-sidebar .ad-nav-item.active svg{stroke:var(--color-primary)}
+    .ad-sidebar .ad-nav-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .ad-sidebar .ad-nav-divider{height:1px;background:var(--color-border);margin:12px 16px}
+    .ad-sidebar .ad-nav-label{font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-muted);padding:0 20px;margin-bottom:4px}
+    .ad-sidebar .ad-sb-user{display:flex;align-items:center;gap:10px;padding:16px 20px;border-top:1px solid var(--color-border);margin-top:auto}
+    .ad-sidebar .ad-sb-user .ad-uavatar{width:32px;height:32px;border-radius:var(--radius-circle);background:var(--color-primary-muted);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--color-primary);flex-shrink:0}
+    .ad-sidebar .ad-sb-user .ad-uname{font-size:14px;font-weight:600;line-height:1.2}
+    .ad-sidebar .ad-sb-user .ad-urole-badge{display:inline-block;padding:1px 6px;border-radius:var(--radius-pill);font-size:10px;font-weight:600;background:var(--color-error);color:var(--color-error-text);text-transform:uppercase;letter-spacing:0.04em}
+
+    /* ── Main content ── */
+    .ad-main{flex:1;padding:32px;max-width:calc(1280px - 240px);display:flex;flex-direction:column;gap:24px}
+
+    /* ── Page heading ── */
+    .ad-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .ad-heading h1{font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.2}
+    .ad-heading .ad-sub{font-size:14px;color:var(--color-text-secondary)}
+    .ad-heading-right{display:flex;align-items:center;gap:8px}
+
+    /* ── Stat cards row ── */
+    .ad-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .ad-stat-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:6px}
+    .ad-stat-card .ad-stat-head{display:flex;align-items:center;justify-content:space-between}
+    .ad-stat-card .ad-stat-icon{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .ad-stat-card .ad-stat-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .ad-stat-card .ad-stat-num{font-size:28px;font-weight:700;line-height:1.1}
+    .ad-stat-card .ad-stat-label{font-size:13px;color:var(--color-text-secondary);font-weight:500}
+    .ad-stat-card .ad-stat-delta{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+    .ad-stat-delta.up{color:var(--color-success-text)}
+    .ad-stat-delta.down{color:var(--color-error-text)}
+
+    /* ── Bento grid ── */
+    .ad-bento{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+    /* ── Chart card ── */
+    .ad-chart-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-sm)}
+    .ad-chart-card.ad-elevated{box-shadow:var(--shadow-md);border:none}
+    .ad-chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .ad-chart-head h3{font-size:16px;font-weight:600}
+    .ad-chart-head .ad-chart-action{font-size:12px;color:var(--color-primary);cursor:pointer;font-weight:500;display:flex;align-items:center;gap:4px}
+    .ad-chart-body{position:relative}
+
+    /* ── Inline SVG chart (line chart) ── */
+    .ad-line-chart svg{width:100%;height:160px;overflow:visible}
+    .ad-line-chart .grid-line{stroke:var(--color-border);stroke-width:1;stroke-dasharray:4}
+    .ad-line-chart .data-line{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+    .ad-line-chart .data-dot{fill:#fff;stroke-width:2.5;cursor:pointer;transition:r var(--duration-fast)}
+    .ad-line-chart .data-dot:hover{r:5}
+    .ad-line-chart .chart-label{font-size:10px;fill:var(--color-text-muted);text-anchor:middle}
+
+    /* ── Horizontal bar chart ── */
+    .ad-bar-list{display:flex;flex-direction:column;gap:10px}
+    .ad-bar-row{display:flex;align-items:center;gap:10px}
+    .ad-bar-row .ad-bar-label{font-size:13px;font-weight:500;width:140px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .ad-bar-row .ad-bar-track{flex:1;height:20px;background:var(--color-bg-elevated);border-radius:var(--radius-pill);overflow:hidden;position:relative}
+    .ad-bar-row .ad-bar-fill{height:100%;border-radius:var(--radius-pill);background:var(--color-primary);transition:width var(--duration-base)}
+    .ad-bar-row .ad-bar-fill.orange{background:var(--color-warning-border)}
+    .ad-bar-row .ad-bar-fill.blue{background:var(--color-info-text)}
+    .ad-bar-row .ad-bar-value{font-size:12px;font-weight:600;color:var(--color-text-secondary);width:40px;text-align:right;flex-shrink:0}
+
+    /* ── AppTable (DESIGN.md §6.4) ── */
+    .ad-table-wrap{overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--color-border);background:var(--color-bg-card);box-shadow:var(--shadow-sm)}
+    .ad-table-wrap table{width:100%;border-collapse:collapse;font-size:13px}
+    .ad-table-wrap thead{background:var(--color-bg-elevated)}
+    .ad-table-wrap th{padding:12px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-secondary);text-align:left;white-space:nowrap;border-bottom:1px solid var(--color-border-strong)}
+    .ad-table-wrap th .th-sort{cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+    .ad-table-wrap th .th-sort:hover{color:var(--color-text-primary)}
+    .ad-table-wrap td{padding:12px 16px;border-bottom:1px solid var(--color-border);color:var(--color-text-primary);vertical-align:middle}
+    .ad-table-wrap tbody tr{transition:background var(--duration-fast)}
+    .ad-table-wrap tbody tr:hover{background:var(--color-bg-elevated)}
+    .ad-table-wrap tbody tr.selected{background:var(--color-primary-muted)}
+    .ad-table-wrap tbody tr.clickable{cursor:pointer}
+    .ad-table-wrap tbody tr:last-child td{border-bottom:none}
+
+    /* ── AppAvatar inline ── */
+    .ad-td-avatar{display:flex;align-items:center;gap:10px}
+    .ad-td-avatar .ad-td-av{width:32px;height:32px;border-radius:var(--radius-circle);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+    .ad-td-avatar .ad-td-name{font-weight:600;font-size:13px}
+    .ad-td-avatar .ad-td-email{font-size:11px;color:var(--color-text-muted)}
+
+    /* ── Role tag colours ── */
+    .ad-role-tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--radius-pill);font-size:11px;font-weight:600;letter-spacing:0.02em;gap:4px}
+    .ad-role-admin{background:var(--color-error);color:var(--color-error-text)}
+    .ad-role-mod{background:var(--color-info);color:var(--color-info-text)}
+    .ad-role-user{background:var(--color-bg-elevated);color:var(--color-text-secondary)}
+
+    /* ── Reward tier ── */
+    .ad-tier{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:var(--radius-pill);font-size:11px;font-weight:600}
+    .ad-tier-gold{background:var(--color-warning);color:var(--color-warning-text)}
+    .ad-tier-bronze{background:var(--color-bg-elevated);color:var(--color-text-secondary)}
+    .ad-tier-silver{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+
+    /* ── Status dot ── */
+    .ad-status-dot{width:8px;height:8px;border-radius:var(--radius-circle);display:inline-block;margin-right:6px;vertical-align:middle}
+    .ad-status-dot.active{background:var(--color-success-text)}
+    .ad-status-dot.banned{background:var(--color-error-text)}
+    .ad-status-dot.pending{background:var(--color-warning-text)}
+
+    /* ── Actions dropdown ── */
+    .ad-actions-wrap{position:relative;display:inline-block}
+    .ad-actions-btn{width:32px;height:32px;border-radius:var(--radius-md);border:none;background:transparent;color:var(--color-text-muted);cursor:pointer;display:grid;place-items:center;transition:background var(--duration-fast)}
+    .ad-actions-btn:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+    .ad-actions-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .ad-dropdown{position:absolute;right:0;top:100%;min-width:160px;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);z-index:50;padding:4px;display:none;margin-top:4px}
+    .ad-dropdown.open{display:block}
+    .ad-dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--color-text-secondary);cursor:pointer;transition:background var(--duration-fast);border:none;background:transparent;width:100%;text-align:left;font-family:'Inter',sans-serif}
+    .ad-dropdown-item:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+    .ad-dropdown-item.danger{color:var(--color-error-text)}
+    .ad-dropdown-item.danger:hover{background:var(--color-error)}
+    .ad-dropdown-item svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── Section separator ── */
+    .ad-section-title{font-size:18px;font-weight:600;letter-spacing:-0.01em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+    /* ── Responsive tweaks ── */
+    @media(max-width:1024px){.ad-stats{grid-template-columns:repeat(2,1fr)}.ad-bento{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<!-- ── Top nav bar ── -->
+<nav class="nav-bar">
+  <a class="nav-logo" href="index.html">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="var(--color-primary)"/><circle cx="12" cy="12" r="3" fill="var(--color-primary-light)"/><circle cx="20" cy="20" r="3" fill="var(--color-primary-light)"/><path d="M12 12L20 20" stroke="var(--color-text-inverse)" stroke-width="2"/></svg>
+    <span>Along</span>
+  </a>
+  <div class="nav-links">
+    <a href="01-design-system-tokens.html">Tokens</a>
+    <a href="02-design-system-components.html">Components</a>
+    <a href="03-landing-light.html">Landing</a>
+    <a href="05-auth-flow.html">Auth</a>
+    <a href="06-home-feed-light.html">Feed</a>
+    <a href="09-explore-map.html">Explore</a>
+    <a href="10-post-detail-light.html">Post</a>
+    <a href="12-profile-page.html">Profile</a>
+    <a href="13-notifications.html">Notifs</a>
+    <a href="14-bookmarks.html">Bmks</a>
+    <a href="15-admin-dashboard.html" class="active">Admin</a>
+    <a href="16-analytics.html">Analytics</a>
+    <a href="17-about-contact.html">About</a>
+  </div>
+</nav>
+
+<div class="section-ref" style="padding:16px 24px 0;max-width:1280px;margin:0 auto">§7.8 Admin Dashboard</div>
+<div class="section-title" style="padding:0 24px;max-width:1280px;margin:0 auto">Admin Dashboard</div>
+<div class="section-subtitle" style="padding:0 24px;max-width:1280px;margin:0 auto">Desktop-only layout · DashboardSidebar 240px + bento grid</div>
+
+<!-- §7.8 Admin Dashboard — Desktop 1280px -->
+<div class="device-row">
+  <div class="device-frame frame-desktop">
+    <div class="device-label">Desktop 1280px · Admin Dashboard</div>
+    <div class="ad-layout">
+
+      <!-- ═══ DashboardSidebar 240px ═══ -->
+      <aside class="ad-sidebar">
+        <a class="ad-sb-brand" href="/home">
+          <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" fill="var(--color-primary)"/><circle cx="10" cy="10" r="2.5" fill="var(--color-primary-light)"/><circle cx="18" cy="18" r="2.5" fill="var(--color-primary-light)"/><path d="M10 10L18 18" stroke="#fff" stroke-width="2"/></svg>
+          <span>Along</span>
+        </a>
+
+        <!-- §6.13 — Nav items -->
+        <a class="ad-nav-item" href="/home"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</a>
+        <a class="ad-nav-item" href="/explore"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>Explore</a>
+        <a class="ad-nav-item" href="/notifications"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+        <a class="ad-nav-item" href="/bookmarks"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Bookmarks</a>
+        <a class="ad-nav-item" href="/analytics"><svg viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Analytics</a>
+
+        <div class="ad-nav-divider"></div>
+        <div class="ad-nav-label">Admin</div>
+        <a class="ad-nav-item active" href="/admin"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Dashboard</a>
+        <a class="ad-nav-item" href="/admin/users"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+        <a class="ad-nav-item" href="/admin/posts"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Posts</a>
+        <a class="ad-nav-item" href="/admin/config"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Config</a>
+        <a class="ad-nav-item" href="/admin/bugs"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v1h1a4 4 0 0 1 4 4v1h1v4h-1v1a4 4 0 0 1-4 4h-1v1h-4v-1H8a4 4 0 0 1-4-4v-1H3v-4h1v-1a4 4 0 0 1 4-4h1V6a4 4 0 0 1 4-4z"/><circle cx="12" cy="15" r="1"/><line x1="9" y1="9" x2="9" y2="12"/><line x1="15" y1="9" x2="15" y2="12"/></svg>Bugs</a>
+
+        <div class="ad-sb-user">
+          <div class="ad-uavatar">AD</div>
+          <div>
+            <div class="ad-uname">Adaobi Duru</div>
+            <span class="ad-urole-badge">Admin</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ═══ Main content ═══ -->
+      <main class="ad-main">
+
+        <!-- §7.8 — Page heading -->
+        <div class="ad-heading">
+          <div>
+            <h1>Dashboard</h1>
+            <div class="ad-sub">Admin overview · Last 7 days</div>
+          </div>
+          <div class="ad-heading-right">
+            <button class="pr-btn pr-btn-secondary" style="height:36px;padding:0 12px;font-size:12px;gap:6px"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button>
+          </div>
+        </div>
+
+        <!-- §7.8 — 4-stat row -->
+        <!-- §7.8 — Bento grid: stat cards -->
+        <div class="ad-stats">
+          <!-- Stat 1: Total Users -->
+          <div class="ad-stat-card">
+            <div class="ad-stat-head">
+              <span class="ad-stat-label">Total Users</span>
+              <span class="ad-stat-icon" style="background:var(--color-primary-muted);color:var(--color-primary)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+            </div>
+            <div class="ad-stat-num">12,847</div>
+            <div class="ad-stat-delta up"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>+8.2%</div>
+          </div>
+          <!-- Stat 2: Posts Today -->
+          <div class="ad-stat-card">
+            <div class="ad-stat-head">
+              <span class="ad-stat-label">Posts Today</span>
+              <span class="ad-stat-icon" style="background:var(--color-info);color:var(--color-info-text)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+            </div>
+            <div class="ad-stat-num">342</div>
+            <div class="ad-stat-delta up"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>+12.1%</div>
+          </div>
+          <!-- Stat 3: Avg Validity Score -->
+          <div class="ad-stat-card">
+            <div class="ad-stat-head">
+              <span class="ad-stat-label">Avg Validity Score</span>
+              <span class="ad-stat-icon" style="background:var(--color-success);color:var(--color-success-text)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+            </div>
+            <div class="ad-stat-num">71.4</div>
+            <div class="ad-stat-delta up"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>+3.7%</div>
+          </div>
+          <!-- Stat 4: Open Bug Reports -->
+          <div class="ad-stat-card">
+            <div class="ad-stat-head">
+              <span class="ad-stat-label">Open Bug Reports</span>
+              <span class="ad-stat-icon" style="background:var(--color-error);color:var(--color-error-text)"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v1h1a4 4 0 0 1 4 4v1h1v4h-1v1a4 4 0 0 1-4 4h-1v1h-4v-1H8a4 4 0 0 1-4-4v-1H3v-4h1v-1a4 4 0 0 1 4-4h1V6a4 4 0 0 1 4-4z"/></svg></span>
+            </div>
+            <div class="ad-stat-num">12</div>
+            <div class="ad-stat-delta down"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>-3 resolved</div>
+          </div>
+        </div>
+
+        <!-- §7.8 — Bento: chart grid -->
+        <div class="ad-bento">
+          <!-- Left: Signups line chart (7-day) -->
+          <div class="ad-chart-card ad-elevated">
+            <div class="ad-chart-head">
+              <h3>Signups (7 days)</h3>
+              <span class="ad-chart-action">View all →</span>
+            </div>
+            <div class="ad-chart-body ad-line-chart">
+              <svg viewBox="0 0 500 160">
+                <line x1="40" y1="140" x2="480" y2="140" stroke="var(--color-border)" stroke-width="1"/>
+                <line x1="40" y1="100" x2="480" y2="100" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="4"/>
+                <line x1="40" y1="60" x2="480" y2="60" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="4"/>
+                <line x1="40" y1="20" x2="480" y2="20" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="4"/>
+                <polyline points="103,120 166,95 229,105 292,80 355,65 418,72 481,50" fill="none" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="103" cy="120" r="3.5" fill="#fff" stroke="var(--color-primary)" stroke-width="2.5"/>
+                <circle cx="166" cy="95" r="3.5" fill="#fff" stroke="var(--color-primary)" stroke-width="2.5"/>
+                <circle cx="229" cy="105" r="3.5" fill="#fff" stroke="var(--color-primary)" stroke-width="2.5"/>
+                <circle cx="292" cy="80" r="3.5" fill="#fff" stroke="var(--color-primary)" stroke-width="2.5"/>
+                <circle cx="355" cy="65" r="3.5" fill="#fff" stroke="var(--color-primary)" stroke-width="2.5"/>
+                <circle cx="418" cy="72" r="3.5" fill="#fff" stroke="var(--color-primary)" stroke-width="2.5"/>
+                <circle cx="481" cy="50" r="4" fill="var(--color-primary)" stroke="#fff" stroke-width="2"/>
+                <text x="103" y="136" class="chart-label">Mon</text>
+                <text x="166" y="136" class="chart-label">Tue</text>
+                <text x="229" y="136" class="chart-label">Wed</text>
+                <text x="292" y="136" class="chart-label">Thu</text>
+                <text x="355" y="136" class="chart-label">Fri</text>
+                <text x="418" y="136" class="chart-label">Sat</text>
+                <text x="481" y="136" class="chart-label">Sun</text>
+                <text x="35" y="104" class="chart-label" text-anchor="end">40</text>
+                <text x="35" y="64" class="chart-label" text-anchor="end">80</text>
+                <text x="35" y="24" class="chart-label" text-anchor="end">120</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Right: Top Routes by Validity (horizontal bar chart) -->
+          <div class="ad-chart-card ad-elevated">
+            <div class="ad-chart-head">
+              <h3>Top Routes by Validity</h3>
+              <span class="ad-chart-action">View all →</span>
+            </div>
+            <div class="ad-chart-body">
+              <div class="ad-bar-list">
+                <div class="ad-bar-row">
+                  <span class="ad-bar-label">Ikeja → Lekki</span>
+                  <div class="ad-bar-track"><div class="ad-bar-fill" style="width:92%"></div></div>
+                  <span class="ad-bar-value">92</span>
+                </div>
+                <div class="ad-bar-row">
+                  <span class="ad-bar-label">Surulere → VI</span>
+                  <div class="ad-bar-track"><div class="ad-bar-fill orange" style="width:88%"></div></div>
+                  <span class="ad-bar-value">88</span>
+                </div>
+                <div class="ad-bar-row">
+                  <span class="ad-bar-label">Mile 2 → Ojota</span>
+                  <div class="ad-bar-track"><div class="ad-bar-fill" style="width:76%"></div></div>
+                  <span class="ad-bar-value">76</span>
+                </div>
+                <div class="ad-bar-row">
+                  <span class="ad-bar-label">Abuja → Lugbe</span>
+                  <div class="ad-bar-track"><div class="ad-bar-fill blue" style="width:71%"></div></div>
+                  <span class="ad-bar-value">71</span>
+                </div>
+                <div class="ad-bar-row">
+                  <span class="ad-bar-label">PHC → Rumuokoro</span>
+                  <div class="ad-bar-track"><div class="ad-bar-fill orange" style="width:65%"></div></div>
+                  <span class="ad-bar-value">65</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- §7.8 — Users AppTable -->
+        <div class="ad-section-title"><svg viewBox="0 0 24 24" width="20" height="20" stroke="var(--color-text-secondary)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</div>
+
+        <div class="ad-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th><span class="th-sort">User <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><path d="M11 5h10"/><path d="M11 9h7"/><path d="M11 13h4"/></svg></span></th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Tier</th>
+                <th>Posts</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1: Admin (active) -->
+              <tr class="clickable">
+                <td><div class="ad-td-avatar"><div class="ad-td-av" style="background:var(--color-error);color:var(--color-error-text)">AD</div><div><div class="ad-td-name">Adaobi Duru</div><div class="ad-td-email">adaobi@along.ng</div></div></div></td>
+                <td>adaobi@along.ng</td>
+                <td><span class="ad-role-tag ad-role-admin"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin</span></td>
+                <td><span class="ad-tier ad-tier-gold"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Gold</span></td>
+                <td>284</td>
+                <td>Jan 2024</td>
+                <td>
+                  <div class="ad-actions-wrap">
+                    <button class="ad-actions-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg></button>
+                    <div class="ad-dropdown open">
+                      <button class="ad-dropdown-item"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Profile</button>
+                      <button class="ad-dropdown-item"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Role</button>
+                      <button class="ad-dropdown-item danger"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Ban User</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 2: Moderator (active) -->
+              <tr class="clickable">
+                <td><div class="ad-td-avatar"><div class="ad-td-av" style="background:var(--color-info);color:var(--color-info-text)">KO</div><div><div class="ad-td-name">Kelechi Okafor</div><div class="ad-td-email">kelechi@along.ng</div></div></div></td>
+                <td>kelechi@along.ng</td>
+                <td><span class="ad-role-tag ad-role-mod"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Mod</span></td>
+                <td><span class="ad-tier ad-tier-bronze">Bronze</span></td>
+                <td>156</td>
+                <td>Mar 2024</td>
+                <td>
+                  <div class="ad-actions-wrap">
+                    <button class="ad-actions-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg></button>
+                    <div class="ad-dropdown">
+                      <button class="ad-dropdown-item"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Profile</button>
+                      <button class="ad-dropdown-item"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Role</button>
+                      <button class="ad-dropdown-item danger"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Ban User</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 3: User (active) -->
+              <tr class="clickable">
+                <td><div class="ad-td-avatar"><div class="ad-td-av" style="background:var(--color-warning);color:var(--color-warning-text)">FO</div><div><div class="ad-td-name">Femi Ogunlade</div><div class="ad-td-email">femi.ogunlade@gmail.com</div></div></div></td>
+                <td>femi.ogunlade@gmail.com</td>
+                <td><span class="ad-role-tag ad-role-user">User</span></td>
+                <td><span class="ad-tier ad-tier-silver"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Silver</span></td>
+                <td>47</td>
+                <td>Jun 2024</td>
+                <td>
+                  <div class="ad-actions-wrap">
+                    <button class="ad-actions-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg></button>
+                    <div class="ad-dropdown">
+                      <button class="ad-dropdown-item"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Profile</button>
+                      <button class="ad-dropdown-item"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Role</button>
+                      <button class="ad-dropdown-item danger"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Ban User</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 4: User (banned) with AppStatusDot -->
+              <tr class="clickable">
+                <td><div class="ad-td-avatar"><div class="ad-td-av" style="background:var(--color-error);color:var(--color-error-text)">BS</div><div><div class="ad-td-name">Blessing Samuel</div><div class="ad-td-email">blessing.s@yahoo.com</div></div></div></td>
+                <td>blessing.s@yahoo.com</td>
+                <td><span class="ad-role-tag ad-role-user">User</span> <span class="ad-status-dot banned"></span></td>
+                <td><span class="ad-tier ad-tier-bronze">Bronze</span></td>
+                <td>12</td>
+                <td>Aug 2024</td>
+                <td>
+                  <div class="ad-actions-wrap">
+                    <button class="ad-actions-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Actions"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg></button>
+                    <div class="ad-dropdown">
+                      <button class="ad-dropdown-item"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View Profile</button>
+                      <button class="ad-dropdown-item" style="color:var(--color-success-text)"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unban</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
