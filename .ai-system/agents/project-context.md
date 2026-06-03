@@ -1,69 +1,85 @@
 # Project Context
 
-> **Overview:** [FILL IN — Brief description of the project, its purpose, who it's for, and what problem it solves. This is the first thing any agent should read to understand the "why" behind the work.]
+> **Overview:** Along is a social travel-intelligence platform built for urban commuters in Nigeria and West Africa. It solves the problem of unreliable public transit information by letting users share, verify, and discover transport routes in real time — combining the social dynamics of Twitter with the utility of Google Maps. The platform targets the 80%+ of urban commuters who rely on informal transit (buses, danfos, keke, okada) with no reliable real-time information.
 
 ---
 
 ## Project Purpose
 
-> **Section summary:** What this project does and why it exists.
-
-[Describe the project goal in plain language]
+Along empowers urban commuters to share and verify transport route information in real time. Users post route updates (delays, fares, accidents, police checks), follow trusted reporters, earn trust badges through verification, and discover optimal routes through community-sourced intelligence. The platform operates offline-first with PWA support and push notifications for critical route alerts.
 
 ---
 
 ## Target Users
 
-> **Section summary:** Who uses this system and what they need from it.
-
 | User Type | Needs | Key Interactions |
 |-----------|-------|-----------------|
-| [user type] | [what they need] | [how they interact] |
+| Daily Commuter | Real-time route info, fare updates, delay alerts | Browse feed, search routes, follow reporters, receive push notifications |
+| Route Reporter | Share route observations, build trust score | Post route updates, verify others' reports, earn rewards/badges |
+| Verified Reporter | High-credibility route intelligence | TrustBadge visible on profile, posts prioritized in feed |
+| Admin | Platform moderation, analytics, user management | Moderate content, view analytics, manage site config, handle bug reports |
+| Visitor | Browse public content before signing up | View landing page, public feed, about/contact pages |
 
 ---
 
 ## Business Constraints
 
-> **Section summary:** Non-negotiable requirements that affect how we build.
-
-- [e.g. Must work offline]
-- [e.g. Data must stay on-premise]
-- [e.g. Must support mobile browsers]
+- Must work reliably on low-end mobile devices and slow 3G/4G connections (PWA-first)
+- Offline capability required — cached feed and map data must be available without connectivity
+- Must support push notifications for route alerts even when the app is closed
+- Nigerian/West African market focus — content moderation must support local languages and contexts
+- Trust and verification are critical — fake route information can cause real harm
+- Must comply with Nigerian data protection regulations (NDPR)
+- No real-time WebSocket requirement — polling + push notifications suffice for the MVP
 
 ---
 
 ## Current Project Phase
 
-> **Section summary:** Where the project stands right now in its development lifecycle.
+Phase: Pre-rebuild (Infrastructure Complete, Application Pending)
 
-Phase: [ Planning | Active Development | Stabilization | Maintenance ]
+The project has completed infrastructure setup (Prisma schema with 14 models, Sentry, Redis, PWA, CI pipeline, design system, all configurations) and an extensive design system (17 HTML design files). The previous application codebase (Phases 1-7 built against a mock backend) was removed for a clean rebuild with database integration. The next step is to generate the complete `app/` directory via AI-driven prompts.
 
-Active sprint focus: [describe current focus]
+Active sprint focus: Generate the application codebase (`app/` directory) starting with the config registry, followed by the universal component library, API services, and page components.
 
 ---
 
 ## Tech Decisions Already Made
 
-> **Section summary:** Decisions that are locked in and should not be revisited unless explicitly flagged.
-
 | Decision | Reason |
 |----------|--------|
-| [decision] | [why it was made] |
+| Next.js App Router over Pages Router | Modern React patterns, server components, streaming SSR, improved DX |
+| Prisma over Drizzle/TypeORM | Mature ORM with excellent migration tooling, type safety, and Postgres support |
+| Ant Design 5 over shadcn/ui/MUI | Comprehensive component library suitable for data-heavy dashboards; already widely used |
+| Tailwind CSS v4 over styled-components/CSS modules | Utility-first approach with CSS custom property theming, smaller bundle via JIT |
+| MapLibre GL over Google Maps/Mapbox | Open-source, no API key costs for self-hosted tiles, full control over styling |
+| JWT with httpOnly cookies over NextAuth.js/sessions | Simpler auth model for API routes, no additional dependency, secure against XSS |
+| Config-driven architecture | All hardcoded values centralized in config registries for maintainability and auditability |
+| OOP Service Layer with BaseRepository | Consistent data access patterns, easy to test, clear separation of concerns |
+| Zero emoji policy | Faster rendering, consistent appearance across devices, accessible |
+| Lucide React over Ant Design Icons | Smaller bundle (tree-shakeable), consistent icon style, no emoji confusion |
 
 ---
 
 ## Out of Scope
 
-> **Section summary:** Things we are explicitly not building in this project.
-
-- [List exclusions here to prevent scope creep]
+- Native mobile app (iOS/Android) — PWA covers mobile use cases for MVP
+- Real-time WebSocket-based messaging or chat
+- Ride-hailing or booking integration — information sharing only, not transactions
+- In-app payments or fare collection
+- International expansion beyond West Africa in the initial release
 
 ---
 
 ## External Integrations
 
-> **Section summary:** Third-party services and APIs this project connects to.
-
 | Service | Purpose | Auth Method |
 |---------|---------|------------|
-| [service] | [what it does] | [API key / OAuth / etc.] |
+| PostgreSQL (via Prisma) | Primary data store | Connection string (DATABASE_URL) |
+| Upstash Redis | Caching, rate limiting, session store | REST API token |
+| Cloudinary | Image upload and optimization | API key + secret |
+| Resend | Transactional emails (verification, notifications) | API key |
+| Sentry | Error tracking and performance monitoring | DSN |
+| MapLibre GL (tiles) | Map rendering and route visualization | (self-hosted or free tile provider) |
+| QStash | Background job queue (push notifications, cleanup) | API token |
+| Web Push API | Browser push notifications | VAPID keys |

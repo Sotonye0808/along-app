@@ -1,0 +1,345 @@
+"use client"
+
+import { useState, useContext } from "react"
+import dynamic from "next/dynamic"
+import Link from "next/link"
+import { Heart, ThumbsDown, MessageCircle, Bookmark, Share2, MoreHorizontal, DollarSign } from "lucide-react"
+import { AppCard, AppUserLabel, AppDropdown, TrustBadge, VehicleChip } from "@/app/components/ui"
+import { AuthContext } from "@/app/providers/AuthProvider"
+import type { VehicleType } from "@/app/lib/types"
+
+const MiniRouteMap = dynamic(() => import("./RouteMap").then((m) => ({ default: m.RouteMap })), { ssr: false })
+
+interface RouteStep {
+  location?: string
+  description?: string
+  vehicle?: string
+  fare?: number
+}
+
+interface PostCardUser {
+  id: string
+  userName: string
+  firstName: string
+  lastName: string
+  avatar?: string | null
+  avatarConfig?: { style: string; seed?: string; flip?: boolean; backgroundColor?: string }
+}
+
+interface PostCardPost {
+  id: string
+  title: string
+  routes: RouteStep[] | unknown
+  images: string[]
+  tags: string[]
+  likes: number
+  dislikes: number
+  comments: number
+  bookmarks: number
+  validityScore: number
+  validityTier: string | null
+  isPlatformGen?: boolean
+  createdAt: string | Date
+  user: PostCardUser
+  _isLiked?: boolean
+  _isBookmarked?: boolean
+  totalDistanceKm?: number | null
+  estimatedMins?: number | null
+  region?: string | null
+}
+
+interface PostCardProps {
+  post: PostCardPost
+  onLike?: (postId: string, liked: boolean) => void
+  onDislike?: (postId: string, disliked: boolean) => void
+  onBookmark?: (postId: string, bookmarked: boolean) => void
+  onShare?: (postId: string) => void
+  onComment?: (postId: string) => void
+  currentUserId?: string
+}
+
+function getTimeAgo(date: string | Date): string {
+  const now = Date.now()
+  const diff = now - new Date(date).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d ago`
+  return new Date(date).toLocaleDateString()
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
+  return String(n)
+}
+
+function extractVehicles(routes: unknown): string[] {
+  if (!Array.isArray(routes)) return []
+  const vehicles = new Set<string>()
+  for (const step of routes) {
+    if (step && typeof step === "object" && "vehicle" in step && step.vehicle) {
+      vehicles.add(step.vehicle as string)
+    }
+  }
+  return Array.from(vehicles)
+}
+
+export default function PostCard({ post, onLike, onDislike, onBookmark, onShare, onComment }: PostCardProps) {
+  const [liked, setLiked] = useState(post._isLiked ?? false)
+  const [likesCount, setLikesCount] = useState(post.likes)
+  const [disliked, setDisliked] = useState(false)
+  const [dislikesCount, setDislikesCount] = useState(post.dislikes)
+  const [bookmarked, setBookmarked] = useState(post._isBookmarked ?? false)
+  const auth = useContext(AuthContext)
+
+  const routes = Array.isArray(post.routes) ? (post.routes as RouteStep[]) : []
+  const vehicles = extractVehicles(post.routes)
+
+  const handleLike = () => {
+    if (!auth?.requireAuth("like routes")) return
+    const newLiked = !liked
+    setLiked(newLiked)
+    setLikesCount((prev) => prev + (newLiked ? 1 : -1))
+    if (disliked) {
+      setDisliked(false)
+      setDislikesCount((prev) => prev - 1)
+    }
+    onLike?.(post.id, newLiked)
+  }
+
+  const handleDislike = () => {
+    if (!auth?.requireAuth("dislike routes")) return
+    const newDisliked = !disliked
+    setDisliked(newDisliked)
+    setDislikesCount((prev) => prev + (newDisliked ? 1 : -1))
+    if (liked) {
+      setLiked(false)
+      setLikesCount((prev) => prev - 1)
+    }
+    onDislike?.(post.id, newDisliked)
+  }
+
+  const handleBookmarkClick = () => {
+    if (!auth?.requireAuth("bookmark routes")) return
+    const newBookmarked = !bookmarked
+    setBookmarked(newBookmarked)
+    onBookmark?.(post.id, newBookmarked)
+  }
+
+  const handleShareClick = () => {
+    if (!auth?.requireAuth("share routes")) return
+    onShare?.(post.id)
+  }
+
+  const handleCommentClick = () => {
+    onComment?.(post.id)
+  }
+
+  const cardVariant = post.isPlatformGen ? "suggestion" : "default"
+  const trustLevel = (post.validityTier as "low" | "developing" | "verified" | "trusted") ?? "developing"
+
+  return (
+    <AppCard variant={cardVariant} hover className={post.isPlatformGen ? "" : ""}>
+      {post.isPlatformGen && (
+        <div className="inline-flex items-center gap-1 px-2 py-0.5 radius-pill text-xs font-semibold text-primary bg-primary-muted ml-4 mt-3">
+          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3l1.5 6L18 12l-4.5 3L12 21l-1.5-6L6 12l4.5-3z" />
+            <path d="M18 3l-1.5 3L18 9" />
+            <path d="M6 9l-1.5-3L6 3" />
+          </svg>
+          Along Suggestion
+        </div>
+      )}
+
+      <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-2.5">
+        <AppUserLabel
+          user={{
+            firstName: post.user.firstName,
+            lastName: post.user.lastName,
+            userName: post.user.userName,
+            avatar: post.user.avatar ?? undefined,
+            avatarConfig: post.user.avatarConfig as { style: string; seed?: string; flip?: boolean; backgroundColor?: string } | undefined,
+          }}
+          size="md"
+          showHandle={true}
+          linkToProfile={true}
+        />
+        <span className="text-xs text-text-muted ml-auto">
+          {getTimeAgo(post.createdAt)}
+        </span>
+        <AppDropdown
+          align="end"
+          trigger={
+            <button className="w-7 h-7 rounded-circle flex items-center justify-center text-text-muted hover:bg-bg-elevated transition-colors duration-fast" aria-label="More options">
+              <MoreHorizontal size={16} />
+            </button>
+          }
+          items={[
+            { label: "Copy link", onClick: () => {} },
+            { label: "Report", variant: "destructive", onClick: () => {} },
+          ]}
+        />
+      </div>
+
+      {vehicles.length > 0 && (
+        <div className="flex gap-1 flex-wrap px-4 pb-2" style={{ paddingLeft: "66px" }}>
+          {vehicles.map((v) => (
+            <VehicleChip key={v} type={v as VehicleType} size="sm" />
+          ))}
+        </div>
+      )}
+
+      <div className="px-4 pb-2">
+        <Link
+          href={`/posts/${post.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="text-lg font-semibold text-text-primary no-underline hover:underline"
+        >
+          {post.title}
+        </Link>
+      </div>
+
+      {routes.length > 0 && (
+        <div className="flex flex-col gap-2 px-4 pb-3">
+          {routes.map((step, index) => (
+            <div key={index} className="flex items-start gap-2.5 relative">
+              {index < routes.length - 1 && (
+                <div className="absolute left-[9px] top-5 bottom-[-6px] w-0.5 bg-border" />
+              )}
+              <div className="w-5 h-5 rounded-circle bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">
+                {index + 1}
+              </div>
+              <span className="text-sm text-text-primary flex-1">
+                {step.description || step.location || ""}
+              </span>
+              {step.fare !== undefined && step.fare !== null && (
+                <span className="text-sm font-semibold text-text-primary flex items-center gap-1 shrink-0">
+                  <DollarSign size={14} className="text-text-muted" />
+                  ₦{step.fare}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {post.tags.length > 0 && (
+        <div className="flex gap-1 flex-wrap px-4 pb-2">
+          {post.tags.map((tag) => (
+            <Link
+              key={tag}
+              href={`/explore?tag=${encodeURIComponent(tag)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1 px-2 py-0.5 radius-pill text-xs font-medium bg-bg-elevated border border-border text-text-secondary no-underline hover:bg-primary-muted hover:text-primary hover:border-primary-muted transition-colors duration-fast"
+            >
+              #{tag}
+            </Link>
+          ))}
+          {post.region && (
+            <Link
+              href={`/explore?region=${encodeURIComponent(post.region)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1 px-2 py-0.5 radius-pill text-xs font-medium bg-primary-muted text-primary border border-primary-muted no-underline"
+            >
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {post.region}
+            </Link>
+          )}
+        </div>
+      )}
+
+      {routes.length >= 2 && (
+        <div className="px-4 pb-2">
+          <MiniRouteMap
+            pins={routes.map((r, i) => ({
+              lat: 0,
+              lng: 0,
+              label: r.location ?? "",
+              type: i === 0 ? "origin" as const : i === routes.length - 1 ? "destination" as const : "waypoint" as const,
+            }))}
+            height={100}
+            showOverlay={false}
+          />
+        </div>
+      )}
+
+      {post.images.length > 0 && (
+        <div className="px-4 pb-2.5">
+          {post.images.length === 1 && (
+            <img src={post.images[0]} alt="Route" className="w-full h-[200px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+          )}
+          {post.images.length === 2 && (
+            <div className="grid grid-cols-2 gap-1">
+              {post.images.map((img, i) => (
+                <img key={i} src={img} alt={`Route photo ${i + 1}`} className="w-full h-[140px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+              ))}
+            </div>
+          )}
+          {post.images.length >= 3 && (
+            <div className="grid grid-cols-2 gap-1" style={{ gridTemplateRows: "auto auto" }}>
+              <img src={post.images[0]} alt="Route photo 1" className="row-span-2 w-full h-full object-cover radius-sm bg-bg-elevated" loading="lazy" style={{ minHeight: "148px" }} />
+              <img src={post.images[1]} alt="Route photo 2" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+              <img src={post.images[2]} alt="Route photo 3" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center gap-1 px-4 py-2 border-t border-border">
+        <button
+          onClick={(e) => { e.stopPropagation(); handleLike(); }}
+          className={`flex items-center gap-1 px-2.5 py-1.5 radius-md text-sm text-text-secondary hover:bg-bg-elevated transition-colors duration-fast border-none bg-transparent cursor-pointer font-sans ${liked ? "liked text-error-text" : ""}`}
+          aria-label="Like"
+        >
+          <Heart size={16} className={liked ? "fill-error-text stroke-error-text" : ""} />
+          {likesCount > 0 && <span>{formatCount(likesCount)}</span>}
+        </button>
+
+        <button
+          onClick={(e) => { e.stopPropagation(); handleDislike(); }}
+          className="flex items-center gap-1 px-2.5 py-1.5 radius-md text-sm text-text-secondary hover:bg-bg-elevated transition-colors duration-fast border-none bg-transparent cursor-pointer font-sans"
+          aria-label="Dislike"
+        >
+          <ThumbsDown size={16} />
+          {dislikesCount > 0 && <span>{formatCount(dislikesCount)}</span>}
+        </button>
+
+        <button
+          onClick={(e) => { e.stopPropagation(); handleCommentClick(); }}
+          className="flex items-center gap-1 px-2.5 py-1.5 radius-md text-sm text-text-secondary hover:bg-bg-elevated transition-colors duration-fast border-none bg-transparent cursor-pointer font-sans"
+          aria-label="Comment"
+        >
+          <MessageCircle size={16} />
+          {post.comments > 0 && <span>{formatCount(post.comments)}</span>}
+        </button>
+
+        <div className="flex items-center gap-1 ml-auto">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleBookmarkClick(); }}
+            className={`flex items-center gap-1 px-2.5 py-1.5 radius-md text-sm text-text-secondary hover:bg-bg-elevated transition-colors duration-fast border-none bg-transparent cursor-pointer font-sans ${bookmarked ? "bookmarked text-primary" : ""}`}
+            aria-label="Bookmark"
+          >
+            <Bookmark size={16} className={bookmarked ? "fill-primary stroke-primary" : ""} />
+          </button>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); handleShareClick(); }}
+            className="flex items-center gap-1 px-2.5 py-1.5 radius-md text-sm text-text-secondary hover:bg-bg-elevated transition-colors duration-fast border-none bg-transparent cursor-pointer font-sans"
+            aria-label="Share"
+          >
+            <Share2 size={16} />
+          </button>
+
+          <TrustBadge level={trustLevel} score={post.validityScore} size="sm" />
+        </div>
+      </div>
+    </AppCard>
+  )
+}

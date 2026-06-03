@@ -1,0 +1,104 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight, Clock, User } from "lucide-react";
+import { PAGE_META, BLOG_LAYOUT_CONFIG } from "@/app/lib/config";
+import { buildPublicMetadata } from "@/app/lib/utils/metadata";
+import { getAllPosts } from "@/app/lib/utils/blog";
+import type { BlogPostFrontmatter } from "@/app/lib/utils/blog";
+
+export const metadata: Metadata = buildPublicMetadata(
+  PAGE_META.blog.title,
+  PAGE_META.blog.description,
+  "/blog",
+);
+
+function PostCard({ post }: { post: BlogPostFrontmatter }) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className="group block bg-bg-card border border-border rounded-xl p-5 hover:shadow-md hover:border-primary/20 transition-all duration-200"
+    >
+      <div className="flex items-center gap-2 text-xs text-text-muted mb-3">
+        <span className="px-2 py-0.5 rounded-full bg-bg-elevated text-text-secondary capitalize">
+          {post.category}
+        </span>
+        <span className="flex items-center gap-1">
+          <Clock size={12} />
+          {post.readingTime} min read
+        </span>
+      </div>
+      <h2 className="text-base font-semibold text-text-primary mb-2 group-hover:text-primary transition-colors">
+        {post.title}
+      </h2>
+      <p className="text-sm text-text-secondary leading-relaxed mb-3 line-clamp-2">
+        {post.description}
+      </p>
+      <div className="flex items-center gap-1 text-xs text-text-muted">
+        <User size={12} />
+        <span>{post.author}</span>
+        <span className="mx-1">·</span>
+        <span>{new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+      </div>
+    </Link>
+  );
+}
+
+export default function BlogPage() {
+  const posts = getAllPosts();
+  const featured = posts.slice(0, BLOG_LAYOUT_CONFIG.featuredCount);
+  const remaining = posts.slice(BLOG_LAYOUT_CONFIG.featuredCount);
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-12">
+      <div className="text-center mb-10">
+        <h1 className="text-3xl font-bold text-text-primary mb-3">Blog</h1>
+        <p className="text-text-secondary max-w-lg mx-auto">
+          Route tips, platform updates, and stories from the Along community.
+        </p>
+      </div>
+
+      {posts.length === 0 ? (
+        <p className="text-center text-text-muted py-16">No posts yet. Check back soon!</p>
+      ) : (
+        <>
+          {featured.map((post) => (
+            <div key={post.slug} className="mb-8">
+              <Link
+                href={`/blog/${post.slug}`}
+                className="group block bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-6 md:p-8 hover:shadow-lg transition-all duration-200"
+              >
+                <span className="text-xs font-semibold uppercase tracking-wider text-primary mb-2 block">Featured</span>
+                <h2 className="text-xl md:text-2xl font-bold text-text-primary mb-3 group-hover:text-primary transition-colors">
+                  {post.title}
+                </h2>
+                <p className="text-sm text-text-secondary mb-4 max-w-2xl line-clamp-2">
+                  {post.description}
+                </p>
+                <div className="flex items-center gap-4 text-xs text-text-muted">
+                  <span className="flex items-center gap-1"><User size={12} />{post.author}</span>
+                  <span className="flex items-center gap-1"><Clock size={12} />{post.readingTime} min read</span>
+                  <span>{new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                </div>
+              </Link>
+            </div>
+          ))}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {remaining.map((post) => (
+              <PostCard key={post.slug} post={post} />
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className="text-center mt-10">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
+        >
+          Back to Home <ArrowRight size={14} />
+        </Link>
+      </div>
+    </div>
+  );
+}

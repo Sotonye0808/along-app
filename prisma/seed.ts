@@ -14,8 +14,31 @@ import type { User as PrismaUser } from '../app/generated/prisma/client';
 import { DEFAULT_EMAIL_CONFIG, DEFAULT_EMAIL_TEMPLATES } from '../app/lib/config/email';
 import { DEFAULT_VALIDITY_CONFIG } from '../app/lib/config/validityConfig';
 import { DEFAULT_FEED_CONFIG } from '../app/lib/config/feedAlgorithm';
+import type { VehicleType } from '../app/lib/types';
 
 // Type definitions for seed data
+interface Coordinate {
+    lat: number;
+    lng: number;
+}
+
+interface RouteLink {
+    text: string;
+    url: string;
+}
+
+interface Route {
+    id: string;
+    text: string;
+    links: RouteLink[];
+    order: number;
+    vehicles: VehicleType[];
+    status: string;
+    fare: number;
+    lat?: number;
+    lng?: number;
+}
+
 interface SeedUser {
     userName: string;
     firstName: string;

@@ -1,22 +1,23 @@
 # Test Results
 
-> **Overview:** Latest test run results. Updated by agents after running the self-heal loop or test suite. Gives a quick snapshot of current project health.
+> **Overview:** Latest test run results for Along. Updated by agents after running the test suite or self-heal loop. Gives a quick snapshot of current project health. No tests have been run yet — the project is in pre-rebuild state.
 
 ---
 
 ## Last Run
 
-**Date:** [DATE]
-**Run by:** [Agent / developer]
+**Date:** —
+**Run by:** —
 
 **Results:**
 | Suite | Passed | Failed | Skipped |
 |-------|--------|--------|---------|
 | Unit | — | — | — |
 | Integration | — | — | — |
+| Component | — | — | — |
 | E2E | — | — | — |
 
-**Overall Status:** [ Passing | Failing | Partial ]
+**Overall Status:** Not Yet Run
 
 ---
 
@@ -24,7 +25,7 @@
 
 | Test | Error | Status | Assigned To |
 |------|-------|--------|------------|
-| [test name] | [error message] | [Investigating / Fixed / Wont Fix] | [agent/dev] |
+| — | — | — | — |
 
 ---
 
@@ -32,4 +33,4 @@
 
 | Date | Passed | Failed | Notes |
 |------|--------|--------|-------|
-| [date] | [n] | [n] | [notes] |
+| — | — | — | No tests run yet — project in pre-rebuild state |

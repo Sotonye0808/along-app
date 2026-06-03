@@ -1,6 +1,6 @@
 # AI Development Protocol — General Instructions
 
-> **Overview:** This is the master instruction file for all AI agents working on this project. Every agent session should begin by reading this file. It defines how agents think, what they reference, and how they behave during development.
+> **Overview:** This is the master instruction file for all AI agents working on this project. Every agent session should begin by reading this file. It defines how agents think, what they reference, and how they behave during development. Along is a Next.js 15 + TypeScript social travel-intelligence platform. Read the project context first before taking any action.
 
 ---
 
@@ -20,8 +20,12 @@ Always consult the following files before taking action, in this order:
 
 ## Core Principles
 
-- **Modular architecture** — each module has a single, clear responsibility
-- **Configuration-driven** — behaviour is controlled via config, not hardcoded
+- **Config-driven architecture** — all hardcoded values must be in centralized config registries under `app/lib/config/`
+- **Universal component wrappers** — never import Ant Design directly outside of `app/components/ui/`; use App* wrappers (AppButton, AppCard, etc.)
+- **OOP service layer** — all business logic lives in class-based services extending `BaseRepository<T>`
+- **Zero emoji policy** — use Lucide React for all icons; no emoji in UI text
+- **Mobile-first PWA** — all layouts must work at 320px minimum, with offline support
+- **Zod validation on every API endpoint** — no input trusts the client
 - **Readable code** — clarity over cleverness; future developers must understand it
 - **Minimal dependencies** — don't add packages you don't need
 - **Explicit error handling** — every failure path should be handled deliberately

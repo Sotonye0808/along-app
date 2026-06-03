@@ -1,0 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/app/lib/db/prisma";
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const q = searchParams.get("q");
+
+    if (!q || q.length < 2) {
+      return NextResponse.json({ users: [] }, { status: 200 });
+    }
+
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { userName: { contains: q, mode: "insensitive" } },
+          { firstName: { contains: q, mode: "insensitive" } },
+          { lastName: { contains: q, mode: "insensitive" } },
+        ],
+      },
+      select: {
+        id: true,
+        userName: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        avatarConfig: true,
+        verified: true,
+      },
+      take: 10,
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json({ users }, { status: 200 });
+  } catch (error) {
+    console.error("Search users error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
