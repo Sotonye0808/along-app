@@ -98,6 +98,8 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
 
   const routes = Array.isArray(post.routes) ? (post.routes as RouteStep[]) : []
   const vehicles = extractVehicles(post.routes)
+  const tags = post.tags ?? []
+  const images = post.images ?? []
 
   const handleLike = () => {
     if (!auth?.requireAuth("like routes")) return
@@ -227,9 +229,9 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
         </div>
       )}
 
-      {post.tags.length > 0 && (
+      {tags.length > 0 && (
         <div className="flex gap-1 flex-wrap px-4 pb-2">
-          {post.tags.map((tag) => (
+          {tags.map((tag) => (
             <Link
               key={tag}
               href={`/explore?tag=${encodeURIComponent(tag)}`}
@@ -270,23 +272,28 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
         </div>
       )}
 
-      {post.images.length > 0 && (
+      {images.length > 0 && (
         <div className="px-4 pb-2.5">
-          {post.images.length === 1 && (
-            <img src={post.images[0]} alt="Route" className="w-full h-[200px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+          {images.length === 1 && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={images[0]} alt="Route" className="w-full h-[200px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
           )}
-          {post.images.length === 2 && (
+          {images.length === 2 && (
             <div className="grid grid-cols-2 gap-1">
-              {post.images.map((img, i) => (
+              {images.map((img, i) => (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img key={i} src={img} alt={`Route photo ${i + 1}`} className="w-full h-[140px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
               ))}
             </div>
           )}
-          {post.images.length >= 3 && (
+          {images.length >= 3 && (
             <div className="grid grid-cols-2 gap-1" style={{ gridTemplateRows: "auto auto" }}>
-              <img src={post.images[0]} alt="Route photo 1" className="row-span-2 w-full h-full object-cover radius-sm bg-bg-elevated" loading="lazy" style={{ minHeight: "148px" }} />
-              <img src={post.images[1]} alt="Route photo 2" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
-              <img src={post.images[2]} alt="Route photo 3" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={images[0]} alt="Route photo 1" className="row-span-2 w-full h-full object-cover radius-sm bg-bg-elevated" loading="lazy" style={{ minHeight: "148px" }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={images[1]} alt="Route photo 2" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={images[2]} alt="Route photo 3" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
             </div>
           )}
         </div>

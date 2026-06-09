@@ -123,6 +123,7 @@ export default function RegisterPage() {
         variant="secondary"
         fullWidth
         className="bg-white border-border text-text-primary hover:bg-bg-elevated"
+        onClick={() => { window.location.href = '/api/auth/google' }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -133,7 +134,11 @@ export default function RegisterPage() {
         Sign up with Google
       </AppButton>
 
-      <p className="text-center text-sm text-text-secondary mt-8">
+      <Link href="/home" className="block text-center text-sm text-text-secondary hover:text-text-primary mt-4 underline underline-offset-2">
+        Continue as guest
+      </Link>
+
+      <p className="text-center text-sm text-text-secondary mt-6">
         Already have an account?{" "}
         <Link href="/login" className="text-primary font-medium hover:text-primary-dark transition-colors duration-fast">
           Sign in

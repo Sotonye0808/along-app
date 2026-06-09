@@ -3,7 +3,6 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import { Navigation, Clock, DollarSign, Crosshair } from 'lucide-react'
 import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre'
-import type { MapRef } from 'react-map-gl/maplibre'
 import polyline from '@mapbox/polyline'
 
 interface RoutePin {

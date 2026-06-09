@@ -15,30 +15,6 @@ export default function LandingPage() {
     <>
       <StructuredData data={websiteSchema()} />
 
-      {/* TopNav */}
-      <nav className="sticky top-0 z-50 flex items-center justify-between h-16 px-5 bg-white/88 dark:bg-[#0F0F0F]/88 backdrop-blur-2xl border-b border-white/60 dark:border-[#2A2A2A]/60">
-        <Link href="/" className="flex items-center gap-2 no-underline">
-          <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
-            <circle cx="16" cy="16" r="14" stroke="var(--color-primary)" strokeWidth="2"/>
-            <circle cx="12" cy="12" r="3" fill="var(--color-primary)" stroke="var(--color-primary)" strokeWidth="1.5"/>
-            <circle cx="22" cy="20" r="3" fill="var(--color-primary)" stroke="var(--color-primary)" strokeWidth="1.5"/>
-            <path d="M14 14L20 18" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          <span className="font-bold text-lg tracking-tight text-primary">Along</span>
-        </Link>
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Link href="/login" className="text-sm text-text-secondary hover:text-text-primary transition-colors py-1.5 px-3">
-            Sign In
-          </Link>
-          <Link
-            href="/register"
-            className="inline-flex items-center h-9 px-3.5 rounded-md bg-primary text-white text-xs sm:text-sm font-semibold hover:shadow-primary transition-shadow"
-          >
-            Get Started
-          </Link>
-        </div>
-      </nav>
-
       {/* Hero */}
       <section
         className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-20 overflow-hidden"
@@ -89,6 +65,9 @@ export default function LandingPage() {
             Sign In
           </Link>
         </div>
+        <Link href="/home" className="mt-5 inline-block text-sm text-white/70 hover:text-white transition-colors underline underline-offset-2">
+          Continue as guest
+        </Link>
       </section>
 
       {/* Features */}

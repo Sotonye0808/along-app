@@ -7,13 +7,13 @@ import type { NavItem } from "@/app/lib/types";
 export const NAV_REGISTRY: NavItem[] = [
   { label: "Home", href: "/home", icon: Home, section: "main" },
   { label: "Explore", href: "/explore", icon: Compass, section: "main" },
-  { label: "Share Route", href: "/share", icon: MapPin, section: "main" },
+  { label: "Share Route", href: "/home", icon: MapPin, section: "main" },
   { label: "Bookmarks", href: "/bookmarks", icon: Bookmark, section: "main" },
   { label: "Notifications", href: "/notifications", icon: Bell, section: "main" },
   { label: "Profile", href: "/profile", icon: User, section: "main" },
   { label: "Analytics", href: "/analytics", icon: BarChart3, section: "main" },
   { label: "Invite", href: "/invite", icon: UserPlus, section: "main" },
-  { label: "Settings", href: "/settings", icon: Settings, section: "main" },
+  { label: "Settings", href: "/profile", icon: Settings, section: "main" },
   { label: "Admin", href: "/admin", icon: Shield, section: "admin", roles: ["admin"] },
   { label: "Moderation", href: "/admin/posts", icon: ShieldCheck, section: "admin", roles: ["admin"] },
 ];

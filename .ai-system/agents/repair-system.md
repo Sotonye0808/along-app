@@ -151,4 +151,26 @@
 
 > **Section summary:** Errors that have been fully resolved and are unlikely to recur. Kept for reference.
 
-[Entries move here when the underlying cause has been permanently fixed]
+### PostCard Crash on Missing Tags/Images
+
+**Symptom:**
+Uncaught TypeError: Cannot read properties of undefined (reading 'length') — occurs when navigating to pages that render PostCard components. Specifically on `post.tags.length` and `post.images.length` accesses.
+
+**Root Cause:**
+API responses may omit `tags` or `images` fields, or return `null` instead of `[]`. TypeScript's type system (`string[]`) does not provide runtime protection, and the data flows through JSON.parse without Zod schema validation on the feed endpoint.
+
+**Fix Applied:**
+Added local constants with `?? []` fallback:
+```tsx
+const tags = post.tags ?? []
+const images = post.images ?? []
+```
+All `.length` and `.map()` calls now reference the guarded constants.
+
+**Prevention:**
+Always access optional array fields with `?? []` fallback or optional chaining. Consider adding Zod validation to feed API responses.
+
+**Files Affected:**
+- `app/components/features/posts/PostCard.tsx`
+
+**Date:** 2026-06-09

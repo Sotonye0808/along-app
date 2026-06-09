@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { prisma } from "@/app/lib/db/prisma";
 import { REGISTER_SCHEMA } from "@/app/lib/schemas/auth";
 import { hashPassword } from "@/app/lib/utils/security";
@@ -94,7 +95,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: "OTP sent to email" }, { status: 201 });
   } catch (error) {
-    console.error("Registration error:", error);
+    Sentry.captureException(error);
+    if (error instanceof Error) {
+      if (error.name === "PrismaClientKnownRequestError") {
+        return NextResponse.json({ error: "Database error. Please try again." }, { status: 500 });
+      }
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -92,3 +92,32 @@ Full Next.js 15 application generated with all module layers: 25 config registry
 
 **Next Sprint Focus:**
 Implement remaining unimplemented features: auth middleware, like/dislike system, full search, map integration with route polyline rendering, clustering, leaderboards, integration tests, and component tests.
+
+---
+
+## 2026-06-09 — Sprint 4: Production Audit Fixes
+
+**Summary:**
+Comprehensive production audit fixing 14 issues: runtime errors (PostCard `.length` crash), broken OAuth buttons, double navbar on landing page, 4 dead links, missing dark mode theme toggle, guest access CTAs, brand logo consistency with actual assets, Sentry global-error boundary, auth API error handling, and OG metadata. All quality gates pass with 65 static pages (up from 54).
+
+**Completed:**
+- Fixed JS Runtime Error: `post.tags.length` and `post.images.length` crash when undefined (PostCard.tsx)
+- Fixed OAuth Google buttons: added `onClick` → `/api/auth/google` (login + register pages)
+- Fixed double navbar: removed inline `<nav>` from landing page (public layout header already provides nav)
+- Fixed dead links: `/dashboard`→`/home` redirect, `/forgot-password` page created, `/share`→`/home`, `/settings`→`/profile`
+- Implemented dark mode theme toggle: ThemeProvider (localStorage + prefers-color-scheme), ThemeToggle (floating button)
+- Added "Continue as Guest" links to landing page, login, and register pages
+- Updated logo branding: LOGO_CONFIG now references actual `logo.svg`, `logo-icon.svg`; AppLogo supports `<Image>` rendering
+- Replaced inline SVGs in auth layout and AdminShell with AppLogo component
+- Created Sentry `global-error.tsx` with error boundary
+- Added `Sentry.captureException()` and specific error type detection to auth API routes
+- Wired full OG image, Twitter card, and apple-touch-icon in root layout metadata
+- Verified all push notification endpoints (4 routes) and instrumentation.ts
+
+**Key Changes:**
+- New architecture: ThemeProvider + ThemeToggle adds dark mode toggle capability to entire app
+- Brand consistency: All logo references now use centralized AppLogo component with actual brand assets
+- Error resilience: PostCard no longer crashes on missing tags/images; auth APIs have specific error messages + Sentry logging
+
+**Next Sprint Focus:**
+Implement remaining unimplemented features: auth middleware, like/dislike system, full search, map integration, leaderboards, integration tests, component tests, Lighthouse audit.

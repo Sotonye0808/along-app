@@ -11,7 +11,7 @@ interface EditProfileModalProps {
   onSubmit: (data: Record<string, unknown>) => Promise<void>
 }
 
-function EditProfileModal({ open, onClose, initialValues: _initialValues, onSubmit }: EditProfileModalProps) {
+function EditProfileModal({ open, onClose, initialValues: _, onSubmit }: EditProfileModalProps) {
   return (
     <AppModal open={open} onClose={onClose} size="sm" title="Edit Profile">
       <div className="py-2">

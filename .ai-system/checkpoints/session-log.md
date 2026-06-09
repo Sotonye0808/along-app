@@ -238,3 +238,90 @@ Completed OC-8 production-readiness audit: emoji cleanup, subtle links, N+1 fixe
 - `npm run build` — ✓ Compiled, 54 static pages, 28 API routes
 - `npm test` — 91/91 passing (9 test suites)
 - Quality gate: ALL PASS
+
+---
+
+## Session 2026-06-09 — Sprint 4: Production Audit Fixes
+
+### Summary
+Comprehensive production audit addressing runtime errors, broken OAuth, double navbar, dead links, missing theme toggle, guest CTAs, brand logo consistency, Sentry integration, and error handling improvements. All 14 issues resolved across 12 files.
+
+### Changes
+
+**Critical Fixes:**
+1. **PostCard `length` crash** — Added `?? []` guards for `post.tags` and `post.images` (`PostCard.tsx:99-100`)
+2. **OAuth buttons** — Added `onClick` handlers linking to `/api/auth/google` on login + register pages
+3. **Double navbar** — Removed redundant inline `<nav>` from landing page (relies on `(public)/layout.tsx` header)
+4. **Dead links** — Fixed `/dashboard`→`/home` redirect in AdminShell; created `/forgot-password` page; redirected `/share`→`/home`, `/settings`→`/profile`
+
+**New Files Created:**
+- `app/providers/ThemeProvider.tsx` — Dark mode toggle with localStorage persistence, `prefers-color-scheme` detection
+- `app/components/ui/ThemeToggle.tsx` — Floating accessible toggle button (Sun/Moon, ARIA label, focus ring)
+- `app/global-error.tsx` — Sentry error boundary for root layout
+- `app/(public)/forgot-password/page.tsx` + `layout.tsx` — Password reset form page
+
+**Enhancements:**
+- Guest CTAs added to landing, login, and register pages
+- Logo config updated with brand file URLs; `AppLogo` now supports `variant="icon"|"full"` with `<Image>` rendering
+- Auth layout and AdminShell inline SVGs replaced with `<AppLogo />`
+- Auth API routes (login, register) now use `Sentry.captureException()` with specific error detection
+- Root layout metadata now includes full OG image, Twitter card, apple-touch-icon
+
+### Build Results
+- `npx tsc --noEmit` — zero errors
+- `npx next lint` — zero errors (pre-existing warnings)
+- `npm run build` — ✓ 65 static pages (up from 54), 28 API routes
+- `npm test` — 91/91 passing (9 test suites)
+- Quality gate: ALL PASS
+
+---
+
+## Session 2026-06-09 (cont.) — Sprint 5: RxJS Feed, i18n, Lighthouse Audit
+
+### Summary
+Implemented three backlog items: RxJS reactive feed stream, i18n foundation (English + Pidgin), and Lighthouse performance improvements. All quality gates pass.
+
+### Changes
+
+**RxJS Reactive Feed:**
+- `app/lib/streams/feedStream.ts` — Created `FeedStream` class with `feedState$` (BehaviorSubject<FeedState>), `interactionCache$` (BehaviorSubject<Map<string, Partial<FeedPost>>>), 30s polling via `interval(30000)`, `loadInitial()`, `loadMore()`, `refresh()`, `applyInteraction()` (optimistic update + API call), proper cleanup via `destroy$` Subject + `takeUntil`
+- `app/(dashboard)/home/page.tsx` — Replaced direct fetch + setInterval with `feedStream.loadInitial()` + subscription to `feedStream.feedState$`; infinite scroll calls `loadMore()`; interactions call `applyInteraction()` optimistically before API call
+
+**i18n Foundation:**
+- `app/lib/config/i18n.ts` — `Locale` type (`"en" | "pcm"`), `LOCALES` array, `DEFAULT_LOCALE = "en"`, `STORAGE_KEY = "along-locale"`, `TranslationMap` type
+- `public/locales/en.json` — ~90 translation keys (nav, auth, landing, feed, common, footer, theme, guest, offline, forgot-password)
+- `public/locales/pcm.json` — Same keys with Pidgin English translations (e.g. `"common.error": "Something scatter"`)
+- `app/providers/I18nProvider.tsx` — Context provider with `locale`, `setLocale()`, `t(key, params)` interpolation; auto-detects from localStorage/navigator.language; fetches JSON; sets `html[lang]`
+- `app/components/ui/LocaleSwitcher.tsx` — Toggle cycling en↔pcm, flag + label, ARIA label
+- `app/layout.tsx` — Wired I18nProvider wrapping ThemeProvider + all providers
+- `middleware.ts` — Added `along-locale` cookie auto-detection from Accept-Language header; added `/forgot-password` to guest routes; replaced `NextResponse.next()` with shared `response` object for cookie consistency
+
+**Lighthouse Audit:**
+- `app/loading.tsx` — Root loading state using AppPageLoader
+- `app/error.tsx` — Client error boundary with Try Again button
+- `app/not-found.tsx` — 404 page with Compass icon, link to home
+- `next.config.mjs` — Added security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy), static asset caching (1yr immutable for images/fonts/js/css), preconnect hints via Script component
+- `app/layout.tsx` — Added preconnect/dns-prefetch resource hints for Google Fonts (fonts.googleapis.com, fonts.gstatic.com), Mapbox API (api.mapbox.com); added google-site-verification meta
+
+### New Files Created
+- `app/lib/streams/feedStream.ts`
+- `app/lib/config/i18n.ts`
+- `public/locales/en.json`
+- `public/locales/pcm.json`
+- `app/providers/I18nProvider.tsx`
+- `app/components/ui/LocaleSwitcher.tsx`
+- `app/loading.tsx`
+- `app/error.tsx`
+- `app/not-found.tsx`
+
+### Files Modified
+- `app/(dashboard)/home/page.tsx` — RxJS feed stream integration
+- `app/layout.tsx` — I18nProvider, Script resource hints, meta tags
+- `middleware.ts` — Locale cookie, response object, guest routes
+- `next.config.mjs` — Security headers, asset caching headers
+
+### Build Results
+- `npx tsc --noEmit` — zero errors
+- `npm run build` — ✓ Compiled successfully, 65 static pages
+- `npm test` — 91/91 passing (9 test suites)
+- Quality gate: ALL PASS

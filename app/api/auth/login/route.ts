@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { prisma } from "@/app/lib/db/prisma";
 import { LOGIN_SCHEMA } from "@/app/lib/schemas/auth";
 import { verifyPassword } from "@/app/lib/utils/security";
@@ -40,11 +41,19 @@ export async function POST(request: NextRequest) {
 
     await setAuthCookies(accessToken, refreshToken);
 
-    const { password: _password, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json({ user: userWithoutPassword }, { status: 200 });
   } catch (error) {
-    console.error("Login error:", error);
+    Sentry.captureException(error);
+    if (error instanceof Error) {
+      if (error.name === "PrismaClientKnownRequestError") {
+        return NextResponse.json({ error: "Database error. Please try again." }, { status: 500 });
+      }
+      if (error.name === "JsonWebTokenError") {
+        return NextResponse.json({ error: "Authentication error. Please try again." }, { status: 500 });
+      }
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

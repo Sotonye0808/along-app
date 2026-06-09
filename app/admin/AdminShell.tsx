@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/app/hooks/useAuth"
 import { AppPageLoader } from "@/app/components/ui"
 import { useEffect } from "react"
+import AppLogo from "@/app/components/ui/AppLogo"
 import {
   LayoutDashboard, Users, FileText, Settings, Bug, Shield,
   Home, Compass, Bell, Bookmark, BarChart3, Mail
@@ -38,7 +39,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!isLoading && !user) {
       router.push("/login")
     } else if (!isLoading && user && user.role !== "ADMIN" && user.role !== "MODERATOR") {
-      router.push("/dashboard")
+      router.push("/home")
     }
   }, [user, isLoading, router])
 
@@ -53,14 +54,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen max-w-[1280px] mx-auto bg-bg-base">
       <aside className="w-[240px] shrink-0 bg-bg-card border-r border-border flex flex-col sticky top-0 h-screen">
-        <Link href="/home" className="flex items-center gap-2 px-5 py-6 pb-4 no-underline">
-          <svg viewBox="0 0 28 28" width="28" height="28" fill="none">
-            <circle cx="14" cy="14" r="12" fill="var(--color-primary)" />
-            <circle cx="10" cy="10" r="2.5" fill="var(--color-primary-light)" />
-            <circle cx="18" cy="18" r="2.5" fill="var(--color-primary-light)" />
-            <path d="M10 10L18 18" stroke="#fff" strokeWidth="2" />
-          </svg>
-          <span className="font-bold text-lg tracking-tight text-primary">Along</span>
+        <Link href="/home" className="px-5 py-6 pb-4 no-underline">
+          <AppLogo size="md" showText={true} variant="icon" />
         </Link>
 
         {topNavItems.map((item) => {

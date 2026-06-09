@@ -41,7 +41,7 @@ export const FOOTER_CONFIG: FooterConfig = {
       title: "Features",
       links: [
         { label: "Explore Routes", href: "/explore" },
-        { label: "Share Route", href: "/share" },
+        { label: "Share Route", href: "/home" },
         { label: "Notifications", href: "/notifications" },
         { label: "Invite Friends", href: "/invite" },
       ],

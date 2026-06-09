@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { LOGO_CONFIG } from '@/app/lib/config/logo'
 
 interface AppLogoProps {
@@ -6,6 +7,7 @@ interface AppLogoProps {
   showText?: boolean
   linkTo?: string
   className?: string
+  variant?: 'inline' | 'icon' | 'full'
 }
 
 export default function AppLogo({
@@ -13,9 +15,11 @@ export default function AppLogo({
   showText = true,
   linkTo = '/',
   className = '',
+  variant = 'inline',
 }: AppLogoProps) {
   const px = LOGO_CONFIG.sizes[size]
-  const content = (
+
+  const inlineLogo = (
     <div className={`inline-flex items-center gap-2 ${className}`}>
       <svg
         width={px}
@@ -41,6 +45,33 @@ export default function AppLogo({
       )}
     </div>
   )
+
+  const iconLogo = (
+    <div className={`inline-flex items-center gap-2 ${className}`}>
+      <Image src={LOGO_CONFIG.iconUrl} alt="Along" width={px} height={px} />
+      {showText && (
+        <span
+          className="font-bold tracking-tight"
+          style={{
+            fontSize: `${px * 0.5}px`,
+            color: LOGO_CONFIG.brandColor,
+            lineHeight: 1,
+          }}
+        >
+          {LOGO_CONFIG.wordmark}
+        </span>
+      )}
+    </div>
+  )
+
+  const fullLogo = (
+    <div className={`inline-flex items-center ${className}`}>
+      <Image src={LOGO_CONFIG.logoUrl} alt="Along" width={px * 2} height={px * 2} />
+    </div>
+  )
+
+  const content = variant === 'full' ? fullLogo : variant === 'icon' ? iconLogo : inlineLogo
+
   if (linkTo) {
     return <Link href={linkTo}>{content}</Link>
   }

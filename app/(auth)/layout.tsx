@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import AppLogo from "@/app/components/ui/AppLogo"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -24,10 +25,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <div className="relative z-10 mb-6">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="32" cy="32" r="28" stroke="white" strokeWidth="2" />
-            <path d="M20 32 L28 40 L44 24" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <AppLogo variant="icon" size="lg" linkTo="" />
         </div>
 
         <h1 className="relative z-10 text-white text-2xl font-bold mb-3">
@@ -41,11 +39,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <main className="flex items-center justify-center p-8 bg-bg-base min-h-[100vh] md:min-h-0">
         <div className="w-full max-w-[420px]">
           <div className="flex flex-col items-center mb-8 md:hidden">
-            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="32" cy="32" r="28" stroke="#00623B" strokeWidth="2" />
-              <path d="M20 32 L28 40 L44 24" stroke="#00623B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="text-primary font-bold text-lg mt-2">Along</span>
+            <AppLogo variant="icon" size="md" linkTo="" />
           </div>
           {children}
         </div>

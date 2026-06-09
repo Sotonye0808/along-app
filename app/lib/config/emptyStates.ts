@@ -54,7 +54,7 @@ export const EMPTY_STATES: Record<string, EmptyStateConfig> = {
     title: "No routes shared yet",
     description: "Share your first route to help the community.",
     actionLabel: "Share a Route",
-    actionHref: "/share",
+    actionHref: "/home",
   },
   reviews: {
     icon: FileText,

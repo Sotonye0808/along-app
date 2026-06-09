@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     await setAuthCookies(accessToken, refreshToken);
 
-    const { password: _password, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json({ user: userWithoutPassword }, { status: 200 });
   } catch (error) {

@@ -7,6 +7,7 @@ function isExactPath(pathname: string, route: string): boolean {
 
 export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("access_token")?.value;
+  const localeCookie = request.cookies.get("along-locale")?.value;
   const { pathname } = request.nextUrl;
 
   if (
@@ -17,21 +18,32 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Set locale cookie if not present, based on Accept-Language
+  const response = NextResponse.next();
+  if (!localeCookie) {
+    const acceptLang = request.headers.get("accept-language") ?? "";
+    const detected = acceptLang.startsWith("pcm") || acceptLang.startsWith("en-pcm") ? "pcm" : "en";
+    response.cookies.set("along-locale", detected, {
+      maxAge: 60 * 60 * 24 * 365,
+      path: "/",
+    });
+  }
+
   // Guest-accessible: public pages + feed, explore, profiles, posts, faq, blog
   const guestRoutes = [
     "/", "/about", "/contact", "/privacy", "/terms", "/report-bug",
-    "/faq", "/blog", "/home", "/explore",
+    "/faq", "/blog", "/home", "/explore", "/forgot-password",
   ];
   if (guestRoutes.some((r) => isExactPath(pathname, r))) {
-    return NextResponse.next();
+    return response;
   }
   // Profile sub-routes (e.g. /profile/username) are guest-accessible but /profile (own) is protected
   if (pathname.startsWith("/profile/") && pathname !== "/profile") {
-    return NextResponse.next();
+    return response;
   }
   // Post detail pages are guest-accessible
   if (pathname.startsWith("/posts/")) {
-    return NextResponse.next();
+    return response;
   }
 
   // Auth routes: redirect to home if already logged in
@@ -39,7 +51,7 @@ export function middleware(request: NextRequest) {
     if (accessToken) {
       return NextResponse.redirect(new URL("/home", request.url));
     }
-    return NextResponse.next();
+    return response;
   }
 
   // Protected routes: require auth
@@ -54,7 +66,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

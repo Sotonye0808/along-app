@@ -310,6 +310,7 @@ export default function PostDetailPage() {
         <div className="grid grid-cols-2 gap-1 radius-md overflow-hidden mb-5" style={post.images.length >= 3 ? { gridTemplateRows: "auto auto" } : {}}>
           {post.images.slice(0, 3).map((img, i) => (
             <div key={i} className={`relative cursor-pointer overflow-hidden group ${i === 0 && post.images.length >= 3 ? "row-span-2" : ""}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img} alt={`Route photo ${i + 1}`} className={`w-full object-cover ${i === 0 && post.images.length >= 3 ? "h-full min-h-[220px]" : post.images.length === 1 ? "h-[280px]" : "h-[110px]"}`} loading="lazy" />
               <div className="absolute inset-0 bg-black/4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
                 <Maximize2 size={28} className="text-white bg-black/30 rounded-circle p-1" />

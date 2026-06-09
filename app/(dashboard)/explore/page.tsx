@@ -46,18 +46,12 @@ export default function ExplorePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [pins, setPins] = useState<PostPin[]>([])
-  const [_loading, setLoading] = useState(true)
   const [selectedPin, setSelectedPin] = useState<PostPin | null>(null)
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "")
   const [panelCollapsed, setPanelCollapsed] = useState(false)
   const [bottomSheetHeight, setBottomSheetHeight] = useState("40vh")
   const [dragging, setDragging] = useState(false)
   const [isDark, setIsDark] = useState(false)
-  const [viewport, setViewport] = useState({
-    latitude: Number(searchParams.get("lat")) || 6.5244,
-    longitude: Number(searchParams.get("lng")) || 3.3792,
-    zoom: Number(searchParams.get("zoom")) || 11,
-  })
   const sheetRef = useRef<HTMLDivElement>(null)
   const dragStartY = useRef(0)
   const sheetStartHeight = useRef("40vh")
@@ -98,7 +92,7 @@ export default function ExplorePage() {
             user: p.user,
           }))
         setPins(mapped)
-      } catch { /* ignore */ } finally { setLoading(false) }
+      } catch { /* ignore */ }
     }
     load()
   }, [])
@@ -117,7 +111,6 @@ export default function ExplorePage() {
 
   const handleViewportChange = useCallback(
     (v: { latitude: number; longitude: number; zoom: number }) => {
-      setViewport(v)
       updateUrl(v.latitude, v.longitude, v.zoom)
     },
     [updateUrl]
@@ -171,14 +164,9 @@ export default function ExplorePage() {
     navigator.clipboard.writeText(url)
   }
 
-  const initialViewState = useMemo(
-    () => ({
-      latitude: viewport.latitude,
-      longitude: viewport.longitude,
-      zoom: viewport.zoom,
-    }),
-    []
-  )
+  const initialLat = Number(searchParams.get("lat")) || 6.5244
+  const initialLng = Number(searchParams.get("lng")) || 3.3792
+  const initialZoom = Number(searchParams.get("zoom")) || 11
 
   const mapStyle = isDark
     ? "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -199,7 +187,7 @@ export default function ExplorePage() {
       <div className="hidden lg:block w-full h-full">
         <MapView
           mapLib={import("maplibre-gl")}
-          initialViewState={initialViewState}
+          initialViewState={{ latitude: initialLat, longitude: initialLng, zoom: initialZoom }}
           mapStyle={mapStyle}
           style={{ width: "100%", height: "100%" }}
           attributionControl={false}
@@ -225,7 +213,7 @@ export default function ExplorePage() {
       <div className="lg:hidden w-full h-full">
         <MapView
           mapLib={import("maplibre-gl")}
-          initialViewState={initialViewState}
+          initialViewState={{ latitude: initialLat, longitude: initialLng, zoom: initialZoom }}
           mapStyle={mapStyle}
           style={{ width: "100%", height: "100%" }}
           attributionControl={false}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { RefreshCw } from "lucide-react"
 import dynamic from "next/dynamic"
 import { PostCard } from "@/app/components/features/posts"
@@ -10,6 +10,7 @@ import { AppEmptyState, PostCardSkeleton } from "@/app/components/ui"
 import { EMPTY_STATES } from "@/app/lib/config"
 import { useAuth } from "@/app/hooks/useAuth"
 import { useFeedInteractions } from "@/app/hooks/useFeedInteractions"
+import { feedStream } from "@/app/lib/streams/feedStream"
 
 interface FeedPost {
   id: string
@@ -43,47 +44,44 @@ interface FeedPost {
 export default function HomePage() {
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [loading, setLoading] = useState(true)
-  const [cursor, setCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [newPostsCount, setNewPostsCount] = useState(0)
   const [showShareModal, setShowShareModal] = useState(false)
   const loaderRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
 
-  const fetchFeed = useCallback(async (cursorVal?: string) => {
-    try {
-      const params = new URLSearchParams()
-      if (cursorVal) params.set("cursor", cursorVal)
-      params.set("limit", "10")
-      const res = await fetch(`/api/posts/feed?${params}`)
-      const data = await res.json()
-      return data as { posts: FeedPost[]; nextCursor: string | null }
-    } catch {
-      return { posts: [], nextCursor: null }
-    }
-  }, [])
-
-  const loadMore = useCallback(async () => {
-    if (!hasMore || loading) return
-    setLoading(true)
-    const data = await fetchFeed(cursor ?? undefined)
-    setPosts((prev) => [...prev, ...data.posts])
-    setCursor(data.nextCursor)
-    setHasMore(!!data.nextCursor)
-    setLoading(false)
-  }, [cursor, hasMore, loading, fetchFeed])
-
   useEffect(() => {
     const init = async () => {
-      setLoading(true)
-      const data = await fetchFeed()
-      setPosts(data.posts)
-      setCursor(data.nextCursor)
-      setHasMore(!!data.nextCursor)
+      const state = await feedStream.loadInitial()
+      setPosts(state.posts)
+      setHasMore(state.hasMore)
       setLoading(false)
     }
     init()
-  }, [fetchFeed])
+
+    const sub = feedStream.feedState$.subscribe((state) => {
+      setPosts(state.posts)
+      setHasMore(state.hasMore)
+      setLoading(state.loading)
+    })
+
+    return () => {
+      sub.unsubscribe()
+    }
+  }, [])
+
+  useEffect(() => {
+    const sub = feedStream.feedState$.subscribe((state) => {
+      if (state.posts.length > 0 && !state.loading) {
+        const currentIds = new Set(posts.map((p) => p.id))
+        const fresh = state.posts.filter((p) => !currentIds.has(p.id))
+        if (fresh.length > 0) {
+          setNewPostsCount(fresh.length)
+        }
+      }
+    })
+    return () => sub.unsubscribe()
+  }, [posts])
 
   useEffect(() => {
     const el = loaderRef.current
@@ -92,7 +90,7 @@ export default function HomePage() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
-          loadMore()
+          feedStream.loadMore()
         }
       },
       { threshold: 0.1 }
@@ -100,36 +98,24 @@ export default function HomePage() {
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [hasMore, loading, loadMore])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (posts.length > 0 && Math.random() > 0.85) {
-        setNewPostsCount((prev) => prev + Math.floor(Math.random() * 3) + 1)
-      }
-    }, 30000)
-    return () => clearInterval(interval)
-  }, [posts.length])
+  }, [hasMore, loading])
 
   const refreshFeed = async () => {
     setNewPostsCount(0)
-    setLoading(true)
-    const data = await fetchFeed()
-    setPosts(data.posts)
-    setCursor(data.nextCursor)
-    setHasMore(!!data.nextCursor)
-    setLoading(false)
+    await feedStream.refresh()
   }
 
   const { handleLike, handleDislike, handleBookmark, handleComment } = useFeedInteractions({
     onLike: async (postId, liked) => {
+      feedStream.applyInteraction({ postId, type: "like", value: liked })
       await fetch(`/api/posts/${postId}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: liked ? "LIKE" : "DISLIKE" }),
       })
     },
-    onDislike: async (postId, _disliked) => {
+    onDislike: async (postId) => {
+      feedStream.applyInteraction({ postId, type: "dislike", value: true })
       await fetch(`/api/posts/${postId}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -137,6 +123,7 @@ export default function HomePage() {
       })
     },
     onBookmark: async (postId, _bookmarked) => {
+      feedStream.applyInteraction({ postId, type: "bookmark", value: !!_bookmarked })
       await fetch(`/api/posts/${postId}/bookmark`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

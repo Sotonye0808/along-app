@@ -130,6 +130,7 @@ export default function AboutPageClient() {
                 className="bg-bg-card border border-border rounded-2xl p-6 text-center shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-base"
               >
                 {member.avatar ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={member.avatar}
                     alt={member.name}

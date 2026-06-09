@@ -18,6 +18,17 @@ interface RouteStepInputProps {
   disabled?: boolean
 }
 
+const MOCK_SUGGESTIONS = [
+  { label: 'Marina, Lagos', lat: 6.4551, lng: 3.3948 },
+  { label: 'Yaba, Lagos', lat: 6.5088, lng: 3.3763 },
+  { label: 'Ikeja, Lagos', lat: 6.6018, lng: 3.3515 },
+  { label: 'Lekki Phase 1, Lagos', lat: 6.4376, lng: 3.4669 },
+  { label: 'Victoria Island, Lagos', lat: 6.4281, lng: 3.4216 },
+  { label: 'Oshodi, Lagos', lat: 6.5459, lng: 3.3491 },
+  { label: 'Surulere, Lagos', lat: 6.4989, lng: 3.3505 },
+  { label: 'Mile 2, Lagos', lat: 6.4699, lng: 3.3066 },
+]
+
 function RouteStepInput({
   value,
   onChange,
@@ -30,17 +41,6 @@ function RouteStepInput({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [loading, setLoading] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const mockSuggestions = [
-    { label: 'Marina, Lagos', lat: 6.4551, lng: 3.3948 },
-    { label: 'Yaba, Lagos', lat: 6.5088, lng: 3.3763 },
-    { label: 'Ikeja, Lagos', lat: 6.6018, lng: 3.3515 },
-    { label: 'Lekki Phase 1, Lagos', lat: 6.4376, lng: 3.4669 },
-    { label: 'Victoria Island, Lagos', lat: 6.4281, lng: 3.4216 },
-    { label: 'Oshodi, Lagos', lat: 6.5459, lng: 3.3491 },
-    { label: 'Surulere, Lagos', lat: 6.4989, lng: 3.3505 },
-    { label: 'Mile 2, Lagos', lat: 6.4699, lng: 3.3066 },
-  ]
 
   const handleQueryChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +57,7 @@ function RouteStepInput({
 
       setLoading(true)
       timerRef.current = setTimeout(() => {
-        const filtered = mockSuggestions.filter((s) =>
+        const filtered = MOCK_SUGGESTIONS.filter((s) =>
           s.label.toLowerCase().includes(val.toLowerCase())
         )
         setSuggestions(filtered)
