@@ -7,7 +7,7 @@ interface AppLogoProps {
   showText?: boolean
   linkTo?: string
   className?: string
-  variant?: 'inline' | 'icon' | 'full'
+  variant?: 'icon' | 'full'
 }
 
 export default function AppLogo({
@@ -15,40 +15,15 @@ export default function AppLogo({
   showText = true,
   linkTo = '/',
   className = '',
-  variant = 'inline',
+  variant = 'icon',
 }: AppLogoProps) {
   const px = LOGO_CONFIG.sizes[size]
 
-  const inlineLogo = (
-    <div className={`inline-flex items-center gap-2 ${className}`}>
-      <svg
-        width={px}
-        height={px}
-        viewBox="0 0 24 24"
-        fill={LOGO_CONFIG.brandColor}
-        xmlns="http://www.w3.org/2000/svg"
-        aria-label="Along logo"
-      >
-        <path d={LOGO_CONFIG.iconPath} />
-      </svg>
-      {showText && (
-        <span
-          className="font-bold tracking-tight"
-          style={{
-            fontSize: `${px * 0.5}px`,
-            color: LOGO_CONFIG.brandColor,
-            lineHeight: 1,
-          }}
-        >
-          {LOGO_CONFIG.wordmark}
-        </span>
-      )}
-    </div>
-  )
-
   const iconLogo = (
     <div className={`inline-flex items-center gap-2 ${className}`}>
-      <Image src={LOGO_CONFIG.iconUrl} alt="Along" width={px} height={px} />
+      <div className="rounded-full overflow-hidden shrink-0">
+        <Image src={LOGO_CONFIG.iconUrl} alt="Along" width={px} height={px} />
+      </div>
       {showText && (
         <span
           className="font-bold tracking-tight"
@@ -66,11 +41,13 @@ export default function AppLogo({
 
   const fullLogo = (
     <div className={`inline-flex items-center ${className}`}>
-      <Image src={LOGO_CONFIG.logoUrl} alt="Along" width={px * 2} height={px * 2} />
+      <div className="rounded-full overflow-hidden shrink-0">
+        <Image src={LOGO_CONFIG.logoUrl} alt="Along" width={px * 2} height={px * 2} />
+      </div>
     </div>
   )
 
-  const content = variant === 'full' ? fullLogo : variant === 'icon' ? iconLogo : inlineLogo
+  const content = variant === 'full' ? fullLogo : iconLogo
 
   if (linkTo) {
     return <Link href={linkTo}>{content}</Link>

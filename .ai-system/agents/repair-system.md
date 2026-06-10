@@ -147,6 +147,95 @@
 
 ---
 
+### Feed Stream Crash on API Error Response
+
+**Symptom:**
+`TypeError: Cannot read properties of undefined (reading 'length')` at `feedStream.ts:72`. Also: "Rendered more hooks than during the previous render" because React's hook count desynchronizes when a render-time error interrupts execution.
+
+**Root Cause:**
+The `fetchFeed` method in `feedStream.ts` called `/api/posts/feed` which returns `{error: "Not authenticated"}` for unauthenticated users. The response was cast as `{posts: FeedPost[]; nextCursor: string | null}` but `data.posts` was actually `undefined` because the API returned an error object. Two crash points:
+1. `feedStream.ts:72` — `state.posts.length` on undefined in the polling subscription
+2. `feedStream.ts:96` — `data.posts` used directly without fallback in `fetchFeed`
+
+**Fix Applied:**
+- `fetchFeed` now defaults `data.posts ?? []` and `data.nextCursor ?? null`
+- Polling subscription uses optional chaining: `(state.posts?.length ?? 0) > 0`
+
+**Prevention:**
+Always default array fields from API responses: `data.field ?? []`. Never assume the API will return the expected shape — it could return `{error: "..."}` or `{message: "..."}`.
+
+**Files Affected:**
+- `app/lib/streams/feedStream.ts`
+
+**Date:** 2026-06-09
+
+---
+
+### Feed API Auth Blocking Guest Access
+
+**Symptom:**
+`GET /api/posts/feed` returned `{"error":"Not authenticated"}` for unauthenticated users, blocking guest browsing of the home feed.
+
+**Root Cause:**
+`app/api/posts/feed/route.ts` called `getUserFromRequest()` at the top and returned 401 if no user was found, with no fallback for guest access.
+
+**Fix Applied:**
+Restructured the GET handler to check auth first. If authenticated, use `feedService.getFeed()` for personalized feed. If guest, return public posts (most recent) directly from Prisma without user-specific filtering.
+
+**Prevention:**
+Public-facing GET endpoints should always have a guest fallback. Auth should gate personalization, not access.
+
+**Files Affected:**
+- `app/api/posts/feed/route.ts`
+
+**Date:** 2026-06-09
+
+---
+
+### PostCard Crash on Missing User Field
+
+**Symptom:**
+`TypeError: Cannot read properties of undefined (reading 'firstName')` when a post object lacks a `user` property.
+
+**Root Cause:**
+`PostCard.tsx` accessed `post.user.firstName`, `post.user.lastName`, etc. without guarding against a missing `user` object. This happened when the feed API returned malformed data.
+
+**Fix Applied:**
+Added a `user` local constant (`const user = post.user`) at the top of the component. All downstream usage changed from `post.user.X` to `user?.X ?? ""`.
+
+**Prevention:**
+Always use optional chaining on nested data from API responses. Create local constants with fallback at the top of the render function.
+
+**Files Affected:**
+- `app/components/features/posts/PostCard.tsx`
+
+**Date:** 2026-06-09
+
+---
+
+### Missing Tailwind Typography Plugin (No Prose Styling)
+
+**Symptom:**
+`prose` CSS classes on Terms, Privacy, and Blog post pages had no effect — content rendered unstyled.
+
+**Root Cause:**
+`@tailwindcss/typography` was not installed. Tailwind CSS v4 requires explicitly installing the typography plugin and importing it in `globals.css` via `@plugin "@tailwindcss/typography"`.
+
+**Fix Applied:**
+- Installed `@tailwindcss/typography@latest`
+- Added `@plugin "@tailwindcss/typography";` to `app/globals.css`
+
+**Prevention:**
+Always install `@tailwindcss/typography` when using `prose` classes in Tailwind v4. Check `@plugin` directive in CSS, not just the Tailwind config.
+
+**Files Affected:**
+- `app/globals.css`
+- `package.json`
+
+**Date:** 2026-06-09
+
+---
+
 ## Resolved Errors Archive
 
 > **Section summary:** Errors that have been fully resolved and are unlikely to recur. Kept for reference.

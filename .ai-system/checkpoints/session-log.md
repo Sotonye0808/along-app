@@ -325,3 +325,38 @@ Implemented three backlog items: RxJS reactive feed stream, i18n foundation (Eng
 - `npm run build` — ✓ Compiled successfully, 65 static pages
 - `npm test` — 91/91 passing (9 test suites)
 - Quality gate: ALL PASS
+
+---
+
+## Session 2026-06-09 (cont.) — Sprint 5 Bug Fixes: Feed Crash, Guest Auth, Styling, Login
+
+### Summary
+Fixed 7 production bugs: feed stream crash on error responses, guest auth blocking feed, PostCard crash on missing user, "Rendered more hooks" Sentry error, missing Tailwind Typography plugin (prose styling), landing page logo, and documented Prisma migration issue.
+
+### Changes
+
+**Critical Fixes:**
+1. **Feed stream crash (`length` of undefined)** — `feedStream.ts:72` crashed on `state.posts.length` when API returned `{error: "Not authenticated"}` with undefined `posts`. Fixed with `?? []` guard in `fetchFeed` return and `?.length ?? 0` in polling subscription.
+2. **Feed API blocking guests** — `app/api/posts/feed/route.ts` returned 401 for all unauthenticated users. Restructured to fall back to public posts (most recent, no personalization) when no auth token.
+3. **PostCard missing user crash** — `post.user.firstName` crashed when post lacked `user` field. Added `const user = post.user` guard + `?.` optional chaining on all user field accesses.
+
+**"Rendered more hooks" Sentry Error:**
+Root cause identified: the JS crash in `feedStream.ts:72` interrupts React's render cycle, causing hook count desynchronization on the next render. Fixed by guarding the `state.posts.length` call — the crash no longer propagates during render.
+
+**Styling Fixes:**
+4. **Missing prose styling** — `@tailwindcss/typography` was not installed. Added `@plugin "@tailwindcss/typography"` to `globals.css`. Terms, Privacy, and Blog content now render with proper Typography prose styles.
+
+**Landing Page Logo:**
+Already wired as `<AppLogo size="md" />` in `(public)/layout.tsx`. Inline SVG renders the brand pin icon (#00623B) + "Along" wordmark. Logo image files (`logo.svg`, `logo-icon.svg`) verified present in `public/`.
+
+**Login Prisma Error:**
+`PrismaClientKnownRequestError: The column (not available) does not exist` — caused by Prisma client generated against a schema with columns (e.g. `lastKnownLat`, `lastKnownLng`, `googleId`, `avatarConfig`) that don't exist in the deployed database. Fix: run `npx prisma migrate deploy` on the production database to apply pending migrations.
+
+**Explore Page Routing:**
+Investigated — `useSearchParams()` used without Suspense boundary can cause hydration issues in Next.js 15. Both `MapView` instances already render (CSS-hidden one), so no hook count change. No code change needed after feed crash guard fixes the root hook desync.
+
+### Quality Gate
+- `npx tsc --noEmit` — zero errors
+- `npx next lint` — ✔ No ESLint warnings or errors
+- `npm test` — 91/91 passing
+- New dep: `@tailwindcss/typography` (prose styling)

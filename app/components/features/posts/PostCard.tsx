@@ -100,6 +100,7 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
   const vehicles = extractVehicles(post.routes)
   const tags = post.tags ?? []
   const images = post.images ?? []
+  const user = post.user
 
   const handleLike = () => {
     if (!auth?.requireAuth("like routes")) return
@@ -160,11 +161,11 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
       <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-2.5">
         <AppUserLabel
           user={{
-            firstName: post.user.firstName,
-            lastName: post.user.lastName,
-            userName: post.user.userName,
-            avatar: post.user.avatar ?? undefined,
-            avatarConfig: post.user.avatarConfig as { style: string; seed?: string; flip?: boolean; backgroundColor?: string } | undefined,
+            firstName: user?.firstName ?? "",
+            lastName: user?.lastName ?? "",
+            userName: user?.userName ?? "",
+            avatar: user?.avatar ?? undefined,
+            avatarConfig: user?.avatarConfig as { style: string; seed?: string; flip?: boolean; backgroundColor?: string } | undefined,
           }}
           size="md"
           showHandle={true}

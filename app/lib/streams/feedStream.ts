@@ -69,7 +69,7 @@ export class FeedStream {
     )
 
     this.polling$.pipe(takeUntil(this.destroy$)).subscribe((state) => {
-      if (state.posts.length > 0) {
+      if ((state.posts?.length ?? 0) > 0) {
         const current = this.feedStateSubject.value
         const existingIds = new Set(current.posts.map((p) => p.id))
         const newPosts = state.posts.filter((p) => !existingIds.has(p.id))
@@ -85,16 +85,16 @@ export class FeedStream {
     })
   }
 
-  private async fetchFeed(cursorVal?: string): Promise<FeedState> {
+    private async fetchFeed(cursorVal?: string): Promise<FeedState> {
     try {
       const params = new URLSearchParams()
       if (cursorVal) params.set("cursor", cursorVal)
       params.set("limit", String(LIMIT))
       const res = await fetch(`/api/posts/feed?${params}`)
-      const data = await res.json() as { posts: FeedPost[]; nextCursor: string | null }
+      const data = await res.json() as { posts?: FeedPost[]; nextCursor?: string | null }
       return {
-        posts: data.posts,
-        cursor: data.nextCursor,
+        posts: data.posts ?? [],
+        cursor: data.nextCursor ?? null,
         hasMore: !!data.nextCursor,
         loading: false,
       }
