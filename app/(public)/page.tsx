@@ -3,6 +3,7 @@ import { Route, ShieldCheck, Users } from "lucide-react";
 import { buildMetadata } from "@/app/lib/utils/metadata";
 import { websiteSchema } from "@/app/lib/utils/structuredData";
 import StructuredData from "@/app/components/ui/StructuredData";
+import AppLogo from "../components/ui/AppLogo";
 
 export const metadata = buildMetadata({
   title: "Navigate Together",
@@ -17,33 +18,11 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section
-        className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-20 overflow-hidden"
+        className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-8 overflow-hidden"
         style={{ background: "linear-gradient(135deg,#004A2C 0%,#00623B 50%,#00A862 100%)" }}
       >
         <div className="absolute inset-0 pointer-events-none opacity-12">
-          <svg viewBox="0 0 375 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
-            <defs>
-              <pattern id="hero-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M40 0L0 0 0 40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#hero-grid)"/>
-            <circle cx="60" cy="120" r="4" fill="rgba(255,255,255,0.2)"/>
-            <circle cx="300" cy="180" r="3" fill="rgba(255,255,255,0.15)"/>
-            <circle cx="180" cy="400" r="5" fill="rgba(255,255,255,0.12)"/>
-            <circle cx="320" cy="450" r="3" fill="rgba(255,255,255,0.1)"/>
-            <circle cx="50" cy="350" r="2" fill="rgba(255,255,255,0.15)"/>
-            <path d="M60 120 L300 180 L180 400 L320 450" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" fill="none"/>
-            <path d="M60 120 L180 400" stroke="rgba(255,255,255,0.06)" strokeWidth="1" fill="none" strokeDasharray="4 4"/>
-          </svg>
-        </div>
-        <div className="mb-6">
-          <svg viewBox="0 0 64 64" fill="none" width="64" height="64">
-            <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5"/>
-            <circle cx="24" cy="24" r="6" fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5"/>
-            <circle cx="44" cy="40" r="6" fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5"/>
-            <path d="M28 28L40 36" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round"/>
-          </svg>
+          <AppLogo variant="full" size="hero" linkTo="" />
         </div>
         <h1 className="text-white font-extrabold tracking-tight leading-tight mb-3 text-[clamp(32px,5vw,48px)]">
           Navigate Together.
@@ -71,7 +50,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section className="py-12 sm:py-16 px-5 bg-bg-base">
+      <section className="py-6 sm:py-8 px-5 bg-bg-base">
         <div className="max-w-[400px] sm:max-w-[960px] mx-auto grid gap-5 sm:grid-cols-3">
           <FeatureCard
             icon={<Route size={24} />}
@@ -92,7 +71,7 @@ export default function LandingPage() {
       </section>
 
       {/* Social Proof */}
-      <section className="py-8 px-5 text-center glass">
+      <section className="py-6 px-5 text-center glass">
         <p className="text-sm font-medium text-text-secondary tracking-wide">
           <strong className="text-primary">10,000+</strong> Routes &middot;{" "}
           <strong className="text-primary">50,000+</strong> Commuters &middot;{" "}
@@ -101,7 +80,7 @@ export default function LandingPage() {
       </section>
 
       {/* Feed Preview */}
-      <section className="py-12 sm:py-16 px-5 bg-bg-elevated">
+      <section className="py-6 sm:py-8 px-5 bg-bg-elevated">
         <div className="max-w-[640px] mx-auto flex flex-col gap-5">
           <span className="text-xs font-medium text-text-muted tracking-wide uppercase">
             Recent from the community
@@ -153,7 +132,7 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section
-        className="py-16 sm:py-20 px-5 text-center"
+        className="py-8 sm:py-10 px-5 text-center"
         style={{ background: "linear-gradient(135deg,#004A2C 0%,#00623B 50%,#00A862 100%)" }}
       >
         <h2 className="text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-white mb-6">
