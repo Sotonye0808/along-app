@@ -1,8 +1,7 @@
 import Link from "next/link";
 import AppFooter from "@/app/components/ui/AppFooter";
 import AppLogo from "@/app/components/ui/AppLogo";
-
-export const dynamic = "force-static";
+import PublicNavActions from "@/app/components/ui/PublicNavActions";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,8 +14,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             <Link href="/faq" className="text-text-secondary hover:text-text-primary transition-colors">FAQ</Link>
             <Link href="/blog" className="text-text-secondary hover:text-text-primary transition-colors">Blog</Link>
             <Link href="/contact" className="text-text-secondary hover:text-text-primary transition-colors">Contact</Link>
-            <Link href="/login" className="text-sm font-semibold text-primary hover:opacity-80 transition-opacity">Sign In</Link>
-            <Link href="/register" className="text-sm font-semibold bg-primary text-text-inverse px-4 py-1.5 rounded-md hover:opacity-90 transition-opacity">Sign Up</Link>
+            <PublicNavActions />
           </nav>
         </div>
       </header>

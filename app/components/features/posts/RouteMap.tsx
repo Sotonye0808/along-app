@@ -78,8 +78,8 @@ function RouteMap({
   }, [])
 
   const mapStyle = isDark
-    ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+    ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+    : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
 
   const routeCoords = encodedPolyline
     ? decodeEncodedPolyline(encodedPolyline)

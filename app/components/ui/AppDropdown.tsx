@@ -54,13 +54,20 @@ export default function AppDropdown({
 
   return (
     <div ref={menuRef} className="relative inline-flex">
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setIsOpen((prev) => !prev)}
-        className="inline-flex"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            setIsOpen((prev) => !prev)
+          }
+        }}
+        className="inline-flex cursor-pointer"
       >
         {trigger}
-      </button>
+      </div>
 
       {isOpen && (
         <div

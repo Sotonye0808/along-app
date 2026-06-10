@@ -34,6 +34,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ posts: resultPosts, nextCursor }, { status: 200 });
   } catch (error) {
     console.error("Feed error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({
+      error: "Internal server error",
+      ...(process.env.NODE_ENV !== "production" && { detail: message }),
+    }, { status: 500 });
   }
 }

@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import Link from "next/link"
 import { Mail, Lock, User } from "lucide-react"
 import { AppButton, AppInput, AppCard, AppDivider, AppAlert } from "@/app/components/ui"
+import { toastService } from "@/app/lib/services/toastService"
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ firstName: "", lastName: "", userName: "", email: "", password: "" })
@@ -44,7 +45,8 @@ export default function RegisterPage() {
         const data = await res.json()
         throw new Error(data.error || "Registration failed")
       }
-      window.location.href = `/otp?email=${encodeURIComponent(form.email)}`
+      toastService.success("Account created! Check your email for the verification code.")
+      setTimeout(() => { window.location.href = `/otp?email=${encodeURIComponent(form.email)}` }, 300)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -122,7 +124,7 @@ export default function RegisterPage() {
         type="button"
         variant="secondary"
         fullWidth
-        className="bg-white border-border text-text-primary hover:bg-bg-elevated"
+        className="bg-bg-card border-border text-text-primary hover:bg-bg-elevated"
         onClick={() => { window.location.href = '/api/auth/google' }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

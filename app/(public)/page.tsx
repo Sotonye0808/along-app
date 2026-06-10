@@ -4,6 +4,7 @@ import { buildMetadata } from "@/app/lib/utils/metadata";
 import { websiteSchema } from "@/app/lib/utils/structuredData";
 import StructuredData from "@/app/components/ui/StructuredData";
 import AppLogo from "../components/ui/AppLogo";
+import { HeroCtas, BottomCta } from "@/app/components/ui/LandingCtas";
 
 export const metadata = buildMetadata({
   title: "Navigate Together",
@@ -18,11 +19,11 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section
-        className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-8 overflow-hidden"
+        className="relative flex flex-col items-center justify-center text-center px-6 py-12 overflow-hidden"
         style={{ background: "linear-gradient(135deg,#004A2C 0%,#00623B 50%,#00A862 100%)" }}
       >
-        <div className="absolute inset-0 pointer-events-none opacity-12">
-          <AppLogo variant="full" size="hero" linkTo="" />
+        <div className="pointer-events-none">
+          <AppLogo variant="full" size="md" className="w-full" linkTo="" />
         </div>
         <h1 className="text-white font-extrabold tracking-tight leading-tight mb-3 text-[clamp(32px,5vw,48px)]">
           Navigate Together.
@@ -31,18 +32,7 @@ export default function LandingPage() {
           Share routes. Discover better ways. Together.
         </p>
         <div className="flex gap-3 flex-wrap justify-center">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-white text-primary text-base font-semibold hover:shadow-lg transition-shadow"
-          >
-            Get Started &rarr;
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-transparent text-white text-base font-medium border border-white/40 hover:bg-white/10 transition-colors"
-          >
-            Sign In
-          </Link>
+          <HeroCtas />
         </div>
         <Link href="/home" className="mt-5 inline-block text-sm text-white/70 hover:text-white transition-colors underline underline-offset-2">
           Continue as guest
@@ -138,12 +128,7 @@ export default function LandingPage() {
         <h2 className="text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-white mb-6">
           Start navigating smarter
         </h2>
-        <Link
-          href="/register"
-          className="inline-flex items-center gap-2 h-12 px-7 rounded-md bg-white text-primary text-base font-semibold hover:shadow-lg transition-shadow"
-        >
-          Create Free Account &rarr;
-        </Link>
+        <BottomCta />
       </section>
     </>
   );

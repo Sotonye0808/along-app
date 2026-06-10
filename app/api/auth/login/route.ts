@@ -45,10 +45,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ user: userWithoutPassword }, { status: 200 });
   } catch (error) {
+    console.error("[LOGIN ERROR]", error);
     Sentry.captureException(error);
     if (error instanceof Error) {
-      if (error.name === "PrismaClientKnownRequestError") {
-        return NextResponse.json({ error: "Database error. Please try again." }, { status: 500 });
+      if (error.name === "PrismaClientKnownRequestError" || error.name === "PrismaClientInitializationError") {
+        const prismaError = error as { code?: string; message: string };
+        return NextResponse.json({
+          error: "Database error. Please try again.",
+          ...(process.env.NODE_ENV !== "production" && { detail: prismaError.message, code: prismaError.code }),
+        }, { status: 500 });
       }
       if (error.name === "JsonWebTokenError") {
         return NextResponse.json({ error: "Authentication error. Please try again." }, { status: 500 });

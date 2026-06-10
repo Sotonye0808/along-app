@@ -9,15 +9,15 @@ import { defineConfig } from "prisma/config";
 const projectEnv = (
     process.env.PROJECT_ENV || process.env.NODE_ENV || "development"
 ).toLowerCase();
-const useLocalDb = projectEnv === "development";
-const datasourceUrl = useLocalDb
-    ? process.env.LOCAL_DB
+const isDev = projectEnv === "development";
+const datasourceUrl = isDev
+    ? process.env.DIRECT_LOCAL_DB
     : process.env.DIRECT_URL || process.env.DATABASE_URL;
 
 // Only throw during explicit Prisma CLI operations, not during build time
 if (!datasourceUrl && process.argv[1]?.includes("prisma")) {
     throw new Error(
-        "Missing datasource URL. Set LOCAL_DB for development or DIRECT_URL/DATABASE_URL for production.",
+        "Missing datasource URL. Set DIRECT_LOCAL_DB for development or DIRECT_URL/DATABASE_URL for production.",
     );
 }
 

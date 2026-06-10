@@ -328,6 +328,29 @@ Implemented three backlog items: RxJS reactive feed stream, i18n foundation (Eng
 
 ---
 
+## Session 2026-06-10 — Sprint 5 Fixes: Footer Grid, ShareRouteModal Responsive, Prisma Connection
+
+### Summary
+Fixed footer grid to show 3 columns on mobile, made ShareRouteModal responsive for tablet/mobile, and resolved Prisma 7 Accelerate vs direct connection mismatch causing 30s login timeout. The Prisma client was receiving an Accelerate URL (`prisma+postgres://`) as `datasourceUrl` instead of a direct `postgres://` URL — these are mutually exclusive in Prisma 7.
+
+### Changes
+- **AppFooter.tsx** — Changed `grid-cols-1 md:grid-cols-3` → `grid-cols-3` (3 columns on mobile)
+- **ShareRouteModal.tsx** — Made responsive: `flex` → `flex-col lg:flex-row`, sidebar `w-[280px]` → `w-full lg:w-[280px]`, added border separator for stacked layout
+- **prisma.ts** — Always uses `accelerateUrl` (Prisma 7 generated client only accepts this), switches URL by env: dev → `LOCAL_DB` (dev Accelerate), prod → `DATABASE_URL` (prod Accelerate)
+- **prisma.config.ts** — Changed dev CLI URL from `LOCAL_DB` (Accelerate) → `DIRECT_LOCAL_DB` (direct `postgres://`)
+- **Login route** — Added `PrismaClientInitializationError` detection, surfaces `detail` + `code` in dev mode
+- **Feed route** — Surfaces error `detail` in dev mode
+
+### Build Results
+- `npx tsc --noEmit` — pending
+- `npm run build` — pending
+
+### Notes
+- Env now has `DIRECT_LOCAL_DB` (direct dev connection), `LOCAL_DB` (Accelerate dev connection), `DIRECT_URL` (direct prod), `DATABASE_URL` (Accelerate prod)
+- After changes, user must run `npx prisma db push && npx prisma db seed` to sync schema then restart dev server
+
+---
+
 ## Session 2026-06-09 (cont.) — Sprint 5 Bug Fixes: Feed Crash, Guest Auth, Styling, Login
 
 ### Summary
@@ -360,3 +383,26 @@ Investigated — `useSearchParams()` used without Suspense boundary can cause hy
 - `npx next lint` — ✔ No ESLint warnings or errors
 - `npm test` — 91/91 passing
 - New dep: `@tailwindcss/typography` (prose styling)
+
+---
+
+## Session 2026-06-10 (cont.) — Auth UX: Toast, Redirect, Auth-Aware Nav
+
+### Summary
+Fixed three auth UX issues: login now redirects to `/home` (not landing page), success toast shown on login/register, and public navbar + landing page CTAs detect auth state to show "View Feed" instead of "Sign In/Sign Up" for authenticated users.
+
+### Changes
+- **Login page** — Changed redirect from `"/"` to `"/home"`, added `toastService.success("Signed in successfully")` with 300ms delay before redirect
+- **Register page** — Added `toastService.success("Account created! Check your email...")` before OTP redirect
+- **Created `app/components/ui/PublicNavActions.tsx`** — Client component that reads `AuthContext`, shows "View Feed" (green button) when authenticated, "Sign In / Sign Up" when guest, loading skeleton during auth check
+- **Created `app/components/ui/LandingCtas.tsx`** — `HeroCtas` and `BottomCta` components with same auth-aware logic for landing page hero and bottom CTA sections
+- **Public layout** — Replaced hardcoded Sign In / Sign Up links with `<PublicNavActions />`
+- **Landing page** — Replaced hero CTAs with `<HeroCtas />` and bottom CTA with `<BottomCta />`
+
+### Files Affected
+- `app/(auth)/login/page.tsx`
+- `app/(auth)/register/page.tsx`
+- `app/(public)/layout.tsx`
+- `app/(public)/page.tsx`
+- `app/components/ui/PublicNavActions.tsx` (new)
+- `app/components/ui/LandingCtas.tsx` (new)

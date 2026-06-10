@@ -236,6 +236,34 @@ Always install `@tailwindcss/typography` when using `prose` classes in Tailwind 
 
 ---
 
+### Prisma 7 Accelerate URL Used as datasourceUrl (P2022 / Timeout)
+
+**Symptom:**
+`POST /api/auth/login` returns 500 "Database error. Please try again." after ~30s timeout. No `PrismaClientKnownRequestError` details visible. Fresh DB keys don't help.
+
+**Root Cause:**
+`app/lib/db/prisma.ts` passed `datasourceUrl` to the PrismaClient constructor, but Prisma 7's generated client (Accelerate mode) only accepts `accelerateUrl` or `adapter` — there is no `datasourceUrl` option in `PrismaClientOptions`. This threw `PrismaClientConstructorValidationError: Unknown property datasourceUrl` at construction time.
+
+Additionally, `prisma.config.ts` used `LOCAL_DB` (the Accelerate `prisma+postgres://` URL) for CLI operations (migrate, seed), but CLI needs a direct `postgres://` connection — Accelerate URLs don't support DDL operations.
+
+**Fix Applied:**
+- `prisma.ts`: Always uses `accelerateUrl`, switches URL based on environment — dev uses `LOCAL_DB` (dev Accelerate), prod uses `DATABASE_URL` (prod Accelerate)
+- `prisma.config.ts`: Development uses `DIRECT_LOCAL_DB` for CLI, production uses `DIRECT_URL`
+- Login route error handling: Added `PrismaClientInitializationError` to the name check, and surfaces `detail` + `code` in dev mode
+
+**Prevention:**
+Never pass a `prisma+postgres://` Accelerate URL to `datasourceUrl`. Use `accelerateUrl` for Accelerate and `datasourceUrl` for direct connections. They are mutually exclusive in Prisma 7's `PrismaClientOptions`.
+
+**Files Affected:**
+- `app/lib/db/prisma.ts`
+- `prisma.config.ts`
+- `app/api/auth/login/route.ts`
+- `app/api/posts/feed/route.ts`
+
+**Date:** 2026-06-10
+
+---
+
 ## Resolved Errors Archive
 
 > **Section summary:** Errors that have been fully resolved and are unlikely to recur. Kept for reference.

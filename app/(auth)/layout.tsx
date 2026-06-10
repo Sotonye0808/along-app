@@ -25,7 +25,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <div className="relative z-10 mb-6">
-          <AppLogo variant="icon" size="lg" linkTo="" />
+          <AppLogo variant="full" size="lg" linkTo="" />
         </div>
 
         <h1 className="relative z-10 text-white text-2xl font-bold mb-3">

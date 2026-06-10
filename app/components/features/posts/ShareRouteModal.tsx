@@ -120,8 +120,8 @@ export default function ShareRouteModal({ isOpen, onClose, onSubmit }: ShareRout
           </button>
         </div>
 
-        <div className="flex overflow-y-auto flex-1">
-          <div className="flex-1 p-6 flex flex-col gap-5 overflow-y-auto">
+        <div className="flex flex-col lg:flex-row overflow-y-auto flex-1">
+          <div className="flex-1 p-4 sm:p-6 flex flex-col gap-5 overflow-y-auto">
             <div>
               <label className="block text-sm font-medium mb-1 text-text-primary">
                 Route title <span className="text-error-text">*</span>
@@ -271,7 +271,7 @@ export default function ShareRouteModal({ isOpen, onClose, onSubmit }: ShareRout
             </div>
           </div>
 
-          <div className="w-[280px] shrink-0 py-5 pr-6 pl-0 flex flex-col gap-4">
+          <div className="w-full lg:w-[280px] shrink-0 p-4 sm:py-5 sm:pr-6 sm:pl-0 flex flex-col gap-4 border-t lg:border-t-0 lg:border-l border-border">
             <div>
               <label className="block text-sm font-medium mb-1.5 text-text-secondary">Route preview</label>
               <RouteMap
