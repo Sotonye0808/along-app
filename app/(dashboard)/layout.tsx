@@ -17,11 +17,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {isGuest && <GuestBanner />}
       <div className="flex-1 flex">
         <DashboardNav />
-        <div className="flex-1 min-w-0 lg:flex lg:justify-center">
-          <main className="flex-1 max-w-[640px] w-full px-4 pb-4 lg:pb-0">
-            {children}
-          </main>
-        </div>
+        <main className="flex-1 min-w-0">
+          {children}
+        </main>
       </div>
       <AppFooter />
     </div>

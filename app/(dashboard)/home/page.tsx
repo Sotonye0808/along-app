@@ -7,6 +7,7 @@ import { PostCard } from "@/app/components/features/posts"
 
 const ShareRouteModal = dynamic(() => import("@/app/components/features/posts/ShareRouteModal"), { ssr: false })
 import { AppEmptyState, PostCardSkeleton } from "@/app/components/ui"
+import SuggestionsPanel from "@/app/components/ui/SuggestionsPanel"
 import { EMPTY_STATES } from "@/app/lib/config"
 import { useAuth } from "@/app/hooks/useAuth"
 import { useFeedInteractions } from "@/app/hooks/useFeedInteractions"
@@ -137,7 +138,8 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="max-w-[640px] mx-auto px-4 py-4 flex flex-col gap-3">
+      <div className="flex justify-center">
+        <div className="max-w-[640px] w-full px-4 py-4 flex flex-col gap-3">
         {newPostsCount > 0 && (
           <button
             onClick={refreshFeed}
@@ -185,6 +187,9 @@ export default function HomePage() {
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-circle animate-spin" />
           </div>
         )}
+        </div>
+
+        <SuggestionsPanel />
       </div>
 
       <ShareRouteModal
