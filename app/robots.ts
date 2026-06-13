@@ -1,17 +1,14 @@
-import { MetadataRoute } from 'next';
-import { getSiteUrl } from '@/lib/utils/metadata';
+import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-    const baseUrl = getSiteUrl();
-
-    return {
-        rules: [
-            {
-                userAgent: '*',
-                allow: '/',
-                disallow: ['/api/', '/otp'],
-            },
-        ],
-        sitemap: `${baseUrl}/sitemap.xml`,
-    };
+  return {
+    rules: [
+      {
+        userAgent: "*",
+        allow: ["/", "/about", "/contact", "/privacy", "/terms", "/explore"],
+        disallow: ["/admin", "/api", "/login", "/register", "/otp", "/home", "/bookmarks", "/notifications", "/profile/", "/posts/"],
+      },
+    ],
+    sitemap: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://along.app"}/sitemap.xml`,
+  };
 }

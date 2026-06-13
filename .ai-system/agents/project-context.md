@@ -1,93 +1,85 @@
 # Project Context
 
-> **Overview:** Along is a social route-sharing platform where users share, discover, and interact with travel routes and destinations. It is a full-stack Next.js 15+ application targeting travelers and adventure enthusiasts who want to share their journeys and discover routes from others. The project is currently in active development, transitioning from a mock backend to a production-ready database-backed architecture.
+> **Overview:** Along is a social travel-intelligence platform built for urban commuters in Nigeria and West Africa. It solves the problem of unreliable public transit information by letting users share, verify, and discover transport routes in real time — combining the social dynamics of Twitter with the utility of Google Maps. The platform targets the 80%+ of urban commuters who rely on informal transit (buses, danfos, keke, okada) with no reliable real-time information.
 
 ---
 
 ## Project Purpose
 
-> **Section summary:** What this project does and why it exists.
-
-Along enables users to create and share travel route posts — including maps, images, and tags — while building a social community around exploration and discovery. Users can follow each other, like and comment on posts, bookmark routes for later, and explore content through a feed algorithm.
+Along empowers urban commuters to share and verify transport route information in real time. Users post route updates (delays, fares, accidents, police checks), follow trusted reporters, earn trust badges through verification, and discover optimal routes through community-sourced intelligence. The platform operates offline-first with PWA support and push notifications for critical route alerts.
 
 ---
 
 ## Target Users
 
-> **Section summary:** Who uses this system and what they need from it.
-
 | User Type | Needs | Key Interactions |
 |-----------|-------|-----------------|
-| Travelers / Explorers | Share their routes with photos and maps | Create posts, follow users, explore feed |
-| Route Discoverers | Find routes by location, tags, or popularity | Browse explore page, search, bookmark posts |
-| Community Members | Engage with others' content | Like, comment, follow, get notifications |
+| Daily Commuter | Real-time route info, fare updates, delay alerts | Browse feed, search routes, follow reporters, receive push notifications |
+| Route Reporter | Share route observations, build trust score | Post route updates, verify others' reports, earn rewards/badges |
+| Verified Reporter | High-credibility route intelligence | TrustBadge visible on profile, posts prioritized in feed |
+| Admin | Platform moderation, analytics, user management | Moderate content, view analytics, manage site config, handle bug reports |
+| Visitor | Browse public content before signing up | View landing page, public feed, about/contact pages |
 
 ---
 
 ## Business Constraints
 
-> **Section summary:** Non-negotiable requirements that affect how we build.
-
-- Must support PWA installation on mobile devices
-- Must work with offline fallback (service workers)
-- Images must go through Cloudinary (no local storage)
-- JWT auth tokens stored in cookies (not localStorage)
-- TypeScript strict mode is mandatory — no `any` types
-- No raw SQL — all DB access through Prisma ORM
-- `app/conflicting/` directory must never be modified (legacy reference only)
+- Must work reliably on low-end mobile devices and slow 3G/4G connections (PWA-first)
+- Offline capability required — cached feed and map data must be available without connectivity
+- Must support push notifications for route alerts even when the app is closed
+- Nigerian/West African market focus — content moderation must support local languages and contexts
+- Trust and verification are critical — fake route information can cause real harm
+- Must comply with Nigerian data protection regulations (NDPR)
+- No real-time WebSocket requirement — polling + push notifications suffice for the MVP
 
 ---
 
 ## Current Project Phase
 
-> **Section summary:** Where the project stands right now in its development lifecycle.
+Phase: Pre-rebuild (Infrastructure Complete, Application Pending)
 
-Phase: **Active Development → Refactoring**
+The project has completed infrastructure setup (Prisma schema with 14 models, Sentry, Redis, PWA, CI pipeline, design system, all configurations) and an extensive design system (17 HTML design files). The previous application codebase (Phases 1-7 built against a mock backend) was removed for a clean rebuild with database integration. The next step is to generate the complete `app/` directory via AI-driven prompts.
 
-The application has a working mock backend (`mock-backend/` with json-server) and Next.js API routes backed by in-memory data. A Prisma schema and database layer (`app/lib/db/`) are in place. The current focus is major refactoring to achieve production readiness: migrating all API routes to use Prisma, adding Redis caching, securing all endpoints, and improving code modularity.
-
-Active sprint focus: Refactoring existing code to production-grade quality, improving type safety, and enabling the full database-backed workflow.
+Active sprint focus: Generate the application codebase (`app/` directory) starting with the config registry, followed by the universal component library, API services, and page components.
 
 ---
 
 ## Tech Decisions Already Made
 
-> **Section summary:** Decisions that are locked in and should not be revisited unless explicitly flagged.
-
 | Decision | Reason |
 |----------|--------|
-| Next.js 15+ App Router | Leverages Server Components and React 19; no Pages Router |
-| TypeScript strict mode | Prevents runtime type errors; mandatory for all files |
-| Tailwind CSS + Ant Design | Tailwind for layout/custom, antd for UI components |
-| Prisma ORM with PostgreSQL | Type-safe DB access, prevents SQL injection, easy migrations |
-| Cloudinary for all media | Centralized image management with transformation support |
-| Upstash Redis for caching | Serverless-compatible, no connection pooling issues |
-| JWT in cookies | More secure than localStorage; server-accessible |
-| Zod for validation | Runtime type checking + schema inference for API inputs |
-| React Context API for global state | Lightweight state management; no Redux needed for this scale |
-| json-server mock backend | Rapid development before DB integration; matches production API shape |
+| Next.js App Router over Pages Router | Modern React patterns, server components, streaming SSR, improved DX |
+| Prisma over Drizzle/TypeORM | Mature ORM with excellent migration tooling, type safety, and Postgres support |
+| Ant Design 5 over shadcn/ui/MUI | Comprehensive component library suitable for data-heavy dashboards; already widely used |
+| Tailwind CSS v4 over styled-components/CSS modules | Utility-first approach with CSS custom property theming, smaller bundle via JIT |
+| MapLibre GL over Google Maps/Mapbox | Open-source, no API key costs for self-hosted tiles, full control over styling |
+| JWT with httpOnly cookies over NextAuth.js/sessions | Simpler auth model for API routes, no additional dependency, secure against XSS |
+| Config-driven architecture | All hardcoded values centralized in config registries for maintainability and auditability |
+| OOP Service Layer with BaseRepository | Consistent data access patterns, easy to test, clear separation of concerns |
+| Zero emoji policy | Faster rendering, consistent appearance across devices, accessible |
+| Lucide React over Ant Design Icons | Smaller bundle (tree-shakeable), consistent icon style, no emoji confusion |
 
 ---
 
 ## Out of Scope
 
-> **Section summary:** Things we are explicitly not building in this project.
-
-- Native mobile apps (iOS/Android) — PWA approach only
-- Real-time map rendering beyond route display
-- Payment processing / marketplace transactions (feature may be added later)
-- Third-party OAuth login (email/password + OTP only for now)
-- Multi-tenant organization features
+- Native mobile app (iOS/Android) — PWA covers mobile use cases for MVP
+- Real-time WebSocket-based messaging or chat
+- Ride-hailing or booking integration — information sharing only, not transactions
+- In-app payments or fare collection
+- International expansion beyond West Africa in the initial release
 
 ---
 
 ## External Integrations
 
-> **Section summary:** Third-party services and APIs this project connects to.
-
 | Service | Purpose | Auth Method |
 |---------|---------|------------|
-| Cloudinary | Image upload, storage, and transformation | API key + upload preset |
-| Upstash Redis | Response caching and rate limiting | REST API with token |
-| PostgreSQL | Primary database | Connection string (via Prisma) |
-| Push Notifications | PWA notifications | Web Push protocol / VAPID keys |
+| PostgreSQL (via Prisma) | Primary data store | Connection string (DATABASE_URL) |
+| Upstash Redis | Caching, rate limiting, session store | REST API token |
+| Cloudinary | Image upload and optimization | API key + secret |
+| Resend | Transactional emails (verification, notifications) | API key |
+| Sentry | Error tracking and performance monitoring | DSN |
+| MapLibre GL (tiles) | Map rendering and route visualization | (self-hosted or free tile provider) |
+| QStash | Background job queue (push notifications, cleanup) | API token |
+| Web Push API | Browser push notifications | VAPID keys |

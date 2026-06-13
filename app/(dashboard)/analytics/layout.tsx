@@ -1,22 +1,11 @@
-import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { buildMetadata } from "@/app/lib/utils/metadata";
 
-export const metadata: Metadata = {
-  title: "Analytics | Along",
-  description: "View your engagement analytics — posts, likes, comments, followers and more.",
-  openGraph: {
-    title: "Analytics | Along",
-    description: "View your engagement analytics on Along.",
-    type: "website",
-    url: "/analytics",
-  },
-  twitter: {
-    card: "summary",
-    title: "Analytics | Along",
-    description: "View your engagement analytics on Along.",
-  },
-};
+export const metadata = buildMetadata({
+  title: "Analytics",
+  description: "Track your route engagement and community impact.",
+  path: "/analytics",
+});
 
-export default function AnalyticsLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+export default function AnalyticsLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

@@ -1,41 +1,24 @@
-"use client";
+import Link from "next/link"
+import { Compass } from "lucide-react"
 
-import Link from "next/link";
-import { Compass, House, MapPinned } from "lucide-react";
-import { AppButton } from "@/components/ui/AppButton";
-import { AppCard } from "@/components/ui/AppCard";
-import { AppEmptyState } from "@/components/ui/AppEmptyState";
-
-export default function NotFound() {
+export default function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(0,98,59,0.12),_transparent_55%),linear-gradient(180deg,#f7faf4_0%,#ffffff_100%)] px-4 py-10">
-      <div className="mx-auto flex min-h-[80vh] max-w-3xl items-center">
-        <AppCard variant="glass" padding="lg" className="w-full">
-          <div className="mb-6 flex justify-center">
-            <div className="rounded-full bg-[var(--color-primary)]/10 p-4 text-[var(--color-primary)]">
-              <MapPinned size={36} aria-hidden="true" />
-            </div>
-          </div>
-
-          <AppEmptyState
-            title="We couldn't find that route"
-            description="The page may have moved, been removed, or never existed. Try heading back to the feed or explore routes nearby."
-            icon={Compass}
-            size="lg"
-          />
-
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link href="/home">
-              <AppButton icon={House}>Back home</AppButton>
-            </Link>
-            <Link href="/explore">
-              <AppButton variant="secondary" icon={Compass}>
-                Explore routes
-              </AppButton>
-            </Link>
-          </div>
-        </AppCard>
+    <div className="min-h-screen flex items-center justify-center p-8 bg-bg-base">
+      <div className="text-center max-w-[400px]">
+        <div className="w-16 h-16 rounded-2xl bg-bg-elevated flex items-center justify-center mx-auto mb-4">
+          <Compass size={32} className="text-text-muted" />
+        </div>
+        <h1 className="text-2xl font-bold text-text-primary mb-2">Page not found</h1>
+        <p className="text-sm text-text-secondary mb-6">
+          This page doesn&apos;t exist or has been moved.
+        </p>
+        <Link
+          href="/"
+          className="inline-flex items-center h-10 px-5 rounded-md bg-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
+        >
+          Go home
+        </Link>
       </div>
     </div>
-  );
+  )
 }

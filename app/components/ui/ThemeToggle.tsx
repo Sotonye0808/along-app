@@ -1,20 +1,23 @@
-"use client";
+"use client"
 
-import React from "react";
-import { Sun, Moon } from "lucide-react";
-import { useTheme } from "@/app/providers/ThemeProvider";
+import { Sun, Moon } from "lucide-react"
+import { useTheme } from "@/app/providers/ThemeProvider"
 
-export function ThemeToggle({ className }: { className?: string }): React.ReactElement {
-  const { theme, toggleTheme } = useTheme();
+export default function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme()
+  const isDark = theme === "dark"
 
   return (
     <button
-      type="button"
       onClick={toggleTheme}
-      className={`inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-base)] hover:text-[var(--color-text-primary)] ${className ?? ""}`}
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="fixed lg:bottom-6 bottom-24 right-6 z-50 w-12 h-12 rounded-full bg-bg-card border border-border shadow-lg flex items-center justify-center hover:shadow-xl transition-all duration-base focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 cursor-pointer"
     >
-      {theme === "dark" ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
+      {isDark ? (
+        <Sun size={20} className="text-text-primary" />
+      ) : (
+        <Moon size={20} className="text-text-primary" />
+      )}
     </button>
-  );
+  )
 }

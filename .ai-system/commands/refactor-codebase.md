@@ -56,5 +56,4 @@ Examples:
 Directive: convert the project to a config-driven modular architecture
 Directive: extract all database logic into a dedicated data access layer
 Directive: standardise all API responses through a single response formatter utility
-Directive: migrate all remaining API routes from mock data to Prisma
 ```

@@ -1,269 +1,174 @@
-"use client";
+"use client"
 
-import React, { useCallback, useEffect, useState } from "react";
-import { Copy, Gift, Trophy, Users } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { AppButton } from "@/components/ui/AppButton";
-import { AppCard } from "@/components/ui/AppCard";
-import { AppEmptyState } from "@/components/ui/AppEmptyState";
-import { AppInput } from "@/components/ui/AppInput";
-import { AppSpinner } from "@/components/ui/AppSpinner";
-import { AppTable, type AppTableColumn } from "@/components/ui/AppTable";
-import { AppUserLabel } from "@/components/ui/AppUserLabel";
-import { api } from "@/lib/utils/api";
-import { API_ENDPOINTS } from "@/lib/constants";
-import { INVITE_CONFIG } from "@/lib/config/inviteConfig";
-import { POINTS_CONFIG, PointsAction } from "@/lib/config/rewards";
-import { ToastService } from "@/lib/services/toastService";
-import { useAuth } from "../../providers/AuthProvider";
+import Link from "next/link"
+import React, { useState, useEffect, useCallback } from "react"
+import { Gift, Copy, Check, Trophy, Users, Share2 } from "lucide-react"
+import { AppCard, AppButton, AppEmptyState } from "@/app/components/ui"
+import { EMPTY_STATES } from "@/app/lib/config"
 
 interface InviteData {
-  code: string;
-  inviteUrl: string;
-  inviterUserName: string;
-  invitedCount: number;
+  inviteCode: string
+  inviteCount: number
+  maxInvites: number
+  pointsPerInvite: number
+  pointsPerAccepted: number
 }
 
 interface LeaderboardEntry {
-  rank: number;
-  userId: string;
-  userName: string;
-  firstName: string;
-  lastName: string;
-  invitedCount: number;
+  rank: number
+  id: string
+  firstName: string
+  lastName: string
+  userName: string
+  avatar: string | null
+  rewardPoints: number
+  count: number
 }
 
-const LEADERBOARD_COLUMNS: AppTableColumn<LeaderboardEntry>[] = [
-  {
-    key: "rank",
-    title: "#",
-    render: (_v, row) => (
-      <span className="font-bold text-[var(--color-primary)]">#{row.rank}</span>
-    ),
-    width: 48,
-  },
-  {
-    key: "user",
-    title: "Inviter",
-    render: (_v, row) => (
-      <AppUserLabel
-        user={{
-          userName: row.userName,
-          firstName: row.firstName,
-          lastName: row.lastName,
-          avatar: undefined,
-        }}
-        avatarSize={32}
-      />
-    ),
-  },
-  {
-    key: "invitedCount",
-    title: "Invited",
-    dataIndex: "invitedCount",
-    align: "right",
-    render: (v) => (
-      <span className="font-semibold text-[var(--color-text-primary)]">
-        {String(v)}
-      </span>
-    ),
-  },
-];
-
 export default function InvitePage() {
-  const { user } = useAuth();
-  const [invite, setInvite] = useState<InviteData | null>(null);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [sendingInvite, setSendingInvite] = useState(false);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await api.get<{
-        invite: InviteData;
-        leaderboard: LeaderboardEntry[];
-      }>(API_ENDPOINTS.INVITES);
-      setInvite(res.data.invite);
-      setLeaderboard(res.data.leaderboard);
-    } catch {
-      ToastService.error("Failed to load invite data");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [data, setData] = useState<InviteData | null>(null)
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (user) void fetchData();
-  }, [user, fetchData]);
+    const load = async () => {
+      try {
+        const [statsRes, lbRes] = await Promise.all([
+          fetch("/api/invite"),
+          fetch("/api/invite?section=leaderboard"),
+        ])
+        if (statsRes.ok) setData(await statsRes.json())
+        if (lbRes.ok) {
+          const lbData = await lbRes.json()
+          setLeaderboard(lbData.leaderboard ?? [])
+        }
+      } catch { /* ignore */ } finally { setLoading(false) }
+    }
+    load()
+  }, [])
+
+  const inviteUrl = data ? `${window.location.origin}/register?ref=${data.inviteCode}` : ""
 
   const handleCopy = useCallback(() => {
-    if (!invite) return;
-    navigator.clipboard
-      .writeText(invite.inviteUrl)
-      .then(() => {
-        ToastService.success("Invite link copied!");
-      })
-      .catch(() => {
-        ToastService.error("Could not copy to clipboard");
-      });
-  }, [invite]);
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {})
+  }, [inviteUrl])
 
-  const handleSendInvite = useCallback(async () => {
-    if (!inviteEmail.trim()) {
-      ToastService.error("Enter an email address first");
-      return;
-    }
-
-    setSendingInvite(true);
-    try {
-      const res = await fetch("/api/invites/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: inviteEmail.trim() }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Invite send failed");
-      }
-
-      setInviteEmail("");
-      ToastService.success("Invite email sent");
-    } catch {
-      ToastService.error("Failed to send invite email");
-    } finally {
-      setSendingInvite(false);
-    }
-  }, [inviteEmail]);
-
-  if (!user) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <AppEmptyState
-          title="Login required"
-          description="Please log in to see your invite link."
-        />
+      <div className="max-w-[680px] mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-bg-elevated radius-md w-1/3" />
+          <div className="h-24 bg-bg-elevated radius-lg" />
+          <div className="h-48 bg-bg-elevated radius-lg" />
+        </div>
       </div>
-    );
+    )
+  }
+
+  if (!data) {
+    return <div className="max-w-[680px] mx-auto px-4 py-8"><AppEmptyState {...EMPTY_STATES.error} /></div>
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-          <Gift
-            size={24}
-            className="text-[var(--color-primary)]"
-            aria-hidden="true"
-          />
-          Invite Friends
-        </h1>
-        <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-          Earn{" "}
-          <strong>{POINTS_CONFIG[PointsAction.INVITE_ACCEPTED]} points</strong>{" "}
-          for every friend who joins with your link (up to{" "}
-          {INVITE_CONFIG.maxInvitesPerDay}/day).
-        </p>
+    <div className="max-w-[680px] mx-auto px-4 py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight mb-1">Invite Friends</h1>
+        <p className="text-sm text-text-secondary">Share your invite link and earn rewards</p>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <AppSpinner size={32} />
+      <AppCard className="p-5 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-circle bg-primary-muted flex items-center justify-center shrink-0">
+            <Gift size={20} className="text-primary" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold">Your Rewards</div>
+            <div className="text-xs text-text-muted">
+              {data.pointsPerInvite} pts per invite sent &bull; {data.pointsPerAccepted} pts per accepted invite
+            </div>
+          </div>
         </div>
-      ) : (
-        <>
-          {/* Invite card */}
-          <AppCard variant="elevated">
-            <div className="flex flex-col items-center gap-5 sm:flex-row">
-              {invite && (
-                <div className="shrink-0 rounded-xl border border-[var(--color-border)] p-2 bg-[var(--color-bg-base)]">
-                  <QRCodeSVG value={invite.inviteUrl} size={120} />
-                </div>
-              )}
-              <div className="flex-1 space-y-3 w-full">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
-                    Your invite code
-                  </p>
-                  <p className="text-3xl font-bold tracking-widest text-[var(--color-primary)] font-mono mt-0.5">
-                    {invite?.code ?? "—"}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    readOnly
-                    value={invite?.inviteUrl ?? ""}
-                    className="flex-1 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] font-mono truncate"
-                    aria-label="Invite URL"
-                  />
-                  <AppButton
-                    variant="secondary"
-                    size="sm"
-                    icon={Copy}
-                    onClick={handleCopy}
-                    ariaLabel="Copy invite link">
-                    Copy
-                  </AppButton>
-                </div>
-                <p className="text-xs text-[var(--color-text-secondary)]">
-                  <Users size={12} className="inline mr-1" aria-hidden="true" />
-                  {invite?.invitedCount ?? 0} friend
-                  {invite?.invitedCount !== 1 ? "s" : ""} invited so far
-                </p>
-                <div className="pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
-                    Send an invite email
-                  </p>
-                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <AppInput
-                      type="email"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      placeholder="friend@example.com"
-                    />
-                    <AppButton
-                      variant="primary"
-                      onClick={handleSendInvite}
-                      loading={sendingInvite}>
-                      Send invite
-                    </AppButton>
+
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex-1 bg-bg-card border border-border radius-md p-3 text-center">
+            <div className="text-2xl font-bold text-primary">{data.inviteCount}</div>
+            <div className="text-[11px] text-text-muted uppercase tracking-wider">Invites Sent</div>
+          </div>
+          <div className="flex-1 bg-bg-card border border-border radius-md p-3 text-center">
+            <div className="text-2xl font-bold text-primary">{data.maxInvites}</div>
+            <div className="text-[11px] text-text-muted uppercase tracking-wider">Max Invites</div>
+          </div>
+        </div>
+
+        <div className="bg-bg-elevated border border-border radius-md p-3 mb-3">
+          <div className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">Your invite link</div>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 text-xs bg-bg-card border border-border radius-md px-2.5 py-2 truncate text-text-secondary">
+              {inviteUrl}
+            </code>
+            <button
+              onClick={handleCopy}
+              className="w-9 h-9 rounded-md bg-primary text-text-inverse flex items-center justify-center shrink-0 cursor-pointer border-none hover:bg-primary-light transition-colors duration-fast"
+              aria-label="Copy invite link"
+            >
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <AppButton
+            variant="secondary"
+            className="flex-1 text-xs"
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({ title: "Join me on Along", url: inviteUrl }).catch(() => {})
+              } else {
+                handleCopy()
+              }
+            }}
+          >
+            <Share2 size={14} /> Share
+          </AppButton>
+        </div>
+      </AppCard>
+
+      <AppCard className="p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Trophy size={18} className="text-warning-border" />
+          <h2 className="text-base font-semibold">Leaderboard</h2>
+        </div>
+        {leaderboard.length === 0 ? (
+          <div className="text-sm text-text-muted text-center py-4">No invites yet. Be the first!</div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {leaderboard.map((entry) => (
+              <div key={entry.id} className="flex items-center gap-3 px-3 py-2 radius-md hover:bg-bg-elevated transition-colors duration-fast">
+                <span className={`w-6 text-center text-xs font-bold ${entry.rank <= 3 ? "text-warning-border" : "text-text-muted"}`}>
+                  #{entry.rank}
+                </span>
+                <Link href={`/profile/${entry.userName}`} className="no-underline">
+                  <div className="w-8 h-8 rounded-circle bg-primary-muted flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                    {entry.firstName[0]}{entry.lastName[0]}
                   </div>
+                </Link>
+                <div className="flex-1 min-w-0">
+                  <Link href={`/profile/${entry.userName}`} className="text-sm font-semibold truncate no-underline hover:underline text-text-primary block">{entry.firstName} {entry.lastName}</Link>
+                  <Link href={`/profile/${entry.userName}`} className="text-[11px] text-text-muted no-underline hover:underline block">@{entry.userName}</Link>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-text-muted">
+                  <span className="flex items-center gap-1"><Users size={12} />{entry.count}</span>
+                  <span className="font-semibold text-primary">{entry.rewardPoints.toLocaleString()}pts</span>
                 </div>
               </div>
-            </div>
-          </AppCard>
-
-          {/* Leaderboard */}
-          <div>
-            <h2 className="text-base font-semibold text-[var(--color-text-primary)] flex items-center gap-2 mb-3">
-              <Trophy
-                size={16}
-                className="text-[var(--color-primary)]"
-                aria-hidden="true"
-              />
-              Top Inviters
-            </h2>
-            {leaderboard.length === 0 ? (
-              <AppEmptyState
-                title="No inviters yet"
-                description="Be the first to invite a friend!"
-              />
-            ) : (
-              <AppTable<LeaderboardEntry>
-                columns={LEADERBOARD_COLUMNS}
-                data={leaderboard}
-                rowKey="userId"
-                rowHref={(row) => `/profile/${row.userName}`}
-                size="small"
-                pagination={false}
-              />
-            )}
+            ))}
           </div>
-        </>
-      )}
+        )}
+      </AppCard>
     </div>
-  );
+  )
 }

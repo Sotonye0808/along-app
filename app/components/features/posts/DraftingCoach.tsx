@@ -1,113 +1,80 @@
-"use client";
+"use client"
 
-import React, { useMemo } from "react";
-import { CheckCircle2, Circle } from "lucide-react";
-import { DraftingCoachService } from "@/lib/services/DraftingCoachService";
-import type { DraftState } from "@/lib/services/DraftingCoachService";
-import { AppAlert } from "@/components/ui/AppAlert";
-import { AppTag } from "@/components/ui/AppTag";
+import { useState } from "react"
+import { BarChart3, ChevronDown, CheckCircle, AlertCircle } from "lucide-react"
+import { AppProgress } from "@/app/components/ui"
 
-interface DraftingCoachProps {
-  draft: DraftState;
-  className?: string;
+interface CheckpointResult {
+  id: string
+  label: string
+  passed: boolean
+  weight: number
 }
 
-const coachService = new DraftingCoachService();
+interface DraftingCoachProps {
+  score: number
+  maxScore: number
+  checkpoints: CheckpointResult[]
+  nextSuggestion: string | null
+}
 
-export function DraftingCoach({
-  draft,
-  className,
-}: DraftingCoachProps): React.ReactElement {
-  const evaluation = useMemo(
-    () => coachService.evaluate(draft),
-    [draft],
-  );
+export default function DraftingCoach({ score, maxScore, checkpoints, nextSuggestion }: DraftingCoachProps) {
+  const [isOpen, setIsOpen] = useState(true)
 
-  const { score, results, nextSuggestion, allPassed } = evaluation;
+  const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0
+
+  const getScoreColor = () => {
+    if (percentage >= 80) return "text-info-text"
+    if (percentage >= 60) return "text-primary"
+    if (percentage >= 30) return "text-warning-text"
+    return "text-error-text"
+  }
+
+  const passed = checkpoints.filter((cp) => cp.passed)
 
   return (
-    <div className={["space-y-3", className ?? ""].join(" ").trim()}>
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-semibold text-[var(--color-text-primary)]">
-            Route quality
-          </span>
-          <AppTag
-            label={`${score}%`}
-            variant={
-              score >= 80
-                ? "success"
-                : score >= 50
-                  ? "warning"
-                  : "error"
-            }
-            size="xs"
-          />
+    <div className="border border-border radius-lg overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-bg-elevated border-b border-border cursor-pointer transition-colors duration-fast border-none text-left"
+      >
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <BarChart3 size={16} className="text-text-secondary" />
+          Route Quality Score
         </div>
-        <div className="h-2 w-full rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-success)] transition-all duration-500"
-            style={{ width: `${score}%` }}
-          />
+        <div className={`transition-transform duration-fast ${isOpen ? "rotate-180" : ""}`}>
+          <ChevronDown size={16} className="text-text-secondary" />
         </div>
-      </div>
+      </button>
 
-      <div className="space-y-1.5">
-        {results.map(({ checkpoint, passed }, idx) => {
-          const Icon = passed ? CheckCircle2 : Circle;
-          return (
-            <div
-              key={checkpoint.key}
-              className="flex items-start gap-2 text-sm">
-              <div className="flex items-center gap-1.5">
-                <div className={[
-                  "flex items-center justify-center w-5 h-5 rounded-full text-xs font-medium",
-                  passed
-                    ? "bg-[var(--color-success)] text-white"
-                    : idx < results.filter(r => r.passed).length
-                      ? "bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)]"
-                      : "border border-[var(--color-border)] text-[var(--color-text-muted)]"
-                ].join(" ")}>
-                  {passed ? <CheckCircle2 size={12} /> : idx + 1}
-                </div>
-                <Icon
-                  size={16}
-                  className={
-                    passed
-                      ? "shrink-0 text-[var(--color-success-text)]"
-                      : "shrink-0 text-[var(--color-text-muted)]"
-                  }
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span
-                  className={
-                    passed
-                      ? "text-[var(--color-text-muted)] line-through"
-                      : "text-[var(--color-text-primary)]"
-                  }>
-                  {checkpoint.label}
-                </span>
-              </div>
+      {isOpen && (
+        <div className="p-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs text-text-secondary flex-1">Score</span>
+            <span className={`text-base font-bold ${getScoreColor()}`}>{score}</span>
+            <span className="text-xs text-text-muted">/ {maxScore}</span>
+          </div>
+          <AppProgress value={percentage} size="sm" className="flex-1" />
+
+          {nextSuggestion && (
+            <div className="flex items-start gap-2 px-3 py-2.5 radius-md bg-info text-info-text border border-info-border text-xs leading-relaxed">
+              <AlertCircle size={14} className="shrink-0 mt-0.5" />
+              <span>{nextSuggestion}</span>
             </div>
-          );
-        })}
-      </div>
+          )}
 
-      {allPassed ? (
-        <AppAlert
-          type="success"
-          message="Your route is well-documented and ready to share!"
-          showIcon
-        />
-      ) : nextSuggestion ? (
-        <AppAlert
-          type="info"
-          message={nextSuggestion.description}
-          showIcon
-        />
-      ) : null}
+          {passed.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {passed.map((cp) => (
+                <span key={cp.id} className="inline-flex items-center gap-1 px-2 py-0.5 radius-pill text-xs font-medium bg-success text-success-text">
+                  <CheckCircle size={12} />
+                  {cp.label}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
-  );
+  )
 }

@@ -1,36 +1,35 @@
-"use client";
+'use client'
 
-import React from "react";
+import React from 'react'
 
-export interface StatusDotConfig {
-  color: string;
-  label: string;
-}
+type StatusDotVariant = 'success' | 'warning' | 'error' | 'info'
 
 export interface AppStatusDotProps {
-  status: string;
-  configMap: Record<string, StatusDotConfig>;
-  className?: string;
+  variant?: StatusDotVariant
+  pulse?: boolean
+  className?: string
 }
 
-export function AppStatusDot({
-  status,
-  configMap,
-  className,
-}: AppStatusDotProps): React.ReactElement {
-  const config = configMap[status] ?? { color: "#9ca3af", label: status };
+const variantStyles: Record<StatusDotVariant, string> = {
+  success: 'bg-success-text',
+  warning: 'bg-warning-text',
+  error: 'bg-error-text',
+  info: 'bg-info-text',
+}
 
-  return (
-    <span
-      className={["inline-flex items-center gap-1.5 text-xs", className ?? ""]
-        .join(" ")
-        .trim()}>
+const AppStatusDot = React.forwardRef<HTMLSpanElement, AppStatusDotProps>(
+  ({ variant = 'info', pulse = false, className = '' }, ref) => {
+    return (
       <span
-        className="inline-block h-2 w-2 rounded-full"
-        style={{ backgroundColor: config.color }}
-        aria-hidden="true"
+        ref={ref}
+        className={`inline-block w-2 h-2 rounded-circle ${variantStyles[variant]} ${pulse ? 'animate-pulse' : ''} ${className}`}
+        role="status"
+        aria-label={`${variant} status`}
       />
-      <span>{config.label}</span>
-    </span>
-  );
-}
+    )
+  }
+)
+
+AppStatusDot.displayName = 'AppStatusDot'
+
+export { AppStatusDot }

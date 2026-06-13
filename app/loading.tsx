@@ -1,5 +1,5 @@
-import { AppPageLoader } from "@/components/ui/AppPageLoader";
+import { AppPageLoader } from "@/app/components/ui"
 
-export default function Loading() {
-  return <AppPageLoader message="Loading Along..." />;
+export default function RootLoading() {
+  return <AppPageLoader />
 }

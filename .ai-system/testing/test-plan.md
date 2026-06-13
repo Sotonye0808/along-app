@@ -1,58 +1,63 @@
 # Test Plan
 
-> **Overview:** Defines what needs to be tested in the Along App and at what level. Agents reference this when writing tests or running the self-heal loop. The project uses Jest with React Testing Library. Updated as new features are added.
+> **Overview:** Defines what needs to be tested in Along and at what level. Agents reference this when writing tests or running the self-heal loop. Jest + React Testing Library are configured with coverage thresholds (branches 70%, functions 70%, lines 80%, statements 80%). No tests exist yet — this plan defines the testing targets.
 
 ---
 
 ## Unit Tests
 
-> **Section summary:** Tests for individual functions and modules in isolation. Located in `app/__tests__/` and colocated `*.test.ts` files.
+> **Section summary:** Tests for individual functions and modules in isolation.
 
-- [ ] `app/lib/utils/format.ts` — all formatting functions
-- [ ] `app/lib/utils/validation.ts` — all Zod schemas
-- [ ] `app/lib/utils/auth.ts` — token parsing utilities
-- [ ] `app/lib/utils/cloudinary.ts` — file validation functions
-- [ ] `app/lib/utils/feedHelpers.ts` — feed ranking logic
-- [ ] `app/lib/utils/security.ts` — security utility functions
-- [ ] `app/lib/utils/rateLimiter.ts` — rate limit logic (mock Redis)
+- [ ] `BaseRepository<T>` — CRUD operations, pagination, transaction handling
+- [ ] Service layer methods (AuthService, FeedService, SearchService, ValidityEngine, DraftingCoach, RewardsService)
+- [ ] Config registry validation — all config files export valid objects
+- [ ] Utility functions (string formatting, date helpers, validation helpers)
+- [ ] Zod schema validation for all API routes
+- [ ] JWT utility functions (sign, verify, decode)
 
 ---
 
 ## Integration Tests
 
-> **Section summary:** Tests for how modules work together, including API routes and database operations.
+> **Section summary:** Tests for how modules work together, including database operations and API routes.
 
-- [ ] `POST /api/auth/login` — valid credentials, invalid credentials, missing fields
-- [ ] `POST /api/auth/register` — new user, duplicate email, duplicate username
-- [ ] `GET /api/posts` — returns paginated list, respects cursor
-- [ ] `POST /api/posts` — creates post with valid data, fails without auth
-- [ ] `POST /api/posts/[id]/like` — toggles like, updates count
-- [ ] `GET /api/users/[id]` — returns profile, 404 for missing user
-- [ ] `POST /api/users/[id]/follow` — follow/unfollow cycle
-- [ ] `GET /api/notifications` — returns user notifications, marks as read
+- [ ] Auth API routes (register → login → refresh → logout flow)
+- [ ] Post CRUD (create, read, update, delete via API)
+- [ ] Like/unlike toggle via API
+- [ ] Comment creation and retrieval
+- [ ] Bookmark save/remove flow
+- [ ] Follow/unfollow user flow
+- [ ] Search endpoint with filters and pagination
+- [ ] Feed route with cursor-based pagination
+- [ ] Notification creation and delivery
+- [ ] Rate limiter integration
 
 ---
 
 ## Component Tests
 
-> **Section summary:** Tests for React components using Testing Library.
+> **Section summary:** Tests for UI components using React Testing Library.
 
-- [ ] Login form — renders, validates, submits correctly
-- [ ] Register form — renders, validates, submits correctly
-- [ ] Post card — renders post data, like/bookmark buttons work
-- [ ] Profile page — renders user data correctly
-- [ ] Navigation — renders correct links for authenticated user
+- [ ] AppButton (variants, loading state, disabled, click handler)
+- [ ] AppCard (rendering children, title, loading skeleton)
+- [ ] AppInput (value changes, error state, disabled)
+- [ ] AppEmptyState (renders message, icon, CTA button)
+- [ ] AppUserLabel (renders user info, trust badge)
+- [ ] AppModal (open/close, confirm/cancel handlers)
+- [ ] TrustBadge (renders correct badge for trust level)
+- [ ] PostCard (renders post content, like/bookmark actions)
+- [ ] GlobalConfirmModal (confirmation flow)
 
 ---
 
 ## End-to-End Tests
 
-> **Section summary:** Tests that simulate real user journeys through the system. (Not yet implemented — to be added in Phase 4.)
+> **Section summary:** Tests that simulate real user journeys through the system.
 
-- [ ] User registration → OTP verification → login flow
-- [ ] Create post → appears in feed → another user likes it
-- [ ] User follows another → sees their posts in feed
-- [ ] Search for a route → bookmark it → appears in bookmarks
+- [ ] User registration → login → create post → view in feed
+- [ ] Search for route → view on map → bookmark
+- [ ] Follow user → receive notification → view notification
+- [ ] Admin login → view dashboard → moderate content
 
 ---
 
@@ -60,7 +65,8 @@
 
 > **Section summary:** Tests to verify the system performs acceptably under expected load.
 
-- [ ] API response time < 500ms for list endpoints (with Redis cache)
-- [ ] API response time < 200ms for cache hits
-- [ ] Image upload completes within 5 seconds for files up to 10MB
-- [ ] Page load time (LCP) < 2.5s for dashboard home
+- [ ] API response time under normal load (< 200ms for cached, < 500ms for uncached)
+- [ ] Feed pagination performance with large datasets
+- [ ] Map clustering performance with 1000+ markers
+- [ ] Lighthouse audit for page load performance
+- [ ] Bundle size analysis (main.js, Ant Design tree-shaking)

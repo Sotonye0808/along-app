@@ -1,3 +1,3 @@
-export { UserProfile } from "./UserProfile";
-export { EditProfileModal } from "./EditProfileModal";
-export { AvatarEditor } from "./AvatarEditor";
+export { RewardsPanel } from "./RewardsPanel"
+export { EditProfileModal } from "./EditProfileModal"
+export { AvatarEditor } from "./AvatarEditor"

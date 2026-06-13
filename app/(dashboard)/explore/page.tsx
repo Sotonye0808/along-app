@@ -1,427 +1,483 @@
-"use client";
+"use client"
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import Link from "next/link";
-import {
-  ArrowRight,
-  ArrowUp,
-  Globe,
-  MapPin,
-  Search,
-  ShieldCheck,
-  TrendingUp,
-  Users,
-  X,
-} from "lucide-react";
-import { App } from "antd";
-import { AppButton } from "@/components/ui/AppButton";
-import { AppCard } from "@/components/ui/AppCard";
-import { AppEmptyState } from "@/components/ui/AppEmptyState";
-import { AppInput } from "@/components/ui/AppInput";
-import { AppTag } from "@/components/ui/AppTag";
-import { AppUserLabel } from "@/components/ui/AppUserLabel";
-import { TrustBadge } from "@/components/ui/TrustBadge";
-import { PostCardSkeleton } from "@/components/ui/AppSkeleton";
-import { RouteMap } from "@/components/features/map";
-import { VEHICLE_REGISTRY } from "@/lib/config/vehicles";
-import { api } from "@/lib/utils/api";
-import { API_ENDPOINTS } from "@/lib/constants";
-import { combinePostsWithAuthors } from "@/lib/utils/feedHelpers";
-import { EMPTY_STATES } from "@/lib/config/emptyStates";
-import { formatNumber } from "@/lib/utils/format";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
+import dynamic from "next/dynamic"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { Search, LocateFixed, SlidersHorizontal, Link2, X, ChevronLeft, MapPin, Heart } from "lucide-react"
 
-interface PostWithAuthor extends Post {
-  author: User;
+const MapView = dynamic(() => import("react-map-gl/maplibre"), { ssr: false })
+const Marker = dynamic(() => import("react-map-gl/maplibre").then((m) => ({ default: m.Marker })), { ssr: false })
+
+interface PostPin {
+  id: string
+  title: string
+  lat: number
+  lng: number
+  likes: number
+  comments: number
+  tags: string[]
+  validityScore: number
+  validityTier: string | null
+  region: string | null
+  createdAt: string
+  user: { userName: string; firstName: string; lastName: string }
 }
 
-const REGION_FILTERS = [
-  "All",
-  "Lagos",
-  "Abuja",
-  "Port Harcourt",
-  "Ibadan",
-  "Kano",
-];
-
-function useExplorePosts() {
-  const [posts, setPosts] = useState<PostWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { message } = App.useApp();
-
-  const fetchPosts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [postsRes, usersRes] = await Promise.all([
-        api.get<Post[]>(API_ENDPOINTS.POSTS),
-        api.get<User[]>(API_ENDPOINTS.USERS),
-      ]);
-      setPosts(
-        combinePostsWithAuthors(
-          postsRes.data ?? [],
-          usersRes.data ?? [],
-        ) as PostWithAuthor[],
-      );
-    } catch {
-      message.error("Failed to load routes");
-    } finally {
-      setLoading(false);
-    }
-  }, [message]);
-
-  useEffect(() => {
-    void fetchPosts();
-  }, [fetchPosts]);
-
-  return { posts, loading, refetch: fetchPosts };
+function formatCount(n: number): string {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
+  return String(n)
 }
 
-function BackToTopFab() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 300);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  if (!visible) return null;
-  return (
-    <button
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      aria-label="Back to top"
-      className="fixed bottom-24 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition hover:bg-[var(--color-primary)]/90 md:bottom-8">
-      <ArrowUp size={20} />
-    </button>
-  );
-}
-
-interface GlassPopupProps {
-  post: PostWithAuthor;
-  onClose: () => void;
-}
-
-function GlassPopup({ post, onClose }: GlassPopupProps) {
-  return (
-    <div className="absolute left-3 bottom-3 z-10 w-64 pointer-events-auto">
-      <div className="glass !rounded-xl p-3">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-          aria-label="Close popup">
-          <X size={14} />
-        </button>
-        <div className="mb-2">
-          <AppUserLabel
-            user={{
-              userName: post.author.userName,
-              firstName: post.author.firstName,
-              lastName: post.author.lastName,
-              avatar: post.author.avatar,
-              verified: post.author.verified,
-            }}
-            avatarSize={32}
-          />
-        </div>
-        <p className="text-sm font-semibold text-[var(--color-text-primary)] line-clamp-2 mb-2">
-          {post.title}
-        </p>
-        {typeof post.validityScore === "number" && (
-          <div className="mb-2">
-            <TrustBadge score={post.validityScore} size="small" />
-          </div>
-        )}
-        <Link
-          href={`/posts/${post.id}`}
-          className="block w-full text-center text-xs font-medium text-[var(--color-primary)] hover:underline">
-            <span className="inline-flex items-center gap-1">View route <ArrowRight size={12} /></span>
-        </Link>
-      </div>
-    </div>
-  );
+function getTimeAgo(date: string): string {
+  const diff = Date.now() - new Date(date).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d ago`
+  return new Date(date).toLocaleDateString()
 }
 
 export default function ExplorePage() {
-  const { posts, loading } = useExplorePosts();
-  const [search, setSearch] = useState("");
-  const [activeRegion, setActiveRegion] = useState("All");
-  const [activeVehicle, setActiveVehicle] = useState<string>("All");
-  const [selectedPost, setSelectedPost] = useState<PostWithAuthor | null>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams()
+  const [pins, setPins] = useState<PostPin[]>([])
+  const [selectedPin, setSelectedPin] = useState<PostPin | null>(null)
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "")
+  const [panelCollapsed, setPanelCollapsed] = useState(false)
+  const [bottomSheetHeight, setBottomSheetHeight] = useState("40vh")
+  const [dragging, setDragging] = useState(false)
+  const [isDark, setIsDark] = useState(false)
+  const sheetRef = useRef<HTMLDivElement>(null)
+  const dragStartY = useRef(0)
+  const sheetStartHeight = useRef("40vh")
 
-  const filtered = useMemo(() => {
-    return posts.filter((p) => {
-      const matchRegion =
-        activeRegion === "All" ||
-        (p.region?.toLowerCase().includes(activeRegion.toLowerCase()) ?? false);
-      const matchVehicle =
-        activeVehicle === "All" ||
-        p.routes.some((r) =>
-          r.vehicles.some((v) => v.toLowerCase() === activeVehicle.toLowerCase()),
-        );
-      const q = search.trim().toLowerCase();
-      const matchSearch =
-        !q ||
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"))
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "attributes" && m.attributeName === "class") {
+          setIsDark(document.documentElement.classList.contains("dark"))
+        }
+      }
+    })
+    observer.observe(document.documentElement, { attributes: true })
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/posts?limit=100")
+        const data = await res.json()
+        const posts = data.posts ?? []
+        const mapped: PostPin[] = posts
+          .filter((p: { startLat?: number | null; startLng?: number | null }) => p.startLat && p.startLng)
+          .map((p: { id: string; title: string; startLat: number; startLng: number; likes: number; comments: number; tags: string[]; validityScore: number; validityTier: string | null; region: string | null; createdAt: string; user: { userName: string; firstName: string; lastName: string } }) => ({
+            id: p.id,
+            title: p.title,
+            lat: p.startLat,
+            lng: p.startLng,
+            likes: p.likes,
+            comments: p.comments,
+            tags: p.tags,
+            validityScore: p.validityScore,
+            validityTier: p.validityTier,
+            region: p.region,
+            createdAt: p.createdAt,
+            user: p.user,
+          }))
+        setPins(mapped)
+      } catch { /* ignore */ }
+    }
+    load()
+  }, [])
+
+  const updateUrl = useCallback(
+    (lat: number, lng: number, zoom: number) => {
+      const params = new URLSearchParams()
+      params.set("lat", lat.toFixed(4))
+      params.set("lng", lng.toFixed(4))
+      params.set("zoom", String(Math.round(zoom)))
+      if (searchQuery) params.set("q", searchQuery)
+      window.history.replaceState(null, "", `/explore?${params.toString()}`)
+    },
+    [searchQuery]
+  )
+
+  const handleViewportChange = useCallback(
+    (v: { latitude: number; longitude: number; zoom: number }) => {
+      updateUrl(v.latitude, v.longitude, v.zoom)
+    },
+    [updateUrl]
+  )
+
+  const filteredPins = useMemo(() => {
+    if (!searchQuery) return pins
+    const q = searchQuery.toLowerCase()
+    return pins.filter(
+      (p) =>
         p.title.toLowerCase().includes(q) ||
         p.tags.some((t) => t.toLowerCase().includes(q)) ||
-        (p.region?.toLowerCase().includes(q) ?? false);
-      return matchRegion && matchVehicle && matchSearch;
-    });
-  }, [posts, search, activeRegion, activeVehicle]);
+        p.region?.toLowerCase().includes(q)
+    )
+  }, [pins, searchQuery])
 
-  // Map post with best geo for the overview map
-  const mapPost = useMemo(
-    () =>
-      filtered.find(
-        (p) =>
-          p.startLat != null &&
-          p.startLng != null &&
-          p.endLat != null &&
-          p.endLng != null,
-      ) ?? filtered[0],
-    [filtered],
-  );
+  const handleSheetPointerDown = (e: React.PointerEvent) => {
+    setDragging(true)
+    dragStartY.current = e.clientY
+    sheetStartHeight.current = bottomSheetHeight
+    const handlePointerMove = (ev: PointerEvent) => {
+      const delta = dragStartY.current - ev.clientY
+      const parentHeight = window.innerHeight
+      const currentVh = parseFloat(bottomSheetHeight) || 40
+      const newVh = Math.min(80, Math.max(25, currentVh + (delta / parentHeight) * 100))
+      setBottomSheetHeight(`${newVh}vh`)
+    }
+    const handlePointerUp = () => {
+      setDragging(false)
+      document.removeEventListener("pointermove", handlePointerMove)
+      document.removeEventListener("pointerup", handlePointerUp)
+    }
+    document.addEventListener("pointermove", handlePointerMove)
+    document.addEventListener("pointerup", handlePointerUp)
+  }
+
+  const handleNearMe = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        handleViewportChange({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          zoom: 14,
+        })
+      })
+    }
+  }
+
+  const handleShareView = () => {
+    const url = window.location.href
+    navigator.clipboard.writeText(url)
+  }
+
+  const initialLat = Number(searchParams.get("lat")) || 6.5244
+  const initialLng = Number(searchParams.get("lng")) || 3.3792
+  const initialZoom = Number(searchParams.get("zoom")) || 11
+
+  const mapStyle = isDark
+    ? "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+
+  const FILTER_OPTIONS = [
+    { label: "Bus", active: false },
+    { label: "Keke", active: false },
+    { label: "Trekking", active: false },
+    { label: "Taxi", active: false },
+    { label: "Verified", active: true },
+    { label: "Trusted", active: false },
+  ]
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
-      {/* Full-width Map */}
-      <div className="flex-1 relative">
-        {!loading && mapPost && (
-          <div className="absolute inset-0 z-0">
-            <RouteMap
-              post={mapPost}
-              height="full"
-              className="w-full h-full"
-              interactive
-            />
-            {selectedPost && (
-              <GlassPopup
-                post={selectedPost}
-                onClose={() => setSelectedPost(null)}
-              />
-            )}
-          </div>
-        )}
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-bg-elevated)]">
-            <div className="text-[var(--color-text-secondary)]">
-              Loading map...
-            </div>
-          </div>
-        )}
+    <div className="relative w-full h-screen overflow-hidden bg-bg-elevated">
+      {/* Desktop Map View */}
+      <div className="hidden lg:block w-full h-full">
+        <MapView
+          mapLib={import("maplibre-gl")}
+          initialViewState={{ latitude: initialLat, longitude: initialLng, zoom: initialZoom }}
+          mapStyle={mapStyle}
+          style={{ width: "100%", height: "100%" }}
+          attributionControl={false}
+          onMoveEnd={(e: { viewState: { latitude: number; longitude: number; zoom: number } }) =>
+            handleViewportChange(e.viewState)
+          }
+          reuseMaps
+        >
+          {filteredPins.map((pin) => (
+            <Marker key={pin.id} latitude={pin.lat} longitude={pin.lng} onClick={() => setSelectedPin(pin)}>
+              <div
+                className="w-[24px] h-[24px] rounded-circle bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-sm border-2 border-white cursor-pointer hover:scale-110 transition-transform"
+                title={pin.title}
+              >
+                {pin.likes > 0 ? Math.min(pin.likes, 99) : "•"}
+              </div>
+            </Marker>
+          ))}
+        </MapView>
       </div>
 
-      {/* Side Panel - 320px */}
-      <aside className="w-[320px] shrink-0 bg-[var(--color-bg-base)] border-l border-[var(--color-border)] overflow-y-auto">
-        <div className="p-4 space-y-4">
-          {/* Stats Header */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[var(--color-bg-elevated)] rounded-lg p-3 text-center">
-              <Globe
-                size={18}
-                className="mx-auto mb-1 text-[var(--color-primary)]"
-              />
-              <div className="text-lg font-bold text-[var(--color-text-primary)]">
-                {formatNumber(posts.length)}
+      {/* Mobile Map View */}
+      <div className="lg:hidden w-full h-full">
+        <MapView
+          mapLib={import("maplibre-gl")}
+          initialViewState={{ latitude: initialLat, longitude: initialLng, zoom: initialZoom }}
+          mapStyle={mapStyle}
+          style={{ width: "100%", height: "100%" }}
+          attributionControl={false}
+          onMoveEnd={(e: { viewState: { latitude: number; longitude: number; zoom: number } }) =>
+            handleViewportChange(e.viewState)
+          }
+          reuseMaps
+        >
+          {filteredPins.map((pin) => (
+            <Marker key={pin.id} latitude={pin.lat} longitude={pin.lng} onClick={() => setSelectedPin(pin)}>
+              <div className="w-[24px] h-[24px] rounded-circle bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-sm border-2 border-white cursor-pointer hover:scale-110 transition-transform">
+                {pin.likes > 0 ? Math.min(pin.likes, 99) : "•"}
               </div>
-              <div className="text-xs text-[var(--color-text-muted)]">
-                Routes
-              </div>
-            </div>
-            <div className="bg-[var(--color-bg-elevated)] rounded-lg p-3 text-center">
-              <Users
-                size={18}
-                className="mx-auto mb-1 text-[var(--color-primary)]"
-              />
-              <div className="text-lg font-bold text-[var(--color-text-primary)]">
-                {formatNumber(
-                  posts.reduce((acc, p) => acc + (p.likes || 0), 0),
-                )}
-              </div>
-              <div className="text-xs text-[var(--color-text-muted)]">
-                Engagements
-              </div>
-            </div>
-          </div>
+            </Marker>
+          ))}
+        </MapView>
+      </div>
 
-          {/* Search */}
-          <AppInput
-            placeholder="Search routes, tags, or regions..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            prefix={
-              <Search
-                size={15}
-                className="text-[var(--color-text-secondary)]"
-              />
-            }
-            suffix={
-              search ? (
-                <button onClick={() => setSearch("")} aria-label="Clear search">
-                  <X size={14} className="text-[var(--color-text-secondary)]" />
-                </button>
-              ) : null
-            }
+      {/* Glass Top Bar - Desktop */}
+      <div className="absolute top-0 left-0 right-0 z-15 hidden lg:flex items-center gap-3 px-5 py-3 bg-bg-base/70 backdrop-blur-[16px] saturate-[180%] border-b border-border/40">
+        <div className="relative w-[360px] shrink-0">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search routes, places..."
+            className="w-full h-10 pl-9 pr-3 border border-border radius-sm text-sm font-sans outline-none bg-bg-base text-text-primary focus:border-primary focus:shadow-[0_0_0_3px_rgba(0,98,59,0.12)] placeholder:text-text-muted"
           />
-
-          {/* Vehicle type filter chips — per design spec */}
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {[
-              { key: "All", Icon: Globe },
-              ...Object.values(VEHICLE_REGISTRY).map((v) => ({ key: v.label, Icon: v.icon })),
-              { key: "Trusted", Icon: ShieldCheck },
-            ].map(({ key, Icon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveVehicle(key)}
-                className={[
-                  "inline-flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
-                  activeVehicle === key
-                    ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                    : "bg-[var(--color-bg-base)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]",
-                ].join(" ").trim()}>
-                <Icon size={14} />
-                {key}
-              </button>
-            ))}
-          </div>
-
-          {/* Region filter chips */}
-          <div className="flex flex-wrap gap-2">
-            {REGION_FILTERS.map((r) => (
-              <button
-                key={r}
-                onClick={() => setActiveRegion(r)}
-                aria-label={`Filter by ${r}`}
-                title={`Filter by ${r}`}>
-                <AppTag
-                  label={r}
-                  variant={activeRegion === r ? "primary" : "default"}
-                  size="sm"
-                />
-              </button>
-            ))}
-          </div>
-
-          {/* Trending Section */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp size={16} className="text-[var(--color-primary)]" />
-              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                Trending Routes
-              </h3>
-            </div>
-            <div className="space-y-2">
-              {filtered.slice(0, 5).map((post, idx) => (
-                <Link key={post.id} href={`/posts/${post.id}`}>
-                  <AppCard variant="default" hover className="!p-3">
-                    <div className="flex items-start gap-2">
-                      <span className="text-lg font-bold text-[var(--color-text-muted)]">
-                        {idx + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-1">
-                          {post.title}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-[var(--color-text-muted)]">
-                            @{post.author.userName}
-                          </span>
-                          {post.region && (
-                            <AppTag
-                              label={post.region}
-                              variant="info"
-                              size="xs"
-                              icon={MapPin}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </AppCard>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Post list */}
-          <div ref={listRef} className="space-y-3">
-            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
-              All Routes ({filtered.length})
-            </h3>
-            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <PostCardSkeleton key={i} />
-              ))
-            ) : filtered.length === 0 ? (
-              <AppEmptyState
-                icon={EMPTY_STATES.noResults?.icon}
-                title={EMPTY_STATES.noResults?.title ?? "No routes found"}
-                description={
-                  EMPTY_STATES.noResults?.description ??
-                  "Try adjusting your search or region filter."
-                }
-              />
-            ) : (
-              filtered.map((post) => (
-                <AppCard
-                  key={post.id}
-                  variant={post.isPlatformGen ? "suggestion" : "default"}
-                  hover
-                  clickable
-                  onClick={() => setSelectedPost(post)}
-                  className="cursor-pointer">
-                  <div className="flex items-start gap-2">
-                    <AppUserLabel
-                      user={{
-                        userName: post.author.userName,
-                        firstName: post.author.firstName,
-                        lastName: post.author.lastName,
-                        avatar: post.author.avatar,
-                        verified: post.author.verified,
-                      }}
-                      avatarSize={32}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-1">
-                        {post.title}
-                      </p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {post.region && (
-                          <AppTag
-                            label={post.region}
-                            variant="info"
-                            size="xs"
-                            icon={MapPin}
-                          />
-                        )}
-                        {post.tags.slice(0, 2).map((tag) => (
-                          <AppTag
-                            key={tag}
-                            label={`#${tag}`}
-                            variant="primary"
-                            size="xs"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    {typeof post.validityScore === "number" && (
-                      <TrustBadge score={post.validityScore} size="small" />
-                    )}
-                  </div>
-                </AppCard>
-              ))
-            )}
-          </div>
         </div>
-      </aside>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {FILTER_OPTIONS.map((f) => (
+            <button
+              key={f.label}
+              className={`inline-flex items-center gap-1 px-3 py-1.25 radius-pill text-xs font-medium border font-sans cursor-pointer whitespace-nowrap transition-all duration-fast ${
+                f.active
+                  ? "bg-primary text-white border-primary"
+                  : "bg-bg-card text-text-secondary border-border hover:border-primary-muted hover:bg-primary-muted hover:text-primary"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleNearMe}
+          className="w-10 h-10 rounded-md border border-border bg-bg-card text-text-secondary flex items-center justify-center shrink-0 hover:bg-bg-elevated hover:text-primary transition-colors duration-fast cursor-pointer"
+          aria-label="Near me"
+        >
+          <LocateFixed size={18} />
+        </button>
+      </div>
 
-      <BackToTopFab />
+      {/* Glass Top Bar - Mobile */}
+      <div className="absolute top-0 left-0 right-0 z-15 flex lg:hidden items-center gap-2 px-3 py-2 bg-bg-base/70 backdrop-blur-[16px] saturate-[180%]">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search routes, places..."
+            className="w-full h-10 pl-9 pr-3 border border-border radius-sm text-sm font-sans outline-none bg-bg-base text-text-primary focus:border-primary focus:shadow-[0_0_0_3px_rgba(0,98,59,0.12)] placeholder:text-text-muted"
+          />
+        </div>
+        <button className="w-10 h-10 rounded-md border border-border bg-bg-card text-text-secondary flex items-center justify-center shrink-0 cursor-pointer" aria-label="Filters">
+          <SlidersHorizontal size={18} />
+        </button>
+      </div>
+
+      {/* Desktop Left Panel (320px, glass) */}
+      <div
+        className={`absolute top-[68px] left-0 bottom-0 w-[320px] z-12 flex flex-col bg-bg-card/85 backdrop-blur-[16px] saturate-[180%] border-r border-border/40 overflow-hidden transition-transform duration-moderate ${
+          panelCollapsed ? "-translate-x-full" : ""
+        }`}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div>
+            <div className="text-sm font-semibold">Nearby routes</div>
+            <div className="text-xs text-text-muted">{filteredPins.length} routes found</div>
+          </div>
+          <button
+            onClick={() => setPanelCollapsed(true)}
+            className="w-8 h-8 rounded-circle bg-bg-elevated text-text-secondary flex items-center justify-center hover:bg-primary-muted hover:text-primary transition-colors duration-fast cursor-pointer border-none"
+            aria-label="Collapse panel"
+          >
+            <ChevronLeft size={16} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2.5">
+          <div className="flex items-center gap-1.5 mb-1">
+            <label className="text-xs text-text-secondary">Sort by</label>
+            <select className="h-8 px-2 border border-border radius-sm text-xs font-sans text-text-primary bg-bg-base outline-none">
+              <option>Validity score</option>
+              <option>Recency</option>
+              <option>Distance</option>
+            </select>
+          </div>
+          {filteredPins.map((pin) => (
+            <Link
+              key={pin.id}
+              href={`/posts/${pin.id}`}
+              className="bg-bg-card border border-border radius-lg p-3 cursor-pointer transition-shadow duration-base hover:shadow-md no-underline block"
+            >
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Link href={`/profile/${pin.user.userName}`} onClick={(e) => e.stopPropagation()} className="no-underline">
+                  <div className="w-6 h-6 rounded-circle bg-primary-muted flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+                    {pin.user.firstName[0]}{pin.user.lastName[0]}
+                  </div>
+                </Link>
+                <Link href={`/profile/${pin.user.userName}`} onClick={(e) => e.stopPropagation()} className="text-xs font-semibold text-text-primary flex-1 no-underline hover:underline">{pin.user.firstName} {pin.user.lastName}</Link>
+                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 radius-pill text-[10px] font-semibold ${
+                  (pin.validityTier ?? "developing") === "verified" ? "bg-success text-success-text" :
+                  (pin.validityTier ?? "developing") === "trusted" ? "bg-info text-info-text" :
+                  (pin.validityTier ?? "developing") === "low" ? "bg-error text-error-text" :
+                  "bg-warning text-warning-text"
+                }`}>
+                  {pin.validityScore}
+                </span>
+              </div>
+              <div className="text-xs font-semibold text-text-primary mb-1">{pin.title}</div>
+              <div className="flex items-center gap-2 text-[11px] text-text-muted mb-1">
+                <span className="flex items-center gap-0.5"><MapPin size={11} />{(pin.tags.length)} steps</span>
+                <span className="flex items-center gap-0.5"><Heart size={11} />{formatCount(pin.likes)}</span>
+              </div>
+              <div className="flex gap-1 flex-wrap">
+                {pin.tags.slice(0, 2).map((t) => (
+                  <Link key={t} href={`/explore?tag=${encodeURIComponent(t)}`} onClick={(e) => e.stopPropagation()} className="inline-flex px-1.5 py-0.5 radius-pill text-[10px] font-medium bg-bg-elevated text-text-secondary no-underline hover:bg-primary-muted hover:text-primary">#{t}</Link>
+                ))}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Collapsed panel toggle */}
+      {panelCollapsed && (
+        <button
+          onClick={() => setPanelCollapsed(false)}
+          className="absolute top-[76px] left-0 z-13 w-8 h-8 rounded-r-md bg-bg-card/85 backdrop-blur border border-border/40 border-l-0 text-text-secondary flex items-center justify-center cursor-pointer hover:text-primary shadow-sm"
+          aria-label="Show panel"
+        >
+          <ChevronLeft size={16} className="rotate-180" />
+        </button>
+      )}
+
+      {/* Pin Popup Card (280px, glass) */}
+      {selectedPin && (
+        <div className="hidden lg:block absolute z-20 w-[280px] bg-bg-card/90 backdrop-blur-[16px] saturate-[180%] border border-border/40 radius-xl p-4 shadow-lg animate-[scaleIn_200ms_ease-out]"
+          style={{ top: "200px", left: "420px" }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Link href={`/profile/${selectedPin.user.userName}`} className="no-underline">
+              <div className="w-8 h-8 rounded-circle bg-primary-muted flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                {selectedPin.user.firstName[0]}{selectedPin.user.lastName[0]}
+              </div>
+            </Link>
+            <div>
+              <Link href={`/profile/${selectedPin.user.userName}`} className="text-xs font-semibold no-underline hover:underline text-text-primary">{selectedPin.user.firstName} {selectedPin.user.lastName}</Link>
+              <Link href={`/profile/${selectedPin.user.userName}`} className="text-[11px] text-text-secondary no-underline hover:underline block">@{selectedPin.user.userName} · {getTimeAgo(selectedPin.createdAt)}</Link>
+            </div>
+            <button
+              onClick={() => setSelectedPin(null)}
+              className="ml-auto w-6 h-6 rounded-circle flex items-center justify-center border-none bg-transparent text-text-muted cursor-pointer hover:bg-bg-elevated"
+              aria-label="Close popup"
+            >
+              <X size={14} />
+            </button>
+          </div>
+          <Link href={`/posts/${selectedPin.id}`} className="text-sm font-semibold mb-2 no-underline hover:underline text-text-primary block">{selectedPin.title}</Link>
+          <div className="flex gap-1 mb-2">
+            {selectedPin.tags.slice(0, 3).map((t) => (
+              <Link key={t} href={`/explore?tag=${encodeURIComponent(t)}`} className="inline-flex items-center gap-1 px-1.5 py-0.5 radius-pill text-[10px] font-medium bg-bg-elevated text-text-secondary no-underline hover:bg-primary-muted hover:text-primary">#{t}</Link>
+            ))}
+          </div>
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 radius-pill text-[10px] font-semibold ${
+              (selectedPin.validityTier ?? "developing") === "verified" ? "bg-success text-success-text" :
+              (selectedPin.validityTier ?? "developing") === "trusted" ? "bg-info text-info-text" :
+              (selectedPin.validityTier ?? "developing") === "low" ? "bg-error text-error-text" :
+              "bg-warning text-warning-text"
+            }`}>
+              {(selectedPin.validityTier ?? "developing").charAt(0).toUpperCase() + (selectedPin.validityTier ?? "developing").slice(1)} {selectedPin.validityScore}
+            </span>
+          </div>
+          <Link
+            href={`/posts/${selectedPin.id}`}
+            className="inline-flex items-center justify-center w-full h-[34px] px-3.5 radius-md bg-primary text-white text-xs font-semibold no-underline hover:bg-primary-light transition-colors duration-fast"
+          >
+            View Route
+          </Link>
+        </div>
+      )}
+
+      {/* Share this view - Desktop */}
+      <button
+        onClick={handleShareView}
+        className="absolute bottom-6 right-6 z-15 hidden lg:inline-flex items-center gap-1.5 px-3.5 py-2 radius-md border border-border bg-bg-card/85 backdrop-blur-[12px] saturate-[180%] text-text-secondary text-xs font-medium cursor-pointer font-sans transition-colors duration-fast hover:bg-bg-card hover:text-primary shadow-sm"
+        aria-label="Share this view"
+      >
+        <Link2 size={16} />
+        Share this view
+      </button>
+
+      {/* Mobile Bottom Sheet */}
+      <div
+        ref={sheetRef}
+        className={`lg:hidden absolute left-0 right-0 bottom-0 z-15 bg-bg-card/90 backdrop-blur-[16px] saturate-[180%] border-t border-border/40 rounded-[24px_24px_0_0] overflow-y-auto transition-[height] duration-moderate ${dragging ? "" : "ease-[cubic-bezier(0.34,1.56,0.64,1)]"}`}
+        style={{ height: bottomSheetHeight, maxHeight: "75vh" }}
+      >
+        <div
+          className="flex justify-center pt-2.5 pb-1.5 cursor-grab active:cursor-grabbing touch-none"
+          onPointerDown={handleSheetPointerDown}
+        >
+          <div className="w-10 h-1 bg-border rounded-pill" />
+        </div>
+        <div className="flex items-center justify-between px-4 pb-2.5">
+          <span className="text-xs font-semibold">Nearby routes</span>
+          <span className="text-xs text-text-muted">{filteredPins.length} found</span>
+        </div>
+        <div className="flex flex-col gap-2 px-4 pb-3">
+          {filteredPins.map((pin) => (
+            <Link
+              key={pin.id}
+              href={`/posts/${pin.id}`}
+              className="bg-bg-card border border-border radius-lg p-3 cursor-pointer transition-shadow duration-base hover:shadow-md no-underline block"
+            >
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Link href={`/profile/${pin.user.userName}`} onClick={(e) => e.stopPropagation()} className="no-underline">
+                  <div className="w-6 h-6 rounded-circle bg-primary-muted flex items-center justify-center text-[10px] font-bold text-primary shrink-0">{pin.user.firstName[0]}{pin.user.lastName[0]}</div>
+                </Link>
+                <Link href={`/profile/${pin.user.userName}`} onClick={(e) => e.stopPropagation()} className="text-xs font-semibold text-text-primary flex-1 no-underline hover:underline">{pin.user.firstName} {pin.user.lastName}</Link>
+                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 radius-pill text-[10px] font-semibold ${
+                  (pin.validityTier ?? "developing") === "verified" ? "bg-success text-success-text" :
+                  (pin.validityTier ?? "developing") === "trusted" ? "bg-info text-info-text" :
+                  (pin.validityTier ?? "developing") === "low" ? "bg-error text-error-text" :
+                  "bg-warning text-warning-text"
+                }`}>{pin.validityScore}</span>
+              </div>
+              <div className="text-xs font-semibold text-text-primary mb-1">{pin.title}</div>
+              <div className="flex items-center gap-2 text-[11px] text-text-muted">
+                <span className="flex items-center gap-0.5"><MapPin size={11} />{(pin.tags.length)} steps</span>
+                <span className="flex items-center gap-0.5"><Heart size={11} />{formatCount(pin.likes)}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Share this view - Mobile */}
+      <button
+        onClick={handleShareView}
+        className="lg:hidden absolute bottom-[calc(40vh+16px)] right-4 z-15 inline-flex items-center gap-1.5 px-3 py-1.5 radius-md border border-border bg-bg-card/85 backdrop-blur-[12px] text-text-secondary text-xs font-medium cursor-pointer font-sans hover:bg-bg-card hover:text-primary shadow-sm"
+        aria-label="Share this view"
+      >
+        <Link2 size={14} />
+        Share
+      </button>
+
+      <style jsx>{`
+        @keyframes scaleIn {
+          from { transform: scale(0.92); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
-  );
+  )
 }

@@ -1,41 +1,48 @@
 # Architecture History
 
-> **Overview:** Chronological record of how the Along App system architecture has evolved. Useful for understanding why things are structured the way they are, and for identifying patterns in how the codebase has grown.
+> **Overview:** Chronological record of how the Along system architecture has evolved. Useful for understanding why things are structured the way they are, and for identifying patterns in how the codebase has grown.
 
 ---
 
 ## History
 
----
-
-### 2024 — Initial Architecture
+### 2026-06-02 — Initial Architecture
 
 **State:**
-Next.js 15+ App Router with TypeScript, Tailwind CSS, and Ant Design. Authentication via JWT in cookies. Mock backend using json-server (`mock-backend/`) with in-memory data (`app/lib/data/`). Cloudinary for image uploads. Basic PWA setup.
+Single Next.js 15 App Router application with PostgreSQL (Prisma 7), Upstash Redis caching, JWT auth, MapLibre GL maps, Ant Design 5 UI components, Tailwind CSS 4 styling, Sentry error tracking, Cloudinary images, Resend email, and Web Push API notifications. The application follows a layered architecture: Next.js App Router → API Routes (Zod validated) → OOP Service Layer (BaseRepository pattern) → Prisma ORM → PostgreSQL. The frontend uses a universal component library (App* wrappers around Ant Design) with context-driven state management.
 
 **Rationale:**
-Rapid development without needing a production database. Mock backend matched the shape of the planned production API, allowing frontend work to proceed in parallel.
+Next.js 15 provides SSR, streaming, and API routes in a single codebase, simplifying deployment. Prisma with PostgreSQL offers type-safe database access for the complex relational data model (14 models). Ant Design provides comprehensive UI components for both the social feed and data-heavy admin dashboard. Redis caching reduces database load for the read-heavy social feed. PWA support enables mobile usage on slow connections common in the target West African market.
+
+**Key Architectural Decisions:**
+- Config-driven architecture (all hardcoded values in centralized registries)
+- OOP service layer with BaseRepository<T> generic CRUD base class
+- Universal component library (App* wrappers) to decouple from Ant Design
+- Zero emoji policy with Lucide React for all icons
+- Mobile-first responsive design with PWA offline support
+- JWT auth with httpOnly cookies (no NextAuth.js)
+- Cursor-based pagination for feed and search
+- Zod validation on every API endpoint
+- Offline-first: `OnlineStatusProvider` + `offlineQueue` for reconnection resilience
+- Push notifications via Web Push API + QStash for background delivery
+- Blog content as MDX files on filesystem (no CMS dependency)
 
 ---
 
-### 2025 — Database Layer Added
+### 2026-06-03 — Application Code Generation
 
 **State:**
-Prisma ORM introduced with a full PostgreSQL schema covering Users, Posts, Comments, Likes, Bookmarks, Notifications, Follow relationships, and UserActivity for the feed algorithm. Upstash Redis added for caching. Prisma client generated to `app/generated/prisma/`.
+All application code modules generated: 25 config registries, 34 UI components, 6 providers, 11 services, 11 utils, auth/dashboard/admin/public pages, push notification system (4 API routes), QStash workers (3 endpoints), blog with MDX posts, FAQ page with structured data.
 
 **Rationale:**
-Production readiness milestone. The mock backend served its purpose; the application needed a real database layer with type-safe access and proper migrations.
+Full application code was needed to move from infrastructure-only state to a working product. The layered architecture (config → components → providers → services → data) was preserved, with push notifications and offline support added as critical features for the West African target market where connectivity is unreliable.
+
+**Key Architectural Decisions:**
+- Push subscriptions stored in Prisma `PushSubscription` model with upsert semantics
+- QStash workers use signature verification (Receiver) for secure server-to-server calls
+- blog utility uses `fs` for build-time MDX parsing — no external CMS
+- `siteConfig` utility uses read-through cache (Redis → Prisma → default)
+- Two `useRequireAuth` variants: router-redirect (`app/hooks/`) and permission-checker (`app/lib/hooks/`)
+- `OfflineQueue` uses localStorage for persistence with `fetch` replay on flush
 
 ---
-
-### 2026-04-20 — .ai-system Initialized, Refactoring Phase Begins
-
-**State:**
-`.ai-system` documentation structure added to the root of the repository. All agent, planning, index, memory, and checkpoint files populated with Along App-specific content. Major refactoring phase begins to migrate all API routes from mock data to Prisma and add Redis caching, rate limiting, and Zod validation throughout.
-
-**Rationale:**
-The developer plans major refactoring and needs the .ai-system in place to guide AI-assisted development sessions systematically.
-
----
-
-[New entries added here as architecture evolves]

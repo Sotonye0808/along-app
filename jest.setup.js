@@ -67,6 +67,11 @@ const localStorageMock = {
 };
 global.localStorage = localStorageMock;
 
+// Polyfill TextEncoder/TextDecoder for Prisma + @noble/hashes
+const { TextEncoder, TextDecoder } = require("util");
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 // Mock geolocation
 global.navigator.geolocation = {
   getCurrentPosition: jest.fn(),

@@ -1,41 +1,56 @@
-import type { LucideIcon } from "lucide-react";
-import { Camera, CheckCircle2, LocateFixed, Route } from "lucide-react";
-
-export interface QualityCheckpoint {
-    key: string;
-    label: string;
-    description: string;
-    points: number;
-    celebrationIcon: LucideIcon;
-}
+import { MapPin, Navigation, Image, Tags, AlertTriangle, CheckCircle } from "lucide-react";
+import type { QualityCheckpoint } from "@/app/lib/types";
 
 export const QUALITY_CHECKPOINTS: QualityCheckpoint[] = [
-    {
-        key: "originDestination",
-        label: "Origin and destination set",
-        description: "Add clear start and end points for your route.",
-        points: 30,
-        celebrationIcon: LocateFixed,
+  {
+    id: "has_title",
+    label: "Descriptive Title",
+    description: "Add a clear title that describes the route",
+    icon: MapPin,
+    weight: 20,
+    validate: (draft) => typeof draft.title === "string" && draft.title.length >= 5,
+  },
+  {
+    id: "has_steps",
+    label: "Route Steps",
+    description: "Add at least 2 route steps with stops",
+    icon: Navigation,
+    weight: 25,
+    validate: (draft) => Array.isArray(draft.steps) && draft.steps.length >= 2,
+  },
+  {
+    id: "has_images",
+    label: "Photos",
+    description: "Add at least one photo to improve credibility",
+    icon: Image,
+    weight: 20,
+    validate: (draft) => Array.isArray(draft.images) && draft.images.length > 0,
+  },
+  {
+    id: "has_tags",
+    label: "Relevant Tags",
+    description: "Add tags to help others discover this route",
+    icon: Tags,
+    weight: 15,
+    validate: (draft) => Array.isArray(draft.tags) && draft.tags.length >= 2,
+  },
+  {
+    id: "has_fare",
+    label: "Fare Information",
+    description: "Include fare details for at least one step",
+    icon: AlertTriangle,
+    weight: 10,
+    validate: (draft) => {
+      if (!Array.isArray(draft.steps)) return false;
+      return draft.steps.some((s: Record<string, unknown>) => typeof s.fare === "number" && s.fare > 0);
     },
-    {
-        key: "transportMode",
-        label: "Transport mode selected",
-        description: "Choose one or more transport modes for route clarity.",
-        points: 20,
-        celebrationIcon: Route,
-    },
-    {
-        key: "routeNarrative",
-        label: "Helpful route details",
-        description: "Share practical details such as fare, queue time, and delays.",
-        points: 30,
-        celebrationIcon: CheckCircle2,
-    },
-    {
-        key: "photoEvidence",
-        label: "Photo evidence added",
-        description: "Attach at least one image to increase trust score.",
-        points: 20,
-        celebrationIcon: Camera,
-    },
+  },
+  {
+    id: "has_description",
+    label: "Description",
+    description: "Add a brief description of the route experience",
+    icon: CheckCircle,
+    weight: 10,
+    validate: (draft) => typeof draft.description === "string" && draft.description.length >= 10,
+  },
 ];

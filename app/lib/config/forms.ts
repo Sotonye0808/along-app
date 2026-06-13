@@ -1,90 +1,48 @@
-export type FieldType =
-    | "text"
-    | "email"
-    | "password"
-    | "textarea"
-    | "number"
-    | "select"
-    | "multiselect"
-    | "tags";
-
-export interface FieldOption {
-    label: string;
-    value: string;
-}
-
-export interface FieldConfig {
-    name: string;
-    label: string;
-    type: FieldType;
-    placeholder?: string;
-    required?: boolean;
-    minLength?: number;
-    maxLength?: number;
-    options?: FieldOption[];
-}
+import { Mail, Lock, User, Phone, MessageSquare, Camera, Bug } from "lucide-react";
+import type { FieldConfig } from "@/app/lib/types";
 
 export const REGISTER_FIELDS: FieldConfig[] = [
-    { name: "firstName", label: "First Name", type: "text", required: true },
-    { name: "lastName", label: "Last Name", type: "text", required: true },
-    { name: "userName", label: "Username", type: "text", required: true, minLength: 3, maxLength: 20 },
-    { name: "email", label: "Email", type: "email", required: true },
-    { name: "password", label: "Password", type: "password", required: true, minLength: 8 },
-    { name: "confirmPassword", label: "Confirm Password", type: "password", required: true, minLength: 8 },
+  { name: "firstName", label: "First Name", type: "text", placeholder: "Enter your first name", required: true, icon: User },
+  { name: "lastName", label: "Last Name", type: "text", placeholder: "Enter your last name", required: true, icon: User },
+  { name: "userName", label: "Username", type: "text", placeholder: "Choose a username", required: true, icon: User },
+  { name: "email", label: "Email", type: "email", placeholder: "you@example.com", required: true, icon: Mail },
+  { name: "password", label: "Password", type: "password", placeholder: "Create a password", required: true, icon: Lock },
 ];
 
 export const LOGIN_FIELDS: FieldConfig[] = [
-    { name: "email", label: "Email", type: "email", required: true, placeholder: "youremail@example.com" },
-    { name: "password", label: "Password", type: "password", required: true, minLength: 8, placeholder: "Enter your password" },
+  { name: "email", label: "Email", type: "email", placeholder: "you@example.com", required: true, icon: Mail },
+  { name: "password", label: "Password", type: "password", placeholder: "Enter your password", required: true, icon: Lock },
 ];
 
 export const EDIT_PROFILE_FIELDS: FieldConfig[] = [
-    { name: "firstName", label: "First Name", type: "text", required: true },
-    { name: "lastName", label: "Last Name", type: "text", required: true },
-    { name: "userName", label: "Username", type: "text", required: true, minLength: 3, maxLength: 20 },
-    { name: "bio", label: "Bio", type: "textarea", maxLength: 280 },
-    { name: "location", label: "Location", type: "text" },
+  { name: "firstName", label: "First Name", type: "text", required: true, icon: User },
+  { name: "lastName", label: "Last Name", type: "text", required: true, icon: User },
+  { name: "bio", label: "Bio", type: "textarea", placeholder: "Tell us about yourself", icon: MessageSquare },
+  { name: "phone", label: "Phone", type: "tel", placeholder: "+234...", icon: Phone },
 ];
 
 export const POST_CREATE_FIELDS: FieldConfig[] = [
-    { name: "title", label: "Route Title", type: "text", required: true, maxLength: 120 },
-    { name: "content", label: "Route Details", type: "textarea", required: true, maxLength: 1000 },
-    {
-        name: "vehicles", label: "Transport Modes", type: "multiselect", options: [
-            { label: "Bus", value: "bus" },
-            { label: "Taxi", value: "taxi" },
-            { label: "Bike", value: "bike" },
-            { label: "Keke", value: "keke" },
-            { label: "Walk", value: "trekking" },
-        ]
-    },
-    { name: "fare", label: "Estimated Fare", type: "number" },
-    { name: "tags", label: "Tags", type: "tags" },
+  { name: "title", label: "Route Title", type: "text", placeholder: "E.g., Yaba to Ikeja via Oshodi", required: true },
+  { name: "description", label: "Description", type: "textarea", placeholder: "Describe the route experience..." },
+  { name: "images", label: "Photos", type: "file", icon: Camera },
 ];
 
 export const BUG_REPORT_FIELDS: FieldConfig[] = [
-    { name: "title", label: "Issue Title", type: "text", required: true, maxLength: 120 },
-    { name: "description", label: "Description", type: "textarea", required: true, maxLength: 2000 },
-    {
-        name: "category",
-        label: "Category",
-        type: "select",
-        required: true,
-        options: [
-            { label: "UI", value: "UI" },
-            { label: "Routing", value: "ROUTING" },
-            { label: "Auth", value: "AUTH" },
-            { label: "Performance", value: "PERFORMANCE" },
-            { label: "Data", value: "DATA" },
-            { label: "Notifications", value: "NOTIFICATIONS" },
-            { label: "Other", value: "OTHER" },
-        ],
-    },
+  { name: "title", label: "Bug Title", type: "text", placeholder: "Brief summary of the issue", required: true },
+  { name: "category", label: "Category", type: "select", required: true, options: [
+    { label: "UI", value: "UI" },
+    { label: "Routing", value: "ROUTING" },
+    { label: "Auth", value: "AUTH" },
+    { label: "Performance", value: "PERFORMANCE" },
+    { label: "Data", value: "DATA" },
+    { label: "Notifications", value: "NOTIFICATIONS" },
+    { label: "Other", value: "OTHER" },
+  ]},
+  { name: "description", label: "Description", type: "textarea", placeholder: "Steps to reproduce...", required: true, icon: Bug },
 ];
 
 export const CONTACT_FIELDS: FieldConfig[] = [
-    { name: "name", label: "Name", type: "text", required: true },
-    { name: "email", label: "Email", type: "email", required: true },
-    { name: "subject", label: "Subject", type: "text", required: true, maxLength: 120 },
-    { name: "message", label: "Message", type: "textarea", required: true, maxLength: 1500 },
+  { name: "name", label: "Your Name", type: "text", required: true, icon: User },
+  { name: "email", label: "Your Email", type: "email", required: true, icon: Mail },
+  { name: "message", label: "Message", type: "textarea", required: true, icon: MessageSquare },
 ];

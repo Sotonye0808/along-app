@@ -1,32 +1,31 @@
-export interface TeamMember {
-    id: string;
-    name: string;
-    role: string;
-    bio: string;
-    avatarSeed: string;
-    socials?: Array<{ label: string; href: string }>;
-}
+import type { TeamMember } from "@/app/lib/types";
 
 export const TEAM_MEMBERS: TeamMember[] = [
-    {
-        id: "alex-mercer",
-        name: "Alex Mercer",
-        role: "Product Lead",
-        bio: "Drives product direction for route intelligence and community trust.",
-        avatarSeed: "Alex Mercer",
-    },
-    {
-        id: "ama-serwaa",
-        name: "Ama Serwaa",
-        role: "Design Lead",
-        bio: "Builds cohesive cross-platform interaction systems and visual language.",
-        avatarSeed: "Ama Serwaa",
-    },
-    {
-        id: "kwame-osei",
-        name: "Kwame Osei",
-        role: "Engineering Lead",
-        bio: "Owns platform architecture, reliability, and performance engineering.",
-        avatarSeed: "Kwame Osei",
-    },
+  {
+    name: "Abdulmalik",
+    role: "Founder and CEO",
+    bio: "Innovating solutions to transit problems.",
+    socials: [
+      { platform: "github", url: "https://github.com/Sotonye0808" },
+      { platform: "twitter", url: "https://x.com/thereasoshady" },
+    ],
+  },
+  {
+    name: "Hassan Babalola",
+    role: "Product Manager and COO",
+    bio: "Driving product strategy and operations.",
+    socials: [
+      { platform: "github", url: "https://github.com/Sotonye0808" },
+      { platform: "twitter", url: "https://x.com/thereasoshady" },
+    ],
+  },
+  {
+    name: "Sotonye Dagogo",
+    role: "Lead Developer and CTO",
+    bio: "Building the future of urban transit intelligence in West Africa.",
+    socials: [
+      { platform: "github", url: "https://github.com/Sotonye0808" },
+      { platform: "twitter", url: "https://x.com/thereasoshady" },
+    ],
+  },
 ];

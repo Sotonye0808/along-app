@@ -1,85 +1,111 @@
-"use client";
+'use client'
 
-import React from "react";
-import { Modal } from "antd";
-import type { LucideIcon } from "lucide-react";
+import { useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
+import { X } from 'lucide-react'
+import { cn } from '@/app/lib/utils/cn'
 
-export interface AppModalProps {
-  open: boolean;
-  onClose: () => void;
-  title?: string;
-  subtitle?: string;
-  icon?: LucideIcon;
-  iconColor?: "primary" | "error" | "warning" | "info";
-  size?: "sm" | "default" | "lg" | "xl" | "fullscreen";
-  footer?: React.ReactNode | null;
-  loading?: boolean;
-  closable?: boolean;
-  maskClosable?: boolean;
-  children: React.ReactNode;
-  className?: string;
+type ModalSize = 'sm' | 'default' | 'lg' | 'xl' | 'fullscreen'
+
+interface AppModalProps {
+  open: boolean
+  onClose: () => void
+  size?: ModalSize
+  title?: string
+  subtitle?: string
+  children?: React.ReactNode
+  footer?: React.ReactNode
+  destructive?: boolean
 }
 
-const widthMap: Record<NonNullable<AppModalProps["size"]>, number | string> = {
-  sm: 420,
-  default: 560,
-  lg: 760,
-  xl: 980,
-  fullscreen: "100vw",
-};
+const sizeClasses: Record<ModalSize, string> = {
+  sm: 'max-w-[400px]',
+  default: 'max-w-[520px]',
+  lg: 'max-w-[680px]',
+  xl: 'max-w-[800px]',
+  fullscreen: 'max-w-full max-h-full rounded-none mx-0',
+}
 
-const iconColorMap: Record<NonNullable<AppModalProps["iconColor"]>, string> = {
-  primary: "text-[var(--color-primary)]",
-  error: "text-[var(--color-error-text)]",
-  warning: "text-[var(--color-warning-text)]",
-  info: "text-sky-600",
-};
-
-export function AppModal({
+export default function AppModal({
   open,
   onClose,
+  size = 'default',
   title,
   subtitle,
-  icon: Icon,
-  iconColor = "primary",
-  size = "default",
-  footer,
-  loading,
-  closable = true,
-  maskClosable = true,
   children,
-  className,
-}: AppModalProps): React.ReactElement {
-  return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      width={widthMap[size]}
-      footer={footer}
-      confirmLoading={loading}
-      closable={closable}
-      maskClosable={maskClosable}
-      className={className}
-      title={
-        <div className="flex items-start gap-3">
-          {Icon ? (
-            <Icon
-              className={iconColorMap[iconColor]}
-              size={20}
-              aria-hidden="true"
-            />
-          ) : null}
-          <div>
-            {title ? <div className="font-semibold">{title}</div> : null}
-            {subtitle ? (
-              <div className="text-sm text-[var(--color-text-secondary)]">
-                {subtitle}
-              </div>
-            ) : null}
+  footer,
+  destructive,
+}: AppModalProps) {
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  const handleEscape = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    },
+    [onClose],
+  )
+
+  useEffect(() => {
+    if (!open) return
+    document.addEventListener('keydown', handleEscape)
+    contentRef.current?.focus()
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [open, handleEscape])
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === overlayRef.current) onClose()
+  }
+
+  if (!open) return null
+
+  return createPortal(
+    <div
+      ref={overlayRef}
+      onClick={handleOverlayClick}
+      className="fixed inset-0 bg-bg-overlay z-50 flex items-start justify-center pt-20 overflow-y-auto"
+    >
+      <div
+        ref={contentRef}
+        tabIndex={-1}
+        className={cn(
+          'bg-bg-card radius-xl shadow-xl animate-fade-slide-up w-full mx-4 outline-none relative',
+          sizeClasses[size],
+        )}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 z-10 rounded-circle p-1.5 hover:bg-bg-elevated transition-colors duration-base text-text-secondary hover:text-text-primary"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+
+        {(title || subtitle) && (
+          <div className="px-6 pt-6 pb-0 pr-14">
+            {title && (
+              <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
+            )}
+            {subtitle && (
+              <p className="text-sm text-text-secondary mt-1">{subtitle}</p>
+            )}
           </div>
-        </div>
-      }>
-      {children}
-    </Modal>
-  );
+        )}
+
+        {children && <div className="p-6">{children}</div>}
+
+        {footer && (
+          <div
+            className={cn(
+              'border-t border-border px-6 py-4 flex gap-2',
+              destructive ? 'justify-between' : 'justify-end',
+            )}
+          >
+            {footer}
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body,
+  )
 }

@@ -14,8 +14,31 @@ import type { User as PrismaUser } from '../app/generated/prisma/client';
 import { DEFAULT_EMAIL_CONFIG, DEFAULT_EMAIL_TEMPLATES } from '../app/lib/config/email';
 import { DEFAULT_VALIDITY_CONFIG } from '../app/lib/config/validityConfig';
 import { DEFAULT_FEED_CONFIG } from '../app/lib/config/feedAlgorithm';
+import type { VehicleType } from '../app/lib/types';
 
 // Type definitions for seed data
+interface Coordinate {
+    lat: number;
+    lng: number;
+}
+
+interface RouteLink {
+    text: string;
+    url: string;
+}
+
+interface Route {
+    id: string;
+    text: string;
+    links: RouteLink[];
+    order: number;
+    vehicles: VehicleType[];
+    status: string;
+    fare: number;
+    lat?: number;
+    lng?: number;
+}
+
 interface SeedUser {
     userName: string;
     firstName: string;
@@ -264,8 +287,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/route-lagos-brt.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/ikeja-bus-stop.jpg',
+                'https://images.unsplash.com/photo-1590674899484-d5640d0f7b1f?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1569517822092-81d3a7f90e9b?w=600&h=400&fit=crop',
             ],
             startLat: 6.6059,
             startLng: 3.3494,
@@ -314,8 +337,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/ojota-park.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/ibadan-road.jpg',
+                'https://images.unsplash.com/photo-1569517822092-81d3a7f90e9b?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1590674899484-d5640d0f7b1f?w=600&h=400&fit=crop',
             ],
             startLat: 6.6059,
             startLng: 3.3494,
@@ -364,8 +387,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/kubwa-junction.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/abuja-bus.jpg',
+                'https://images.unsplash.com/photo-1590674899484-d5640d0f7b1f?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1569517822092-81d3a7f90e9b?w=600&h=400&fit=crop',
             ],
             startLat: 9.1584,
             startLng: 7.3240,
@@ -423,8 +446,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/niger-bridge.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/lagos-ibadan-expressway.jpg',
+                'https://images.unsplash.com/photo-1469854523086-cc02fe5bbc80?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=400&fit=crop',
             ],
             startLat: 6.6059,
             startLng: 3.3494,
@@ -474,8 +497,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/enugu-museum.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/okpara-square.jpg',
+                'https://images.unsplash.com/photo-1596179576071-c668e4a16a15?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1582062311609-f319eb5b4c06?w=600&h=400&fit=crop',
             ],
             startLat: 6.4511,
             startLng: 7.5022,
@@ -523,8 +546,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/calabar-carnival.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/marian-road.jpg',
+                'https://images.unsplash.com/photo-1614030374535-2348fc420828?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1534430480872-3498386e6b44?w=600&h=400&fit=crop',
             ],
             startLat: 4.9751,
             startLng: 8.3402,
@@ -572,8 +595,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/owerri-park.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/portharcourt-road.jpg',
+                'https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=600&h=400&fit=crop',
             ],
             startLat: 5.4776,
             startLng: 7.0138,
@@ -622,8 +645,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/dala-hill.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/kurmi-market.jpg',
+                'https://images.unsplash.com/photo-1553440569-bcc63803a83f?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1580651315530-69c8e0026377?w=600&h=400&fit=crop',
             ],
             startLat: 12.0022,
             startLng: 8.5193,
@@ -671,8 +694,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/shere-hills.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/jos-landscape.jpg',
+                'https://images.unsplash.com/photo-1534430480872-3498386e6b44?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1469854523086-cc02fe5bbc80?w=600&h=400&fit=crop',
             ],
             startLat: 10.5105,
             startLng: 7.4177,
@@ -713,8 +736,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 },
             ],
             images: [
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/lekki-road.jpg',
-                'https://res.cloudinary.com/durowdibn/image/upload/v1/along-app/ajah-beach.jpg',
+                'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop',
             ],
             startLat: 6.4281,
             startLng: 3.5646,

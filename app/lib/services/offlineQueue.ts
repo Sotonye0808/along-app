@@ -1,54 +1,59 @@
-export interface OfflineQueueAction {
-    id: string;
-    type: string;
-    payload: Record<string, unknown>;
-    createdAt: number;
+type QueueItem = {
+  id: string;
+  endpoint: string;
+  method: "POST" | "PATCH" | "DELETE";
+  body?: unknown;
+  createdAt: number;
+};
+
+class OfflineQueue {
+  private storageKey = "offlineQueue";
+  private queue: QueueItem[] = [];
+
+  constructor() {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(this.storageKey);
+        if (stored) this.queue = JSON.parse(stored);
+      } catch {}
+    }
+  }
+
+  enqueue(item: Omit<QueueItem, "id" | "createdAt">) {
+    const entry: QueueItem = { ...item, id: crypto.randomUUID(), createdAt: Date.now() };
+    this.queue.push(entry);
+    this.persist();
+    return entry;
+  }
+
+  dequeue(id: string) {
+    this.queue = this.queue.filter((item) => item.id !== id);
+    this.persist();
+  }
+
+  getAll(): QueueItem[] {
+    return [...this.queue];
+  }
+
+  flush(): Promise<Response[]> {
+    const promises = this.queue.map((item) =>
+      fetch(item.endpoint, {
+        method: item.method,
+        headers: { "Content-Type": "application/json" },
+        body: item.body ? JSON.stringify(item.body) : undefined,
+      }).then((res) => {
+        if (res.ok) this.dequeue(item.id);
+        return res;
+      })
+    );
+    return Promise.all(promises);
+  }
+
+  private persist() {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.queue));
+    } catch {}
+  }
 }
 
-const STORAGE_KEY = "along_offline_queue";
-
-class OfflineQueueService {
-    private queue: OfflineQueueAction[] = [];
-
-    constructor() {
-        if (typeof window !== "undefined") {
-            const raw = window.localStorage.getItem(STORAGE_KEY);
-            this.queue = raw ? (JSON.parse(raw) as OfflineQueueAction[]) : [];
-        }
-    }
-
-    enqueue(type: string, payload: Record<string, unknown>): OfflineQueueAction {
-        const action: OfflineQueueAction = {
-            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            type,
-            payload,
-            createdAt: Date.now(),
-        };
-        this.queue.push(action);
-        this.persist();
-        return action;
-    }
-
-    dequeue(): OfflineQueueAction | undefined {
-        const action = this.queue.shift();
-        this.persist();
-        return action;
-    }
-
-    list(): OfflineQueueAction[] {
-        return [...this.queue];
-    }
-
-    clear(): void {
-        this.queue = [];
-        this.persist();
-    }
-
-    private persist(): void {
-        if (typeof window !== "undefined") {
-            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.queue));
-        }
-    }
-}
-
-export const OfflineQueue = new OfflineQueueService();
+export const offlineQueue = new OfflineQueue();

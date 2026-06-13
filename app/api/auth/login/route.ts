@@ -1,178 +1,64 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { rateLimitByAction } from '@/lib/utils/rateLimiter';
-import { validateLoginData } from '@/lib/utils/validation';
-import { handlePrismaError } from '@/lib/utils/prismaErrors';
-import { getAuthRateLimitIdentifier } from '@/lib/utils/requestClient';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-// Generate JWT tokens
-function generateTokens(userId: string) {
-    const accessToken = jwt.sign(
-        { userId },
-        process.env.JWT_ACCESS_SECRET!,
-        { expiresIn: '15m' }
-    );
-
-    const refreshToken = jwt.sign(
-        { userId },
-        process.env.JWT_REFRESH_SECRET!,
-        { expiresIn: '7d' }
-    );
-
-    return { accessToken, refreshToken };
-}
+import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
+import { prisma } from "@/app/lib/db/prisma";
+import { LOGIN_SCHEMA } from "@/app/lib/schemas/auth";
+import { verifyPassword } from "@/app/lib/utils/security";
+import { signAccessToken, signRefreshToken } from "@/app/lib/utils/auth";
+import { setAuthCookies } from "@/app/lib/utils/cookies";
 
 export async function POST(request: NextRequest) {
-    try {
-        // Initial rate limit for malformed/oversized-body abuse protection
-        const preRateLimitIdentifier = getAuthRateLimitIdentifier(request);
-        const preRateLimit = await rateLimitByAction('auth:login:pre', preRateLimitIdentifier, {
-            maxRequests: 30,
-            windowSeconds: 900,
-        });
+  try {
+    const body = await request.json();
+    const parsed = LOGIN_SCHEMA.safeParse(body);
 
-        if (!preRateLimit.success) {
-            return NextResponse.json(
-                { error: 'Too many login attempts. Please try again later.' },
-                {
-                    status: 429,
-                    headers: { 'Retry-After': String(preRateLimit.reset) }
-                }
-            );
-        }
-
-        const body: LoginCredentials = await request.json();
-
-        // Validate input data
-        const validation = validateLoginData(body);
-        if (!validation.success) {
-            return NextResponse.json(
-                { error: validation.error.issues[0]?.message || 'Invalid input data' },
-                { status: 400 }
-            );
-        }
-
-        const { email, password } = body;
-
-        // Credential-aware rate limit after payload validation
-        const rateLimitIdentifier = getAuthRateLimitIdentifier(request, email);
-        const rateLimit = await rateLimitByAction('auth:login', rateLimitIdentifier, {
-            maxRequests: 10,
-            windowSeconds: 900,
-        });
-
-        if (!rateLimit.success) {
-            return NextResponse.json(
-                { error: 'Too many login attempts. Please try again later.' },
-                {
-                    status: 429,
-                    headers: { 'Retry-After': String(rateLimit.reset) }
-                }
-            );
-        }
-
-        // Find user by email with password
-        const user = await prisma.user.findUnique({
-            where: { email },
-            select: {
-                id: true,
-                userName: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                password: true,
-                avatar: true,
-                bio: true,
-                verified: true,
-                location: true,
-                createdAt: true,
-                _count: {
-                    select: {
-                        followers: true,
-                        following: true,
-                        posts: true
-                    }
-                }
-            }
-        });
-
-        if (!user) {
-            return NextResponse.json(
-                { error: 'Invalid email or password' },
-                { status: 401 }
-            );
-        }
-
-        // Verify password with bcrypt
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordValid) {
-            return NextResponse.json(
-                { error: 'Invalid email or password' },
-                { status: 401 }
-            );
-        }
-
-        // Check if user is verified
-        if (!user.verified) {
-            return NextResponse.json(
-                { error: 'Please verify your account before logging in' },
-                { status: 403 }
-            );
-        }
-
-        // Generate tokens
-        const { accessToken, refreshToken } = generateTokens(user.id);
-
-        // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
-
-        // Transform response to match frontend interface
-        const responseUser = {
-            ...userWithoutPassword,
-            followers: user._count.followers,
-            following: [], // Will be populated by a separate call if needed
-            likes: [], // Will be populated by a separate call if needed
-            bookmarks: [] // Will be populated by a separate call if needed
-        };
-
-        // Create response with tokens
-        const response = NextResponse.json({
-            user: responseUser,
-            accessToken,
-            refreshToken,
-        });
-
-        // Set tokens in httpOnly cookies (for production security)
-        response.cookies.set('accessToken', accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 15, // 15 minutes
-            path: '/',
-        });
-
-        response.cookies.set('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 7, // 7 days
-            path: '/',
-        });
-
-        return response;
-    } catch (error) {
-        const prismaError = handlePrismaError(error, 'User');
-        if (prismaError) {
-            return prismaError;
-        }
-
-        console.error('Login error:', error);
-        return NextResponse.json(
-            { error: 'Login failed. Please try again.' },
-            { status: 500 }
-        );
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
+
+    const { email, password } = parsed.data;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    }
+
+    const valid = await verifyPassword(password, user.password);
+
+    if (!valid) {
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    }
+
+    if (!user.verified) {
+      return NextResponse.json({ error: "Please verify your email first" }, { status: 403 });
+    }
+
+    const accessToken = signAccessToken({ userId: user.id, role: user.role });
+    const refreshToken = signRefreshToken({ userId: user.id, role: user.role });
+
+    await setAuthCookies(accessToken, refreshToken);
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json({ user: userWithoutPassword }, { status: 200 });
+  } catch (error) {
+    console.error("[LOGIN ERROR]", error);
+    Sentry.captureException(error);
+    if (error instanceof Error) {
+      if (error.name === "PrismaClientKnownRequestError" || error.name === "PrismaClientInitializationError") {
+        const prismaError = error as { code?: string; message: string };
+        return NextResponse.json({
+          error: "Database error. Please try again.",
+          ...(process.env.NODE_ENV !== "production" && { detail: prismaError.message, code: prismaError.code }),
+        }, { status: 500 });
+      }
+      if (error.name === "JsonWebTokenError") {
+        return NextResponse.json({ error: "Authentication error. Please try again." }, { status: 500 });
+      }
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

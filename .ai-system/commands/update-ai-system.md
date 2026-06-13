@@ -20,18 +20,22 @@ Update the following:
    - update module relationships
    - flag new dependencies introduced
 
-3. .ai-system/agents/system-architecture.md
+3. .ai-system/index/file-summaries/
+   - generate or update summaries for modified modules
+   - remove summaries for deleted files
+
+4. .ai-system/agents/system-architecture.md
    - flag any architecture drift (code doesn't match docs)
    - update architecture to reflect current state
 
-4. .ai-system/planning/project-plan.md
+5. .ai-system/planning/project-plan.md
    - mark completed items [x]
    - add newly discovered tasks
 
-5. .ai-system/summaries/dev-history.md
+6. .ai-system/summaries/dev-history.md
    - add a sprint summary for work completed
 
-6. .ai-system/memory/lessons-learned.md
+7. .ai-system/memory/lessons-learned.md
    - document any recurring issues or newly discovered patterns
 
 Report what was updated and what inconsistencies were found.
@@ -47,6 +51,5 @@ Directive: [focus area if needed]
 
 Examples:
 Directive: Focus on updating summaries after the authentication module refactor
-Directive: Specifically check for architecture drift in the API routes layer
-Directive: Update after migrating all API routes from mock data to Prisma
+Directive: Specifically check for architecture drift in the services layer
 ```

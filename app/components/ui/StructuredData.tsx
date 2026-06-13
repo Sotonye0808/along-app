@@ -1,12 +1,8 @@
-import React from "react";
-
-export interface StructuredDataProps {
+interface StructuredDataProps {
   data: Record<string, unknown>;
 }
 
-export function StructuredData({
-  data,
-}: StructuredDataProps): React.ReactElement {
+export default function StructuredData({ data }: StructuredDataProps) {
   return (
     <script
       type="application/ld+json"

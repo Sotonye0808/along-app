@@ -43,5 +43,4 @@ Examples:
 Directive: TypeError: Cannot read properties of undefined reading 'map' in UserList component
 Directive: Database connection pool exhausted under load — fix and add connection limit config
 Directive: Next.js hydration mismatch on the dashboard page
-Directive: cookies() should be awaited before using its value in Next.js 15
 ```

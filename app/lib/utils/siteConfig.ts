@@ -1,44 +1,22 @@
-import { siteConfigRepository } from "@/lib/db/SiteConfigRepository";
-import { DEFAULT_VALIDITY_CONFIG } from "@/lib/config/validityConfig";
-import type { ValidityConfig } from "@/lib/config/validityConfig";
-import { DEFAULT_FEED_CONFIG } from "@/lib/config/feedAlgorithm";
-import type { FeedAlgorithmConfig } from "@/lib/config/feedAlgorithm";
-import { DEFAULT_EMAIL_CONFIG, DEFAULT_EMAIL_TEMPLATES } from "@/lib/config/email";
+import { prisma } from "@/app/lib/db/prisma";
+import { redis } from "@/app/lib/db/redis";
+import { CACHE_TTL, CACHE_KEYS } from "@/app/lib/config/cache";
 
-type SiteConfigKey =
-  | "validityConfig"
-  | "feedAlgorithm"
-  | "email"
-  | "emailTemplates";
-
-type SiteConfigValueMap = {
-  validityConfig: ValidityConfig;
-  feedAlgorithm: FeedAlgorithmConfig;
-  email: EmailConfig;
-  emailTemplates: EmailTemplateConfig;
-};
-
-const DEFAULTS: SiteConfigValueMap = {
-  validityConfig: DEFAULT_VALIDITY_CONFIG,
-  feedAlgorithm: DEFAULT_FEED_CONFIG,
-  email: DEFAULT_EMAIL_CONFIG,
-  emailTemplates: DEFAULT_EMAIL_TEMPLATES,
-};
-
-export async function getSiteConfig<K extends SiteConfigKey>(
-  key: K,
-  fallback?: SiteConfigValueMap[K],
-): Promise<SiteConfigValueMap[K]> {
-  const value = await siteConfigRepository.get<SiteConfigValueMap[K]>(key);
-  if (value !== null) {
-    return value;
-  }
-  return fallback ?? DEFAULTS[key];
-}
-
-export async function setSiteConfig<K extends SiteConfigKey>(
-  key: K,
-  value: SiteConfigValueMap[K],
-): Promise<void> {
-  await siteConfigRepository.set(key, value);
+export async function getSiteConfig<T>(key: string, defaultValue: T): Promise<T> {
+  const cacheKey = CACHE_KEYS.siteConfig(key);
+  try {
+    const cached = await redis.get<string>(cacheKey);
+    if (cached) {
+      return JSON.parse(cached) as T;
+    }
+  } catch {}
+  try {
+    const entry = await prisma.siteConfig.findUnique({ where: { key } });
+    if (entry && entry.value !== null && entry.value !== undefined) {
+      const val = entry.value as T;
+      await redis.set(cacheKey, JSON.stringify(val), { ex: CACHE_TTL.siteConfig });
+      return val;
+    }
+  } catch {}
+  return defaultValue;
 }

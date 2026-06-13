@@ -1,695 +1,370 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
-import { Spin, App, Button, Skeleton, Card } from "antd";
-import { ArrowLeft, Eye, Share2, Bookmark, ThumbsUp, MessageCircle } from "lucide-react";
-import { useRouter, useParams } from "next/navigation";
-import { PostCard } from "@/components/features/posts/PostCard";
-import { CommentSection } from "@/components/features/posts/CommentSection";
-import { useAuth } from "../../../providers/AuthProvider";
-import { api } from "@/lib/utils/api";
-import { API_ENDPOINTS } from "@/lib/constants";
-import { StructuredData } from "@/components/ui/StructuredData";
-import { generateArticleSchema } from "@/lib/utils/structuredData";
-import { getSiteUrl } from "@/lib/utils/metadata";
-import { RouteMap } from "@/components/features/map";
-import { formatNumber } from "@/lib/utils/format";
-import { combinePostsWithAuthors } from "@/lib/utils/feedHelpers";
-import Link from "next/link";
+import { useState, useEffect, useMemo } from "react"
+import dynamic from "next/dynamic"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import { ArrowLeft, Heart, ThumbsDown, MessageCircle, Bookmark, Share2, DollarSign, Maximize2, MapPin } from "lucide-react"
+import { AppCard, TrustBadge, VehicleChip, AppEmptyState } from "@/app/components/ui"
+import { VEHICLE_REGISTRY, EMPTY_STATES } from "@/app/lib/config"
+import { CommentInput, CommentList } from "@/app/components/features/comments"
+import { useAuth } from "@/app/hooks/useAuth"
+import type { VehicleType } from "@/app/lib/types"
+import type { RoutePin } from "@/app/components/features/posts/RouteMap"
 
-interface PostWithAuthor extends Post {
-  author: User;
+const RouteMap = dynamic(() => import("@/app/components/features/posts/RouteMap").then((m) => ({ default: m.RouteMap })), { ssr: false })
+
+interface RouteStep {
+  location?: string
+  description?: string
+  vehicle?: string
+  fare?: number
 }
 
-export default function PostPage() {
-  const params = useParams();
-  const postId = params?.id as string;
-  const { user: currentUser, isAuthenticated } = useAuth();
-  const [post, setPost] = useState<PostWithAuthor | null>(null);
-  const [comments, setComments] = useState<(PostComment & { author: User })[]>(
-    [],
-  );
-  const [relatedPosts, setRelatedPosts] = useState<PostWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [commentModalOpen, setCommentModalOpen] = useState(false);
-  const [userInteractions, setUserInteractions] = useState({
-    likes: new Set<string>(),
-    dislikes: new Set<string>(),
-    bookmarks: new Set<string>(),
-    following: new Set<string>(),
-  });
-  const { message, modal } = App.useApp();
-  const router = useRouter();
+interface PostDetail {
+  id: string
+  title: string
+  routes: unknown
+  images: string[]
+  tags: string[]
+  likes: number
+  dislikes: number
+  comments: number
+  bookmarks: number
+  validityScore: number
+  validityTier: string | null
+  region: string | null
+  totalDistanceKm: number | null
+  estimatedMins: number | null
+  createdAt: string
+  user: {
+    id: string
+    userName: string
+    firstName: string
+    lastName: string
+    avatar?: string | null
+    avatarConfig?: unknown
+  }
+  _isLiked?: boolean
+  _isBookmarked?: boolean
+}
+
+interface Comment {
+  id: string
+  text: string
+  createdAt: string
+  user: {
+    id: string
+    userName: string
+    firstName: string
+    lastName: string
+    avatar?: string | null
+    avatarConfig?: unknown
+  }
+}
+
+function getTimeAgo(date: string): string {
+  const diff = Date.now() - new Date(date).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days}d ago`
+  return new Date(date).toLocaleDateString()
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
+  return String(n)
+}
+
+export default function PostDetailPage() {
+  const params = useParams()
+  const { user: currentUser } = useAuth()
+  const [post, setPost] = useState<PostDetail | null>(null)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [liked, setLiked] = useState(false)
+  const [likesCount, setLikesCount] = useState(0)
+  const [bookmarked, setBookmarked] = useState(false)
+
+  const postId = params.id as string
 
   useEffect(() => {
-    if (!postId) return;
-    fetchPost();
-  }, [postId]);
+    if (!postId) return
+    const load = async () => {
+      try {
+        const [postRes, commentRes] = await Promise.all([
+          fetch(`/api/posts/${postId}`),
+          fetch(`/api/posts/${postId}/comments`),
+        ])
+        const postData = await postRes.json()
+        const commentData = await commentRes.json()
+        setPost(postData.post)
+        setComments(commentData.comments)
+        setLiked(postData.post._isLiked ?? false)
+        setLikesCount(postData.post.likes)
+        setBookmarked(postData.post._isBookmarked ?? false)
+      } catch {
+        console.error("Failed to load post")
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [postId])
 
-  useEffect(() => {
-    if (!currentUser || !postId) return;
-    fetchUserInteractions();
-  }, [currentUser, postId]);
-
-  const fetchRelatedPosts = async (tags: string[]) => {
-    if (tags.length === 0) return;
+  const handleLike = async () => {
+    const newLiked = !liked
+    setLiked(newLiked)
+    setLikesCount((prev) => prev + (newLiked ? 1 : -1))
     try {
-      const [postsRes, usersRes] = await Promise.all([
-        api.get<Post[]>(API_ENDPOINTS.POSTS),
-        api.get<User[]>(API_ENDPOINTS.USERS),
-      ]);
-      const allPosts = postsRes.data ?? [];
-      const related = allPosts
-        .filter((p) => p.id !== postId && p.tags.some((t) => tags.includes(t)))
-        .slice(0, 4);
-      setRelatedPosts(
-        combinePostsWithAuthors(related, usersRes.data ?? []) as PostWithAuthor[],
-      );
+      await fetch(`/api/posts/${postId}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "LIKE" }),
+      })
     } catch {
-      // silent
+      setLiked(!newLiked)
+      setLikesCount((prev) => prev - (newLiked ? 1 : -1))
     }
-  };
+  }
 
-  const fetchPost = async () => {
+  const handleBookmark = async () => {
+    const newBookmarked = !bookmarked
+    setBookmarked(newBookmarked)
     try {
-      setLoading(true);
-      const postRes = await api.get<Post>(`${API_ENDPOINTS.POSTS}/${postId}`);
-      const authorRes = await api.get<User>(
-        `${API_ENDPOINTS.USERS}/${postRes.data.userId}`,
-      );
-
-      const postData = {
-        ...postRes.data,
-        author: authorRes.data,
-      };
-      setPost(postData);
-      void fetchRelatedPosts(postData.tags);
-    } catch (error) {
-      console.error("Failed to fetch post:", error);
-      message.error("Post not found");
-      router.push("/home");
-    } finally {
-      setLoading(false);
+      await fetch(`/api/posts/${postId}/bookmark`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+    } catch {
+      setBookmarked(!newBookmarked)
     }
-  };
+  }
 
-  const fetchUserInteractions = async () => {
-    if (!currentUser || !postId) return;
-
+  const handleComment = async (text: string) => {
     try {
-      const likes = new Set<string>();
-      const dislikes = new Set<string>();
-      const bookmarks = new Set<string>();
-
-      // Check if user has liked/disliked this post
-      const likeCheck = await api.get<{ data: Like | null }>(
-        `${API_ENDPOINTS.POST_LIKE(postId)}?userId=${currentUser.id}`,
-      );
-
-      if (likeCheck.data.data) {
-        if (likeCheck.data.data.type === "like") {
-          likes.add(postId);
-        } else if (likeCheck.data.data.type === "dislike") {
-          dislikes.add(postId);
-        }
+      const res = await fetch(`/api/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setComments((prev) => [data.comment, ...prev])
       }
-
-      // Check if user has bookmarked this post
-      const bookmarkCheck = await api.get<{ data: Bookmark | null }>(
-        `${API_ENDPOINTS.POST_BOOKMARK(postId)}?userId=${currentUser.id}`,
-      );
-
-      if (bookmarkCheck.data.data) {
-        bookmarks.add(postId);
-      }
-
-      setUserInteractions((prev) => ({
-        ...prev,
-        likes,
-        dislikes,
-        bookmarks,
-      }));
-    } catch (error) {
-      console.error("Failed to fetch user interactions:", error);
+    } catch {
+      console.error("Failed to post comment")
     }
-  };
-
-  const handleLike = async (postId: string) => {
-    if (!currentUser) {
-      message.warning("Please login to like posts");
-      return;
-    }
-
-    const wasLiked = userInteractions.likes.has(postId);
-    const wasDisliked = userInteractions.dislikes.has(postId);
-
-    // Optimistic update
-    const newLikes = new Set(userInteractions.likes);
-    const newDislikes = new Set(userInteractions.dislikes);
-
-    if (wasLiked) {
-      newLikes.delete(postId);
-      setPost((prev) => (prev ? { ...prev, likes: prev.likes - 1 } : null));
-    } else {
-      newLikes.add(postId);
-      if (wasDisliked) {
-        newDislikes.delete(postId);
-        setPost((prev) =>
-          prev
-            ? { ...prev, likes: prev.likes + 1, dislikes: prev.dislikes - 1 }
-            : null,
-        );
-      } else {
-        setPost((prev) => (prev ? { ...prev, likes: prev.likes + 1 } : null));
-      }
-    }
-
-    setUserInteractions((prev) => ({
-      ...prev,
-      likes: newLikes,
-      dislikes: newDislikes,
-    }));
-
-    try {
-      await api.post(API_ENDPOINTS.POST_LIKE(postId), {
-        userId: currentUser.id,
-        type: "like",
-      });
-    } catch (error) {
-      // Rollback on error
-      setUserInteractions((prev) => ({
-        ...prev,
-        likes: userInteractions.likes,
-        dislikes: userInteractions.dislikes,
-      }));
-      fetchPost();
-      message.error("Failed to like post");
-    }
-  };
-
-  const handleDislike = async (postId: string) => {
-    if (!currentUser) {
-      message.warning("Please login to dislike posts");
-      return;
-    }
-
-    const wasDisliked = userInteractions.dislikes.has(postId);
-    const wasLiked = userInteractions.likes.has(postId);
-
-    const newLikes = new Set(userInteractions.likes);
-    const newDislikes = new Set(userInteractions.dislikes);
-
-    if (wasDisliked) {
-      newDislikes.delete(postId);
-      setPost((prev) =>
-        prev ? { ...prev, dislikes: prev.dislikes - 1 } : null,
-      );
-    } else {
-      newDislikes.add(postId);
-      if (wasLiked) {
-        newLikes.delete(postId);
-        setPost((prev) =>
-          prev
-            ? { ...prev, dislikes: prev.dislikes + 1, likes: prev.likes - 1 }
-            : null,
-        );
-      } else {
-        setPost((prev) =>
-          prev ? { ...prev, dislikes: prev.dislikes + 1 } : null,
-        );
-      }
-    }
-
-    setUserInteractions((prev) => ({
-      ...prev,
-      likes: newLikes,
-      dislikes: newDislikes,
-    }));
-
-    try {
-      await api.post(API_ENDPOINTS.POST_LIKE(postId), {
-        userId: currentUser.id,
-        type: "dislike",
-      });
-    } catch (error) {
-      setUserInteractions((prev) => ({
-        ...prev,
-        likes: userInteractions.likes,
-        dislikes: userInteractions.dislikes,
-      }));
-      fetchPost();
-      message.error("Failed to dislike post");
-    }
-  };
-
-  const handleComment = async (postId: string) => {
-    if (!currentUser) {
-      modal.confirm({
-        title: "Login Required",
-        content:
-          "You need to be logged in to comment. Would you like to login now?",
-        okText: "Login",
-        cancelText: "Cancel",
-        onOk: () => {
-          router.push("/login");
-        },
-      });
-      return;
-    }
-
-    try {
-      const commentsRes = await api.get<PostComment[]>(
-        API_ENDPOINTS.POST_COMMENTS(postId),
-      );
-
-      const commentsWithAuthors = await Promise.all(
-        (commentsRes.data || []).map(async (comment) => {
-          const authorRes = await api.get<User>(
-            `${API_ENDPOINTS.USERS}/${comment.userId}`,
-          );
-          return {
-            ...comment,
-            author: authorRes.data,
-          };
-        }),
-      );
-
-      setComments(commentsWithAuthors);
-      setCommentModalOpen(true);
-    } catch (error) {
-      console.error("Failed to fetch comments:", error);
-      message.error("Failed to load comments");
-    }
-  };
-
-  const handleAddComment = async (postId: string, text: string) => {
-    if (!currentUser) {
-      message.warning("Please login to comment");
-      throw new Error("User not logged in");
-    }
-
-    try {
-      const newComment: Partial<PostComment> = {
-        postId,
-        userId: currentUser.id,
-        text,
-        createdAt: new Date().toISOString(),
-        likes: 0,
-        dislikes: 0,
-      };
-
-      await api.post(API_ENDPOINTS.POST_COMMENTS(postId), newComment);
-
-      // Refresh comments
-      await handleComment(postId);
-
-      // Update comment count
-      setPost((prev) =>
-        prev ? { ...prev, comments: prev.comments + 1 } : null,
-      );
-
-      message.success("Comment added");
-    } catch (error) {
-      console.error("Failed to add comment:", error);
-      message.error("Failed to add comment");
-      throw error;
-    }
-  };
-
-  const handleEditComment = async (commentId: string, newText: string) => {
-    if (!currentUser || !postId) return;
-
-    try {
-      await api.put(`${API_ENDPOINTS.POST_COMMENTS(postId)}/${commentId}`, {
-        text: newText,
-      });
-
-      setComments((prev) =>
-        prev.map((comment) =>
-          comment.id === commentId ? { ...comment, text: newText } : comment,
-        ),
-      );
-    } catch (error) {
-      console.error("Failed to update comment:", error);
-      throw error;
-    }
-  };
+  }
 
   const handleDeleteComment = async (commentId: string) => {
-    if (!currentUser || !postId) return;
-
     try {
-      await api.delete(`${API_ENDPOINTS.POST_COMMENTS(postId)}/${commentId}`);
-
-      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
-
-      setPost((prev) =>
-        prev ? { ...prev, comments: prev.comments - 1 } : null,
-      );
-    } catch (error) {
-      console.error("Failed to delete comment:", error);
-      throw error;
+      await fetch(`/api/posts/${postId}/comments/${commentId}`, { method: "DELETE" })
+      setComments((prev) => prev.filter((c) => c.id !== commentId))
+    } catch {
+      console.error("Failed to delete comment")
     }
-  };
+  }
 
-  const handleLikeComment = async (commentId: string) => {
-    if (!currentUser || !postId) {
-      message.warning("Please login to like comments");
-      return;
-    }
+  const routes = useMemo(() =>
+    post && Array.isArray(post.routes) ? (post.routes as RouteStep[]) : [],
+    [post]
+  )
+  const trustLevel = (post?.validityTier as "low" | "developing" | "verified" | "trusted") ?? "developing"
+  const initials = post ? `${post.user.firstName[0]}${post.user.lastName[0]}`.toUpperCase() : ""
 
-    // Optimistic update
-    setComments((prev) =>
-      prev.map((c) => (c.id === commentId ? { ...c, likes: c.likes + 1 } : c)),
-    );
-
-    try {
-      await api.post(API_ENDPOINTS.POST_COMMENT_LIKE(postId, commentId), {
-        userId: currentUser.id,
-        type: "like",
-      });
-    } catch (error) {
-      console.error("Failed to like comment:", error);
-      message.error("Failed to update like");
-      // Rollback
-      setComments((prev) =>
-        prev.map((c) =>
-          c.id === commentId ? { ...c, likes: c.likes - 1 } : c,
-        ),
-      );
-    }
-  };
-
-  const handleDislikeComment = async (commentId: string) => {
-    if (!currentUser || !postId) {
-      message.warning("Please login to dislike comments");
-      return;
-    }
-
-    // Optimistic update
-    setComments((prev) =>
-      prev.map((c) =>
-        c.id === commentId ? { ...c, dislikes: c.dislikes + 1 } : c,
-      ),
-    );
-
-    try {
-      await api.post(API_ENDPOINTS.POST_COMMENT_DISLIKE(postId, commentId), {
-        userId: currentUser.id,
-        type: "dislike",
-      });
-    } catch (error) {
-      console.error("Failed to dislike comment:", error);
-      message.error("Failed to update dislike");
-      // Rollback
-      setComments((prev) =>
-        prev.map((c) =>
-          c.id === commentId ? { ...c, dislikes: c.dislikes - 1 } : c,
-        ),
-      );
-    }
-  };
-
-  const handleBookmark = async (postId: string) => {
-    if (!currentUser) {
-      message.warning("Please login to bookmark posts");
-      return;
-    }
-
-    const wasBookmarked = userInteractions.bookmarks.has(postId);
-    const newBookmarks = new Set(userInteractions.bookmarks);
-
-    if (wasBookmarked) {
-      newBookmarks.delete(postId);
-      setPost((prev) =>
-        prev ? { ...prev, bookmarks: (prev.bookmarks || 0) - 1 } : null,
-      );
-    } else {
-      newBookmarks.add(postId);
-      setPost((prev) =>
-        prev ? { ...prev, bookmarks: (prev.bookmarks || 0) + 1 } : null,
-      );
-    }
-
-    setUserInteractions((prev) => ({
-      ...prev,
-      bookmarks: newBookmarks,
-    }));
-
-    try {
-      if (wasBookmarked) {
-        await api.delete(
-          `${API_ENDPOINTS.POST_BOOKMARK(postId)}?userId=${currentUser.id}`,
-        );
-        message.success("Removed from bookmarks");
-      } else {
-        await api.post(API_ENDPOINTS.POST_BOOKMARK(postId), {
-          userId: currentUser.id,
-        });
-        message.success("Added to bookmarks");
-      }
-    } catch (error) {
-      setUserInteractions((prev) => ({
-        ...prev,
-        bookmarks: userInteractions.bookmarks,
-      }));
-      fetchPost();
-      message.error("Failed to update bookmark");
-    }
-  };
-
-  const handleShare = async (postId: string) => {
-    const shareUrl = `${window.location.origin}/posts/${postId}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: post?.title || "Check out this route on Along",
-          url: shareUrl,
-        });
-      } catch (error: any) {
-        if (error.name !== "AbortError") {
-          navigator.clipboard.writeText(shareUrl);
-          message.success("Link copied to clipboard");
-        }
-      }
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-      message.success("Link copied to clipboard");
-    }
-  };
+  const routePins: RoutePin[] = useMemo(() =>
+    routes.map((r, i) => ({
+      lat: 0,
+      lng: 0,
+      label: r.location ?? "",
+      type: i === 0 ? "origin" as const : i === routes.length - 1 ? "destination" as const : "waypoint" as const,
+    })),
+    [routes]
+  )
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto p-4">
-        <Button
-          type="text"
-          icon={<ArrowLeft />}
-          onClick={() => router.back()}
-          className="mb-4">
-          Back
-        </Button>
-        <Card>
-          <Skeleton active avatar paragraph={{ rows: 6 }} />
-        </Card>
+      <div className="max-w-[680px] mx-auto px-4 py-8">
+        <div className="animate-pulse flex flex-col gap-4">
+          <div className="h-8 bg-bg-elevated radius-md w-3/4" />
+          <div className="h-4 bg-bg-elevated radius-md w-1/4" />
+          <div className="h-64 bg-bg-elevated radius-md" />
+          <div className="h-4 bg-bg-elevated radius-md w-full" />
+          <div className="h-4 bg-bg-elevated radius-md w-2/3" />
+        </div>
       </div>
-    );
-  }
-
-  if (!postId) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <p className="text-gray-500 dark:text-gray-400 text-lg">
-          Invalid post ID
-        </p>
-        <Button
-          type="primary"
-          onClick={() => router.push("/home")}
-          className="bg-[var(--color-primary)]">
-          Back to Feed
-        </Button>
-      </div>
-    );
+    )
   }
 
   if (!post) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <p className="text-gray-500 dark:text-gray-400 text-lg">
-          Post not found
-        </p>
-        <Button
-          type="primary"
-          onClick={() => router.push("/home")}
-          className="bg-[var(--color-primary)]">
-          Back to Feed
-        </Button>
+      <div className="max-w-[680px] mx-auto px-4 py-8">
+        <AppEmptyState {...EMPTY_STATES.error} />
       </div>
-    );
+    )
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const currentBaseUrl = getSiteUrl();
-  const articleSchema = generateArticleSchema(
-    post,
-    post.author,
-    currentBaseUrl,
-  );
-
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <StructuredData data={articleSchema} />
-
-      <div className="flex items-center justify-between mb-4">
-        <Button
-          type="text"
-          icon={<ArrowLeft />}
-          onClick={() => router.back()}>
-          Back
-        </Button>
-
-        <div className="flex items-center gap-4 text-sm text-[var(--color-text-secondary)]">
-          <span className="flex items-center gap-1.5">
-            <Eye size={16} />
-            {formatNumber(post.views || 0)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Share2 size={16} />
-            {formatNumber(post.shares || 0)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Bookmark size={16} />
-            {formatNumber(post.saves || 0)}
-          </span>
+    <div className="max-w-[680px] mx-auto px-4 py-4">
+      <div className="flex items-center gap-2 pb-3 mb-4 border-b border-border">
+        <Link href="/home" className="w-9 h-9 rounded-circle bg-bg-elevated flex items-center justify-center text-text-secondary hover:bg-primary-muted hover:text-primary transition-colors duration-fast no-underline">
+          <ArrowLeft size={18} />
+        </Link>
+        <div className="flex items-center gap-1 text-sm text-text-secondary flex-1">
+          <Link href="/home" className="text-text-secondary no-underline hover:text-primary hover:underline">Home</Link>
+          <span className="text-text-muted">/</span>
+          <Link href="/explore" className="text-text-secondary no-underline hover:text-primary hover:underline">Routes</Link>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={() => {}} className="w-9 h-9 rounded-circle flex items-center justify-center border-none bg-transparent text-text-secondary cursor-pointer hover:bg-bg-elevated hover:text-primary transition-colors duration-fast" aria-label="Share">
+            <Share2 size={18} />
+          </button>
+          <button onClick={handleBookmark} className={`w-9 h-9 rounded-circle flex items-center justify-center border-none bg-transparent cursor-pointer transition-colors duration-fast hover:bg-bg-elevated hover:text-primary ${bookmarked ? "text-primary" : "text-text-secondary"}`} aria-label="Bookmark">
+            <Bookmark size={18} className={bookmarked ? "fill-primary stroke-primary" : ""} />
+          </button>
         </div>
       </div>
 
-      <PostCard
-        post={post}
-        author={post.author}
-        currentUserId={currentUser?.id}
-        onLike={handleLike}
-        onDislike={handleDislike}
-        onComment={handleComment}
-        onBookmark={handleBookmark}
-        onShare={handleShare}
-        isLiked={userInteractions.likes.has(post.id)}
-        isDisliked={userInteractions.dislikes.has(post.id)}
-        isBookmarked={userInteractions.bookmarks.has(post.id)}
-      />
+      <h1 className="text-[28px] font-bold tracking-tight leading-tight mb-3">{post.title}</h1>
 
-      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        {[
-          { icon: ThumbsUp, label: "Likes", value: post.likes },
-          { icon: MessageCircle, label: "Comments", value: post.comments },
-          { icon: Eye, label: "Views", value: post.views || 0 },
-          { icon: Share2, label: "Shares", value: post.shares || 0 },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-[var(--color-bg-elevated)] rounded-lg p-3 text-center">
-            <stat.icon size={18} className="mx-auto mb-1 text-[var(--color-text-secondary)]" />
-            <div className="text-lg font-semibold text-[var(--color-text-primary)]">{formatNumber(stat.value)}</div>
-            <div className="text-xs text-[var(--color-text-muted)]">{stat.label}</div>
+      <div className="flex items-center gap-2.5 mb-3">
+        <Link href={`/profile/${post.user.userName}`} onClick={(e) => e.stopPropagation()} className="w-10 h-10 rounded-circle bg-primary-muted flex items-center justify-center text-sm font-bold text-primary shrink-0 no-underline">
+          {initials}
+        </Link>
+        <div>
+          <Link href={`/profile/${post.user.userName}`} onClick={(e) => e.stopPropagation()} className="text-sm font-semibold text-text-primary no-underline hover:underline">
+            {post.user.firstName} {post.user.lastName}
+          </Link>
+          <div className="text-sm text-text-secondary">
+            <Link href={`/profile/${post.user.userName}`} onClick={(e) => e.stopPropagation()} className="text-text-secondary no-underline hover:underline">@{post.user.userName}</Link> · {getTimeAgo(post.createdAt)}
+          </div>
+        </div>
+        <span className="text-xs text-text-muted ml-auto">
+          {new Date(post.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </span>
+      </div>
+
+      <div className="mb-3.5">
+        <TrustBadge level={trustLevel} score={post.validityScore} />
+      </div>
+
+      <div className="flex gap-1.5 flex-wrap mb-4">
+        {post.tags.map((tag) => (
+          <Link key={tag} href={`/explore?tag=${encodeURIComponent(tag)}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 px-2.5 py-0.5 radius-pill text-xs font-medium bg-bg-elevated border border-border text-text-secondary no-underline hover:bg-primary-muted hover:text-primary hover:border-primary-muted transition-colors duration-fast">
+            #{tag}
+          </Link>
+        ))}
+        {post.region && (
+          <Link href={`/explore?region=${encodeURIComponent(post.region)}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 px-2.5 py-0.5 radius-pill text-xs font-medium bg-primary-muted text-primary border border-primary-muted no-underline">
+            <MapPin size={12} />
+            {post.region}
+          </Link>
+        )}
+      </div>
+
+      <div className="w-full h-[280px] radius-md overflow-hidden mb-4">
+        <RouteMap
+          pins={routePins}
+          height={280}
+          showOverlay={true}
+          distance={post.totalDistanceKm ?? undefined}
+          duration={post.estimatedMins ?? undefined}
+        />
+      </div>
+
+      <div className="flex flex-col gap-3 mb-5">
+        {routes.map((step, index) => (
+          <div key={index} className="flex items-start gap-3 relative">
+            {index < routes.length - 1 && (
+              <div className="absolute left-[11px] top-6 bottom-[-12px] w-0.5 bg-border" />
+            )}
+            <div className="w-6 h-6 rounded-circle bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">
+              {index + 1}
+            </div>
+            <div className="flex-1">
+              <div className="text-sm text-text-primary mb-1.5">
+                {step.description || step.location || ""}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                {step.fare !== undefined && step.fare !== null && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 radius-pill text-xs font-medium bg-bg-elevated text-text-secondary">
+                    <DollarSign size={12} />₦{step.fare}
+                  </span>
+                )}
+                {step.vehicle && VEHICLE_REGISTRY[step.vehicle as VehicleType] && (
+                  <VehicleChip type={step.vehicle as VehicleType} size="sm" />
+                )}
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Route Map — inline on desktop, collapsible on mobile */}
-      <div className="mt-4">
-        <div className="hidden md:block">
-          <RouteMap post={post} height={300} />
+      {post.images.length > 0 && (
+        <div className="grid grid-cols-2 gap-1 radius-md overflow-hidden mb-5" style={post.images.length >= 3 ? { gridTemplateRows: "auto auto" } : {}}>
+          {post.images.slice(0, 3).map((img, i) => (
+            <div key={i} className={`relative cursor-pointer overflow-hidden group ${i === 0 && post.images.length >= 3 ? "row-span-2" : ""}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={img} alt={`Route photo ${i + 1}`} className={`w-full object-cover ${i === 0 && post.images.length >= 3 ? "h-full min-h-[220px]" : post.images.length === 1 ? "h-[280px]" : "h-[110px]"}`} loading="lazy" />
+              <div className="absolute inset-0 bg-black/4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
+                <Maximize2 size={28} className="text-white bg-black/30 rounded-circle p-1" />
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="md:hidden">
-          <RouteMap post={post} height={240} collapsible />
-        </div>
-      </div>
-
-      {/* Comment Section Modal */}
-      {commentModalOpen && (
-        <CommentSection
-          open={commentModalOpen}
-          onClose={() => {
-            setCommentModalOpen(false);
-            setComments([]);
-          }}
-          postId={postId}
-          comments={comments}
-          currentUser={currentUser}
-          onAddComment={handleAddComment}
-          onLikeComment={handleLikeComment}
-          onDislikeComment={handleDislikeComment}
-          onEditComment={handleEditComment}
-          onDeleteComment={handleDeleteComment}
-          onShowLoginModal={() => {
-            modal.confirm({
-              title: "Login Required",
-              content:
-                "You need to be logged in to interact with comments. Would you like to login now?",
-              okText: "Login",
-              cancelText: "Cancel",
-              onOk: () => {
-                router.push("/login");
-              },
-            });
-          }}
-        />
       )}
 
-      {/* Related Routes — per design spec: horizontal cards */}
-      <div className="mb-4">
-        <h3 className="text-base font-semibold mb-3 text-[var(--color-text-primary)]">
-          Related Routes
-        </h3>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
-          {relatedPosts.length > 0
-            ? relatedPosts.slice(0, 4).map((rp) => (
-                <Link
-                  key={rp.id}
-                  href={`/posts/${rp.id}`}
-                  className="flex-none w-56 group">
-                  <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-base)] overflow-hidden transition-all hover:shadow-[0_8px_32px_rgba(0,98,59,0.15)] hover:-translate-y-0.5">
-                    {/* Image placeholder */}
-                    <div className="h-28 bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary-light)]/10 flex items-center justify-center">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                      </svg>
-                    </div>
-                    {/* Card body */}
-                    <div className="p-3">
-                      <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-1 group-hover:text-[var(--color-primary)]">
-                        {rp.title}
-                      </p>
-                      <div className="text-xs text-[var(--color-text-muted)] mt-1">
-                        {rp.totalDistanceKm ? `${rp.totalDistanceKm} km` : ""}
-                        {rp.totalDistanceKm && rp.estimatedMins ? " · " : ""}
-                        {rp.estimatedMins ? `${rp.estimatedMins} min` : ""}
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <div className="w-5 h-5 rounded-full bg-[var(--color-primary)]/20 text-[10px] font-semibold flex items-center justify-center text-[var(--color-primary)]">
-                          {(rp.author?.firstName?.[0] ?? "U").toUpperCase()}
-                        </div>
-                        <span className="text-xs text-[var(--color-text-secondary)] truncate">
-                          {rp.author?.firstName ?? "User"}
-                        </span>
-                        {typeof rp.validityScore === "number" && (
-                          <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium">
-                            {rp.validityScore >= 80 ? "Trusted" : rp.validityScore >= 60 ? "Verified" : rp.validityScore >= 30 ? "Developing" : "Low"}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            : post.tags.slice(0, 4).map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/explore?tag=${encodeURIComponent(tag)}`}
-                  className="flex-none px-4 py-2 rounded-full bg-[var(--color-bg-elevated)] text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors">
-                  #{tag}
-                </Link>
-              ))}
+      <div className="flex items-center gap-1 py-3 border-t border-border border-b mb-5">
+        <button onClick={handleLike} className={`flex items-center gap-1 px-3 py-1.5 radius-md border-none bg-transparent text-sm font-medium cursor-pointer font-sans transition-colors duration-fast hover:bg-bg-elevated ${liked ? "liked text-error-text" : "text-text-secondary"}`} aria-label="Like">
+          <Heart size={16} className={liked ? "fill-error-text stroke-error-text" : ""} />
+          {likesCount > 0 && <span>{formatCount(likesCount)}</span>}
+        </button>
+        <button className="flex items-center gap-1 px-3 py-1.5 radius-md border-none bg-transparent text-sm font-medium text-text-secondary cursor-pointer font-sans transition-colors duration-fast hover:bg-bg-elevated" aria-label="Dislike">
+          <ThumbsDown size={16} />
+          {post.dislikes > 0 && <span>{formatCount(post.dislikes)}</span>}
+        </button>
+        <button className="flex items-center gap-1 px-3 py-1.5 radius-md border-none bg-transparent text-sm font-medium text-text-secondary cursor-pointer font-sans transition-colors duration-fast hover:bg-bg-elevated" aria-label="Comment">
+          <MessageCircle size={16} />
+          {post.comments > 0 && <span>{formatCount(post.comments)}</span>}
+        </button>
+        <div className="flex-1" />
+        <button onClick={handleBookmark} className={`flex items-center gap-1 px-3 py-1.5 radius-md border-none bg-transparent text-sm font-medium cursor-pointer font-sans transition-colors duration-fast hover:bg-bg-elevated ${bookmarked ? "text-primary" : "text-text-secondary"}`} aria-label="Bookmark">
+          <Bookmark size={16} className={bookmarked ? "fill-primary stroke-primary" : ""} />
+        </button>
+        <button className="flex items-center gap-1 px-3 py-1.5 radius-md border-none bg-transparent text-sm font-medium text-text-secondary cursor-pointer font-sans transition-colors duration-fast hover:bg-bg-elevated" aria-label="Share">
+          <Share2 size={16} />
+        </button>
+      </div>
+
+      <AppCard variant="elevated" className="p-5 flex items-center gap-4 flex-wrap mb-5">
+        <div className="flex-1 min-w-[200px]">
+          <h3 className="text-base font-semibold mb-0.5">Buy Route Guide</h3>
+          <p className="text-sm text-text-secondary">Detailed turn-by-turn with landmark photos and driver contacts</p>
         </div>
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-1 px-3 py-1 radius-pill bg-primary-muted text-primary text-sm font-bold">₦2,500</span>
+          <button className="h-10 px-5 radius-md bg-primary text-white border-none text-sm font-semibold cursor-pointer font-sans hover:bg-primary-light transition-colors duration-fast">
+            Get Full Access
+          </button>
+        </div>
+      </AppCard>
+
+      <div className="mb-6">
+        <h3 className="text-base font-semibold mb-3">
+          Comments <span className="font-normal text-sm text-text-muted">· {comments.length}</span>
+        </h3>
+        <CommentInput
+          userName={currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "User"}
+          onSubmit={handleComment}
+        />
+        <CommentList comments={comments} onDelete={handleDeleteComment} />
       </div>
     </div>
-  );
+  )
 }

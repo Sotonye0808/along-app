@@ -1,36 +1,11 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/app/lib/utils/metadata";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Notifications",
-  description:
-    "View your notifications and stay updated with likes, comments, follows, and mentions on Along.",
-  keywords: [
-    "notifications",
-    "updates",
-    "alerts",
-    "Along",
-    "activity",
-    "mentions",
-  ],
-  openGraph: {
-    title: "Notifications | Along",
-    description:
-      "View your notifications and stay updated with likes, comments, follows, and mentions on Along.",
-    type: "website",
-    url: "/notifications",
-  },
-  twitter: {
-    card: "summary",
-    title: "Notifications | Along",
-    description:
-      "View your notifications and stay updated with likes, comments, follows, and mentions on Along.",
-  },
-};
+  description: "Stay updated on route changes and community activity.",
+  path: "/notifications",
+});
 
-export default function NotificationsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+export default function NotificationsLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

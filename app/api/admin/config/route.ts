@@ -1,54 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { prisma } from "@/lib/db/prisma";
-import { requireAuth } from "@/lib/utils/auth-server";
-import { siteConfigRepository } from "@/lib/db/SiteConfigRepository";
+import { prisma } from "@/app/lib/db/prisma";
+import { getUserFromRequest } from "@/app/lib/utils/auth";
 
-const bodySchema = z.object({
-  key: z.enum(["validityConfig", "feedAlgorithm", "email", "emailTemplates"]),
-  value: z.record(z.string(), z.unknown()),
-});
+export async function GET() {
+  try {
+    const user = await getUserFromRequest();
+    if (!user || user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
-async function requireAdmin(request: NextRequest): Promise<string | NextResponse> {
-  const authUser = await requireAuth(request);
-  const user = await prisma.user.findUnique({
-    where: { id: authUser },
-    select: { role: true },
-  });
-  if (!user || user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const configs = await prisma.siteConfig.findMany({
+      orderBy: { key: "asc" },
+    });
+
+    return NextResponse.json({ configs }, { status: 200 });
+  } catch (error) {
+    console.error("Admin config list error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-  return authUser;
 }
 
-/**
- * GET /api/admin/config?key=validityConfig
- */
-export async function GET(request: NextRequest): Promise<NextResponse> {
-  const adminOrError = await requireAdmin(request);
-  if (adminOrError instanceof NextResponse) return adminOrError;
+export async function PUT(request: NextRequest) {
+  try {
+    const user = await getUserFromRequest();
+    if (!user || user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
-  const { searchParams } = new URL(request.url);
-  const key = searchParams.get("key");
-  if (!key) {
-    return NextResponse.json({ error: "Missing key" }, { status: 400 });
+    const body = await request.json();
+    const { key, value } = body;
+
+    if (!key || value === undefined) {
+      return NextResponse.json({ error: "key and value required" }, { status: 400 });
+    }
+
+    const config = await prisma.siteConfig.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    });
+
+    return NextResponse.json({ config }, { status: 200 });
+  } catch (error) {
+    console.error("Admin config update error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const value = await siteConfigRepository.get(key);
-  return NextResponse.json({ key, value });
 }
 
-/**
- * POST /api/admin/config
- * Upsert a site config entry.
- */
-export async function POST(request: NextRequest): Promise<NextResponse> {
-  const adminOrError = await requireAdmin(request);
-  if (adminOrError instanceof NextResponse) return adminOrError;
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getUserFromRequest();
+    if (!user || user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
-  const body: unknown = await request.json();
-  const { key, value } = bodySchema.parse(body);
+    const body = await request.json();
+    const { key } = body;
 
-  await siteConfigRepository.set(key, value);
-  return NextResponse.json({ key, value });
+    if (!key) {
+      return NextResponse.json({ error: "key required" }, { status: 400 });
+    }
+
+    await prisma.siteConfig.delete({ where: { key } });
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error("Admin config delete error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

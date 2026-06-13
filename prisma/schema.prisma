@@ -311,7 +311,7 @@ model BugReport {
   description String
   category    BugCategory
   status      BugStatus   @default(OPEN)
-  reporterId  String
+  reporterId  String?
   reviewerId  String?
   postId      String?
   metadata    Json?
@@ -319,7 +319,7 @@ model BugReport {
   updatedAt   DateTime    @updatedAt
   resolvedAt  DateTime?
 
-  reporter User  @relation("BugReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reporter User? @relation("BugReporter", fields: [reporterId], references: [id], onDelete: SetNull)
   reviewer User? @relation("BugReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
   post     Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
 
@@ -327,6 +327,16 @@ model BugReport {
   @@index([reviewerId])
   @@index([status])
   @@index([category])
+  @@index([createdAt(sort: Desc)])
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
   @@index([createdAt(sort: Desc)])
 }
 
@@ -368,6 +378,23 @@ model AnalyticsEvent {
   @@index([userId])
   @@index([postId])
   @@index([region])
+  @@index([createdAt(sort: Desc)])
+}
+
+// EmailLog — audit trail for all sent emails
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  type      String   // "otp" | "welcome" | "contact_notification" | "bug_report_notification" | "password_reset"
+  status    String   // "sent" | "failed" | "skipped" (when Resend not configured)
+  error     String?
+  metadata  Json?    // e.g. { otp: "...", userId: "..." }
+  createdAt DateTime @default(now())
+
+  @@index([to])
+  @@index([type])
+  @@index([status])
   @@index([createdAt(sort: Desc)])
 }
 

@@ -62,8 +62,10 @@ export const ModelName = {
   UserActivity: 'UserActivity',
   SiteConfig: 'SiteConfig',
   BugReport: 'BugReport',
+  ContactSubmission: 'ContactSubmission',
   UserReview: 'UserReview',
   AnalyticsEvent: 'AnalyticsEvent',
+  EmailLog: 'EmailLog',
   PushSubscription: 'PushSubscription'
 } as const
 
@@ -252,6 +254,17 @@ export const BugReportScalarFieldEnum = {
 export type BugReportScalarFieldEnum = (typeof BugReportScalarFieldEnum)[keyof typeof BugReportScalarFieldEnum]
 
 
+export const ContactSubmissionScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  message: 'message',
+  createdAt: 'createdAt'
+} as const
+
+export type ContactSubmissionScalarFieldEnum = (typeof ContactSubmissionScalarFieldEnum)[keyof typeof ContactSubmissionScalarFieldEnum]
+
+
 export const UserReviewScalarFieldEnum = {
   id: 'id',
   reviewerId: 'reviewerId',
@@ -279,6 +292,20 @@ export const AnalyticsEventScalarFieldEnum = {
 } as const
 
 export type AnalyticsEventScalarFieldEnum = (typeof AnalyticsEventScalarFieldEnum)[keyof typeof AnalyticsEventScalarFieldEnum]
+
+
+export const EmailLogScalarFieldEnum = {
+  id: 'id',
+  to: 'to',
+  subject: 'subject',
+  type: 'type',
+  status: 'status',
+  error: 'error',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailLogScalarFieldEnum = (typeof EmailLogScalarFieldEnum)[keyof typeof EmailLogScalarFieldEnum]
 
 
 export const PushSubscriptionScalarFieldEnum = {

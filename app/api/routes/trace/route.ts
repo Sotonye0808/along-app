@@ -1,49 +1,65 @@
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { rateLimitByIP } from "@/lib/utils/rateLimiter";
-import { RouteTracingService } from "@/lib/services/RouteTracingService";
+import { NextRequest, NextResponse } from "next/server"
+import { routeTracingService } from "@/app/lib/services/routeTracingService"
+import { RATE_LIMITS } from "@/app/lib/config/rateLimits"
 
-const traceSchema = z.object({
-  startLat: z.number().min(-90).max(90),
-  startLng: z.number().min(-180).max(180),
-  endLat: z.number().min(-90).max(90),
-  endLng: z.number().min(-180).max(180),
-  vehicleType: z.string().optional(),
-});
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+
+function checkRateLimit(ip: string): boolean {
+  const config = RATE_LIMITS.trace
+  const now = Date.now()
+  const entry = rateLimitMap.get(ip)
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + config.windowMs })
+    return true
+  }
+
+  if (entry.count >= config.maxRequests) {
+    return false
+  }
+
+  entry.count++
+  return true
+}
 
 export async function POST(request: NextRequest) {
-  const clientIP = request.headers.get("x-forwarded-for") ?? "unknown";
-  const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 100, windowSeconds: 60 });
-  if (!rateLimit.success) {
+  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown"
+
+  if (!checkRateLimit(ip)) {
     return NextResponse.json(
-      { error: "Too many requests. Please try again later." },
-      { status: 429, headers: { "Retry-After": String(rateLimit.reset) } },
-    );
+      { error: RATE_LIMITS.trace.message ?? "Rate limit exceeded" },
+      { status: 429 }
+    )
   }
 
-  let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+    const body = await request.json()
+    const { pins } = body
 
-  const parsed = traceSchema.safeParse(body);
-  if (!parsed.success) {
+    if (!pins || !Array.isArray(pins) || pins.length < 2) {
+      return NextResponse.json(
+        { error: "At least 2 pins (lat/lng objects) required" },
+        { status: 400 }
+      )
+    }
+
+    for (const pin of pins) {
+      if (typeof pin.lat !== "number" || typeof pin.lng !== "number") {
+        return NextResponse.json(
+          { error: "Each pin must have lat and lng as numbers" },
+          { status: 400 }
+        )
+      }
+    }
+
+    const result = await routeTracingService.trace(pins)
+
+    return NextResponse.json(result, { status: 200 })
+  } catch (error) {
+    console.error("Route trace error:", error)
     return NextResponse.json(
-      { error: "Validation error", details: parsed.error.flatten() },
-      { status: 422 },
-    );
+      { error: "Failed to trace route" },
+      { status: 500 }
+    )
   }
-
-  const { startLat, startLng, endLat, endLng, vehicleType } = parsed.data;
-  const result = RouteTracingService.trace(
-    startLat,
-    startLng,
-    endLat,
-    endLng,
-    vehicleType,
-  );
-
-  return NextResponse.json(result);
 }

@@ -1,20 +1,49 @@
-import type { LucideIcon } from "lucide-react";
-import { Bell, Heart, MessageCircle, ShieldCheck, UserPlus, Gift } from "lucide-react";
+import { Heart, MessageCircle, UserPlus, AtSign, Star, Award, ShieldCheck } from "lucide-react";
+import type { NotificationTypeConfig } from "@/app/lib/types";
 
-export type NotificationType = AppNotification["type"] | "system";
-
-export interface NotificationTypeConfig {
-    type: NotificationType;
-    label: string;
-    icon: LucideIcon;
-    colorClass: string;
-}
+type NotificationType = "LIKE" | "COMMENT" | "FOLLOW" | "MENTION" | "REWARD" | "BADGE" | "VERIFIED";
 
 export const NOTIFICATION_REGISTRY: Record<NotificationType, NotificationTypeConfig> = {
-    like: { type: "like", label: "Like", icon: Heart, colorClass: "text-[var(--color-success-text)]" },
-    comment: { type: "comment", label: "Comment", icon: MessageCircle, colorClass: "text-[var(--color-primary)]" },
-    follow: { type: "follow", label: "Follow", icon: UserPlus, colorClass: "text-[var(--color-primary)]" },
-    mention: { type: "mention", label: "Mention", icon: Bell, colorClass: "text-[var(--color-warning-text)]" },
-    reward: { type: "reward", label: "Reward", icon: Gift, colorClass: "text-[var(--color-warning-text)]" },
-    system: { type: "system", label: "System", icon: ShieldCheck, colorClass: "text-[var(--color-text-secondary)]" },
+  LIKE: {
+    label: "Like",
+    icon: Heart,
+    color: "#EF4444",
+    messageTemplate: "{actor} liked your post",
+  },
+  COMMENT: {
+    label: "Comment",
+    icon: MessageCircle,
+    color: "#3B82F6",
+    messageTemplate: "{actor} commented on your post",
+  },
+  FOLLOW: {
+    label: "Follow",
+    icon: UserPlus,
+    color: "#10B981",
+    messageTemplate: "{actor} started following you",
+  },
+  MENTION: {
+    label: "Mention",
+    icon: AtSign,
+    color: "#8B5CF6",
+    messageTemplate: "{actor} mentioned you in a comment",
+  },
+  REWARD: {
+    label: "Reward",
+    icon: Star,
+    color: "#F59E0B",
+    messageTemplate: "You earned {points} points!",
+  },
+  BADGE: {
+    label: "Badge",
+    icon: Award,
+    color: "#F59E0B",
+    messageTemplate: "You unlocked the {tier} badge!",
+  },
+  VERIFIED: {
+    label: "Verified",
+    icon: ShieldCheck,
+    color: "#10B981",
+    messageTemplate: "Your route has been verified",
+  },
 };

@@ -1,56 +1,77 @@
 "use client";
 
-import React from "react";
-import { AlertTriangle } from "lucide-react";
-import { ModalService } from "@/lib/services/modalService";
-import { useGlobalModal } from "@/app/providers/GlobalModalProvider";
-import { AppButton } from "./AppButton";
-import { AppModal } from "./AppModal";
+import { useEffect, useCallback } from "react";
+import { AlertTriangle, HelpCircle } from "lucide-react";
+import { AppModal, AppButton } from "./";
 
-export interface ConfirmState {
+export interface GlobalConfirmModalProps {
   open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  variant: "destructive" | "sensitive";
   title: string;
-  description?: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  destructive?: boolean;
-  onConfirm?: () => void | Promise<void>;
+  description: string;
 }
 
-export function closeGlobalConfirm(): void {
-  ModalService.resolve(false);
-}
+export default function GlobalConfirmModal({
+  open,
+  onClose,
+  onConfirm,
+  variant,
+  title,
+  description,
+}: GlobalConfirmModalProps) {
+  const isDestructive = variant === "destructive";
+  const Icon = isDestructive ? AlertTriangle : HelpCircle;
+  const iconBg = isDestructive ? "bg-error" : "bg-warning";
+  const iconColor = isDestructive ? "text-error-text" : "text-warning-text";
 
-export function GlobalConfirmModal(): React.ReactElement {
-  const { modalState } = useGlobalModal();
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!open) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onConfirm();
+      }
+    },
+    [open, onClose, onConfirm],
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
-    <AppModal
-      open={modalState.open}
-      onClose={closeGlobalConfirm}
-      title={modalState.title}
-      subtitle={modalState.description}
-      icon={AlertTriangle}
-      iconColor={modalState.destructive ? "error" : "warning"}
-      footer={
-        <div className="flex justify-end gap-2">
-          <AppButton variant="secondary" onClick={closeGlobalConfirm}>
-            {modalState.cancelLabel ?? "Cancel"}
-          </AppButton>
-          <AppButton
-            variant={modalState.destructive ? "destructive" : "primary"}
-            onClick={async () => {
-              ModalService.resolve(true);
-            }}>
-            {modalState.confirmLabel ?? "Confirm"}
-          </AppButton>
+    <AppModal open={open} onClose={onClose} size="sm">
+      <div className="flex flex-col items-center gap-4 px-6 pt-6 pb-2">
+        <div
+          className={`flex items-center justify-center w-12 h-12 rounded-xl ${iconBg}`}
+        >
+          <Icon size={32} className={iconColor} />
         </div>
-      }>
-      {modalState.description && (
-        <div className="text-sm text-[var(--color-text-secondary)]">
-          {modalState.description}
-        </div>
-      )}
+        <h2 className="text-lg font-semibold text-center text-text-primary">
+          {title}
+        </h2>
+        <p className="text-sm text-text-secondary text-center max-w-sm">
+          {description}
+        </p>
+      </div>
+      <div className="flex items-center justify-between px-6 py-4 border-t border-border mt-4">
+        <AppButton variant="ghost" onClick={onClose}>
+          Cancel
+        </AppButton>
+        <AppButton
+          variant={isDestructive ? "destructive" : "primary"}
+          onClick={onConfirm}
+        >
+          Confirm
+        </AppButton>
+      </div>
     </AppModal>
   );
 }

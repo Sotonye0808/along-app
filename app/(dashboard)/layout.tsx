@@ -1,50 +1,27 @@
-"use client";
+"use client"
 
-import { DashboardNavbar } from "@/components/features/navigation/DashboardNavbar";
-import { MobileTopBar } from "@/components/features/navigation/MobileTopBar";
-import { DesktopTopBar } from "@/components/features/navigation/DesktopTopBar";
-import { ScrollToTop } from "@/components/features/navigation/ScrollToTop";
-import { OfflineIndicator } from "@/components/features/pwa";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { AppFooter } from "@/components/ui/AppFooter";
-import { useAuth } from "@/app/providers/AuthProvider";
-import { AppPageLoader } from "@/components/ui/AppPageLoader";
+import { useRequireAuth } from "@/app/hooks/useRequireAuth"
+import { AppPageLoader, AppFooter } from "@/app/components/ui"
+import GuestBanner from "@/app/components/ui/GuestBanner"
+import DashboardNav from "@/app/components/ui/DashboardNav"
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { loading, user } = useAuth();
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { isLoading, isGuest } = useRequireAuth("")
 
-  if (loading) {
-    return <AppPageLoader />;
+  if (isLoading) {
+    return <AppPageLoader />
   }
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] transition-colors duration-200">
-        {/* Offline Indicator */}
-        <OfflineIndicator />
-
-        {/* Navigation */}
-        <DashboardNavbar userId={user?.id} />
-        <MobileTopBar />
-        <DesktopTopBar />
-
-        {/* Main Content */}
-        <main className="mb-20 mt-8 md:mb-0 md:ml-[var(--sidebar-width)] md:mt-16">
-          <div className="mx-auto max-w-7xl p-1 md:p-4">{children}</div>
+    <div className="min-h-screen flex flex-col bg-bg-base lg:pb-0 pb-16">
+      {isGuest && <GuestBanner />}
+      <div className="flex-1 flex">
+        <DashboardNav />
+        <main className="flex-1 min-w-0">
+          {children}
         </main>
-
-        {/* Footer */}
-        <div className="md:ml-[var(--sidebar-width)]">
-          <AppFooter />
-        </div>
-
-        {/* Scroll to Top Button */}
-        <ScrollToTop />
       </div>
-    </ErrorBoundary>
-  );
+      <AppFooter />
+    </div>
+  )
 }

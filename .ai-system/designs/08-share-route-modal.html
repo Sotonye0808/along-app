@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="along-route" content="design-system" />
+  <meta name="along-component" content="ShareRouteModal, AppModal, AppInput, AppTextarea, AppButton, AppTag, DraftingCoach, RouteMap, AppProgress, AppAlert, VehicleChip" />
+  <title>Share Route Modal — Along Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Inter',-apple-system,system-ui,sans-serif;color:var(--color-text-primary);background:var(--color-bg-base)}
+
+    :root{
+      --color-primary:#00623B;--color-primary-light:#00A862;--color-primary-dark:#004A2C;--color-primary-muted:#E6F4EE;
+      --color-bg-base:#FFFFFF;--color-bg-elevated:#F7F7F7;--color-bg-card:#FFFFFF;--color-bg-overlay:rgba(0,0,0,0.48);
+      --color-text-primary:#1A1A1A;--color-text-secondary:#6B7280;--color-text-muted:#9CA3AF;--color-text-inverse:#FFFFFF;
+      --color-border:#E5E7EB;--color-border-strong:#D1D5DB;
+      --color-success:#D1FAE5;--color-success-text:#065F46;--color-success-border:#6EE7B7;
+      --color-warning:#FEF3C7;--color-warning-text:#92400E;--color-warning-border:#FCD34D;
+      --color-error:#FEE2E2;--color-error-text:#7F1D1D;--color-error-border:#FCA5A5;
+      --color-info:#DBEAFE;--color-info-text:#1E3A8A;--color-info-border:#93C5FD;
+      --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--radius-2xl:24px;--radius-pill:999px;--radius-circle:50%;
+      --shadow-xs:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm:0 2px 8px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --shadow-md:0 4px 16px rgba(0,0,0,0.10),0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg:0 8px 32px rgba(0,0,0,0.12),0 4px 16px rgba(0,0,0,0.06);
+      --shadow-xl:0 16px 48px rgba(0,0,0,0.14),0 8px 24px rgba(0,0,0,0.08);
+      --shadow-primary:0 8px 32px rgba(0,98,59,0.20),0 2px 8px rgba(0,98,59,0.12);
+      --duration-fast:120ms;--duration-base:200ms;--duration-moderate:300ms;
+    }
+
+    .nav-bar{position:sticky;top:0;z-index:100;background:var(--color-bg-card);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo svg{width:32px;height:32px}
+    .nav-logo span{font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--color-primary)}
+    .nav-links{display:flex;gap:4px;align-items:center}
+    .nav-links a{text-decoration:none;padding:8px 16px;border-radius:var(--radius-md);font-size:14px;font-weight:500;color:var(--color-text-secondary);transition:background var(--duration-fast) ease-out,color var(--duration-fast) ease-out}
+    .nav-links a:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+    .nav-links a.active{background:var(--color-primary-muted);color:var(--color-primary)}
+    .page{max-width:1280px;margin:0 auto;padding:0 24px}
+    .section{padding:48px 0;border-bottom:1px solid var(--color-border)}
+    .section-ref{font-size:12px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:4px}
+    .section-title{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px}
+    .section-subtitle{font-size:14px;color:var(--color-text-secondary);margin-bottom:32px}
+
+    .device-frame{border-radius:var(--radius-xl);border:1px solid var(--color-border);overflow:hidden;box-shadow:var(--shadow-md);max-width:1000px;margin:0 auto}
+    .device-frame .device-label{padding:8px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted);background:var(--color-bg-elevated);border-bottom:1px solid var(--color-border);text-align:center}
+
+    /* ═══════════════════════════════════════════════════════════════
+       SHARE ROUTE MODAL — Desktop (DESIGN.md §7.7)
+       AppModal xl (800px), overlay bg, 2-column layout
+       ═══════════════════════════════════════════════════════════════ */
+
+    /* ── Overlay ── */
+    .sr-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.48);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn 200ms ease-out}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+    /* ── AppModal xl — 800px max, 16px radius, 24px padding ── */
+    .sr-modal{width:100%;max-width:800px;max-height:90vh;background:var(--color-bg-card);border-radius:var(--radius-xl);box-shadow:var(--shadow-xl);display:flex;flex-direction:column;overflow:hidden;animation:scaleIn 200ms ease-out}
+    @keyframes scaleIn{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}
+
+    /* ── Header ── */
+    .sr-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--color-border)}
+    .sr-header h2{font-size:18px;font-weight:600;letter-spacing:-0.01em}
+    .sr-header .sr-sub{font-size:14px;color:var(--color-text-secondary);margin-top:2px}
+    .sr-header .sr-close{width:36px;height:36px;border-radius:var(--radius-circle);border:none;background:transparent;color:var(--color-text-secondary);cursor:pointer;display:grid;place-items:center;transition:background var(--duration-fast)}
+    .sr-header .sr-close:hover{background:var(--color-bg-elevated)}
+    .sr-header .sr-close svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── Body — 2-column layout ── */
+    .sr-body{display:flex;overflow-y:auto;flex:1}
+
+    /* ── Left column: form ── */
+    .sr-form{flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
+
+    /* ── Form sections ── */
+    .sr-field label{display:block;font-size:14px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)}
+    .sr-field label .required{color:var(--color-error-text)}
+    .sr-input{width:100%;height:40px;padding:10px 12px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color var(--duration-fast),box-shadow var(--duration-fast);background:var(--color-bg-base);color:var(--color-text-primary)}
+    .sr-input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,98,59,0.12)}
+    .sr-input::placeholder{color:var(--color-text-muted)}
+    .sr-input.error{border-color:var(--color-error-border)}
+    .sr-textarea{width:100%;min-height:72px;padding:10px 12px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color var(--duration-fast),box-shadow var(--duration-fast);resize:vertical;background:var(--color-bg-base);color:var(--color-text-primary)}
+    .sr-textarea:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,98,59,0.12)}
+    .sr-textarea::placeholder{color:var(--color-text-muted)}
+
+    /* ── Route builder step ── */
+    .sr-route-steps{display:flex;flex-direction:column;gap:12px}
+    .sr-step-card{background:var(--color-bg-elevated);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:16px;position:relative}
+    .sr-step-card .sr-step-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .sr-step-card .sr-step-num{width:24px;height:24px;border-radius:var(--radius-circle);background:var(--color-primary);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .sr-step-card .sr-step-drag{color:var(--color-text-muted);cursor:grab;display:flex}
+    .sr-step-card .sr-step-drag svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .sr-step-card .sr-step-remove{color:var(--color-error-text);cursor:pointer;display:flex;margin-left:auto;border:none;background:transparent;padding:4px;border-radius:var(--radius-xs)}
+    .sr-step-card .sr-step-remove:hover{background:var(--color-error)}
+    .sr-step-card .sr-step-remove svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .sr-step-card .sr-step-fields{display:flex;flex-direction:column;gap:10px}
+
+    /* ── Input with prefix icon ── */
+    .sr-input-wrap{position:relative}
+    .sr-input-wrap .sr-input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--color-text-muted);pointer-events:none;display:flex}
+    .sr-input-wrap .sr-input-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .sr-input-wrap .sr-input{padding-left:34px}
+    .sr-input-wrap .sr-input-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:600;color:var(--color-text-primary);pointer-events:none}
+    .sr-input-wrap .sr-input.has-prefix{padding-left:28px}
+
+    /* ── Vehicle chip selector row ── */
+    .sr-vehicle-row{display:flex;flex-wrap:wrap;gap:6px}
+    .sr-vehicle-opt{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--radius-pill);border:1.5px solid var(--color-border);background:transparent;font-size:12px;font-weight:500;cursor:pointer;transition:all var(--duration-fast);color:var(--color-text-secondary);font-family:'Inter',sans-serif}
+    .sr-vehicle-opt:hover{border-color:var(--color-primary-light)}
+    .sr-vehicle-opt.selected{background:var(--color-primary-muted);border-color:var(--color-primary);color:var(--color-primary)}
+    .sr-vehicle-opt svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── Add step button ── */
+    .sr-add-step{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius-md);border:1.5px dashed var(--color-border);background:transparent;font-size:13px;font-weight:500;color:var(--color-text-secondary);cursor:pointer;transition:all var(--duration-fast);font-family:'Inter',sans-serif}
+    .sr-add-step:hover{border-color:var(--color-primary);color:var(--color-primary);background:var(--color-primary-muted)}
+    .sr-add-step svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── Image upload zone ── */
+    .sr-upload-zone{border:2px dashed var(--color-border);border-radius:var(--radius-lg);padding:32px;text-align:center;cursor:pointer;transition:border-color var(--duration-fast),background var(--duration-fast)}
+    .sr-upload-zone:hover{border-color:var(--color-primary);background:var(--color-primary-muted)}
+    .sr-upload-zone .sr-upload-icon{color:var(--color-text-muted);margin-bottom:8px}
+    .sr-upload-zone .sr-upload-icon svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .sr-upload-zone p{font-size:13px;color:var(--color-text-secondary)}
+    .sr-upload-zone p strong{color:var(--color-text-primary)}
+
+    /* ── Tags tokenized input ── */
+    .sr-tags-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-bg-base);min-height:40px;align-items:center}
+    .sr-tags-wrap .sr-tag-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:var(--radius-pill);font-size:12px;font-weight:500;background:var(--color-primary-muted);color:var(--color-primary)}
+    .sr-tags-wrap .sr-tag-chip .sr-tag-x{width:14px;height:14px;border-radius:var(--radius-circle);background:transparent;border:none;color:var(--color-primary);cursor:pointer;display:grid;place-items:center;padding:0}
+    .sr-tags-wrap .sr-tag-chip .sr-tag-x svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .sr-tags-wrap .sr-tag-input{border:none;outline:none;font-size:13px;flex:1;min-width:80px;background:transparent;font-family:'Inter',sans-serif;color:var(--color-text-primary)}
+    .sr-tags-wrap .sr-tag-input::placeholder{color:var(--color-text-muted)}
+
+    /* ── Submit row ── */
+    .sr-submit-row{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--color-border)}
+    .sr-submit-row .sr-btn-group{display:flex;gap:8px}
+    .sr-btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--radius-md);font-size:14px;font-weight:600;cursor:pointer;transition:all var(--duration-fast);font-family:'Inter',sans-serif}
+    .sr-btn-primary{height:40px;padding:0 20px;background:var(--color-primary);color:var(--color-text-inverse);border:none}
+    .sr-btn-primary:hover{background:var(--color-primary-light)}
+    .sr-btn-ghost{height:40px;padding:0 16px;background:transparent;color:var(--color-text-secondary);border:none}
+    .sr-btn-ghost:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+
+    /* ── Right column: 320px panel ── */
+    .sr-right-panel{width:280px;flex-shrink:0;padding:20px 0 20px 0;display:flex;flex-direction:column;gap:16px}
+
+    /* ── RouteMap preview placeholder (DESIGN.md §6.12) ── */
+    .sr-routemap{height:180px;border-radius:var(--radius-md);background:var(--color-bg-elevated);position:relative;overflow:hidden;border:1px solid var(--color-border);margin-bottom:8px}
+    .sr-routemap .rm-bg{position:absolute;inset:0;opacity:0.08}
+    .sr-routemap .rm-bg svg{width:100%;height:100%}
+    .sr-routemap .rm-pin{position:absolute;width:24px;height:24px;border-radius:var(--radius-circle);background:var(--color-primary);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);z-index:2}
+    .sr-routemap .rm-pin.origin{background:#004A2C;width:20px;height:20px}
+    .sr-routemap .rm-pin.dest{background:#00623B;width:20px;height:20px;border:2px solid #fff}
+    .sr-routemap .rm-pin.waypoint{background:#fff;color:var(--color-primary);border:2px solid var(--color-primary)}
+    .sr-routemap .rm-line{position:absolute;border-top:3px solid var(--color-primary);opacity:0.6;z-index:1}
+    .sr-routemap .rm-label{position:absolute;bottom:10px;left:12px;font-size:11px;color:var(--color-text-muted);background:rgba(255,255,255,0.88);padding:4px 8px;border-radius:var(--radius-xs)}
+    .sr-routemap .rm-label-icon{display:inline-flex;margin-right:4px;vertical-align:middle}
+    .sr-routemap .rm-label-icon svg{width:12px;height:12px;stroke:var(--color-text-muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── DraftingCoach (DESIGN.md §6.11) ── */
+    .sr-drafting-coach{border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden}
+    .sr-drafting-coach .dc-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--color-bg-elevated);border-bottom:1px solid var(--color-border)}
+    .sr-drafting-coach .dc-header .dc-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+    .sr-drafting-coach .dc-header .dc-title svg{width:16px;height:16px;stroke:var(--color-text-secondary);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .sr-drafting-coach .dc-header .dc-chevron svg{width:16px;height:16px;stroke:var(--color-text-secondary);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform var(--duration-fast)}
+    .sr-drafting-coach .dc-header .dc-chevron.open svg{transform:rotate(180deg)}
+    .sr-drafting-coach .dc-body{padding:16px;display:flex;flex-direction:column;gap:12px}
+    .sr-drafting-coach .dc-score-row{display:flex;align-items:center;gap:10px}
+    .sr-drafting-coach .dc-score-row .dc-score-label{font-size:12px;color:var(--color-text-secondary);flex:1}
+    .sr-drafting-coach .dc-score-row .dc-score-val{font-size:16px;font-weight:700}
+
+    /* ── AppProgress bar ── */
+    .sr-progress{height:8px;background:var(--color-bg-elevated);border-radius:var(--radius-pill);overflow:hidden;flex:1}
+    .sr-progress .sr-progress-fill{height:100%;border-radius:var(--radius-pill);transition:width 400ms ease}
+    .sr-progress .sr-progress-fill.low{background:var(--color-error-text)}
+    .sr-progress .sr-progress-fill.medium{background:var(--color-warning-text)}
+    .sr-progress .sr-progress-fill.high{background:var(--color-primary)}
+    .sr-progress .sr-progress-fill.excellent{background:var(--color-info-text)}
+
+    /* ── AppAlert info ── */
+    .sr-alert{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:var(--radius-md);font-size:12px;line-height:1.5}
+    .sr-alert.info{background:var(--color-info);color:var(--color-info-text);border:1px solid var(--color-info-border)}
+    .sr-alert.info svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+
+    /* ── Completed chips ── */
+    .sr-completed-chips{display:flex;flex-wrap:wrap;gap:6px}
+    .sr-completed-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-pill);font-size:11px;font-weight:500;background:var(--color-success);color:var(--color-success-text)}
+    .sr-completed-chip svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  </style>
+</head>
+<body>
+
+<nav class="nav-bar">
+  <a class="nav-logo" href="./README.md">
+    <svg viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="14" stroke="var(--color-primary)" stroke-width="2"/>
+      <circle cx="12" cy="12" r="3" fill="var(--color-primary)" stroke="var(--color-primary)" stroke-width="1.5"/>
+      <circle cx="22" cy="20" r="3" fill="var(--color-primary)" stroke="var(--color-primary)" stroke-width="1.5"/>
+      <path d="M14 14L20 18" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span>Along</span>
+  </a>
+  <div class="nav-links">
+    <a href="01-design-system-tokens.html">Tokens</a>
+    <a href="02-design-system-components.html">Components</a>
+    <a href="03-landing-light.html">Landing</a>
+    <a href="04-landing-dark.html">Dark</a>
+    <a href="05-auth-flow.html">Auth</a>
+    <a href="06-home-feed-light.html">Feed</a>
+    <a href="07-home-feed-dark.html">Feed Dark</a>
+    <a class="active" href="08-share-route-modal.html">Share</a>
+    <a href="09-explore-map.html">Explore</a>
+    <a href="10-post-detail-light.html">Post</a>
+    <a href="11-post-detail-dark.html">Post Dark</a>
+    <a href="12-profile-page.html">Profile</a>
+    <a href="13-notifications.html">Notif</a>
+    <a href="14-bookmarks.html">Bmks</a>
+    <a href="15-admin-dashboard.html">Admin</a>
+    <a href="16-analytics.html">Analytics</a>
+    <a href="17-about-contact.html">About</a>
+</div>
+</nav>
+
+<div class="page">
+  <div class="section">
+    <div class="section-ref">DESIGN.md §7.7</div>
+    <h1 class="section-title">Share Route Modal</h1>
+    <p class="section-subtitle">AppModal xl (800px) · Desktop overlay · 2-column layout: form (flex-1) + right panel (280px).</p>
+
+    <div class="device-frame">
+      <div class="device-label">🖥️ Desktop — ShareRouteModal Overlay</div>
+      <div style="position:relative;min-height:700px;font-family:'Inter',sans-serif;background:var(--color-bg-base)">
+
+        <!-- ══════════════════════════════════════════════ -->
+        <!-- §7.7 — ShareRouteModal                        -->
+        <!-- AppModal xl overlay                           -->
+        <!-- ══════════════════════════════════════════════ -->
+        <div class="sr-overlay">
+          <div class="sr-modal">
+
+            <!-- ── Header ── -->
+            <!-- §6.5 AppModal header: title (18px/600) + subtitle (14px secondary) + close X -->
+            <div class="sr-header">
+              <div>
+                <h2>Share a Route</h2>
+                <div class="sr-sub">Help the community with a new route</div>
+              </div>
+              <button class="sr-close" aria-label="Close">
+                <svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <!-- ── Body: 2-column ── -->
+            <div class="sr-body">
+
+              <!-- ── Left column: form ── -->
+              <div class="sr-form">
+
+                <!-- §7.7 — 1. Title input -->
+                <div class="sr-field">
+                  <label>Route title <span class="required">*</span></label>
+                  <input class="sr-input" type="text" placeholder='e.g. "Marina to Yaba via Obalende"' value="Ikeja to Lekki — Express Route" />
+                </div>
+
+                <!-- §7.7 — 2. Route builder: 3 steps -->
+                <div>
+                  <label style="font-size:14px;font-weight:500;display:block;margin-bottom:8px">Route steps <span class="required">*</span></label>
+                  <div class="sr-route-steps">
+
+                    <!-- Step 1 -->
+                    <div class="sr-step-card">
+                      <div class="sr-step-head">
+                        <span class="sr-step-drag"><svg viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                        <span class="sr-step-num">1</span>
+                        <span style="font-size:13px;font-weight:500">Origin</span>
+                        <button class="sr-step-remove" aria-label="Remove step"><svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
+                      </div>
+                      <div class="sr-step-fields">
+                        <!-- Location input with MapPin prefix (Lucide MapPin icon, 16px, muted) -->
+                        <div class="sr-input-wrap">
+                          <span class="sr-input-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                          <input class="sr-input" type="text" placeholder="Search location..." value="Ikeja Alausa, Lagos" />
+                        </div>
+                        <!-- Text description (AppTextarea) -->
+                        <textarea class="sr-textarea" placeholder="Describe this stop, landmarks, and boarding instructions...">Pickup point at Ikeja Alausa bus terminal, opposite the Secretariat.</textarea>
+                        <!-- Vehicle chip selector row from VEHICLE_REGISTRY -->
+                        <div class="sr-vehicle-row">
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Taxi</button>
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><path d="M9 20l3-9 3 9"/><path d="M6 12h12"/></svg>Bike</button>
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-6h15L21 9"/><path d="M3 9v9a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1"/><path d="M17 18a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg>Keke</button>
+                          <button class="sr-vehicle-opt selected"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Bus</button>
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><path d="M9 20l3-9 3 9"/><path d="M6 12h12"/></svg>Trekking</button>
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Car</button>
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Bolt</button>
+                        </div>
+                        <!-- Fare input with ₦ prefix -->
+                        <div class="sr-input-wrap">
+                          <span class="sr-input-prefix">₦</span>
+                          <input class="sr-input has-prefix" type="text" placeholder="Fare amount" value="800" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="sr-step-card">
+                      <div class="sr-step-head">
+                        <span class="sr-step-drag"><svg viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                        <span class="sr-step-num">2</span>
+                        <span style="font-size:13px;font-weight:500">Stop</span>
+                        <button class="sr-step-remove" aria-label="Remove step"><svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
+                      </div>
+                      <div class="sr-step-fields">
+                        <div class="sr-input-wrap">
+                          <span class="sr-input-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                          <input class="sr-input" type="text" placeholder="Search location..." value="Oshodi Express, Lagos" />
+                        </div>
+                        <textarea class="sr-textarea" placeholder="Describe this stop...">Alight at Oshodi under-bridge, walk towards the express toll gate.</textarea>
+                        <div class="sr-vehicle-row">
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Taxi</button>
+                          <button class="sr-vehicle-opt selected"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Car</button>
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-6h15L21 9"/><path d="M3 9v9a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1"/><path d="M17 18a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg>Keke</button>
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Bolt</button>
+                        </div>
+                        <div class="sr-input-wrap">
+                          <span class="sr-input-prefix">₦</span>
+                          <input class="sr-input has-prefix" type="text" placeholder="Fare amount" value="1,200" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="sr-step-card">
+                      <div class="sr-step-head">
+                        <span class="sr-step-drag"><svg viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                        <span class="sr-step-num">3</span>
+                        <span style="font-size:13px;font-weight:500">Destination</span>
+                        <button class="sr-step-remove" aria-label="Remove step"><svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
+                      </div>
+                      <div class="sr-step-fields">
+                        <div class="sr-input-wrap">
+                          <span class="sr-input-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                          <input class="sr-input" type="text" placeholder="Search location..." value="Lekki Phase 1, Lagos" />
+                        </div>
+                        <textarea class="sr-textarea" placeholder="Describe final destination...">Final drop at Admiralty Circle Plaza, Lekki Phase 1.</textarea>
+                        <div class="sr-vehicle-row">
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Taxi</button>
+                          <button class="sr-vehicle-opt selected"><svg viewBox="0 0 24 24"><path d="M8 6v2M16 6v2"/><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/></svg>Car</button>
+                          <button class="sr-vehicle-opt"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><path d="M9 20l3-9 3 9"/><path d="M6 12h12"/></svg>Trekking</button>
+                        </div>
+                        <div class="sr-input-wrap">
+                          <span class="sr-input-prefix">₦</span>
+                          <input class="sr-input has-prefix" type="text" placeholder="Fare amount" value="—" />
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <!-- +Add step button -->
+                  <button class="sr-add-step" style="margin-top:10px">
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add step
+                  </button>
+                </div>
+
+                <!-- §7.7 — 3. Image upload zone -->
+                <div>
+                  <label style="font-size:14px;font-weight:500;display:block;margin-bottom:6px">Images <span class="required">*</span></label>
+                  <div class="sr-upload-zone">
+                    <div class="sr-upload-icon">
+                      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </div>
+                    <p>Drag & drop or <strong>browse</strong> — Up to 10 images</p>
+                    <p style="font-size:11px;color:var(--color-text-muted);margin-top:4px">JPEG, PNG, WebP · Max 5MB each</p>
+                  </div>
+                </div>
+
+                <!-- §7.7 — 4. Tags tokenized input -->
+                <div>
+                  <label style="font-size:14px;font-weight:500;display:block;margin-bottom:6px">Tags</label>
+                  <div class="sr-tags-wrap">
+                    <span class="sr-tag-chip">#lagos<button class="sr-tag-x"><svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></span>
+                    <span class="sr-tag-chip">#express<button class="sr-tag-x"><svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></span>
+                    <span class="sr-tag-chip">#taxi<button class="sr-tag-x"><svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></span>
+                    <input class="sr-tag-input" type="text" placeholder="Type to add tags..." />
+                  </div>
+                </div>
+
+                <!-- §7.7 — 5. Submit row -->
+                <div class="sr-submit-row">
+                  <span style="font-size:12px;color:var(--color-text-muted)">Drafts are saved locally</span>
+                  <div class="sr-btn-group">
+                    <button class="sr-btn sr-btn-ghost">Save Draft</button>
+                    <button class="sr-btn sr-btn-primary">Share Route</button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- ── Right column (280px): RouteMap + DraftingCoach ── -->
+              <div class="sr-right-panel" style="padding-right:24px">
+
+                <!-- §6.12 RouteMap preview placeholder -->
+                <!-- 3 numbered pins connected by green polyline -->
+                <div>
+                  <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;color:var(--color-text-secondary)">Route preview</label>
+                  <div class="sr-routemap">
+                    <div class="rm-bg">
+                      <svg viewBox="0 0 280 180" preserveAspectRatio="xMidYMid slice">
+                        <defs><pattern id="rm-grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0L0 0 0 30" fill="none" stroke="#D1D5DB" stroke-width="0.5"/></pattern></defs>
+                        <rect width="280" height="180" fill="url(#rm-grid)"/>
+                      </svg>
+                    </div>
+                    <!-- Pin 1 — Origin (Ikeja Alausa) -->
+                    <div class="rm-pin origin" style="top:40px;left:35px">A</div>
+                    <!-- Pin 2 — Waypoint (Oshodi) -->
+                    <div class="rm-pin waypoint" style="top:72px;left:130px">2</div>
+                    <!-- Pin 3 — Destination (Lekki) -->
+                    <div class="rm-pin dest" style="top:115px;left:210px">B</div>
+                    <!-- Polyline connecting pins -->
+                    <svg style="position:absolute;inset:0;pointer-events:none;z-index:1" viewBox="0 0 280 180">
+                      <polyline points="35,52 130,84 210,127" fill="none" stroke="#00623B" stroke-width="3" opacity="0.6" stroke-linejoin="round"/>
+                    </svg>
+                    <!-- Label -->
+                    <div class="rm-label">
+                      <span class="rm-label-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                      Ikeja → Oshodi → Lekki · 22 km
+                    </div>
+                  </div>
+                </div>
+
+                <!-- §6.11 DraftingCoach panel — expanded state -->
+                <!-- Header: BarChart2 icon + "Route Quality Score" + collapse chevron -->
+                <div class="sr-drafting-coach">
+                  <div class="dc-header">
+                    <div class="dc-title">
+                      <svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                      Route Quality Score
+                    </div>
+                    <div class="dc-chevron open">
+                      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                  </div>
+                  <div class="dc-body">
+                    <!-- Score bar: 45/100 with orange fill -->
+                    <div class="dc-score-row">
+                      <span class="dc-score-label">Score</span>
+                      <span class="dc-score-val" style="color:var(--color-warning-text)">45</span>
+                      <span style="font-size:12px;color:var(--color-text-muted)">/ 100</span>
+                    </div>
+                    <div class="sr-progress">
+                      <div class="sr-progress-fill medium" style="width:45%"></div>
+                    </div>
+
+                    <!-- Top nudge: AppAlert info — "Add 2+ images to boost +20 pts" -->
+                    <div class="sr-alert info">
+                      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                      <span>Add 2+ images to boost <strong>+20 pts</strong></span>
+                    </div>
+
+                    <!-- Completed chips: has-title CheckCircle, min-routes CheckCircle -->
+                    <div class="sr-completed-chips">
+                      <span class="sr-completed-chip"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Has title</span>
+                      <span class="sr-completed-chip"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Min 2 routes</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div><!-- /sr-body -->
+          </div><!-- /sr-modal -->
+        </div><!-- /sr-overlay -->
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

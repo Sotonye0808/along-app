@@ -73,6 +73,11 @@ export type SiteConfig = Prisma.SiteConfigModel
  */
 export type BugReport = Prisma.BugReportModel
 /**
+ * Model ContactSubmission
+ * 
+ */
+export type ContactSubmission = Prisma.ContactSubmissionModel
+/**
  * Model UserReview
  * 
  */
@@ -82,6 +87,11 @@ export type UserReview = Prisma.UserReviewModel
  * 
  */
 export type AnalyticsEvent = Prisma.AnalyticsEventModel
+/**
+ * Model EmailLog
+ * 
+ */
+export type EmailLog = Prisma.EmailLogModel
 /**
  * Model PushSubscription
  * 

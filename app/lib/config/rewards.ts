@@ -1,41 +1,25 @@
-export enum PointsAction {
-    CREATE_POST = "CREATE_POST",
-    RECEIVE_LIKE = "RECEIVE_LIKE",
-    RECEIVE_COMMENT = "RECEIVE_COMMENT",
-    VERIFY_ROUTE = "VERIFY_ROUTE",
-    ADD_PHOTO = "ADD_PHOTO",
-    INVITE_ACCEPTED = "INVITE_ACCEPTED",
+import type { PointsAction } from "@/app/lib/types";
+
+interface RewardTierConfig {
+  label: string;
+  minPoints: number;
+  color: string;
+  icon: string;
 }
 
-export interface RewardTier {
-    key: string;
-    label: string;
-    minPoints: number;
-    badgeLabel: string;
-    colorClass: string;
-}
+export const REWARD_TIERS: Record<string, RewardTierConfig> = {
+  BRONZE: { label: "Bronze", minPoints: 0, color: "#CD7F32", icon: "Star" },
+  SILVER: { label: "Silver", minPoints: 500, color: "#C0C0C0", icon: "Star" },
+  GOLD: { label: "Gold", minPoints: 2000, color: "#FFD700", icon: "Award" },
+  PLATINUM: { label: "Platinum", minPoints: 5000, color: "#E5E4E2", icon: "Trophy" },
+};
 
-export interface PointsConfig {
-    [PointsAction.CREATE_POST]: number;
-    [PointsAction.RECEIVE_LIKE]: number;
-    [PointsAction.RECEIVE_COMMENT]: number;
-    [PointsAction.VERIFY_ROUTE]: number;
-    [PointsAction.ADD_PHOTO]: number;
-    [PointsAction.INVITE_ACCEPTED]: number;
-}
-
-export const REWARD_TIERS: RewardTier[] = [
-    { key: "bronze", label: "Bronze", minPoints: 0, badgeLabel: "Developing", colorClass: "text-[var(--color-warning-text)]" },
-    { key: "silver", label: "Silver", minPoints: 300, badgeLabel: "Verified", colorClass: "text-[var(--color-success-text)]" },
-    { key: "gold", label: "Gold", minPoints: 900, badgeLabel: "Trusted", colorClass: "text-[var(--color-primary)]" },
-    { key: "platinum", label: "Platinum", minPoints: 1800, badgeLabel: "Elite", colorClass: "text-[var(--color-primary-dark)]" },
-];
-
-export const POINTS_CONFIG: PointsConfig = {
-    [PointsAction.CREATE_POST]: 15,
-    [PointsAction.RECEIVE_LIKE]: 2,
-    [PointsAction.RECEIVE_COMMENT]: 3,
-    [PointsAction.VERIFY_ROUTE]: 20,
-    [PointsAction.ADD_PHOTO]: 8,
-    [PointsAction.INVITE_ACCEPTED]: 40,
+export const POINTS_CONFIG: Record<string, PointsAction> = {
+  CREATE_POST: { action: "Create route post", points: 50 },
+  RECEIVE_LIKE: { action: "Receive a like", points: 5, cooldownHours: 0, maxPerDay: 100 },
+  RECEIVE_BOOKMARK: { action: "Receive a bookmark", points: 10, cooldownHours: 0, maxPerDay: 50 },
+  INVITE_SENT: { action: "Invite a friend", points: 20 },
+  INVITE_ACCEPTED: { action: "Invite accepted", points: 100 },
+  VERIFIED_POST: { action: "Post verified", points: 200 },
+  DAILY_VISIT: { action: "Daily login", points: 5, cooldownHours: 24 },
 };

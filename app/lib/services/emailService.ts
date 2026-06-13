@@ -1,320 +1,174 @@
-import { Resend } from "resend";
-import { getSiteConfig } from "@/lib/utils/siteConfig";
-import { getSiteUrl } from "@/lib/utils/metadata";
-import { isProjectDev } from "@/lib/utils/env";
-import {
-    buildBugReportConfirmationEmail,
-    buildBugReportNotificationEmail,
-    buildContactConfirmationEmail,
-    buildContactNotificationEmail,
-    buildDigestSummaryEmail,
-    buildInviteEmail,
-    buildOtpEmail,
-    buildPasswordChangedEmail,
-} from "@/lib/email/templates";
+import { prisma } from "@/app/lib/db/prisma";
+import { getEmailConfig, findTemplate, renderEmailHtml, renderEmailText } from "@/app/lib/utils/emailTemplates";
 
-export interface EmailSendResult {
-    ok: boolean;
-    skipped: boolean;
-    error?: string;
+async function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const { Resend } = await import("resend");
+    return new Resend(apiKey);
+  } catch {
+    return null;
+  }
 }
 
-interface SendEmailOptions {
-    to: string;
-    subject: string;
-    html: string;
-    text: string;
-    replyTo?: string;
+async function logEmail(params: {
+  to: string;
+  subject: string;
+  type: string;
+  status: "sent" | "failed" | "skipped";
+  error?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  try {
+    await prisma.emailLog.create({
+      data: {
+        to: params.to,
+        subject: params.subject,
+        type: params.type,
+        status: params.status,
+        error: params.error ?? null,
+        metadata: (params.metadata ?? {}) as never,
+      },
+    });
+  } catch {
+    console.error("Failed to log email:", params.type, params.to);
+  }
 }
 
-async function deliverEmail(
-    options: SendEmailOptions,
-    from: string,
-): Promise<EmailSendResult> {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-        if (isProjectDev()) {
-            console.info("[email] Resend not configured, skipped send.");
-            return { ok: false, skipped: true, error: "missing-api-key" };
-        }
-        return { ok: false, skipped: false, error: "missing-api-key" };
+export async function sendEmail(options: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  type: string;
+  metadata?: Record<string, unknown>;
+}) {
+  const { to, subject, html, text, type, metadata } = options;
+  const resend = await getResend();
+
+  if (!resend) {
+    console.log(`[EMAIL SKIPPED] ${type} to ${to}: ${subject}`);
+    console.log(`[EMAIL BODY]\n${text}`);
+    await logEmail({ to, subject, type, status: "skipped", metadata });
+    return { sent: false, reason: "RESEND_API_KEY not configured" };
+  }
+
+  try {
+    const config = await getEmailConfig();
+    const { data, error } = await resend.emails.send({
+      from: `${config.fromName} <${config.fromEmail}>`,
+      to: [to],
+      reply_to: config.replyTo,
+      subject,
+      html,
+      text,
+    });
+
+    if (error) {
+      console.error(`[EMAIL FAILED] ${type} to ${to}:`, error);
+      await logEmail({ to, subject, type, status: "failed", error: String(error), metadata });
+      return { sent: false, reason: String(error) };
     }
 
-    try {
-        const resend = new Resend(apiKey);
-        await resend.emails.send({
-            from,
-            to: options.to,
-            subject: options.subject,
-            html: options.html,
-            text: options.text,
-            reply_to: options.replyTo,
-        });
-        return { ok: true, skipped: false };
-    } catch (error) {
-        console.error("[email] send failed", error);
-        if (isProjectDev()) {
-            return { ok: false, skipped: true, error: "send-failed" };
-        }
-        return { ok: false, skipped: false, error: "send-failed" };
-    }
+    await logEmail({ to, subject, type, status: "sent", metadata: { ...metadata, resendId: data?.id } });
+    return { sent: true, id: data?.id };
+  } catch (error) {
+    console.error(`[EMAIL FAILED] ${type} to ${to}:`, error);
+    await logEmail({ to, subject, type, status: "failed", error: String(error), metadata });
+    return { sent: false, reason: String(error) };
+  }
 }
 
-async function getEmailSettings(): Promise<{
-    config: EmailConfig;
-    templates: EmailTemplateConfig;
-}> {
-    const [config, templates] = await Promise.all([
-        getSiteConfig("email"),
-        getSiteConfig("emailTemplates"),
-    ]);
-    return { config, templates };
+export async function sendOtpEmail(to: string, otp: string) {
+  const template = await findTemplate("otp");
+  if (!template) {
+    console.log(`[EMAIL SKIPPED] otp to ${to}: template not found`);
+    return { sent: false, reason: "Template not found" };
+  }
+
+  const vars = { otp };
+  return sendEmail({
+    to,
+    subject: template.subject,
+    html: renderEmailHtml(template, vars),
+    text: renderEmailText(template, vars),
+    type: "otp",
+    metadata: { otp },
+  });
 }
 
-export async function sendOtpVerificationEmail(input: {
-    email: string;
-    firstName: string;
-    code: string;
-    expiresInMinutes: number;
-}): Promise<EmailSendResult> {
-    const { config, templates } = await getEmailSettings();
-    const verifyUrl = getSiteUrl(`/otp?email=${encodeURIComponent(input.email)}`);
+export async function sendWelcomeEmail(to: string, firstName: string) {
+  const template = await findTemplate("welcome");
+  if (!template) {
+    console.log(`[EMAIL SKIPPED] welcome to ${to}: template not found`);
+    return { sent: false, reason: "Template not found" };
+  }
 
-    const email = buildOtpEmail(
-        {
-            brandName: config.brandName,
-            firstName: input.firstName,
-            email: input.email,
-            code: input.code,
-            expiresInMinutes: input.expiresInMinutes,
-            verifyUrl,
-        },
-        templates,
-    );
-
-    return deliverEmail(
-        {
-            to: input.email,
-            subject: email.subject,
-            html: email.html,
-            text: email.text,
-            replyTo: config.replyToEmail,
-        },
-        `${config.fromName} <${config.fromEmail}>`,
-    );
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const vars = { firstName, appUrl };
+  return sendEmail({
+    to,
+    subject: template.subject,
+    html: renderEmailHtml(template, vars),
+    text: renderEmailText(template, vars),
+    type: "welcome",
+    metadata: { firstName },
+  });
 }
 
-export async function sendInviteEmail(input: {
-    email: string;
-    inviterName: string;
-    inviteUrl: string;
-    inviteCode: string;
-}): Promise<EmailSendResult> {
-    const { config, templates } = await getEmailSettings();
-    const email = buildInviteEmail(
-        {
-            brandName: config.brandName,
-            inviterName: input.inviterName,
-            inviteUrl: input.inviteUrl,
-            inviteCode: input.inviteCode,
-        },
-        templates,
-    );
+export async function sendPasswordResetEmail(to: string, resetLink: string) {
+  const template = await findTemplate("passwordReset");
+  if (!template) {
+    console.log(`[EMAIL SKIPPED] passwordReset to ${to}: template not found`);
+    return { sent: false, reason: "Template not found" };
+  }
 
-    return deliverEmail(
-        {
-            to: input.email,
-            subject: email.subject,
-            html: email.html,
-            text: email.text,
-            replyTo: config.replyToEmail,
-        },
-        `${config.fromName} <${config.fromEmail}>`,
-    );
+  const vars = { resetLink };
+  return sendEmail({
+    to,
+    subject: template.subject,
+    html: renderEmailHtml(template, vars),
+    text: renderEmailText(template, vars),
+    type: "passwordReset",
+    metadata: { resetLink },
+  });
 }
 
-export async function sendContactConfirmationEmail(input: {
-    email: string;
-    name: string;
-    subject: string;
-    message: string;
-}): Promise<EmailSendResult> {
-    const { config, templates } = await getEmailSettings();
-    const email = buildContactConfirmationEmail(
-        {
-            brandName: config.brandName,
-            name: input.name,
-            subject: input.subject,
-            message: input.message,
-            supportEmail: config.supportEmail,
-        },
-        templates,
-    );
+export async function sendContactNotification(senderName: string, senderEmail: string, message: string) {
+  const recipient = process.env.PLATFORM_USER_EMAIL ?? "alongtoanywhere@gmail.com";
+  const template = await findTemplate("contactNotification");
+  if (!template) {
+    console.log(`[EMAIL SKIPPED] contactNotification: template not found`);
+    return { sent: false, reason: "Template not found" };
+  }
 
-    return deliverEmail(
-        {
-            to: input.email,
-            subject: email.subject,
-            html: email.html,
-            text: email.text,
-            replyTo: config.replyToEmail,
-        },
-        `${config.fromName} <${config.fromEmail}>`,
-    );
+  const vars = { senderName, senderEmail, message };
+  return sendEmail({
+    to: recipient,
+    subject: template.subject,
+    html: renderEmailHtml(template, vars),
+    text: renderEmailText(template, vars),
+    type: "contactNotification",
+    metadata: { senderName, senderEmail },
+  });
 }
 
-export async function sendContactNotificationEmail(input: {
-    name: string;
-    email: string;
-    subject: string;
-    message: string;
-}): Promise<EmailSendResult> {
-    const { config, templates } = await getEmailSettings();
-    const email = buildContactNotificationEmail(
-        {
-            brandName: config.brandName,
-            name: input.name,
-            email: input.email,
-            subject: input.subject,
-            message: input.message,
-        },
-        templates,
-    );
+export async function sendBugReportNotification(title: string, category: string, description: string) {
+  const recipient = process.env.PLATFORM_USER_EMAIL ?? "alongtoanywhere@gmail.com";
+  const template = await findTemplate("bugReportNotification");
+  if (!template) {
+    console.log(`[EMAIL SKIPPED] bugReportNotification: template not found`);
+    return { sent: false, reason: "Template not found" };
+  }
 
-    return deliverEmail(
-        {
-            to: config.contactEmail,
-            subject: email.subject,
-            html: email.html,
-            text: email.text,
-            replyTo: config.replyToEmail,
-        },
-        `${config.fromName} <${config.fromEmail}>`,
-    );
-}
-
-export async function sendBugReportConfirmationEmail(input: {
-    email: string;
-    name: string;
-    reportId: string;
-    title: string;
-    category: string;
-}): Promise<EmailSendResult> {
-    const { config, templates } = await getEmailSettings();
-    const email = buildBugReportConfirmationEmail(
-        {
-            brandName: config.brandName,
-            name: input.name,
-            reportId: input.reportId,
-            title: input.title,
-            category: input.category,
-        },
-        templates,
-    );
-
-    return deliverEmail(
-        {
-            to: input.email,
-            subject: email.subject,
-            html: email.html,
-            text: email.text,
-            replyTo: config.replyToEmail,
-        },
-        `${config.fromName} <${config.fromEmail}>`,
-    );
-}
-
-export async function sendBugReportNotificationEmail(input: {
-    name: string;
-    email: string;
-    reportId: string;
-    title: string;
-    category: string;
-}): Promise<EmailSendResult> {
-    const { config, templates } = await getEmailSettings();
-    const adminUrl = getSiteUrl("/admin/bugs");
-    const email = buildBugReportNotificationEmail(
-        {
-            brandName: config.brandName,
-            name: input.name,
-            email: input.email,
-            reportId: input.reportId,
-            title: input.title,
-            category: input.category,
-            adminUrl,
-        },
-        templates,
-    );
-
-    return deliverEmail(
-        {
-            to: config.bugReportsEmail,
-            subject: email.subject,
-            html: email.html,
-            text: email.text,
-            replyTo: config.replyToEmail,
-        },
-        `${config.fromName} <${config.fromEmail}>`,
-    );
-}
-
-export async function sendDigestSummaryEmail(input: {
-    email: string;
-    userName: string;
-    likesCount: number;
-    commentsCount: number;
-    followsCount: number;
-}): Promise<EmailSendResult> {
-    const { config, templates } = await getEmailSettings();
-    const notificationsUrl = getSiteUrl("/notifications");
-    const email = buildDigestSummaryEmail(
-        {
-            brandName: config.brandName,
-            userName: input.userName,
-            likesCount: input.likesCount,
-            commentsCount: input.commentsCount,
-            followsCount: input.followsCount,
-            notificationsUrl,
-        },
-        templates,
-    );
-
-    return deliverEmail(
-        {
-            to: input.email,
-            subject: email.subject,
-            html: email.html,
-            text: email.text,
-            replyTo: config.replyToEmail,
-        },
-        `${config.fromName} <${config.fromEmail}>`,
-    );
-}
-
-export async function sendPasswordChangedEmail(input: {
-    email: string;
-    name: string;
-}): Promise<EmailSendResult> {
-    const { config, templates } = await getEmailSettings();
-    const securityUrl = getSiteUrl("/settings/security");
-    const email = buildPasswordChangedEmail(
-        {
-            brandName: config.brandName,
-            name: input.name,
-            supportEmail: config.supportEmail,
-            securityUrl,
-        },
-        templates,
-    );
-
-    return deliverEmail(
-        {
-            to: input.email,
-            subject: email.subject,
-            html: email.html,
-            text: email.text,
-            replyTo: config.replyToEmail,
-        },
-        `${config.fromName} <${config.fromEmail}>`,
-    );
+  const vars = { title, category, description };
+  return sendEmail({
+    to: recipient,
+    subject: template.subject,
+    html: renderEmailHtml(template, vars),
+    text: renderEmailText(template, vars),
+    type: "bugReportNotification",
+    metadata: { title, category },
+  });
 }

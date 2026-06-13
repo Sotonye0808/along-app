@@ -1,119 +1,284 @@
-"use client";
+'use client'
 
-import React from "react";
-import { Table } from "antd";
-import type { TableColumnsType, TableProps } from "antd";
+import React, { useState, useCallback, useMemo, useRef } from 'react'
+import Link from 'next/link'
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 
-export interface AppPaginationConfig {
-  current?: number;
-  pageSize?: number;
-  total?: number;
-  onChange?: (page: number, pageSize: number) => void;
+interface Column<T> {
+  key: string
+  label: string
+  render?: (value: unknown, row: T) => React.ReactNode
+  sortable?: boolean
 }
 
-export interface TableEmptyStateConfig {
-  title: string;
-  description?: string;
+interface AppTableProps<T> {
+  columns: Column<T>[]
+  data: T[]
+  rowHref?: string | ((row: T) => string)
+  selectable?: boolean
+  selectedKeys?: Set<string>
+  onSelectionChange?: (keys: Set<string>) => void
+  stickyHeader?: boolean
+  emptyState?: React.ReactNode
+  isLoading?: boolean
+  loadingSkeleton?: React.ReactNode
+  className?: string
+  rowKey?: string | ((row: T) => string)
 }
 
-export interface AppTableColumn<T> {
-  key: string;
-  title: string;
-  dataIndex?: keyof T;
-  render?: (value: unknown, row: T) => React.ReactNode;
-  sortable?: boolean;
-  width?: number | string;
-  align?: "left" | "center" | "right";
-  fixed?: "left" | "right";
+function getRowKey<T>(row: T, index: number, rowKey?: string | ((row: T) => string)): string {
+  if (typeof rowKey === 'function') return rowKey(row)
+  if (typeof rowKey === 'string') return String((row as Record<string, unknown>)[rowKey])
+  return String((row as Record<string, unknown>).id ?? (row as Record<string, unknown>).key ?? index)
 }
 
-export interface AppTableProps<T extends object> {
-  columns: AppTableColumn<T>[];
-  data: T[];
-  loading?: boolean;
-  rowKey: keyof T | ((row: T) => string);
-  onRowClick?: (row: T) => void;
-  rowHref?: (row: T) => string;
-  pagination?: AppPaginationConfig | false;
-  emptyState?: TableEmptyStateConfig;
-  selectable?: boolean;
-  onSelectionChange?: (selected: T[]) => void;
-  size?: "small" | "default";
-  stickyHeader?: boolean;
-  className?: string;
+interface SkeletonRowProps {
+  columns: ReadonlyArray<{ key: string }>
+  selectable?: boolean
 }
 
-export function AppTable<T extends object>({
+const SkeletonRow = React.memo(function SkeletonRow({ columns, selectable }: SkeletonRowProps) {
+  return (
+    <tr className="h-14 border-b border-border">
+      {selectable && (
+        <td className="p-3">
+          <div className="w-4 h-4 rounded bg-bg-elevated animate-shimmer" style={{ background: 'linear-gradient(90deg, var(--color-bg-elevated) 25%, var(--color-border) 50%, var(--color-bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+        </td>
+      )}
+      {columns.map((col) => (
+        <td key={col.key} className="p-3">
+          <div className="h-3 rounded bg-bg-elevated animate-shimmer w-[60%]" style={{ background: 'linear-gradient(90deg, var(--color-bg-elevated) 25%, var(--color-border) 50%, var(--color-bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+        </td>
+      ))}
+    </tr>
+  )
+})
+
+function TdLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: (e: React.MouseEvent) => void }) {
+  return (
+    <Link href={href} onClick={onClick} className="block w-full h-full">
+      {children}
+    </Link>
+  )
+}
+
+function AppTable<T extends Record<string, unknown>>({
   columns,
   data,
-  loading,
-  rowKey,
-  onRowClick,
   rowHref,
-  pagination,
-  emptyState,
-  selectable,
+  selectable = false,
+  selectedKeys: controlledSelectedKeys,
   onSelectionChange,
-  size = "default",
-  stickyHeader,
-  className,
-}: AppTableProps<T>): React.ReactElement {
-  const mappedColumns: TableColumnsType<T> = columns.map((column) => ({
-    key: column.key,
-    title: column.title,
-    dataIndex: column.dataIndex as string | undefined,
-    render: column.render,
-    sorter: column.sortable,
-    width: column.width,
-    align: column.align,
-    fixed: column.fixed,
-  }));
+  stickyHeader = false,
+  emptyState,
+  isLoading = false,
+  loadingSkeleton,
+  className = '',
+  rowKey,
+}: AppTableProps<T>) {
+  const [localSortKey, setLocalSortKey] = useState<string | null>(null)
+  const [localSortDir, setLocalSortDir] = useState<'asc' | 'desc'>('asc')
+  const lastClickedRef = useRef<number | null>(null)
 
-  const rowSelection: TableProps<T>["rowSelection"] = selectable
-    ? {
-        onChange: (_, selectedRows) => onSelectionChange?.(selectedRows),
+  const isControlled = controlledSelectedKeys !== undefined
+
+  const internalSelectedRef = useRef<Set<string>>(new Set())
+
+  const resolvedSelected = isControlled ? controlledSelectedKeys! : internalSelectedRef.current
+
+  const handleSort = useCallback(
+    (key: string) => {
+      if (localSortKey === key) {
+        setLocalSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+      } else {
+        setLocalSortKey(key)
+        setLocalSortDir('asc')
       }
-    : undefined;
+    },
+    [localSortKey]
+  )
+
+  const sortedData = useMemo(() => {
+    if (!localSortKey) return data
+    return [...data].sort((a, b) => {
+      const aVal = a[localSortKey]
+      const bVal = b[localSortKey]
+      if (aVal == null) return 1
+      if (bVal == null) return -1
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return localSortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      }
+      if (aVal < bVal) return localSortDir === 'asc' ? -1 : 1
+      if (aVal > bVal) return localSortDir === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [data, localSortKey, localSortDir])
+
+  const notifySelection = useCallback(
+    (keys: Set<string>) => {
+      if (isControlled) {
+        onSelectionChange?.(keys)
+      } else {
+        internalSelectedRef.current = keys
+      }
+    },
+    [isControlled, onSelectionChange]
+  )
+
+  const toggleSelection = useCallback(
+    (key: string, displayIndex: number, shiftKey: boolean) => {
+      const next = new Set(resolvedSelected)
+      if (shiftKey && lastClickedRef.current !== null) {
+        const start = Math.min(lastClickedRef.current, displayIndex)
+        const end = Math.max(lastClickedRef.current, displayIndex)
+        const rangeKeys = sortedData.slice(start, end + 1).map((r, i) => getRowKey(r, start + i, rowKey))
+        const alreadyAllSelected = rangeKeys.every((k) => next.has(k))
+        for (const k of rangeKeys) {
+          if (alreadyAllSelected) {
+            next.delete(k)
+          } else {
+            next.add(k)
+          }
+        }
+      } else {
+        if (next.has(key)) {
+          next.delete(key)
+        } else {
+          next.add(key)
+        }
+      }
+      lastClickedRef.current = displayIndex
+      notifySelection(next)
+    },
+    [sortedData, resolvedSelected, rowKey, notifySelection]
+  )
+
+  const toggleAll = useCallback(() => {
+    const allKeys = sortedData.map((row, i) => getRowKey(row, i, rowKey))
+    const allSelected = allKeys.every((k) => resolvedSelected.has(k))
+    const next = new Set(resolvedSelected)
+    if (allSelected) {
+      for (const k of allKeys) next.delete(k)
+    } else {
+      for (const k of allKeys) next.add(k)
+    }
+    notifySelection(next)
+  }, [sortedData, resolvedSelected, rowKey, notifySelection])
+
+  const skeletonRows = useMemo(() => {
+    if (!isLoading) return null
+    if (loadingSkeleton) return loadingSkeleton
+    return Array.from({ length: 5 }, (_, i) => (
+      <SkeletonRow key={`skel-${i}`} columns={columns} selectable={selectable} />
+    ))
+  }, [isLoading, loadingSkeleton, columns, selectable])
+
+  const headerClass = stickyHeader ? 'sticky top-0 z-10' : ''
 
   return (
-    <Table<T>
-      rowKey={rowKey as TableProps<T>["rowKey"]}
-      columns={mappedColumns}
-      dataSource={data}
-      loading={loading}
-      pagination={pagination === false ? false : pagination}
-      size={size === "small" ? "small" : "middle"}
-      sticky={stickyHeader}
-      rowSelection={rowSelection}
-      locale={
-        emptyState
-          ? {
-              emptyText: (
-                <div className="py-6 text-center">
-                  <div className="font-medium">{emptyState.title}</div>
-                  {emptyState.description ? (
-                    <div className="text-sm text-[var(--color-text-secondary)]">
-                      {emptyState.description}
+    <div className={`w-full overflow-x-auto ${className}`}>
+      <table className="w-full border-collapse">
+        <thead className={`bg-bg-elevated ${headerClass}`}>
+          <tr>
+            {selectable && (
+              <th className="p-3 text-left w-10 border-b border-border-strong">
+                <input
+                  type="checkbox"
+                  className="cursor-pointer accent-primary"
+                  checked={sortedData.length > 0 && sortedData.every((row, i) => resolvedSelected.has(getRowKey(row, i, rowKey)))}
+                  onChange={toggleAll}
+                />
+              </th>
+            )}
+            {columns.map((col) => (
+              <th
+                key={col.key}
+                className={`p-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider border-b border-border-strong ${
+                  col.sortable ? 'cursor-pointer select-none hover:text-text-primary transition-colors duration-base' : ''
+                }`}
+                onClick={col.sortable ? () => handleSort(col.key) : undefined}
+              >
+                <span className="inline-flex items-center gap-1">
+                  {col.label}
+                  {col.sortable && (
+                    localSortKey === col.key ? (
+                      localSortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
+                    ) : (
+                      <ChevronsUpDown size={12} className="text-text-muted" />
+                    )
+                  )}
+                </span>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {isLoading ? (
+            skeletonRows
+          ) : sortedData.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length + (selectable ? 1 : 0)} className="p-3">
+                <div className="flex items-center justify-center min-h-[240px]">
+                  {emptyState ?? (
+                    <div className="text-center text-text-muted">
+                      <p className="text-sm">No data available</p>
                     </div>
-                  ) : null}
+                  )}
                 </div>
-              ),
-            }
-          : undefined
-      }
-      onRow={(record) => ({
-        onClick: () => {
-          if (onRowClick) {
-            onRowClick(record);
-            return;
-          }
-          if (rowHref) {
-            window.location.href = rowHref(record);
-          }
-        },
-        style: rowHref || onRowClick ? { cursor: "pointer" } : undefined,
-      })}
-      className={className}
-    />
-  );
+              </td>
+            </tr>
+          ) : (
+            sortedData.map((row, displayIndex) => {
+              const key = getRowKey(row, displayIndex, rowKey)
+              const isSelected = resolvedSelected.has(key)
+              const href = typeof rowHref === 'function' ? rowHref(row) : rowHref
+
+              return (
+                <tr
+                  key={key}
+                  className={`h-14 border-b border-border hover:bg-bg-elevated transition-colors duration-base ${
+                    displayIndex % 2 !== 0 ? 'bg-bg-base/50' : ''
+                  } ${isSelected ? 'bg-primary-muted' : ''} ${href ? 'cursor-pointer' : ''}`}
+                  onClick={(e) => {
+                    if (href && !(e.target as HTMLElement).closest('a, input, button, label')) {
+                      window.location.href = href
+                    }
+                  }}
+                >
+                  {selectable && (
+                    <td className="p-3">
+                      <input
+                        type="checkbox"
+                        className="cursor-pointer accent-primary"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          e.stopPropagation()
+                          toggleSelection(key, displayIndex, e.nativeEvent instanceof MouseEvent && (e.nativeEvent as MouseEvent).shiftKey)
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </td>
+                  )}
+                  {columns.map((col) => (
+                    <td key={col.key} className="p-3 text-sm text-text-primary">
+                      {href ? (
+                        <TdLink href={href} onClick={(e) => e.stopPropagation()}>
+                          {col.render ? col.render(row[col.key], row) : String(row[col.key] ?? '-')}
+                        </TdLink>
+                      ) : (
+                        col.render ? col.render(row[col.key], row) : String(row[col.key] ?? '-')
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
 }
+
+export { AppTable, SkeletonRow }
+export type { AppTableProps, Column }
