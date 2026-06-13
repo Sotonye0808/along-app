@@ -1,0 +1,1177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="along-route" content="design-system" />
+  <meta name="along-component" content="tokens, colors, typography, spacing, icons, shadows, glass" />
+  <title>Colour & Typography — Along Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       Along Design System — Token Reference
+       All CSS custom property names match DESIGN.md §2 exactly.
+       Token naming convention: {theme}/{category}/{name}
+       ═══════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      color: var(--color-text-primary);
+      background: var(--color-bg-base);
+      transition: background .2s, color .2s;
+    }
+
+    /* ── Light theme (default) ─────────────────────────────────── */
+    :root {
+      /* §2.1 Core Palette */
+      --color-primary: #00623B;
+      --color-primary-light: #00A862;
+      --color-primary-dark: #004A2C;
+      --color-primary-muted: #E6F4EE;
+      --color-bg-base: #FFFFFF;
+      --color-bg-elevated: #F7F7F7;
+      --color-bg-card: #FFFFFF;
+      --color-bg-overlay: rgba(0,0,0,0.48);
+      --color-text-primary: #1A1A1A;
+      --color-text-secondary: #6B7280;
+      --color-text-muted: #9CA3AF;
+      --color-text-inverse: #FFFFFF;
+      --color-border: #E5E7EB;
+      --color-border-strong: #D1D5DB;
+
+      /* §2.2 Semantic Colors */
+      --color-success: #D1FAE5;
+      --color-success-text: #065F46;
+      --color-success-border: #6EE7B7;
+      --color-warning: #FEF3C7;
+      --color-warning-text: #92400E;
+      --color-warning-border: #FCD34D;
+      --color-error: #FEE2E2;
+      --color-error-text: #7F1D1D;
+      --color-error-border: #FCA5A5;
+      --color-info: #DBEAFE;
+      --color-info-text: #1E3A8A;
+      --color-info-border: #93C5FD;
+
+      /* §4.2 Border Radius */
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-2xl: 24px;
+      --radius-pill: 999px;
+      --radius-circle: 50%;
+
+      /* §4.3 Elevation / Shadows */
+      --shadow-xs: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-xl: 0 16px 48px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08);
+      --shadow-primary: 0 8px 32px rgba(0,98,59,0.20), 0 2px 8px rgba(0,98,59,0.12);
+
+      /* §8 Motion */
+      --duration-fast: 120ms;
+      --duration-base: 200ms;
+      --duration-moderate: 300ms;
+      --duration-slow: 400ms;
+      --duration-toast: 350ms;
+    }
+
+    /* ── Dark theme ──────────────────────────────────────────── */
+    .dark {
+      --color-primary: #00A862;
+      --color-primary-light: #00C876;
+      --color-primary-dark: #007A48;
+      --color-primary-muted: rgba(0,168,98,0.12);
+      --color-bg-base: #0F0F0F;
+      --color-bg-elevated: #1A1A1A;
+      --color-bg-card: #1F1F1F;
+      --color-bg-overlay: rgba(0,0,0,0.72);
+      --color-text-primary: #F0F0F0;
+      --color-text-secondary: #9CA3AF;
+      --color-text-muted: #6B7280;
+      --color-text-inverse: #0F0F0F;
+      --color-border: #2A2A2A;
+      --color-border-strong: #3A3A3A;
+      --color-success: rgba(16,185,129,0.15);
+      --color-success-text: #34D399;
+      --color-success-border: #059669;
+      --color-warning: rgba(245,158,11,0.15);
+      --color-warning-text: #FCD34D;
+      --color-warning-border: #D97706;
+      --color-error: rgba(239,68,68,0.15);
+      --color-error-text: #FCA5A5;
+      --color-error-border: #DC2626;
+      --color-info: rgba(59,130,246,0.15);
+      --color-info-text: #93C5FD;
+      --color-info-border: #2563EB;
+      --shadow-xs: 0 1px 3px rgba(0,0,0,0.20), 0 1px 2px rgba(0,0,0,0.15);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.18);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.20);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.22);
+      --shadow-xl: 0 16px 48px rgba(0,0,0,0.30), 0 8px 24px rgba(0,0,0,0.25);
+      --shadow-primary: 0 8px 32px rgba(0,168,98,0.15), 0 2px 8px rgba(0,168,98,0.08);
+    }
+
+    /* ── Text Styles (§3.1) ─────────────────────────────────── */
+    .display-xl { font-size: 48px; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; }
+    .display-lg { font-size: 36px; font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+    .display-md { font-size: 28px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+    .title-lg { font-size: 22px; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; }
+    .title-md { font-size: 18px; font-weight: 600; line-height: 1.4; letter-spacing: 0; }
+    .title-sm { font-size: 16px; font-weight: 600; line-height: 1.4; letter-spacing: 0; }
+    .body-lg { font-size: 16px; font-weight: 400; line-height: 1.6; letter-spacing: 0; }
+    .body-md { font-size: 14px; font-weight: 400; line-height: 1.6; letter-spacing: 0; }
+    .body-sm { font-size: 13px; font-weight: 400; line-height: 1.5; letter-spacing: 0; }
+    .label-lg { font-size: 14px; font-weight: 500; line-height: 1.4; letter-spacing: 0.01em; }
+    .label-sm { font-size: 12px; font-weight: 500; line-height: 1.4; letter-spacing: 0.02em; }
+    .code { font-size: 13px; font-weight: 400; line-height: 1.6; letter-spacing: 0; font-family: 'Courier New', Courier, monospace; }
+
+    /* ── Weight modifiers ───────────────────────────────────── */
+    .w400 { font-weight: 400; }
+    .w500 { font-weight: 500; }
+    .w600 { font-weight: 600; }
+    .w700 { font-weight: 700; }
+    .w800 { font-weight: 800; }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    .page { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+    @media (max-width: 768px) { .page { padding: 0 16px; } }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    .nav-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--color-bg-card);
+      border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 64px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    .nav-logo svg { width: 32px; height: 32px; }
+    .nav-logo span { font-weight: 700; font-size: 20px; letter-spacing: -0.02em; color: var(--color-primary); }
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-links a {
+      text-decoration: none; padding: 8px 16px; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500; color: var(--color-text-secondary);
+      transition: background var(--duration-fast) ease-out, color var(--duration-fast) ease-out;
+    }
+    .nav-links a:hover { background: var(--color-bg-elevated); color: var(--color-text-primary); }
+    .nav-links a.active { background: var(--color-primary-muted); color: var(--color-primary); }
+    .theme-toggle {
+      background: var(--color-bg-elevated); border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill); padding: 6px 12px; cursor: pointer;
+      font: 13px/1 'Inter', sans-serif; color: var(--color-text-secondary);
+      transition: background var(--duration-fast) ease-out;
+    }
+    .theme-toggle:hover { background: var(--color-primary-muted); }
+
+    /* ── Section ─────────────────────────────────────────────── */
+    .section { padding: 48px 0; border-bottom: 1px solid var(--color-border); }
+    .section:last-of-type { border-bottom: none; }
+    .section-title {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+      margin-bottom: 8px; color: var(--color-text-primary);
+    }
+    .section-subtitle {
+      font-size: 14px; color: var(--color-text-secondary); margin-bottom: 32px;
+    }
+    .section-ref {
+      font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--color-text-muted); margin-bottom: 4px;
+    }
+
+    /* ── Token cards ─────────────────────────────────────────── */
+    .token-grid {
+      display: grid; gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+    .token-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: 16px; transition: box-shadow var(--duration-base) ease;
+    }
+    .token-card:hover { box-shadow: var(--shadow-sm); }
+    .token-swatch {
+      width: 100%; height: 48px; border-radius: var(--radius-sm); margin-bottom: 12px;
+      border: 1px solid var(--color-border);
+    }
+    .token-name {
+      font-size: 13px; font-weight: 600; color: var(--color-text-primary);
+      margin-bottom: 2px; word-break: break-all;
+    }
+    .token-value {
+      font-size: 12px; font-weight: 400; color: var(--color-text-muted);
+      font-family: 'Courier New', Courier, monospace;
+    }
+    .token-var {
+      font-size: 11px; font-weight: 500; color: var(--color-text-secondary);
+      font-family: 'Courier New', Courier, monospace;
+      background: var(--color-bg-elevated); padding: 2px 6px; border-radius: 4px;
+      display: inline-block; margin-top: 4px;
+    }
+    .token-tag {
+      display: inline-block; font-size: 11px; font-weight: 500;
+      padding: 2px 6px; border-radius: var(--radius-xs);
+      background: var(--color-primary-muted); color: var(--color-primary); margin-top: 4px;
+    }
+
+    /* ── Text style preview ──────────────────────────────────── */
+    .text-style-row {
+      display: flex; align-items: baseline; gap: 24px; padding: 16px 0;
+      border-bottom: 1px solid var(--color-border); cursor: default;
+    }
+    .text-style-row:last-child { border-bottom: none; }
+    .text-style-meta { min-width: 160px; flex-shrink: 0; }
+    .text-style-label { font-size: 12px; font-weight: 600; color: var(--color-text-primary); }
+    .text-style-size { font-size: 11px; color: var(--color-text-muted); font-family: 'Courier New', Courier, monospace; }
+    .text-style-demo { flex: 1; }
+    .text-style-usage { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; }
+
+    /* ── Shadow preview ──────────────────────────────────────── */
+    .shadow-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    .shadow-card {
+      background: var(--color-bg-card); border-radius: var(--radius-lg);
+      padding: 32px 16px; text-align: center; cursor: default;
+    }
+    .shadow-card span { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); }
+    .shadow-label { font-size: 12px; font-weight: 600; margin-top: 12px; color: var(--color-text-primary); }
+    .shadow-var { font-size: 11px; color: var(--color-text-muted); font-family: 'Courier New', Courier, monospace; }
+
+    /* ── Spacing ─────────────────────────────────────────────── */
+    .spacing-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .spacing-block {
+      background: var(--color-primary); opacity: 0.3; border-radius: var(--radius-xs);
+      flex-shrink: 0;
+    }
+    .spacing-label { font-size: 12px; font-weight: 500; min-width: 80px; }
+    .spacing-px { font-family: 'Courier New', Courier, monospace; font-size: 11px; color: var(--color-text-muted); }
+
+    /* ── Radius ──────────────────────────────────────────────── */
+    .radius-grid { display: flex; flex-wrap: wrap; gap: 16px; }
+    .radius-demo {
+      width: 72px; height: 72px; border: 2px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 600; color: var(--color-text-muted); text-align: center;
+    }
+    .radius-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin-top: 4px; }
+
+    /* ── Grid demos ──────────────────────────────────────────── */
+    .grid-demo {
+      border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+      overflow: hidden; margin-bottom: 24px;
+    }
+    .grid-demo-label {
+      padding: 8px 16px; font-size: 12px; font-weight: 600;
+      background: var(--color-bg-elevated); border-bottom: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+    .grid-demo-body { padding: 16px; }
+    .grid-cols { display: grid; gap: 12px; }
+    .grid-cols-1 { grid-template-columns: 1fr; }
+    .grid-cols-2 { grid-template-columns: 1fr 1fr; }
+    .grid-cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .grid-cell {
+      background: var(--color-primary-muted); border: 1px solid var(--color-primary);
+      border-radius: var(--radius-sm); padding: 16px; text-align: center;
+      font-size: 12px; font-weight: 500; color: var(--color-primary);
+    }
+
+    /* ── Icons ───────────────────────────────────────────────── */
+    .icon-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    .icon-card {
+      display: flex; align-items: center; gap: 12px; padding: 8px 12px;
+      border-radius: var(--radius-sm); transition: background var(--duration-fast) ease-out;
+    }
+    .icon-card:hover { background: var(--color-bg-elevated); }
+    .icon-card svg { flex-shrink: 0; color: var(--color-text-secondary); }
+    .icon-label { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+    .icon-context { font-size: 11px; color: var(--color-text-muted); }
+    .icon-group-label {
+      font-size: 16px; font-weight: 700; letter-spacing: -0.01em;
+      color: var(--color-text-primary); margin: 24px 0 12px; padding-bottom: 4px;
+      border-bottom: 2px solid var(--color-primary); display: inline-block;
+    }
+
+    /* ── Section header card ─────────────────────────────────── */
+    .section-header-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: 32px; margin-bottom: 32px;
+    }
+    .section-header-card h2 {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px;
+      color: var(--color-text-primary);
+    }
+    .section-header-card p { font-size: 14px; color: var(--color-text-secondary); }
+
+    /* ── Glass demo ──────────────────────────────────────────── */
+    .glass-demo {
+      background: var(--color-bg-elevated); border-radius: var(--radius-xl);
+      padding: 32px; position: relative; overflow: hidden;
+    }
+    .glass-demo::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      opacity: 0.1; border-radius: inherit;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.72); backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.48);
+      border-radius: var(--radius-xl); padding: 24px; max-width: 400px;
+      position: relative; z-index: 1;
+    }
+    .dark .glass-card {
+      background: rgba(15,15,15,0.72); backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .glass-card h4 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .glass-card p { font-size: 13px; color: var(--color-text-secondary); }
+
+    /* ── Vehicle colors ──────────────────────────────────────── */
+    .vehicle-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .vehicle-chip {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      border-radius: var(--radius-pill); font-size: 13px; font-weight: 500;
+      border: 1px solid var(--color-border);
+    }
+
+    /* ── Trust colors ────────────────────────────────────────── */
+    .trust-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    .trust-card {
+      border-radius: var(--radius-lg); padding: 16px; border: 1px solid;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .trust-card svg { width: 24px; height: 24px; flex-shrink: 0; }
+    .trust-info h4 { font-size: 14px; font-weight: 600; }
+    .trust-info p { font-size: 12px; }
+    .trust-info .score { font-size: 11px; font-weight: 500; color: var(--color-text-muted); }
+
+    /* ── Tabs ────────────────────────────────────────────────── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; }
+    .tab {
+      padding: 8px 20px; border-radius: var(--radius-pill); cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--color-text-secondary);
+      background: transparent; border: 1px solid transparent; transition: all var(--duration-fast) ease-out;
+    }
+    .tab:hover { background: var(--color-bg-elevated); }
+    .tab.active { background: var(--color-primary-muted); color: var(--color-primary); border-color: var(--color-primary); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── Theme toggle ────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; } }
+
+    /* ── Utility ─────────────────────────────────────────────── */
+    .mb-8 { margin-bottom: 8px; }
+    .mb-16 { margin-bottom: 16px; }
+    .mb-24 { margin-bottom: 24px; }
+    .mb-32 { margin-bottom: 32px; }
+    .mt-24 { margin-top: 24px; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .gap-8 { gap: 8px; }
+    .gap-16 { gap: 16px; }
+    .text-secondary { color: var(--color-text-secondary); }
+    .text-muted { color: var(--color-text-muted); }
+    .text-primary { color: var(--color-text-primary); }
+    .font-mono { font-family: 'Courier New', Courier, monospace; }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════ NAV ════════════════════════════════ -->
+  <nav class="nav-bar">
+    <div class="nav-logo">
+      <svg viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" fill="var(--color-primary)"/>
+        <path d="M10 20 L16 8 L22 20 L16 16 Z" fill="#fff"/>
+        <circle cx="10" cy="20" r="2.5" fill="#fff"/>
+        <circle cx="22" cy="20" r="2.5" fill="#fff"/>
+      </svg>
+      <span>Along</span>
+    </div>
+    <div class="nav-links">
+      <a href="01-design-system-tokens.html" class="active">Tokens</a>
+      <a href="02-design-system-components.html">Components</a>
+      <a href="03-landing-light.html">Landing</a>
+      <a href="04-landing-dark.html">Dark</a>
+      <a href="05-auth-flow.html">Auth</a>
+      <a href="06-home-feed-light.html">Feed</a>
+      <a href="07-home-feed-dark.html">Feed Dark</a>
+      <a href="08-share-route-modal.html">Share</a>
+      <a href="09-explore-map.html">Explore</a>
+      <a href="10-post-detail-light.html">Post</a>
+      <a href="11-post-detail-dark.html">Post Dark</a>
+    <a href="12-profile-page.html">Profile</a>
+    <a href="13-notifications.html">Notif</a>
+    <a href="14-bookmarks.html">Bmks</a>
+</div>
+    <button id="themeBtn" class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+  </nav>
+
+  <div class="page">
+
+    <!-- ══════════════════════════════ HEADER ══════════════════════════════ -->
+    <div class="section-header-card" style="margin-top: 32px;">
+      <h1>Colour &amp; Typography — Token Reference</h1>
+      <p>All tokens from <strong>DESIGN.md §2–5</strong>. CSS custom property names match the spec exactly. Named styles follow <code>{theme}/{category}/{name}</code> convention.</p>
+    </div>
+
+    <!-- ══════════════════════════════ CORE PALETTE ══════════════════════ -->
+    <!-- §2.1 Core Palette -->
+    <div class="section">
+      <div class="section-ref">§2.1</div>
+      <h2 class="section-title">Core Palette</h2>
+      <p class="section-subtitle">Brand, backgrounds, text, and border tokens for Light and Dark themes.</p>
+      <div class="tabs" id="coreTabs">
+        <div class="tab active" onclick="switchTab('coreTabs','core-light',this)">Light</div>
+        <div class="tab" onclick="switchTab('coreTabs','core-dark',this)">Dark</div>
+      </div>
+
+      <!-- Light -->
+      <div class="tab-content active" id="core-light">
+        <div class="token-grid">
+          <div class="token-card">
+            <div class="token-swatch" style="background:#00623B"></div>
+            <div class="token-name">light/brand/primary</div>
+            <div class="token-value">#00623B</div>
+            <div class="token-var">--color-primary</div>
+            <div class="token-tag">CTAs, active states, key accents</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#00A862"></div>
+            <div class="token-name">light/brand/primary-light</div>
+            <div class="token-value">#00A862</div>
+            <div class="token-var">--color-primary-light</div>
+            <div class="token-tag">Hover states, progress fills</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#004A2C"></div>
+            <div class="token-name">light/brand/primary-dark</div>
+            <div class="token-value">#004A2C</div>
+            <div class="token-var">--color-primary-dark</div>
+            <div class="token-tag">Pressed states, deep accents</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#E6F4EE"></div>
+            <div class="token-name">light/brand/primary-muted</div>
+            <div class="token-value">#E6F4EE</div>
+            <div class="token-var">--color-primary-muted</div>
+            <div class="token-tag">Tinted backgrounds, suggestion cards</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#FFFFFF;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">light/bg/base</div>
+            <div class="token-value">#FFFFFF</div>
+            <div class="token-var">--color-bg-base</div>
+            <div class="token-tag">Page background</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#F7F7F7"></div>
+            <div class="token-name">light/bg/elevated</div>
+            <div class="token-value">#F7F7F7</div>
+            <div class="token-var">--color-bg-elevated</div>
+            <div class="token-tag">Cards, sidebars, inputs</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#FFFFFF;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">light/bg/card</div>
+            <div class="token-value">#FFFFFF</div>
+            <div class="token-var">--color-bg-card</div>
+            <div class="token-tag">Card surfaces</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:rgba(0,0,0,0.48);border-color:var(--color-border-strong)"></div>
+            <div class="token-name">light/bg/overlay</div>
+            <div class="token-value">rgba(0,0,0,0.48)</div>
+            <div class="token-var">--color-bg-overlay</div>
+            <div class="token-tag">Modal/drawer scrim</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#1A1A1A"></div>
+            <div class="token-name">light/text/primary</div>
+            <div class="token-value">#1A1A1A</div>
+            <div class="token-var">--color-text-primary</div>
+            <div class="token-tag">Headings, body text</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#6B7280"></div>
+            <div class="token-name">light/text/secondary</div>
+            <div class="token-value">#6B7280</div>
+            <div class="token-var">--color-text-secondary</div>
+            <div class="token-tag">Captions, metadata</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#9CA3AF"></div>
+            <div class="token-name">light/text/muted</div>
+            <div class="token-value">#9CA3AF</div>
+            <div class="token-var">--color-text-muted</div>
+            <div class="token-tag">Disabled, de-emphasized</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#FFFFFF;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">light/text/inverse</div>
+            <div class="token-value">#FFFFFF</div>
+            <div class="token-var">--color-text-inverse</div>
+            <div class="token-tag">Text on primary backgrounds</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#E5E7EB"></div>
+            <div class="token-name">light/border/default</div>
+            <div class="token-value">#E5E7EB</div>
+            <div class="token-var">--color-border</div>
+            <div class="token-tag">Default borders, dividers</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#D1D5DB"></div>
+            <div class="token-name">light/border/strong</div>
+            <div class="token-value">#D1D5DB</div>
+            <div class="token-var">--color-border-strong</div>
+            <div class="token-tag">Focused borders, table lines</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dark -->
+      <div class="tab-content" id="core-dark">
+        <div class="token-grid">
+          <div class="token-card">
+            <div class="token-swatch" style="background:#00A862"></div>
+            <div class="token-name">dark/brand/primary</div>
+            <div class="token-value">#00A862</div>
+            <div class="token-var">--color-primary</div>
+            <div class="token-tag">CTAs, active states, key accents</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#00C876"></div>
+            <div class="token-name">dark/brand/primary-light</div>
+            <div class="token-value">#00C876</div>
+            <div class="token-var">--color-primary-light</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#007A48"></div>
+            <div class="token-name">dark/brand/primary-dark</div>
+            <div class="token-value">#007A48</div>
+            <div class="token-var">--color-primary-dark</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:rgba(0,168,98,0.12);border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/brand/primary-muted</div>
+            <div class="token-value">rgba(0,168,98,0.12)</div>
+            <div class="token-var">--color-primary-muted</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#0F0F0F;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/bg/base</div>
+            <div class="token-value">#0F0F0F</div>
+            <div class="token-var">--color-bg-base</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#1A1A1A;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/bg/elevated</div>
+            <div class="token-value">#1A1A1A</div>
+            <div class="token-var">--color-bg-elevated</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#1F1F1F;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/bg/card</div>
+            <div class="token-value">#1F1F1F</div>
+            <div class="token-var">--color-bg-card</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:rgba(0,0,0,0.72);border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/bg/overlay</div>
+            <div class="token-value">rgba(0,0,0,0.72)</div>
+            <div class="token-var">--color-bg-overlay</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#F0F0F0"></div>
+            <div class="token-name">dark/text/primary</div>
+            <div class="token-value">#F0F0F0</div>
+            <div class="token-var">--color-text-primary</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#9CA3AF"></div>
+            <div class="token-name">dark/text/secondary</div>
+            <div class="token-value">#9CA3AF</div>
+            <div class="token-var">--color-text-secondary</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#6B7280"></div>
+            <div class="token-name">dark/text/muted</div>
+            <div class="token-value">#6B7280</div>
+            <div class="token-var">--color-text-muted</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#0F0F0F;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/text/inverse</div>
+            <div class="token-value">#0F0F0F</div>
+            <div class="token-var">--color-text-inverse</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#2A2A2A;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/border/default</div>
+            <div class="token-value">#2A2A2A</div>
+            <div class="token-var">--color-border</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#3A3A3A;border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/border/strong</div>
+            <div class="token-value">#3A3A3A</div>
+            <div class="token-var">--color-border-strong</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ SEMANTIC COLORS ══════════════════ -->
+    <!-- §2.2 Semantic Colors -->
+    <div class="section">
+      <div class="section-ref">§2.2</div>
+      <h2 class="section-title">Semantic Colors</h2>
+      <p class="section-subtitle">Success, warning, error, and info states — each with background, text, and border tokens.</p>
+      <div class="token-grid">
+        <div class="token-card">
+          <div class="token-swatch" style="background:#D1FAE5"></div>
+          <div class="token-name">light/semantic/success</div>
+          <div class="token-var">--color-success</div>
+          <div class="token-value">#D1FAE5</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#065F46"></div>
+          <div class="token-name">light/semantic/success-text</div>
+          <div class="token-var">--color-success-text</div>
+          <div class="token-value">#065F46</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#6EE7B7"></div>
+          <div class="token-name">light/semantic/success-border</div>
+          <div class="token-var">--color-success-border</div>
+          <div class="token-value">#6EE7B7</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#FEF3C7"></div>
+          <div class="token-name">light/semantic/warning</div>
+          <div class="token-var">--color-warning</div>
+          <div class="token-value">#FEF3C7</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#92400E"></div>
+          <div class="token-name">light/semantic/warning-text</div>
+          <div class="token-var">--color-warning-text</div>
+          <div class="token-value">#92400E</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#FCD34D"></div>
+          <div class="token-name">light/semantic/warning-border</div>
+          <div class="token-var">--color-warning-border</div>
+          <div class="token-value">#FCD34D</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#FEE2E2"></div>
+          <div class="token-name">light/semantic/error</div>
+          <div class="token-var">--color-error</div>
+          <div class="token-value">#FEE2E2</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#7F1D1D"></div>
+          <div class="token-name">light/semantic/error-text</div>
+          <div class="token-var">--color-error-text</div>
+          <div class="token-value">#7F1D1D</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#FCA5A5"></div>
+          <div class="token-name">light/semantic/error-border</div>
+          <div class="token-var">--color-error-border</div>
+          <div class="token-value">#FCA5A5</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#DBEAFE"></div>
+          <div class="token-name">light/semantic/info</div>
+          <div class="token-var">--color-info</div>
+          <div class="token-value">#DBEAFE</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#1E3A8A"></div>
+          <div class="token-name">light/semantic/info-text</div>
+          <div class="token-var">--color-info-text</div>
+          <div class="token-value">#1E3A8A</div>
+        </div>
+        <div class="token-card">
+          <div class="token-swatch" style="background:#93C5FD"></div>
+          <div class="token-name">light/semantic/info-border</div>
+          <div class="token-var">--color-info-border</div>
+          <div class="token-value">#93C5FD</div>
+        </div>
+      </div>
+      <details style="margin-top:24px;cursor:pointer;">
+        <summary style="font-size:14px;font-weight:500;color:var(--color-text-secondary)">Show Dark theme semantic tokens</summary>
+        <div class="token-grid" style="margin-top:16px;">
+          <div class="token-card">
+            <div class="token-swatch" style="background:rgba(16,185,129,0.15);border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/semantic/success</div>
+            <div class="token-var">--color-success</div>
+            <div class="token-value">rgba(16,185,129,0.15)</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#34D399"></div>
+            <div class="token-name">dark/semantic/success-text</div>
+            <div class="token-var">--color-success-text</div>
+            <div class="token-value">#34D399</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#059669"></div>
+            <div class="token-name">dark/semantic/success-border</div>
+            <div class="token-var">--color-success-border</div>
+            <div class="token-value">#059669</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:rgba(245,158,11,0.15);border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/semantic/warning</div>
+            <div class="token-var">--color-warning</div>
+            <div class="token-value">rgba(245,158,11,0.15)</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#FCD34D"></div>
+            <div class="token-name">dark/semantic/warning-text</div>
+            <div class="token-var">--color-warning-text</div>
+            <div class="token-value">#FCD34D</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#D97706"></div>
+            <div class="token-name">dark/semantic/warning-border</div>
+            <div class="token-var">--color-warning-border</div>
+            <div class="token-value">#D97706</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:rgba(239,68,68,0.15);border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/semantic/error</div>
+            <div class="token-var">--color-error</div>
+            <div class="token-value">rgba(239,68,68,0.15)</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#FCA5A5"></div>
+            <div class="token-name">dark/semantic/error-text</div>
+            <div class="token-var">--color-error-text</div>
+            <div class="token-value">#FCA5A5</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#DC2626"></div>
+            <div class="token-name">dark/semantic/error-border</div>
+            <div class="token-var">--color-error-border</div>
+            <div class="token-value">#DC2626</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:rgba(59,130,246,0.15);border-color:var(--color-border-strong)"></div>
+            <div class="token-name">dark/semantic/info</div>
+            <div class="token-var">--color-info</div>
+            <div class="token-value">rgba(59,130,246,0.15)</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#93C5FD"></div>
+            <div class="token-name">dark/semantic/info-text</div>
+            <div class="token-var">--color-info-text</div>
+            <div class="token-value">#93C5FD</div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background:#2563EB"></div>
+            <div class="token-name">dark/semantic/info-border</div>
+            <div class="token-var">--color-info-border</div>
+            <div class="token-value">#2563EB</div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- ══════════════════════════════ TRUST LEVELS ══════════════════════ -->
+    <!-- §2.3 Trust Level Colors -->
+    <div class="section">
+      <div class="section-ref">§2.3</div>
+      <h2 class="section-title">Trust Level Colors</h2>
+      <p class="section-subtitle">Four-tier validity system with score ranges, colors, and associated Lucide icons.</p>
+      <div class="trust-grid">
+        <div class="trust-card" style="background:#FEE2E2;border-color:#FCA5A5;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#7F1D1D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div class="trust-info">
+            <h4 style="color:#7F1D1D">Low Trust</h4>
+            <p style="color:#7F1D1D">0–29 · AlertTriangle</p>
+            <div class="score">light/trust/low</div>
+          </div>
+        </div>
+        <div class="trust-card" style="background:#FEF3C7;border-color:#FCD34D;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="trust-info">
+            <h4 style="color:#92400E">Developing</h4>
+            <p style="color:#92400E">30–59 · Clock</p>
+            <div class="score">light/trust/developing</div>
+          </div>
+        </div>
+        <div class="trust-card" style="background:#D1FAE5;border-color:#6EE7B7;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#065F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <div class="trust-info">
+            <h4 style="color:#065F46">Verified</h4>
+            <p style="color:#065F46">60–79 · CheckCircle</p>
+            <div class="score">light/trust/verified</div>
+          </div>
+        </div>
+        <div class="trust-card" style="background:#DBEAFE;border-color:#93C5FD;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div class="trust-info">
+            <h4 style="color:#1E3A8A">Trusted</h4>
+            <p style="color:#1E3A8A">80–100 · ShieldCheck</p>
+            <div class="score">light/trust/trusted</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ VEHICLE COLORS ════════════════════ -->
+    <!-- §2.4 Vehicle Type Colors -->
+    <div class="section">
+      <div class="section-ref">§2.4</div>
+      <h2 class="section-title">Vehicle Type Colors</h2>
+      <p class="section-subtitle">Icon+label chips used across the app for route step vehicles.</p>
+      <div class="vehicle-grid">
+        <div class="vehicle-chip" style="background:#fefce8;color:#854d0e;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+          Taxi
+        </div>
+        <div class="vehicle-chip" style="background:#fff7ed;color:#9a3412;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="18" r="3.5"/><circle cx="18.5" cy="18" r="3.5"/><path d="M12 18V5l-7 3v10"/><path d="M16 12h-2"/></svg>
+          Bike
+        </div>
+        <div class="vehicle-chip" style="background:#f0fdf4;color:#166534;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h5l4 8"/><circle cx="10" cy="17" r="4"/><path d="M13 6h5l3 5-4 2"/><line x1="7" y1="8" x2="10" y2="8"/></svg>
+          Keke
+        </div>
+        <div class="vehicle-chip" style="background:#eff6ff;color:#1d4ed8;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"/><path d="M6 11H4v2h2"/><circle cx="8" cy="15" r="2"/><circle cx="17" cy="15" r="2"/><path d="M18 11h2v2h-2"/></svg>
+          Bus
+        </div>
+        <div class="vehicle-chip" style="background:#f9fafb;color:#374151;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/><circle cx="12" cy="12" r="4"/></svg>
+          Trekking
+        </div>
+        <div class="vehicle-chip" style="background:#eef2ff;color:#3730a3;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+          Car
+        </div>
+        <div class="vehicle-chip" style="background:#f7fee7;color:#3f6212;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18" r="2.5"/><circle cx="18.5" cy="18" r="2.5"/></svg>
+          Bolt
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ TYPOGRAPHY ════════════════════════ -->
+    <!-- §3 Typography -->
+    <div class="section">
+      <div class="section-ref">§3</div>
+      <h2 class="section-title">Typography — Type Scale</h2>
+      <p class="section-subtitle">Font: <strong>Inter</strong> (400/500/600/700/800). Named following <code>{role}/{weight}</code> convention.</p>
+
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">display-xl / extrabold</div><div class="text-style-size">48px · 800 · -0.02em</div></div>
+        <div class="text-style-demo display-xl w800">Navigate Together</div>
+        <div class="text-style-usage">Hero headlines</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">display-lg / bold</div><div class="text-style-size">36px · 700 · -0.02em</div></div>
+        <div class="text-style-demo display-lg w700">Share routes. Discover better.</div>
+        <div class="text-style-usage">Page titles</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">display-md / bold</div><div class="text-style-size">28px · 700 · -0.01em</div></div>
+        <div class="text-style-demo display-md w700">Explore transport routes in Lagos</div>
+        <div class="text-style-usage">Section headings</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">title-lg / semibold</div><div class="text-style-size">22px · 600 · -0.01em</div></div>
+        <div class="text-style-demo title-lg w600">From CMS to Obalende in 35 mins</div>
+        <div class="text-style-usage">Card titles, modal headings</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">title-md / semibold</div><div class="text-style-size">18px · 600 · 0</div></div>
+        <div class="text-style-demo title-md w600">Route: CMS → Obalende → Ajah</div>
+        <div class="text-style-usage">Post titles, sidebar headings</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">title-sm / semibold</div><div class="text-style-size">16px · 600 · 0</div></div>
+        <div class="text-style-demo title-sm w600">Bus rapid transit from Ikeja</div>
+        <div class="text-style-usage">Small card titles</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">body-lg / regular</div><div class="text-style-size">16px · 400 · 0</div></div>
+        <div class="text-style-demo body-lg">Share your daily commute route and help others navigate Lagos better.</div>
+        <div class="text-style-usage">Primary body text</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">body-md / regular</div><div class="text-style-size">14px · 400 · 0</div></div>
+        <div class="text-style-demo body-md">Take a Keke from the bus stop to your street. Fare is around ₦200.</div>
+        <div class="text-style-usage">Secondary body</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">body-sm / regular</div><div class="text-style-size">13px · 400 · 0</div></div>
+        <div class="text-style-demo body-sm">Posted 2h ago · 42 likes · 12 comments</div>
+        <div class="text-style-usage">Captions, metadata</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">label-lg / medium</div><div class="text-style-size">14px · 500 · 0.01em</div></div>
+        <div class="text-style-demo label-lg">Route Description</div>
+        <div class="text-style-usage">Form labels, tags</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">label-sm / medium</div><div class="text-style-size">12px · 500 · 0.02em</div></div>
+        <div class="text-style-demo label-sm">2 min ago · Trust score 85</div>
+        <div class="text-style-usage">Small badges, timestamps</div>
+      </div>
+      <div class="text-style-row">
+        <div class="text-style-meta"><div class="text-style-label">code / regular</div><div class="text-style-size">13px · 400 · mono</div></div>
+        <div class="text-style-demo code">const route = { origin: "CMS", destination: "Ajah" };</div>
+        <div class="text-style-usage">Monospace code blocks</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ EFFECTS ════════════════════════════ -->
+    <!-- §4.3 Elevation + §2.5 Glass -->
+    <div class="section">
+      <div class="section-ref">§4.3 · §2.5</div>
+      <h2 class="section-title">Effect Styles — Shadows &amp; Glass</h2>
+      <p class="section-subtitle">Elevation shadow tokens and the glass morphism recipe with intensity variants.</p>
+
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">Shadows</h3>
+      <div class="shadow-grid">
+        <div class="shadow-card" style="box-shadow:var(--shadow-xs)"><span>xs</span><div class="shadow-label">Shadow XS</div><div class="shadow-var">--shadow-xs</div></div>
+        <div class="shadow-card" style="box-shadow:var(--shadow-sm)"><span>sm</span><div class="shadow-label">Shadow SM</div><div class="shadow-var">--shadow-sm</div></div>
+        <div class="shadow-card" style="box-shadow:var(--shadow-md)"><span>md</span><div class="shadow-label">Shadow MD</div><div class="shadow-var">--shadow-md</div></div>
+        <div class="shadow-card" style="box-shadow:var(--shadow-lg)"><span>lg</span><div class="shadow-label">Shadow LG</div><div class="shadow-var">--shadow-lg</div></div>
+        <div class="shadow-card" style="box-shadow:var(--shadow-xl)"><span>xl</span><div class="shadow-label">Shadow XL</div><div class="shadow-var">--shadow-xl</div></div>
+        <div class="shadow-card" style="box-shadow:var(--shadow-primary)"><span>primary</span><div class="shadow-label">Shadow Primary</div><div class="shadow-var">--shadow-primary</div></div>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:600;margin:32px 0 16px;">Glass Morphism</h3>
+      <div class="glass-demo">
+        <div class="glass-card">
+          <h4>Map Overlay Card</h4>
+          <p>Distance: 12 km · Est. 45 min · Avg Fare: ₦800</p>
+          <div style="margin-top:12px;">
+            <span class="token-var">background: rgba(255,255,255,0.72)</span><br>
+            <span class="token-var">backdrop-filter: blur(16px) saturate(180%)</span>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;">
+            <span class="token-tag">glass-low (0.48)</span>
+            <span class="token-tag">glass-medium (0.72)</span>
+            <span class="token-tag">glass-high (0.88)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ SPACING & BORDERS ════════════════ -->
+    <!-- §4.1 Spacing + §4.2 Border Radius -->
+    <div class="section">
+      <div class="section-ref">§4.1 · §4.2</div>
+      <h2 class="section-title">Spacing &amp; Border Radius</h2>
+      <p class="section-subtitle">4px base unit spacing scale and full radius token set.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
+        <div>
+          <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">Spacing Scale</h3>
+          <div class="spacing-row"><div class="spacing-block" style="width:4px;height:12px;"></div><div class="spacing-label">4px (1)</div><div class="spacing-px">Micro gaps, icon padding</div></div>
+          <div class="spacing-row"><div class="spacing-block" style="width:8px;height:12px;"></div><div class="spacing-label">8px (2)</div><div class="spacing-px">Compact padding, small gaps</div></div>
+          <div class="spacing-row"><div class="spacing-block" style="width:12px;height:12px;"></div><div class="spacing-label">12px (3)</div><div class="spacing-px">Input padding, tight card padding</div></div>
+          <div class="spacing-row"><div class="spacing-block" style="width:16px;height:12px;"></div><div class="spacing-label">16px (4)</div><div class="spacing-px">Standard padding, section gaps</div></div>
+          <div class="spacing-row"><div class="spacing-block" style="width:20px;height:12px;"></div><div class="spacing-label">20px (5)</div><div class="spacing-px">Card padding</div></div>
+          <div class="spacing-row"><div class="spacing-block" style="width:24px;height:12px;"></div><div class="spacing-label">24px (6)</div><div class="spacing-px">Section padding, larger gaps</div></div>
+          <div class="spacing-row"><div class="spacing-block" style="width:32px;height:12px;"></div><div class="spacing-label">32px (8)</div><div class="spacing-px">Page section spacing</div></div>
+          <div class="spacing-row"><div class="spacing-block" style="width:48px;height:12px;"></div><div class="spacing-label">48px (12)</div><div class="spacing-px">Major section breaks</div></div>
+          <div class="spacing-row"><div class="spacing-block" style="width:64px;height:12px;"></div><div class="spacing-label">64px (16)</div><div class="spacing-px">Hero spacing</div></div>
+        </div>
+        <div>
+          <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">Border Radius</h3>
+          <div class="radius-grid">
+            <div><div class="radius-demo" style="border-radius:var(--radius-xs)">xs 4px</div><div class="radius-label">--radius-xs</div></div>
+            <div><div class="radius-demo" style="border-radius:var(--radius-sm)">sm 6px</div><div class="radius-label">--radius-sm</div></div>
+            <div><div class="radius-demo" style="border-radius:var(--radius-md)">md 8px</div><div class="radius-label">--radius-md</div></div>
+            <div><div class="radius-demo" style="border-radius:var(--radius-lg)">lg 12px</div><div class="radius-label">--radius-lg</div></div>
+            <div><div class="radius-demo" style="border-radius:var(--radius-xl)">xl 16px</div><div class="radius-label">--radius-xl</div></div>
+            <div><div class="radius-demo" style="border-radius:var(--radius-2xl)">2xl 24px</div><div class="radius-label">--radius-2xl</div></div>
+            <div><div class="radius-demo" style="border-radius:var(--radius-pill);width:96px;">pill</div><div class="radius-label">--radius-pill</div></div>
+            <div><div class="radius-demo" style="border-radius:var(--radius-circle)">circle</div><div class="radius-label">--radius-circle</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ GRID ══════════════════════════════ -->
+    <!-- §4.4–4.5 Layout Grid -->
+    <div class="section">
+      <div class="section-ref">§4.4 · §4.5</div>
+      <h2 class="section-title">Layout Grid — Responsive</h2>
+      <p class="section-subtitle">Three grid configurations matching the 375px mobile, 768px tablet, and 1280px desktop breakpoints.</p>
+      <div class="grid-demo">
+        <div class="grid-demo-label">Mobile · 1 column · 375px</div>
+        <div class="grid-demo-body"><div class="grid-cols grid-cols-1"><div class="grid-cell">Feed (100%)</div></div></div>
+      </div>
+      <div class="grid-demo">
+        <div class="grid-demo-label">Tablet · 2 columns · 768px (md+)</div>
+        <div class="grid-demo-body"><div class="grid-cols grid-cols-2"><div class="grid-cell">Feed (fluid)</div><div class="grid-cell">Sidebar (280px)</div></div></div>
+      </div>
+      <div class="grid-demo">
+        <div class="grid-demo-label">Desktop · 3 columns · 1280px (lg+)</div>
+        <div class="grid-demo-body"><div class="grid-cols grid-cols-3"><div class="grid-cell">Sidebar Nav (240px)</div><div class="grid-cell">Feed (max 640px)</div><div class="grid-cell">Right Panel (280px)</div></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ ICONS ════════════════════════════ -->
+    <!-- §5 Iconography -->
+    <div class="section" style="border-bottom:none;">
+      <div class="section-ref">§5</div>
+      <h2 class="section-title">Icon System — Lucide React</h2>
+      <p class="section-subtitle">Zero emoji. All iconography uses Lucide stroke icons at 20px or 24px. Groups defined per DESIGN.md §5.1.</p>
+
+      <div class="icon-group-label">Navigation</div>
+      <div class="icon-grid">
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div><div class="icon-label">Home</div><div class="icon-context">Home / Feed</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><div><div class="icon-label">Compass</div><div class="icon-context">Explore / Map</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><div class="icon-label">MapPin</div><div class="icon-context">Share Route / Create</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><div><div class="icon-label">Bookmark</div><div class="icon-context">Bookmarks</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div><div class="icon-label">Bell</div><div class="icon-context">Notifications</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div><div class="icon-label">User</div><div class="icon-context">Profile</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg><div><div class="icon-label">BarChart2</div><div class="icon-context">Analytics</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg><div><div class="icon-label">UserPlus</div><div class="icon-context">Invite</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><div><div class="icon-label">Settings</div><div class="icon-context">Settings</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><div class="icon-label">Shield</div><div class="icon-context">Admin</div></div></div>
+      </div>
+
+      <div class="icon-group-label">Actions</div>
+      <div class="icon-grid">
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><div><div class="icon-label">Heart</div><div class="icon-context">Like</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div><div class="icon-label">MessageCircle</div><div class="icon-context">Comment</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><div><div class="icon-label">Share2</div><div class="icon-context">Share</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><div><div class="icon-label">Trash2</div><div class="icon-context">Delete</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><div><div class="icon-label">Pencil</div><div class="icon-context">Edit</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><div><div class="icon-label">X</div><div class="icon-context">Close / Dismiss</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><div><div class="icon-label">ArrowLeft</div><div class="icon-context">Back</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg><div><div class="icon-label">ExternalLink</div><div class="icon-context">External link</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg><div><div class="icon-label">Search</div><div class="icon-context">Search</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg><div><div class="icon-label">ArrowDown</div><div class="icon-context">Expand / Sort</div></div></div>
+      </div>
+
+      <div class="icon-group-label">Vehicles</div>
+      <div class="icon-grid">
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg><div><div class="icon-label">Car</div><div class="icon-context">Taxi, Car</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="18" r="3.5"/><circle cx="18.5" cy="18" r="3.5"/><path d="M12 18V5l-7 3v10"/><path d="M16 12h-2"/></svg><div><div class="icon-label">Bike</div><div class="icon-context">Bike</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h5l4 8"/><circle cx="10" cy="17" r="4"/><path d="M13 6h5l3 5-4 2"/><line x1="7" y1="8" x2="10" y2="8"/></svg><div><div class="icon-label">Tractor</div><div class="icon-context">Keke (tricycle)</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"/><path d="M6 11H4v2h2"/><circle cx="8" cy="15" r="2"/><circle cx="17" cy="15" r="2"/><path d="M18 11h2v2h-2"/></svg><div><div class="icon-label">Bus</div><div class="icon-context">Bus</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/></svg><div><div class="icon-label">PersonStanding</div><div class="icon-context">Trekking</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18" r="2.5"/><circle cx="18.5" cy="18" r="2.5"/></svg><div><div class="icon-label">Truck</div><div class="icon-context">Bolt Ride</div></div></div>
+      </div>
+
+      <div class="icon-group-label">Trust Levels</div>
+      <div class="icon-grid">
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7F1D1D" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div><div class="icon-label">AlertTriangle</div><div class="icon-context">Low Trust</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><div class="icon-label">Clock</div><div class="icon-context">Developing</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#065F46" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div><div class="icon-label">CheckCircle</div><div class="icon-context">Verified</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><div class="icon-label">ShieldCheck</div><div class="icon-context">Trusted</div></div></div>
+      </div>
+
+      <div class="icon-group-label">Status &amp; Route</div>
+      <div class="icon-grid">
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><div><div class="icon-label">ShieldCheck</div><div class="icon-context">Verified badge</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="12" x2="2" y2="12"/><polyline points="5 9 2 12 5 15"/></svg><div><div class="icon-label">Navigation</div><div class="icon-context">Route / Direction</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 20a8 8 0 0 0 0-16"/></svg><div><div class="icon-label">LocateFixed</div><div class="icon-context">Location pin</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="12" y1="2" x2="12" y2="4"/></svg><div><div class="icon-label">LocateFixed</div><div class="icon-context">Near me</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div><div class="icon-label">Coins</div><div class="icon-context">Fare / Money</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg><div><div class="icon-label">Ruler</div><div class="icon-context">Distance</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><div class="icon-label">Clock</div><div class="icon-context">Time</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg><div><div class="icon-label">Loader2</div><div class="icon-context">Loading spinner</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg><div><div class="icon-label">RefreshCw</div><div class="icon-context">Refresh</div></div></div>
+        <div class="icon-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg><div><div class="icon-label">BarChart2</div><div class="icon-context">Analytics / Stats</div></div></div>
+      </div>
+
+      <details style="margin-top:24px;cursor:pointer;">
+        <summary style="font-size:14px;font-weight:500;color:var(--color-text-secondary)">Show full icon map table (§5.1)</summary>
+        <div style="margin-top:16px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead><tr style="background:var(--color-bg-elevated);">
+              <th style="padding:8px 12px;text-align:left;border-bottom:1px solid var(--color-border);">Context</th>
+              <th style="padding:8px 12px;text-align:left;border-bottom:1px solid var(--color-border);">Icon(s)</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Home / Feed</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Home</code>, <code>HomeIcon</code> (filled active)</td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Explore / Map</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Compass</code>, <code>Map</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Share Route / Create</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>MapPin</code>, <code>Plus</code>, <code>PlusCircle</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Bookmarks</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Bookmark</code>, <code>BookmarkCheck</code> (filled)</td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Notifications</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Bell</code>, <code>BellRing</code> (active)</td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Profile</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>User</code>, <code>UserCircle</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Analytics</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>BarChart2</code>, <code>TrendingUp</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Invite</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>UserPlus</code>, <code>Share2</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Settings</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Settings</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Admin</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Shield</code>, <code>ShieldCheck</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Search</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Search</code>, <code>SearchX</code> (no results)</td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Like</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Heart</code>, <code>HeartIcon</code> (filled active)</td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Dislike</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>ThumbsDown</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Comment</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>MessageCircle</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Share</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Share2</code>, <code>Link2</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">More</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>MoreHorizontal</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Delete</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Trash2</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Edit</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Pencil</code>, <code>Edit2</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Close / Dismiss</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>X</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Back</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>ArrowLeft</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Trust Low</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>AlertTriangle</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Trust Developing</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Clock</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Trust Verified</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>CheckCircle</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Trust Trusted</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>ShieldCheck</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Route / Direction</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Navigation</code>, <code>Route</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Location</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>MapPin</code>, <code>LocateFixed</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Fare / Money</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Coins</code>, <code>Banknote</code>, <code>DollarSign</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Distance</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Ruler</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Time</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Clock</code>, <code>Timer</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Rewards</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Star</code>, <code>Award</code>, <code>Trophy</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Upload</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Upload</code>, <code>ImagePlus</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Camera</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Camera</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Copy</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Copy</code>, <code>CopyCheck</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">QR Code</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>QrCode</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">AI / Sparkle</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Sparkles</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Offline / Online</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>WifiOff</code>, <code>Wifi</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Report / Flag</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Flag</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Block</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Ban</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Filter / Sort</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>Filter</code>, <code>ArrowUpDown</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Drag handle</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>GripVertical</code></td></tr>
+              <tr><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);">Verified badge</td><td style="padding:8px 12px;border-bottom:1px solid var(--color-border);"><code>BadgeCheck</code>, <code>ShieldCheck</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+  </div>
+
+  <script>
+    var dark = false;
+    function toggleTheme() {
+      dark = !dark;
+      document.documentElement.classList.toggle('dark', dark);
+      document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+    }
+    function switchTab(tabsId, tabId, el) {
+      var container = document.getElementById(tabsId);
+      var tabs = container.querySelectorAll('.tab');
+      tabs.forEach(function(t){ t.classList.remove('active'); });
+      el.classList.add('active');
+      var contents = container.parentElement.querySelectorAll('.tab-content');
+      contents.forEach(function(c){ c.classList.remove('active'); });
+      document.getElementById(tabId).classList.add('active');
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      toggleTheme();
+    }
+  </script>
+</body>
+</html>

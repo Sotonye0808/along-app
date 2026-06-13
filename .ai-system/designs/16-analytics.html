@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="along-route" content="design-system" />
+  <meta name="along-component" content="Analytics, AppCard, LineChart, BarChart, DonutChart, AreaChart, KPI" />
+  <title>Analytics — Along Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Inter',-apple-system,system-ui,sans-serif;color:var(--color-text-primary);background:var(--color-bg-base)}
+
+    :root{
+      --color-primary:#00623B;--color-primary-light:#00A862;--color-primary-dark:#004A2C;--color-primary-muted:#E6F4EE;
+      --color-bg-base:#FFFFFF;--color-bg-elevated:#F7F7F7;--color-bg-card:#FFFFFF;--color-bg-overlay:rgba(0,0,0,0.48);
+      --color-text-primary:#1A1A1A;--color-text-secondary:#6B7280;--color-text-muted:#9CA3AF;--color-text-inverse:#FFFFFF;
+      --color-border:#E5E7EB;--color-border-strong:#D1D5DB;
+      --color-success:#D1FAE5;--color-success-text:#065F46;--color-success-border:#6EE7B7;
+      --color-warning:#FEF3C7;--color-warning-text:#92400E;--color-warning-border:#FCD34D;
+      --color-error:#FEE2E2;--color-error-text:#7F1D1D;--color-error-border:#FCA5A5;
+      --color-info:#DBEAFE;--color-info-text:#1E3A8A;--color-info-border:#93C5FD;
+      --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--radius-2xl:24px;--radius-pill:999px;--radius-circle:50%;
+      --shadow-xs:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm:0 2px 8px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+      --shadow-md:0 4px 16px rgba(0,0,0,0.10),0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg:0 8px 32px rgba(0,0,0,0.12),0 4px 16px rgba(0,0,0,0.06);
+      --shadow-xl:0 16px 48px rgba(0,0,0,0.14),0 8px 24px rgba(0,0,0,0.08);
+      --shadow-primary:0 8px 32px rgba(0,98,59,0.20),0 2px 8px rgba(0,98,59,0.12);
+      --duration-fast:120ms;--duration-base:200ms;--duration-moderate:300ms;
+    }
+
+    .nav-bar{position:sticky;top:0;z-index:100;background:var(--color-bg-card);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo svg{width:32px;height:32px}
+    .nav-logo span{font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--color-primary)}
+    .nav-links{display:flex;gap:4px;align-items:center}
+    .nav-links a{text-decoration:none;padding:8px 16px;border-radius:var(--radius-md);font-size:14px;font-weight:500;color:var(--color-text-secondary);transition:background var(--duration-fast) ease-out,color var(--duration-fast) ease-out}
+    .nav-links a:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
+    .nav-links a.active{background:var(--color-primary-muted);color:var(--color-primary)}
+    .page{max-width:1280px;margin:0 auto;padding:0 24px}
+    .section{padding:48px 0;border-bottom:1px solid var(--color-border)}
+    .section-ref{font-size:12px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:4px}
+    .section-title{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px}
+    .section-subtitle{font-size:14px;color:var(--color-text-secondary);margin-bottom:32px}
+
+    .device-row{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;padding:32px}
+    .device-frame{border-radius:var(--radius-xl);border:1px solid var(--color-border);overflow:hidden;box-shadow:var(--shadow-md)}
+    .device-frame .device-label{padding:8px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted);background:var(--color-bg-elevated);border-bottom:1px solid var(--color-border);text-align:center}
+    .frame-mobile{width:375px;min-height:812px}
+    .frame-desktop{width:100%;max-width:1280px;min-height:auto}
+
+    .zone-chip{display:inline-flex;align-items:center;gap:6px;background:var(--color-primary-muted);color:var(--color-primary);font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--radius-pill);letter-spacing:0.04em}
+    .zone-chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ═══════════════════════════════════════════════════════════════
+       ANALYTICS PAGE — Desktop 1280px (DESIGN.md §7.12)
+       ═══════════════════════════════════════════════════════════════ */
+
+    .an-page{max-width:1100px;margin:0 auto;padding:32px 24px;display:flex;flex-direction:column;gap:24px}
+
+    .an-heading{display:flex;align-items:center;justify-content:space-between}
+    .an-heading h1{font-size:28px;font-weight:700;letter-spacing:-0.02em}
+    .an-heading .an-sub{font-size:14px;color:var(--color-text-secondary)}
+    .an-heading-right{display:flex;align-items:center;gap:8px}
+    .an-period-select{padding:6px 12px;border-radius:var(--radius-md);border:1.5px solid var(--color-border);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:var(--color-text-primary);background:var(--color-bg-card);cursor:pointer}
+
+    /* ── KPI row (4 small stat cards) ── */
+    .an-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .an-kpi-card{background:var(--color-bg-elevated);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:16px;display:flex;align-items:center;gap:14px}
+    .an-kpi-card .an-kpi-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .an-kpi-card .an-kpi-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .an-kpi-card .an-kpi-num{font-size:22px;font-weight:700;line-height:1.1}
+    .an-kpi-card .an-kpi-label{font-size:12px;color:var(--color-text-secondary);font-weight:500}
+
+    /* ── Bento 2-col grid ── */
+    .an-bento{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+    /* ── Chart card ── */
+    .an-chart-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-xs)}
+    .an-chart-card.an-elevated{box-shadow:var(--shadow-md);border:none}
+    .an-chart-card.an-flat{background:var(--color-bg-elevated);border:1px solid var(--color-border);box-shadow:none}
+    .an-chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .an-chart-head h3{font-size:15px;font-weight:600}
+    .an-chart-head .an-chart-tag{font-size:11px;padding:2px 8px;border-radius:var(--radius-pill);background:var(--color-primary-muted);color:var(--color-primary);font-weight:600}
+    .an-chart-body{position:relative}
+
+    /* ── SVG chart helpers ── */
+    .an-svg-chart svg{width:100%;height:150px;overflow:visible}
+    .an-grid-line{stroke:var(--color-border);stroke-width:1;stroke-dasharray:3}
+    .an-data-line{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+    .an-data-dot{fill:#fff;stroke-width:2.5;cursor:pointer;transition:r var(--duration-fast)}
+    .an-data-dot:hover{r:5}
+    .an-chart-label{font-size:9px;fill:var(--color-text-muted);text-anchor:middle}
+
+    /* ── Area chart (follower growth) ── */
+    .an-area-fill{fill:var(--color-primary);fill-opacity:0.08}
+    .an-area-line{fill:none;stroke:var(--color-primary);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ── Horizontal bar list ── */
+    .an-bar-list{display:flex;flex-direction:column;gap:8px}
+    .an-bar-row{display:flex;align-items:center;gap:8px}
+    .an-bar-row .an-bar-label{font-size:12px;font-weight:500;width:130px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .an-bar-row .an-bar-track{flex:1;height:18px;background:var(--color-bg-elevated);border-radius:var(--radius-pill);overflow:hidden}
+    .an-bar-row .an-bar-fill{height:100%;border-radius:var(--radius-pill);background:var(--color-primary);transition:width var(--duration-base)}
+    .an-bar-row .an-bar-fill.views{background:var(--color-primary)}
+    .an-bar-row .an-bar-fill.likes{background:var(--color-error-text)}
+    .an-bar-row .an-bar-fill.bookmarks{background:var(--color-info-text)}
+    .an-bar-row .an-bar-value{font-size:11px;font-weight:600;color:var(--color-text-secondary);width:36px;text-align:right;flex-shrink:0}
+
+    /* ── Donut chart ── */
+    .an-donut-wrap{display:flex;align-items:center;gap:20px}
+    .an-donut-svg{width:140px;height:140px;flex-shrink:0}
+    .an-donut-legend{display:flex;flex-direction:column;gap:6px}
+    .an-donut-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500}
+    .an-donut-dot{width:10px;height:10px;border-radius:var(--radius-circle);flex-shrink:0}
+    .an-donut-item .an-donut-pct{font-size:11px;color:var(--color-text-muted);margin-left:auto}
+
+    /* ── 3-line engagement chart legend ── */
+    .an-legend{display:flex;gap:16px;margin-bottom:12px;font-size:11px}
+    .an-legend-item{display:flex;align-items:center;gap:6px;font-weight:500;color:var(--color-text-secondary)}
+    .an-legend-dot{width:8px;height:8px;border-radius:var(--radius-circle)}
+
+    @media(max-width:900px){.an-kpi-row,.an-bento{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<!-- ── Top nav bar ── -->
+<nav class="nav-bar">
+  <a class="nav-logo" href="index.html">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="var(--color-primary)"/><circle cx="12" cy="12" r="3" fill="var(--color-primary-light)"/><circle cx="20" cy="20" r="3" fill="var(--color-primary-light)"/><path d="M12 12L20 20" stroke="var(--color-text-inverse)" stroke-width="2"/></svg>
+    <span>Along</span>
+  </a>
+  <div class="nav-links">
+    <a href="01-design-system-tokens.html">Tokens</a>
+    <a href="02-design-system-components.html">Components</a>
+    <a href="03-landing-light.html">Landing</a>
+    <a href="05-auth-flow.html">Auth</a>
+    <a href="06-home-feed-light.html">Feed</a>
+    <a href="09-explore-map.html">Explore</a>
+    <a href="10-post-detail-light.html">Post</a>
+    <a href="12-profile-page.html">Profile</a>
+    <a href="13-notifications.html">Notifs</a>
+    <a href="14-bookmarks.html">Bmks</a>
+    <a href="15-admin-dashboard.html">Admin</a>
+    <a href="16-analytics.html" class="active">Analytics</a>
+    <a href="17-about-contact.html">About</a>
+  </div>
+</nav>
+
+<div class="section-ref" style="padding:16px 24px 0;max-width:1280px;margin:0 auto">§7.12 Analytics Page</div>
+<div class="section-title" style="padding:0 24px;max-width:1280px;margin:0 auto">Analytics</div>
+<div class="section-subtitle" style="padding:0 24px;max-width:1280px;margin:0 auto">Desktop-only · Bento 2-col grid</div>
+
+<!-- §7.12 Analytics Page — Desktop 1280px -->
+<div class="device-row">
+  <div class="device-frame frame-desktop">
+    <div class="device-label">Desktop 1280px · Analytics</div>
+    <div class="an-page">
+
+      <!-- §7.12 — Page heading -->
+      <div class="an-heading">
+        <div>
+          <h1>Analytics</h1>
+          <div class="an-sub">Performance metrics &amp; insights</div>
+        </div>
+        <div class="an-heading-right">
+          <select class="an-period-select">
+            <option>Last 7 days</option>
+            <option selected>Last 30 days</option>
+            <option>Last 90 days</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- §7.12 — KPI row: 4 small stat cards -->
+      <div class="an-kpi-row">
+        <div class="an-kpi-card">
+          <div class="an-kpi-icon" style="background:var(--color-primary-muted);color:var(--color-primary)"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div><div class="an-kpi-num">128K</div><div class="an-kpi-label">Total Views</div></div>
+        </div>
+        <div class="an-kpi-card">
+          <div class="an-kpi-icon" style="background:var(--color-error);color:var(--color-error-text)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+          <div><div class="an-kpi-num">6,340</div><div class="an-kpi-label">Total Likes</div></div>
+        </div>
+        <div class="an-kpi-card">
+          <div class="an-kpi-icon" style="background:var(--color-success);color:var(--color-success-text)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div><div class="an-kpi-num">71.4</div><div class="an-kpi-label">Avg Score</div></div>
+        </div>
+        <div class="an-kpi-card">
+          <div class="an-kpi-icon" style="background:var(--color-info);color:var(--color-info-text)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div><div class="an-kpi-num">4,281</div><div class="an-kpi-label">Total Posts</div></div>
+        </div>
+      </div>
+
+      <!-- §7.12 — Bento grid -->
+      <div class="an-bento">
+
+        <!-- Engagement over time: line chart (3 lines) — an-elevated -->
+        <div class="an-chart-card an-elevated">
+          <div class="an-chart-head">
+            <h3>Engagement over time</h3>
+            <span class="an-chart-tag">+14.2%</span>
+          </div>
+          <div class="an-chart-body">
+            <!-- §7.12 — Legend (views, likes, bookmarks) -->
+            <div class="an-legend">
+              <span class="an-legend-item"><span class="an-legend-dot" style="background:var(--color-primary)"></span>Views</span>
+              <span class="an-legend-item"><span class="an-legend-dot" style="background:var(--color-error-text)"></span>Likes</span>
+              <span class="an-legend-item"><span class="an-legend-dot" style="background:var(--color-info-text)"></span>Bookmarks</span>
+            </div>
+            <div class="an-svg-chart">
+              <svg viewBox="0 0 500 150">
+                <line x1="40" y1="130" x2="480" y2="130" stroke="var(--color-border)" stroke-width="1"/>
+                <line x1="40" y1="95" x2="480" y2="95" class="an-grid-line"/>
+                <line x1="40" y1="60" x2="480" y2="60" class="an-grid-line"/>
+                <line x1="40" y1="25" x2="480" y2="25" class="an-grid-line"/>
+                <!-- Views line (primary green) -->
+                <polyline points="103,110 166,95 229,100 292,80 355,65 418,70 481,50" class="an-data-line" stroke="var(--color-primary)"/>
+                <circle cx="103" cy="110" r="3" class="an-data-dot" stroke="var(--color-primary)"/>
+                <circle cx="166" cy="95" r="3" class="an-data-dot" stroke="var(--color-primary)"/>
+                <circle cx="229" cy="100" r="3" class="an-data-dot" stroke="var(--color-primary)"/>
+                <circle cx="292" cy="80" r="3" class="an-data-dot" stroke="var(--color-primary)"/>
+                <circle cx="355" cy="65" r="3" class="an-data-dot" stroke="var(--color-primary)"/>
+                <circle cx="418" cy="70" r="3" class="an-data-dot" stroke="var(--color-primary)"/>
+                <circle cx="481" cy="50" r="3.5" fill="var(--color-primary)" stroke="#fff" stroke-width="2"/>
+                <!-- Likes line (error/red) -->
+                <polyline points="103,125 166,118 229,120 292,110 355,105 418,108 481,95" class="an-data-line" stroke="var(--color-error-text)" opacity="0.7"/>
+                <circle cx="103" cy="125" r="3" class="an-data-dot" stroke="var(--color-error-text)"/>
+                <circle cx="166" cy="118" r="3" class="an-data-dot" stroke="var(--color-error-text)"/>
+                <circle cx="229" cy="120" r="3" class="an-data-dot" stroke="var(--color-error-text)"/>
+                <circle cx="292" cy="110" r="3" class="an-data-dot" stroke="var(--color-error-text)"/>
+                <circle cx="355" cy="105" r="3" class="an-data-dot" stroke="var(--color-error-text)"/>
+                <circle cx="418" cy="108" r="3" class="an-data-dot" stroke="var(--color-error-text)"/>
+                <circle cx="481" cy="95" r="3" fill="var(--color-error-text)" stroke="#fff" stroke-width="2"/>
+                <!-- Bookmarks line (info/blue) -->
+                <polyline points="103,128 166,122 229,124 292,117 355,115 418,116 481,108" class="an-data-line" stroke="var(--color-info-text)" opacity="0.6"/>
+                <circle cx="103" cy="128" r="3" class="an-data-dot" stroke="var(--color-info-text)"/>
+                <circle cx="166" cy="122" r="3" class="an-data-dot" stroke="var(--color-info-text)"/>
+                <circle cx="229" cy="124" r="3" class="an-data-dot" stroke="var(--color-info-text)"/>
+                <circle cx="292" cy="117" r="3" class="an-data-dot" stroke="var(--color-info-text)"/>
+                <circle cx="355" cy="115" r="3" class="an-data-dot" stroke="var(--color-info-text)"/>
+                <circle cx="418" cy="116" r="3" class="an-data-dot" stroke="var(--color-info-text)"/>
+                <circle cx="481" cy="108" r="3" fill="var(--color-info-text)" stroke="#fff" stroke-width="2"/>
+                <!-- X labels -->
+                <text x="103" y="142" class="an-chart-label">Mon</text>
+                <text x="166" y="142" class="an-chart-label">Tue</text>
+                <text x="229" y="142" class="an-chart-label">Wed</text>
+                <text x="292" y="142" class="an-chart-label">Thu</text>
+                <text x="355" y="142" class="an-chart-label">Fri</text>
+                <text x="418" y="142" class="an-chart-label">Sat</text>
+                <text x="481" y="142" class="an-chart-label">Sun</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 5 posts by validity: horizontal bar chart — an-elevated -->
+        <div class="an-chart-card an-elevated">
+          <div class="an-chart-head">
+            <h3>Top 5 posts by validity</h3>
+            <span class="an-chart-tag">Verified ↑</span>
+          </div>
+          <div class="an-chart-body">
+            <div class="an-bar-list">
+              <div class="an-bar-row">
+                <span class="an-bar-label">Ikeja → Lekki</span>
+                <div class="an-bar-track"><div class="an-bar-fill views" style="width:92%"></div></div>
+                <span class="an-bar-value">92</span>
+              </div>
+              <div class="an-bar-row">
+                <span class="an-bar-label">Surulere → VI</span>
+                <div class="an-bar-track"><div class="an-bar-fill views" style="width:88%;background:var(--color-error-text)"></div></div>
+                <span class="an-bar-value">88</span>
+              </div>
+              <div class="an-bar-row">
+                <span class="an-bar-label">Mile 2 → Ojota</span>
+                <div class="an-bar-track"><div class="an-bar-fill views" style="width:76%"></div></div>
+                <span class="an-bar-value">76</span>
+              </div>
+              <div class="an-bar-row">
+                <span class="an-bar-label">Abuja → Lugbe</span>
+                <div class="an-bar-track"><div class="an-bar-fill views" style="width:71%;background:var(--color-info-text)"></div></div>
+                <span class="an-bar-value">71</span>
+              </div>
+              <div class="an-bar-row">
+                <span class="an-bar-label">PHC → Rumuokoro</span>
+                <div class="an-bar-track"><div class="an-bar-fill views" style="width:65%;background:var(--color-warning-border)"></div></div>
+                <span class="an-bar-value">65</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Follower growth: area chart — flat -->
+        <div class="an-chart-card an-flat">
+          <div class="an-chart-head">
+            <h3>Follower growth</h3>
+            <span class="an-chart-tag">+18.3%</span>
+          </div>
+          <div class="an-chart-body">
+            <div class="an-svg-chart">
+              <svg viewBox="0 0 500 150">
+                <line x1="40" y1="130" x2="480" y2="130" stroke="var(--color-border)" stroke-width="1"/>
+                <line x1="40" y1="95" x2="480" y2="95" class="an-grid-line"/>
+                <line x1="40" y1="60" x2="480" y2="60" class="an-grid-line"/>
+                <line x1="40" y1="25" x2="480" y2="25" class="an-grid-line"/>
+                <!-- Area fill -->
+                <polygon points="103,130 103,110 166,105 229,108 292,90 355,70 418,82 481,55 481,130" class="an-area-fill"/>
+                <!-- Area line -->
+                <polyline points="103,110 166,105 229,108 292,90 355,70 418,82 481,55" class="an-area-line"/>
+                <circle cx="103" cy="110" r="2.5" fill="var(--color-primary)" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="166" cy="105" r="2.5" fill="var(--color-primary)" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="229" cy="108" r="2.5" fill="var(--color-primary)" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="292" cy="90" r="2.5" fill="var(--color-primary)" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="355" cy="70" r="2.5" fill="var(--color-primary)" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="418" cy="82" r="2.5" fill="var(--color-primary)" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="481" cy="55" r="3" fill="var(--color-primary)" stroke="#fff" stroke-width="2"/>
+                <text x="103" y="142" class="an-chart-label">Mon</text>
+                <text x="166" y="142" class="an-chart-label">Tue</text>
+                <text x="229" y="142" class="an-chart-label">Wed</text>
+                <text x="292" y="142" class="an-chart-label">Thu</text>
+                <text x="355" y="142" class="an-chart-label">Fri</text>
+                <text x="418" y="142" class="an-chart-label">Sat</text>
+                <text x="481" y="142" class="an-chart-label">Sun</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tag distribution: donut chart — flat -->
+        <div class="an-chart-card an-flat">
+          <div class="an-chart-head">
+            <h3>Tag distribution</h3>
+            <span class="an-chart-tag">Top tags</span>
+          </div>
+          <div class="an-chart-body">
+            <div class="an-donut-wrap">
+              <svg class="an-donut-svg" viewBox="0 0 140 140">
+                <!-- Donut segments: total value=100, stroke-dasharray=circumference*value/100,
+                     circumference = 2*pi*50 = 314.16, offset shifts by previous sum -->
+                <!-- #lagos 35% : dasharray 110, offset 0 -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="var(--color-primary)" stroke-width="20" stroke-dasharray="110 204.16" stroke-dashoffset="0"/>
+                <!-- #brt 25% : dasharray 78.5, offset 110 -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="var(--color-warning-border)" stroke-width="20" stroke-dasharray="78.5 235.66" stroke-dashoffset="-110" transform="rotate(-90 70 70)"/>
+                <!-- #abuja 18% : dasharray 56.5, offset 188.5 -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="var(--color-info-text)" stroke-width="20" stroke-dasharray="56.5 257.66" stroke-dashoffset="-188.5" transform="rotate(-90 70 70)"/>
+                <!-- #keke 12% : dasharray 37.7, offset 245 -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="var(--color-error-text)" stroke-width="20" stroke-dasharray="37.7 276.46" stroke-dashoffset="-245" transform="rotate(-90 70 70)"/>
+                <!-- #nightride 10% : dasharray 31.4, offset 282.7 -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="var(--color-text-muted)" stroke-width="20" stroke-dasharray="31.4 282.76" stroke-dashoffset="-282.7" transform="rotate(-90 70 70)"/>
+                <!-- Center hole label -->
+                <text x="70" y="66" text-anchor="middle" font-size="22" font-weight="700" fill="var(--color-text-primary)">100%</text>
+                <text x="70" y="82" text-anchor="middle" font-size="9" fill="var(--color-text-muted)">tags</text>
+              </svg>
+              <div class="an-donut-legend">
+                <div class="an-donut-item"><span class="an-donut-dot" style="background:var(--color-primary)"></span>#lagos<span class="an-donut-pct">35%</span></div>
+                <div class="an-donut-item"><span class="an-donut-dot" style="background:var(--color-warning-border)"></span>#brt<span class="an-donut-pct">25%</span></div>
+                <div class="an-donut-item"><span class="an-donut-dot" style="background:var(--color-info-text)"></span>#abuja<span class="an-donut-pct">18%</span></div>
+                <div class="an-donut-item"><span class="an-donut-dot" style="background:var(--color-error-text)"></span>#keke<span class="an-donut-pct">12%</span></div>
+                <div class="an-donut-item"><span class="an-donut-dot" style="background:var(--color-text-muted)"></span>#nightride<span class="an-donut-pct">10%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

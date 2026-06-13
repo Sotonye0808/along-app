@@ -1,47 +1,24 @@
-export interface AvatarConfig {
-    style: string;
-    seed: string;
-    backgroundColor?: string;
-    radius?: number;
-}
+import type { AvatarConfig } from "@/app/lib/types";
 
-export const DICEBEAR_BASE_URL = "https://api.dicebear.com/9.x";
+const DICEBEAR_BASE = "https://api.dicebear.com/9.x";
 
 export const AVATAR_STYLES = [
-    "adventurer",
-    "adventurer-neutral",
-    "avataaars",
-    "bottts",
-    "fun-emoji",
-    "lorelei",
-    "micah",
-    "open-peeps",
-    "pixel-art",
+  { value: "avataaars", label: "Avataaars" },
+  { value: "bottts", label: "Bottts" },
+  { value: "lorelei", label: "Lorelei" },
+  { value: "notionists", label: "Notionists" },
+  { value: "thumbs", label: "Thumbs" },
 ] as const;
 
-export type AvatarStyle = (typeof AVATAR_STYLES)[number];
-
 export function buildAvatarUrl(config: AvatarConfig): string {
-    const params = new URLSearchParams();
-
-    if (config.backgroundColor) {
-        params.set("backgroundColor", config.backgroundColor.replace("#", ""));
-    }
-
-    if (typeof config.radius === "number") {
-        params.set("radius", String(config.radius));
-    }
-
-    return `${DICEBEAR_BASE_URL}/${config.style}/svg?seed=${encodeURIComponent(config.seed)}&${params.toString()}`;
+  const params = new URLSearchParams();
+  if (config.seed) params.set("seed", config.seed);
+  if (config.flip) params.set("flip", "true");
+  if (config.backgroundColor) params.set("backgroundColor", config.backgroundColor);
+  const qs = params.toString();
+  return `${DICEBEAR_BASE}/${config.style}/svg${qs ? `?${qs}` : ""}`;
 }
 
-export function getFallbackAvatarUrl(seed: string): string {
-    const fallbackConfig: AvatarConfig = {
-        style: "adventurer-neutral",
-        seed,
-        backgroundColor: "dbeafe",
-        radius: 50,
-    };
-
-    return buildAvatarUrl(fallbackConfig);
+export function getFallbackAvatarUrl(firstName: string): string {
+  return `${DICEBEAR_BASE}/avataaars/svg?seed=${encodeURIComponent(firstName)}`;
 }

@@ -1,6 +1,6 @@
 # Repository Map
 
-> Overview: Current folder structure and purpose. Update when the structure changes.
+> **Overview:** Complete folder structure of the Along monorepo with purpose descriptions for each directory. Agents read this first when navigating the codebase.
 
 ---
 
@@ -8,70 +8,115 @@
 
 ```
 along-app/
-  .ai-system/                 -> AI development system
-  app/                        -> Next.js App Router
-    (auth)/                   -> Auth routes (login, register, otp)
-    (dashboard)/              -> Main app routes (home, explore, posts, profile, etc)
-    (admin)/                  -> Admin routes
-    (public)/                 -> Public marketing/legal pages
-    api/                      -> API routes
-    components/               -> UI and feature components
-      features/               -> Feature-specific components
-      ui/                     -> Universal UI wrappers (App*)
-    lib/                      -> Shared logic
-      cache/                  -> Redis helpers
-      config/                 -> Config registries
-      constants/              -> App constants (legacy)
-      db/                     -> Prisma access
-      hooks/                  -> React hooks
-      services/               -> Business logic
-      types/                  -> Global types
-      utils/                  -> Utilities
-    providers/                -> React context providers
-    generated/                -> Prisma client output
-    globals.css               -> Global CSS tokens and base styles
-    layout.tsx                -> Root layout
-    page.tsx                  -> Landing page
-    robots.ts                 -> robots.txt
-    sitemap.ts                -> sitemap.xml
-  prisma/                     -> Prisma schema and migrations
-  public/                     -> Static assets (icons, manifest, sw)
-  .env.example                -> Environment variable template
-  next.config.mjs             -> Next.js config
-  tailwind.config.ts          -> Tailwind config
-  tsconfig.json               -> TypeScript config
-  package.json                -> Dependencies and scripts
+│
+├── .ai-system/              → AI development orchestration system
+│   ├── agents/              → Agent instruction files
+│   ├── checkpoints/         → Session log and checkpoints
+│   ├── commands/            → Executable AI commands
+│   ├── designs/             → HTML design files (17 pages)
+│   ├── docs/                → PRD, design brief, prompts, roadmap
+│   ├── index/               → Repo map and dependency graph
+│   ├── memory/              → Decisions, lessons, architecture history
+│   ├── operations/          → Operations guide
+│   ├── planning/            → Project plan and task queue
+│   ├── summaries/           → Development history
+│   └── testing/             → Test plan and results
+│
+├── .github/                 → GitHub configuration
+│   ├── workflows/           → CI pipeline (build, type-check, test, lint)
+│   └── summaries/           → Previous development phase summaries
+│
+├── prisma/                  → Database layer
+│   ├── schema.prisma        → 14 models, 8 enums, indexes
+│   ├── migrations/          → 3 applied migrations
+│   └── seed.ts              → Development seed data
+│
+├── public/                  → Static assets
+│   ├── sw.js                → Custom service worker (PWA)
+│   ├── offline.html         → Offline fallback page
+│   ├── manifest.json        → PWA manifest
+│   ├── icons/               → App icons (192x192, 512x512)
+│   └── images/              → OG image, favicon, logos
+│
+├── app/                     → Application root (Next.js App Router)
+│   ├── layout.tsx           → Root layout with 6 context providers
+│   ├── globals.css          → Global styles with Tailwind v4
+│   ├── robots.ts            → Robots.txt config
+│   ├── sitemap.ts           → Sitemap generation
+│   ├── hooks/               → App-level custom hooks (useAuth, useFeedInteractions, useRequireAuth)
+│   ├── generated/           → Code-generated files
+│   ├── (auth)/              → Auth pages (login, register, OTP)
+│   ├── (dashboard)/         → Main app (feed, explore, profile, etc.)
+│   ├── (admin)/             → Admin dashboard
+│   ├── (public)/            → Landing, about, contact, legal, faq, blog
+│   │   ├── faq/             → FAQ page with categorized Q&A
+│   │   ├── blog/            → Blog listing page
+│   │   │   ├── posts/       → MDX blog post files
+│   │   │   └── [slug]/      → Blog post detail page
+│   ├── api/                 → REST API routes
+│   │   ├── push/            → Push notification API
+│   │   │   ├── subscribe/   → POST: subscribe to push
+│   │   │   ├── unsubscribe/ → POST: unsubscribe from push
+│   │   │   ├── send/        → POST: QStash-triggered push delivery
+│   │   │   └── vapid-public-key/ → GET: VAPID public key
+│   │   ├── workers/         → QStash background worker endpoints
+│   │   │   ├── feed-invalidate/
+│   │   │   ├── rewards/
+│   │   │   └── validity-recompute/
+│   ├── components/          → React components
+│   │   ├── ui/              → 34 App* universal component wrappers
+│   │   └── features/        → Domain-specific components (comments, posts, profile)
+│   ├── lib/                 → Shared code
+│   │   ├── services/        → 11 OOP services (feed, push sub, QStash, rewards, etc.)
+│   │   ├── config/          → 25 config registry files
+│   │   ├── db/              → Database layer (prisma.ts, redis.ts)
+│   │   ├── hooks/           → Server-compatible custom React hooks
+│   │   ├── schemas/         → Zod validation schemas
+│   │   ├── streams/         → Reactive streams
+│   │   ├── types/           → TypeScript type definitions
+│   │   └── utils/           → 11 utility modules (blog, pushClient, siteConfig, etc.)
+│   └── providers/           → 6 context providers (Auth, OnlineStatus, Push, GlobalModal, GlobalToast, CookieConsent)
+│
+├── node_modules/            → Installed dependencies
+│
+├── instrumentation.ts       → Sentry runtime hooks
+├── next.config.mjs          → Next.js config (Sentry, PWA headers, images)
+├── tailwind.config.ts       → Tailwind theme (colors, shadows, radii)
+├── postcss.config.mjs       → PostCSS with @tailwindcss/postcss
+├── tsconfig.json            → TypeScript config with path aliases
+├── jest.config.js           → Jest config with coverage thresholds
+├── jest.setup.js            → Jest global mocks
+├── .eslintrc.json           → ESLint config
+├── .env                     → Environment variables (populated)
+├── .env.example             → Environment variable template
+├── package.json             → Project manifest and scripts
+└── README.md                → Project overview
 ```
 
 ---
 
 ## Directory Descriptions
 
-| Directory               | Purpose           | Key Files                                       |
-| ----------------------- | ----------------- | ----------------------------------------------- |
-| app/(auth)              | Auth pages        | login/page.tsx, register/page.tsx, otp/page.tsx |
-| app/(dashboard)         | Main app pages    | home/, explore/, posts/, profile/               |
-| app/(admin)             | Admin UI          | admin/\* pages                                  |
-| app/(public)            | Marketing/legal   | about/, contact/, privacy/, terms/              |
-| app/api                 | REST API routes   | auth/, posts/, users/, notifications/           |
-| app/components/features | Feature UI        | posts/, profile/, navigation/, pwa/, map/       |
-| app/components/ui       | UI wrappers       | AppButton, AppCard, AppModal, etc               |
-| app/lib/config          | Config registries | navigation.ts, forms.ts, seo.ts, etc            |
-| app/lib/services        | Business logic    | ValidityEngine, DraftingCoachService, etc       |
-| app/lib/db              | Prisma access     | prisma.ts, repositories                         |
-| prisma                  | ORM schema        | schema.prisma, migrations/                      |
-| public                  | PWA assets        | manifest.json, sw.js, icons                     |
+| Directory | Purpose | Key Files |
+|-----------|---------|-----------|
+| `.ai-system/` | AI development orchestration — agent instructions, plans, designs | `agents/general-instructions.md`, `docs/ROADMAP.md`, `designs/*.html` |
+| `.github/` | GitHub CI and project documentation | `workflows/ci.yml`, `plan.md`, `project-context.md` |
+| `prisma/` | Database schema, migrations, and seed data | `schema.prisma` (14 models), `seed.ts`, `migrations/` |
+| `public/` | Static assets served at root path | `sw.js` (service worker), `manifest.json`, `offline.html` |
+| `app/` | Next.js App Router pages, API routes, components, providers, config registries | `layout.tsx`, `globals.css`, `providers/`, `api/`, `components/ui/`, `lib/config/` |
+| `node_modules/` | NPM dependencies | — |
 
 ---
 
 ## Entry Points
 
-| Purpose          | File                       |
-| ---------------- | -------------------------- |
-| Root layout      | app/layout.tsx             |
-| Dashboard layout | app/(dashboard)/layout.tsx |
-| Auth layout      | app/(auth)/layout.tsx      |
-| Admin layout     | app/(admin)/layout.tsx     |
-| Landing page     | app/page.tsx               |
-| Prisma schema    | prisma/schema.prisma       |
-| Next config      | next.config.mjs            |
+| Purpose | File |
+|---------|------|
+| Application root | `app/layout.tsx` |
+| Global styles | `app/globals.css` |
+| Next.js configuration | `next.config.mjs` |
+| Database schema | `prisma/schema.prisma` |
+| Server instrumentation | `instrumentation.ts` |
+| Environment validation | `.env` / `.env.example` |
+| CI pipeline | `.github/workflows/ci.yml` |
+| AI agent instructions | `.ai-system/agents/general-instructions.md` |

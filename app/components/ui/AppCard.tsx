@@ -1,81 +1,39 @@
-"use client";
+'use client'
 
-import React from "react";
-import Link from "next/link";
-import { Card } from "antd";
+import { cn } from '@/app/lib/utils/cn'
 
-export interface AppCardProps {
-  variant?: "default" | "glass" | "elevated" | "flat" | "suggestion";
-  padding?: "none" | "sm" | "default" | "lg";
-  hover?: boolean;
-  clickable?: boolean;
-  onClick?: () => void;
-  href?: string;
-  className?: string;
-  children: React.ReactNode;
-  glassIntensity?: "low" | "medium" | "high";
+type CardVariant = 'default' | 'elevated' | 'glass' | 'flat' | 'suggestion'
+
+interface AppCardProps {
+  variant?: CardVariant
+  hover?: boolean
+  className?: string
+  children: React.ReactNode
 }
 
-const variantClasses: Record<NonNullable<AppCardProps["variant"]>, string> = {
-  default: "bg-[var(--color-bg-base)] border border-[var(--color-border)]",
-  glass: "glass border border-white/20",
-  elevated:
-    "bg-[var(--color-bg-base)] border border-[var(--color-border)] shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
-  flat: "bg-[var(--color-bg-elevated)] border border-transparent shadow-none",
-  suggestion:
-    "bg-[var(--color-primary)]/[0.03] border-l-4 border-l-[var(--color-primary)] border border-[var(--color-border)]",
-};
+const variantClasses: Record<CardVariant, string> = {
+  default: 'bg-bg-card border border-border shadow-sm radius-lg',
+  elevated: 'bg-bg-card shadow-md radius-lg',
+  glass: 'glass radius-xl',
+  flat: 'bg-bg-elevated border border-border radius-lg',
+  suggestion: 'bg-primary-muted border border-border shadow-sm border-l-4 border-l-primary',
+}
 
-const paddingClasses: Record<NonNullable<AppCardProps["padding"]>, string> = {
-  none: "!p-0",
-  sm: "!p-3",
-  default: "!p-4",
-  lg: "!p-6",
-};
-
-export function AppCard({
-  variant = "default",
-  padding = "default",
-  hover,
-  clickable,
-  onClick,
-  href,
+export default function AppCard({
+  variant = 'default',
+  hover = false,
   className,
   children,
-  glassIntensity = "medium",
-}: AppCardProps): React.ReactElement {
-  const glassClass =
-    variant === "glass"
-      ? glassIntensity === "low"
-        ? "backdrop-blur-sm"
-        : glassIntensity === "high"
-          ? "backdrop-blur-xl"
-          : "backdrop-blur-lg"
-      : "";
-
-  const card = (
-    <Card
-      onClick={onClick}
-      className={[
-        "!rounded-[var(--radius-card)] transition-all",
+}: AppCardProps) {
+  return (
+    <div
+      className={cn(
         variantClasses[variant],
-        paddingClasses[padding],
-        glassClass,
-        hover
-          ? "hover:shadow-[0_8px_32px_rgba(0,98,59,0.15)] hover:-translate-y-0.5"
-          : "",
-        clickable || href ? "cursor-pointer" : "",
-        className ?? "",
-      ]
-        .join(" ")
-        .trim()}>
+        hover && 'transition-all duration-base hover:-translate-y-0.5 hover:shadow-md',
+        className,
+      )}
+    >
       {children}
-    </Card>
-  );
-
-  if (href) {
-    return <Link href={href}>{card}</Link>;
-  }
-
-  return card;
+    </div>
+  )
 }

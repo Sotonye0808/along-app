@@ -1,52 +1,55 @@
 "use client";
 
-import React from "react";
-import type { ToastPayload } from "@/lib/services/toastService";
-import { ToastService } from "@/lib/services/toastService";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { GlobalUndoToast } from "@/app/components/ui";
+import { toastService } from "@/app/lib/services/toastService";
+import type { ToastOptions } from "@/app/lib/services/toastService";
 
-interface GlobalToastContextValue {
-  currentToast: ToastPayload | null;
-  clearToast: () => void;
-}
+export function GlobalToastProvider({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState<ToastOptions | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-const GlobalToastContext = React.createContext<GlobalToastContextValue>({
-  currentToast: null,
-  clearToast: () => undefined,
-});
-
-export function GlobalToastProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.ReactElement {
-  const [currentToast, setCurrentToast] = React.useState<ToastPayload | null>(
-    null,
-  );
-
-  React.useEffect(() => {
-    ToastService.registerListener((payload) => {
-      setCurrentToast(payload);
-      if (payload.durationMs) {
-        window.setTimeout(() => {
-          setCurrentToast((prev) => (prev === payload ? null : prev));
-        }, payload.durationMs);
-      }
-    });
-
-    return () => {
-      ToastService.unregisterListener();
-    };
+  const close = useCallback(() => {
+    setOpen(false);
+    setOptions(null);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    toastService.close();
   }, []);
 
-  const clearToast = React.useCallback(() => setCurrentToast(null), []);
+  useEffect(() => {
+    toastService.register((opts) => {
+      if (opts) {
+        setOptions(opts);
+        setOpen(true);
+        if (opts.duration) {
+          timerRef.current = setTimeout(close, opts.duration);
+        }
+      } else {
+        close();
+      }
+    });
+    return () => {
+      toastService.unregister();
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [close]);
 
   return (
-    <GlobalToastContext.Provider value={{ currentToast, clearToast }}>
+    <>
       {children}
-    </GlobalToastContext.Provider>
+      {options && (
+        <GlobalUndoToast
+          open={open}
+          message={options.message}
+          undoLabel={options.undoLabel}
+          onUndo={options.onUndo || (() => {})}
+          onAutoClose={close}
+        />
+      )}
+    </>
   );
-}
-
-export function useGlobalToast(): GlobalToastContextValue {
-  return React.useContext(GlobalToastContext);
 }

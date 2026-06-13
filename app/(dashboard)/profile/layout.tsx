@@ -1,36 +1,11 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/app/lib/utils/metadata";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Profile",
-  description:
-    "View and edit your Along profile. Manage your posts, followers, and travel experiences.",
-  keywords: [
-    "profile",
-    "user profile",
-    "my profile",
-    "Along",
-    "edit profile",
-    "my posts",
-  ],
-  openGraph: {
-    title: "Profile | Along",
-    description:
-      "View and edit your Along profile. Manage your posts, followers, and travel experiences.",
-    type: "profile",
-    url: "/profile",
-  },
-  twitter: {
-    card: "summary",
-    title: "Profile | Along",
-    description:
-      "View and edit your Along profile. Manage your posts, followers, and travel experiences.",
-  },
-};
+  description: "Your route contributions and community reputation.",
+  path: "/profile",
+});
 
-export default function ProfileLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+export default function ProfileLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

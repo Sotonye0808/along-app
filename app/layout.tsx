@@ -1,77 +1,50 @@
 import type { Metadata } from "next";
-import { AntdProvider } from "./providers/AntdProvider";
-import { AuthProvider } from "./providers/AuthProvider";
-import { CookieConsentProvider } from "./providers/CookieConsentProvider";
-import { GlobalModalProvider } from "./providers/GlobalModalProvider";
-import { GlobalToastProvider } from "./providers/GlobalToastProvider";
-import { ThemeProvider } from "./providers/ThemeProvider";
-import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
-import { InstallPrompt } from "./components/features/pwa";
-import { CookieConsent } from "./components/ui/CookieConsent";
-import { GlobalConfirmModal } from "./components/ui/GlobalConfirmModal";
-import { GlobalUndoToast } from "./components/ui/GlobalUndoToast";
-import { DEFAULT_OG_IMAGE, getSiteUrl } from "./lib/utils/metadata";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import Script from "next/script";
+import { AuthProvider } from "@/app/providers/AuthProvider";
+import { GlobalModalProvider } from "@/app/providers/GlobalModalProvider";
+import { GlobalToastProvider } from "@/app/providers/GlobalToastProvider";
+import { CookieConsentProvider } from "@/app/providers/CookieConsentProvider";
+import { OnlineStatusProvider } from "@/app/providers/OnlineStatusProvider";
+import { PushProvider } from "@/app/providers/PushProvider";
+import { ThemeProvider } from "@/app/providers/ThemeProvider";
+import { I18nProvider } from "@/app/providers/I18nProvider";
+import ThemeToggle from "@/app/components/ui/ThemeToggle";
+import BackToTop from "@/app/components/ui/BackToTop";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
-  title: {
-    default: "Along - Share Your Travel Routes",
-    template: "%s | Along",
-  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://along.app"),
+  title: "Along — Navigate Together",
   description:
-    "Discover and share amazing travel routes with the Along community. Connect with fellow travelers, bookmark routes, and plan your next adventure.",
-  keywords: [
-    "travel",
-    "routes",
-    "social",
-    "community",
-    "destinations",
-    "adventure",
-    "Along",
-    "travel planning",
-  ],
-  authors: [{ name: "Along Team" }],
-  creator: "Along",
-  publisher: "Along",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
+    "Along is a social travel-intelligence platform for sharing, verifying, and discovering transport routes in West Africa.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
-  metadataBase: new URL(getSiteUrl()),
+  manifest: "/manifest.json",
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "/",
-    title: "Along - Share Your Travel Routes",
-    description:
-      "Discover and share amazing travel routes with the Along community. Connect with fellow travelers, bookmark routes, and plan your next adventure.",
+    title: "Along — Navigate Together",
+    description: "Along is a social travel-intelligence platform for sharing, verifying, and discovering transport routes in West Africa.",
+    url: process.env.NEXT_PUBLIC_APP_URL ?? "https://along.app",
     siteName: "Along",
-    images: [
-      {
-        url: DEFAULT_OG_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: "Along - Share Your Travel Routes",
-      },
-    ],
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Along - Share Your Travel Routes",
-    description:
-      "Discover and share amazing travel routes with the Along community. Connect with fellow travelers, bookmark routes, and plan your next adventure.",
-    images: ["/assets/images/og-image.png"],
-    creator: "@along_app",
-  },
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Along",
+    title: "Along — Navigate Together",
+    description: "Along is a social travel-intelligence platform for sharing, verifying, and discovering transport routes in West Africa.",
+    images: ["/og-image.png"],
   },
   other: {
-    "mobile-web-app-capable": "yes",
+    "google-site-verification": process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "",
   },
 };
 
@@ -81,34 +54,44 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#00623B" />
-        <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      </head>
-      <body className="font-sans antialiased">
-        <ServiceWorkerRegistration />
-        <ThemeProvider>
-          <CookieConsentProvider>
-            <GlobalToastProvider>
-              <GlobalModalProvider>
-                <AntdProvider>
-                  <AuthProvider>
-                    {children}
-                    <InstallPrompt />
-                    <CookieConsent />
-                    <GlobalConfirmModal />
-                    <GlobalUndoToast />
-                  </AuthProvider>
-                </AntdProvider>
-              </GlobalModalProvider>
-            </GlobalToastProvider>
-          </CookieConsentProvider>
-        </ThemeProvider>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body>
+        <Script id="resource-hints" strategy="afterInteractive">
+          {`
+            const hints = [
+              { rel: "preconnect", href: "https://fonts.googleapis.com" },
+              { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+              { rel: "preconnect", href: "https://api.mapbox.com" },
+              { rel: "dns-prefetch", href: "https://api.mapbox.com" },
+            ];
+            hints.forEach(h => {
+              const link = document.createElement("link");
+              link.rel = h.rel;
+              link.href = h.href;
+              if (h.crossOrigin) link.crossOrigin = h.crossOrigin;
+              document.head.appendChild(link);
+            });
+          `}
+        </Script>
+        <I18nProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <OnlineStatusProvider>
+                <PushProvider>
+                  <GlobalModalProvider>
+                    <GlobalToastProvider>
+                      <CookieConsentProvider>
+                        {children}
+                        <ThemeToggle />
+                        <BackToTop />
+                      </CookieConsentProvider>
+                    </GlobalToastProvider>
+                  </GlobalModalProvider>
+                </PushProvider>
+              </OnlineStatusProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </I18nProvider>
       </body>
     </html>
   );

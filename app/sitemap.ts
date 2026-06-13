@@ -1,145 +1,60 @@
-import { MetadataRoute } from 'next';
-import { getSiteUrl } from '@/lib/utils/metadata';
+import type { MetadataRoute } from "next";
+import { prisma } from "@/app/lib/db/prisma";
+import { DEFAULT_META } from "@/app/lib/config";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = getSiteUrl();
+  const baseUrl = DEFAULT_META.url;
 
-    // Static routes
-    const staticRoutes: MetadataRoute.Sitemap = [
-        {
-            url: baseUrl,
-            lastModified: new Date(),
-            changeFrequency: 'daily',
-            priority: 1,
-        },
-        {
-            url: `${baseUrl}/login`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/register`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/home`,
-            lastModified: new Date(),
-            changeFrequency: 'hourly',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/explore`,
-            lastModified: new Date(),
-            changeFrequency: 'daily',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/marketplace`,
-            lastModified: new Date(),
-            changeFrequency: 'daily',
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/bookmarks`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.6,
-        },
-        {
-            url: `${baseUrl}/notifications`,
-            lastModified: new Date(),
-            changeFrequency: 'hourly',
-            priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/profile`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.6,
-        },
-        {
-            url: `${baseUrl}/analytics`,
-            lastModified: new Date(),
-            changeFrequency: 'daily',
-            priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/events`,
-            lastModified: new Date(),
-            changeFrequency: 'daily',
-            priority: 0.6,
-        },
-        {
-            url: `${baseUrl}/invite`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/about`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/contact`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.6,
-        },
-        {
-            url: `${baseUrl}/privacy`,
-            lastModified: new Date(),
-            changeFrequency: 'yearly',
-            priority: 0.3,
-        },
-        {
-            url: `${baseUrl}/terms`,
-            lastModified: new Date(),
-            changeFrequency: 'yearly',
-            priority: 0.3,
-        },
-    ];
+  const staticPages: MetadataRoute.Sitemap = [
+    { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
+    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/explore`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+  ];
 
-    const isLocalHost =
-        baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1");
+  const dynamicPages: MetadataRoute.Sitemap = [];
 
-    if (isLocalHost) {
-        return staticRoutes;
+  try {
+    const posts = await prisma.post.findMany({
+      where: {},
+      select: { id: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
+      take: 1000,
+    });
+
+    for (const post of posts) {
+      dynamicPages.push({
+        url: `${baseUrl}/posts/${post.id}`,
+        lastModified: post.updatedAt,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      });
     }
+  } catch {
+    // DB not available at build time — skip dynamic pages
+  }
 
-    try {
-        // Fetch all posts for dynamic routes
-        const postsResponse = await fetch(`${baseUrl}/api/posts`, {
-            next: { revalidate: 3600 },
-        });
-        const posts = postsResponse.ok ? (await postsResponse.json()) as Post[] : [];
+  try {
+    const users = await prisma.user.findMany({
+      where: {},
+      select: { userName: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
+      take: 1000,
+    });
 
-        const postRoutes: MetadataRoute.Sitemap = (posts || []).map((post) => ({
-            url: `${baseUrl}/posts/${post.id}`,
-            lastModified: new Date(post.updatedAt),
-            changeFrequency: 'weekly' as const,
-            priority: 0.7,
-        }));
-
-        // Fetch all users for dynamic profile routes
-        const usersResponse = await fetch(`${baseUrl}/api/users`, {
-            next: { revalidate: 3600 },
-        });
-        const users = usersResponse.ok ? (await usersResponse.json()) as User[] : [];
-
-        const userRoutes: MetadataRoute.Sitemap = users.map((user) => ({
-            url: `${baseUrl}/profile/${user.userName}`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly' as const,
-            priority: 0.6,
-        }));
-
-        return [...staticRoutes, ...postRoutes, ...userRoutes];
-    } catch {
-        return staticRoutes;
+    for (const user of users) {
+      dynamicPages.push({
+        url: `${baseUrl}/profile/${user.userName}`,
+        lastModified: user.updatedAt,
+        changeFrequency: "weekly",
+        priority: 0.6,
+      });
     }
+  } catch {
+    // DB not available — skip
+  }
+
+  return [...staticPages, ...dynamicPages];
 }

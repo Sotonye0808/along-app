@@ -1,286 +1,140 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { PostCard } from "@/components/features/posts/PostCard";
-import { useAuth } from "../../providers/AuthProvider";
-import { api } from "@/lib/utils/api";
-import { API_ENDPOINTS, APP_ROUTES } from "@/lib/constants";
-import { ToastService } from "@/lib/services/toastService";
-import { ModalService } from "@/lib/services/modalService";
-import { AppEmptyState } from "@/components/ui/AppEmptyState";
-import { AppSpinner } from "@/components/ui/AppSpinner";
-import { EMPTY_STATES } from "@/lib/config/emptyStates";
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { X, ThumbsUp, MessageCircle } from "lucide-react"
+import { AppEmptyState } from "@/app/components/ui"
+import { EMPTY_STATES } from "@/app/lib/config"
 
-interface PostWithAuthor extends Post {
-  author: User;
+interface BookmarkedPost {
+  id: string
+  title: string
+  tags: string[]
+  likes: number
+  comments: number
+  createdAt: string
+  user: {
+    id: string
+    userName: string
+    firstName: string
+    lastName: string
+    avatar?: string | null
+    avatarConfig?: unknown
+  }
+  bookmarkedAt: string
 }
 
-export default function BookmarksPage(): React.ReactElement {
-  const { user, isAuthenticated } = useAuth();
-  const [bookmarkedPosts, setBookmarkedPosts] = useState<PostWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userInteractions, setUserInteractions] = useState({
-    likes: new Set<string>(),
-    dislikes: new Set<string>(),
-    bookmarks: new Set<string>(),
-  });
-  const router = useRouter();
+function getTimeAgo(date: string): string {
+  const diff = Date.now() - new Date(date).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days}d ago`
+  return new Date(date).toLocaleDateString()
+}
 
-  const fetchBookmarkedPosts = useCallback(async () => {
-    if (!user) return;
-    try {
-      const [postsResponse, usersResponse] = await Promise.all([
-        api.get<Post[]>(API_ENDPOINTS.POSTS),
-        api.get<User[]>(API_ENDPOINTS.USERS),
-      ]);
-      const usersMap = new Map(
-        (usersResponse.data || []).map((u) => [u.id, u]),
-      );
-      const bookmarkedPostIds = user.bookmarks ?? [];
-      const bookmarked = postsResponse.data
-        .filter((post) => bookmarkedPostIds.includes(post.id))
-        .map((post) => ({
-          ...post,
-          author:
-            usersMap.get(post.userId) ??
-            ({
-              id: post.userId,
-              userName: "unknown",
-              firstName: "Unknown",
-              lastName: "User",
-              email: "",
-              createdAt: new Date().toISOString(),
-            } as User),
-        }))
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-      setBookmarkedPosts(bookmarked);
-    } catch {
-      ToastService.error("Failed to load bookmarks");
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+function formatCount(n: number): string {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
+  return String(n)
+}
 
-  const fetchUserInteractions = useCallback(async () => {
-    if (!user) return;
-    try {
-      const postsResponse = await api.get<Post[]>(API_ENDPOINTS.POSTS);
-      const likes = new Set<string>();
-      const dislikes = new Set<string>();
-      const bookmarks = new Set(user.bookmarks ?? []);
-      for (const post of postsResponse.data) {
-        try {
-          const likeCheck = await api.get<Like | null>(
-            `${API_ENDPOINTS.POST_LIKE(post.id)}?userId=${user.id}`,
-          );
-          if (likeCheck.data) {
-            if (likeCheck.data.type === "like") likes.add(post.id);
-            else if (likeCheck.data.type === "dislike") dislikes.add(post.id);
-          }
-        } catch {
-          // ignore
-        }
-      }
-      setUserInteractions({ likes, dislikes, bookmarks });
-    } catch {
-      // silent
-    }
-  }, [user]);
+export default function BookmarksPage() {
+  const [bookmarks, setBookmarks] = useState<BookmarkedPost[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
-      const run = async () => {
-        const confirmed = await ModalService.confirm({
-          title: "Login required",
-          description: "You need to be signed in to view your bookmarks.",
-          confirmLabel: "Sign in",
-          cancelLabel: "Go home",
-        });
-        router.push(confirmed ? APP_ROUTES.LOGIN : APP_ROUTES.HOME);
-      };
-      void run();
-      setLoading(false);
-      return;
-    }
-    void fetchBookmarkedPosts();
-    void fetchUserInteractions();
-  }, [user, isAuthenticated, fetchBookmarkedPosts, fetchUserInteractions, router]);
-
-  const handleLike = async (postId: string) => {
-    if (!user) return;
-    const wasLiked = userInteractions.likes.has(postId);
-    const wasDisliked = userInteractions.dislikes.has(postId);
-    try {
-      setUserInteractions((prev) => {
-        const newLikes = new Set(prev.likes);
-        const newDislikes = new Set(prev.dislikes);
-        if (wasLiked) {
-          newLikes.delete(postId);
-        } else {
-          newLikes.add(postId);
-          newDislikes.delete(postId);
-        }
-        return { ...prev, likes: newLikes, dislikes: newDislikes };
-      });
-      setBookmarkedPosts((prev) =>
-        prev.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                likes: wasLiked ? post.likes - 1 : post.likes + 1,
-                dislikes: wasDisliked ? post.dislikes - 1 : post.dislikes,
-              }
-            : post,
-        ),
-      );
-      await api.post(API_ENDPOINTS.POST_LIKE(postId), {
-        userId: user.id,
-        type: wasLiked ? null : "like",
-      });
-    } catch {
-      ToastService.error("Failed to update like");
-      void fetchBookmarkedPosts();
-      void fetchUserInteractions();
-    }
-  };
-
-  const handleDislike = async (postId: string) => {
-    if (!user) return;
-    const wasDisliked = userInteractions.dislikes.has(postId);
-    const wasLiked = userInteractions.likes.has(postId);
-    try {
-      setUserInteractions((prev) => {
-        const newLikes = new Set(prev.likes);
-        const newDislikes = new Set(prev.dislikes);
-        if (wasDisliked) {
-          newDislikes.delete(postId);
-        } else {
-          newDislikes.add(postId);
-          newLikes.delete(postId);
-        }
-        return { ...prev, likes: newLikes, dislikes: newDislikes };
-      });
-      setBookmarkedPosts((prev) =>
-        prev.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                dislikes: wasDisliked ? post.dislikes - 1 : post.dislikes + 1,
-                likes: wasLiked ? post.likes - 1 : post.likes,
-              }
-            : post,
-        ),
-      );
-      await api.post(API_ENDPOINTS.POST_LIKE(postId), {
-        userId: user.id,
-        type: wasDisliked ? null : "dislike",
-      });
-    } catch {
-      ToastService.error("Failed to update dislike");
-      void fetchBookmarkedPosts();
-      void fetchUserInteractions();
-    }
-  };
-
-  const handleComment = (postId: string) => {
-    router.push(`/posts/${postId}`);
-  };
-
-  const handleBookmark = async (postId: string) => {
-    if (!user) return;
-    const wasBookmarked = userInteractions.bookmarks.has(postId);
-    try {
-      setUserInteractions((prev) => {
-        const newBookmarks = new Set(prev.bookmarks);
-        if (wasBookmarked) {
-          newBookmarks.delete(postId);
-        } else {
-          newBookmarks.add(postId);
-        }
-        return { ...prev, bookmarks: newBookmarks };
-      });
-      if (wasBookmarked) {
-        setBookmarkedPosts((prev) => prev.filter((post) => post.id !== postId));
+    const load = async () => {
+      try {
+        await fetch("/api/posts?limit=50")
+        setBookmarks([])
+      } catch {
+        console.error("Failed to load bookmarks")
+      } finally {
+        setLoading(false)
       }
-      await api.post(API_ENDPOINTS.POST_BOOKMARK(postId), {
-        userId: user.id,
-        action: wasBookmarked ? "remove" : "add",
-      });
-      ToastService.success(
-        wasBookmarked ? "Removed from bookmarks" : "Added to bookmarks",
-      );
+    }
+    load()
+  }, [])
+
+  const removeBookmark = async (postId: string) => {
+    try {
+      await fetch(`/api/posts/${postId}/bookmark`, { method: "POST" })
+      setBookmarks((prev) => prev.filter((b) => b.id !== postId))
     } catch {
-      ToastService.error("Failed to update bookmark");
-      void fetchBookmarkedPosts();
-      void fetchUserInteractions();
+      console.error("Failed to remove bookmark")
     }
-  };
-
-  const handleShare = (postId: string) => {
-    const shareUrl = `${window.location.origin}/posts/${postId}`;
-    if (navigator.share) {
-      navigator
-        .share({ title: "Check out this route on Along", url: shareUrl })
-        .catch(() => {
-          void navigator.clipboard.writeText(shareUrl);
-          ToastService.success("Link copied to clipboard");
-        });
-    } else {
-      void navigator.clipboard.writeText(shareUrl);
-      ToastService.success("Link copied to clipboard");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <AppSpinner size={32} />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || !user) {
-    return <></>;
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="mb-6 text-2xl font-bold text-[var(--color-text-primary)]">
-        Saved Routes
-      </h1>
+    <div className="max-w-[640px] mx-auto px-4">
+      <div className="flex items-center justify-between py-4 border-b border-border mb-4">
+        <h1 className="text-[22px] font-semibold tracking-tight">Bookmarks</h1>
+        {bookmarks.length > 0 && (
+          <span className="text-sm text-text-secondary">{bookmarks.length} saved</span>
+        )}
+      </div>
 
-      {bookmarkedPosts.length === 0 ? (
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <AppEmptyState
-            title={EMPTY_STATES.noBookmarks.title}
-            description={EMPTY_STATES.noBookmarks.description}
-            icon={EMPTY_STATES.noBookmarks.icon}
-          />
+      {loading ? (
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-bg-card border border-border radius-lg p-4 animate-pulse">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-circle bg-bg-elevated" />
+                <div className="h-3 bg-bg-elevated radius-md w-32" />
+              </div>
+              <div className="h-4 bg-bg-elevated radius-md w-3/4 mb-2" />
+              <div className="h-3 bg-bg-elevated radius-md w-1/2" />
+            </div>
+          ))}
+        </div>
+      ) : bookmarks.length === 0 ? (
+        <div className="py-8">
+          <AppEmptyState {...EMPTY_STATES.bookmarks} />
         </div>
       ) : (
-        <div className="space-y-4">
-          {bookmarkedPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              author={post.author}
-              currentUserId={user.id}
-              onLike={handleLike}
-              onDislike={handleDislike}
-              onComment={handleComment}
-              onBookmark={handleBookmark}
-              onShare={handleShare}
-              isLiked={userInteractions.likes.has(post.id)}
-              isDisliked={userInteractions.dislikes.has(post.id)}
-              isBookmarked={userInteractions.bookmarks.has(post.id)}
-            />
-          ))}
+        <div className="flex flex-col gap-3">
+          {bookmarks.map((bookmark) => {
+            const initials = `${bookmark.user.firstName[0]}${bookmark.user.lastName[0]}`.toUpperCase()
+            return (
+              <div key={bookmark.id} className="bg-bg-card border border-border radius-lg p-4 relative transition-shadow duration-base hover:shadow-md group">
+                <button
+                  onClick={() => removeBookmark(bookmark.id)}
+                  className="absolute top-2.5 right-2.5 w-7 h-7 rounded-circle bg-bg-elevated text-text-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-fast border-none cursor-pointer hover:text-error-text hover:bg-error"
+                  aria-label="Remove bookmark"
+                >
+                  <X size={14} />
+                </button>
+                <div className="flex items-center gap-2 mb-2">
+                  <Link href={`/profile/${bookmark.user.userName}`} onClick={(e) => e.stopPropagation()} className="w-7 h-7 rounded-circle bg-primary-muted flex items-center justify-center text-[10px] font-bold text-primary shrink-0 no-underline">
+                    {initials}
+                  </Link>
+                  <Link href={`/profile/${bookmark.user.userName}`} onClick={(e) => e.stopPropagation()} className="text-xs font-semibold text-text-primary no-underline hover:underline flex-1">
+                    {bookmark.user.firstName} {bookmark.user.lastName}
+                  </Link>
+                  <Link href={`/profile/${bookmark.user.userName}`} onClick={(e) => e.stopPropagation()} className="text-xs text-text-muted no-underline hover:underline">@{bookmark.user.userName}</Link>
+                </div>
+                <Link href={`/posts/${bookmark.id}`} onClick={(e) => e.stopPropagation()} className="text-sm font-semibold text-text-primary no-underline hover:underline mb-1.5 block">
+                  {bookmark.title}
+                </Link>
+                <div className="flex items-center gap-2 text-xs text-text-muted flex-wrap">
+                  <span className="inline-flex items-center gap-1"><ThumbsUp size={12} /> {formatCount(bookmark.likes)}</span>
+                  <span className="inline-flex items-center gap-1"><MessageCircle size={12} /> {formatCount(bookmark.comments)}</span>
+                  {bookmark.tags.slice(0, 3).map((tag) => (
+                    <Link key={tag} href={`/explore?tag=${encodeURIComponent(tag)}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 radius-pill text-[10px] font-medium bg-bg-elevated text-text-secondary no-underline">
+                      #{tag}
+                    </Link>
+                  ))}
+                  <span>Saved · {getTimeAgo(bookmark.createdAt)}</span>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
-  );
+  )
 }

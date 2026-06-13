@@ -14,8 +14,31 @@ import type { User as PrismaUser } from '../app/generated/prisma/client';
 import { DEFAULT_EMAIL_CONFIG, DEFAULT_EMAIL_TEMPLATES } from '../app/lib/config/email';
 import { DEFAULT_VALIDITY_CONFIG } from '../app/lib/config/validityConfig';
 import { DEFAULT_FEED_CONFIG } from '../app/lib/config/feedAlgorithm';
+import type { VehicleType } from '../app/lib/types';
 
 // Type definitions for seed data
+interface Coordinate {
+    lat: number;
+    lng: number;
+}
+
+interface RouteLink {
+    text: string;
+    url: string;
+}
+
+interface Route {
+    id: string;
+    text: string;
+    links: RouteLink[];
+    order: number;
+    vehicles: VehicleType[];
+    status: string;
+    fare: number;
+    lat?: number;
+    lng?: number;
+}
+
 interface SeedUser {
     userName: string;
     firstName: string;
@@ -32,6 +55,14 @@ interface SeedPost {
     tags: string[];
     routes: Route[];
     images: string[];
+    startLat?: number;
+    startLng?: number;
+    endLat?: number;
+    endLng?: number;
+    waypoints?: Coordinate[];
+    region?: string;
+    totalDistanceKm?: number;
+    estimatedMins?: number;
 }
 
 interface SeedComment {
@@ -255,7 +286,22 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 150,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1590674899484-d5640d0f7b1f?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1569517822092-81d3a7f90e9b?w=600&h=400&fit=crop',
+            ],
+            startLat: 6.6059,
+            startLng: 3.3494,
+            endLat: 6.4281,
+            endLng: 3.4193,
+            waypoints: [
+                { lat: 6.5244, lng: 3.3742 },
+                { lat: 6.4689, lng: 3.3915 },
+                { lat: 6.4356, lng: 3.4061 },
+            ],
+            region: 'Lagos',
+            totalDistanceKm: 12.5,
+            estimatedMins: 45,
         },
         {
             userId: users[1].id, // Ada
@@ -290,7 +336,22 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 150,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1569517822092-81d3a7f90e9b?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1590674899484-d5640d0f7b1f?w=600&h=400&fit=crop',
+            ],
+            startLat: 6.6059,
+            startLng: 3.3494,
+            endLat: 7.3775,
+            endLng: 3.9470,
+            waypoints: [
+                { lat: 6.7281, lng: 3.5089 },
+                { lat: 6.8932, lng: 3.6348 },
+                { lat: 7.1435, lng: 3.8315 },
+            ],
+            region: 'Lagos-Ibadan',
+            totalDistanceKm: 145,
+            estimatedMins: 150,
         },
         {
             userId: users[2].id, // Emeka
@@ -325,7 +386,22 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 150,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1590674899484-d5640d0f7b1f?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1569517822092-81d3a7f90e9b?w=600&h=400&fit=crop',
+            ],
+            startLat: 9.1584,
+            startLng: 7.3240,
+            endLat: 9.0559,
+            endLng: 7.4891,
+            waypoints: [
+                { lat: 9.1268, lng: 7.3520 },
+                { lat: 9.0872, lng: 7.4125 },
+                { lat: 9.0689, lng: 7.4521 },
+            ],
+            region: 'Abuja',
+            totalDistanceKm: 18,
+            estimatedMins: 45,
         },
         {
             userId: users[4].id, // Tunde
@@ -369,7 +445,23 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 0,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1469854523086-cc02fe5bbc80?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=400&fit=crop',
+            ],
+            startLat: 6.6059,
+            startLng: 3.3494,
+            endLat: 9.0765,
+            endLng: 7.3986,
+            waypoints: [
+                { lat: 7.1023, lng: 3.6382 },
+                { lat: 7.7823, lng: 4.5732 },
+                { lat: 8.0751, lng: 5.2518 },
+                { lat: 8.4291, lng: 5.9318 },
+            ],
+            region: 'Lagos-Abuja',
+            totalDistanceKm: 750,
+            estimatedMins: 540,
         },
         {
             userId: users[3].id, // Ngozi
@@ -404,7 +496,21 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 200,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1596179576071-c668e4a16a15?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1582062311609-f319eb5b4c06?w=600&h=400&fit=crop',
+            ],
+            startLat: 6.4511,
+            startLng: 7.5022,
+            endLat: 6.4493,
+            endLng: 7.5098,
+            waypoints: [
+                { lat: 6.4505, lng: 7.5045 },
+                { lat: 6.4497, lng: 7.5068 },
+            ],
+            region: 'Enugu',
+            totalDistanceKm: 1.2,
+            estimatedMins: 20,
         },
         {
             userId: users[6].id, // Bola
@@ -439,7 +545,21 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 0,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1614030374535-2348fc420828?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1534430480872-3498386e6b44?w=600&h=400&fit=crop',
+            ],
+            startLat: 4.9751,
+            startLng: 8.3402,
+            endLat: 4.9749,
+            endLng: 8.3377,
+            waypoints: [
+                { lat: 4.9753, lng: 8.3391 },
+                { lat: 4.9750, lng: 8.3384 },
+            ],
+            region: 'Cross River',
+            totalDistanceKm: 2,
+            estimatedMins: 30,
         },
         {
             userId: users[7].id, // Ifeanyi
@@ -474,7 +594,22 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 200,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=600&h=400&fit=crop',
+            ],
+            startLat: 5.4776,
+            startLng: 7.0138,
+            endLat: 4.7777,
+            endLng: 7.0133,
+            waypoints: [
+                { lat: 5.3245, lng: 7.0136 },
+                { lat: 5.1123, lng: 7.0135 },
+                { lat: 4.9456, lng: 7.0134 },
+            ],
+            region: 'Rivers',
+            totalDistanceKm: 88,
+            estimatedMins: 120,
         },
         {
             userId: users[5].id, // Zainab
@@ -509,7 +644,21 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 0,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1553440569-bcc63803a83f?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1580651315530-69c8e0026377?w=600&h=400&fit=crop',
+            ],
+            startLat: 12.0022,
+            startLng: 8.5193,
+            endLat: 12.0013,
+            endLng: 8.5155,
+            waypoints: [
+                { lat: 12.0019, lng: 8.5180 },
+                { lat: 12.0015, lng: 8.5165 },
+            ],
+            region: 'Kano',
+            totalDistanceKm: 1.5,
+            estimatedMins: 15,
         },
         {
             userId: users[8].id, // Amina
@@ -544,7 +693,23 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 1000,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1534430480872-3498386e6b44?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1469854523086-cc02fe5bbc80?w=600&h=400&fit=crop',
+            ],
+            startLat: 10.5105,
+            startLng: 7.4177,
+            endLat: 9.8965,
+            endLng: 8.8583,
+            waypoints: [
+                { lat: 10.3812, lng: 7.4811 },
+                { lat: 10.2189, lng: 7.5812 },
+                { lat: 10.0423, lng: 7.8531 },
+                { lat: 9.9587, lng: 8.3251 },
+            ],
+            region: 'Plateau',
+            totalDistanceKm: 95,
+            estimatedMins: 240,
         },
         {
             userId: users[9].id, // John
@@ -570,7 +735,21 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                     fare: 1500,
                 },
             ],
-            images: [],
+            images: [
+                'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=600&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop',
+            ],
+            startLat: 6.4281,
+            startLng: 3.5646,
+            endLat: 6.4106,
+            endLng: 3.5996,
+            waypoints: [
+                { lat: 6.4238, lng: 3.5741 },
+                { lat: 6.4178, lng: 3.5871 },
+            ],
+            region: 'Lagos',
+            totalDistanceKm: 8,
+            estimatedMins: 30,
         },
     ];
 
@@ -581,13 +760,21 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
                 userId: postData.userId,
                 title: postData.title,
                 tags: postData.tags,
-                routes: postData.routes as any, // Cast to any to satisfy Prisma's JSON type
+                routes: postData.routes as any,
                 images: postData.images,
                 likes: Math.floor(Math.random() * 50) + 10,
                 dislikes: Math.floor(Math.random() * 5),
                 comments: Math.floor(Math.random() * 20),
                 bookmarks: Math.floor(Math.random() * 30),
                 views: Math.floor(Math.random() * 200) + 50,
+                startLat: postData.startLat ?? undefined,
+                startLng: postData.startLng ?? undefined,
+                endLat: postData.endLat ?? undefined,
+                endLng: postData.endLng ?? undefined,
+                waypoints: postData.waypoints as any ?? undefined,
+                region: postData.region ?? undefined,
+                totalDistanceKm: postData.totalDistanceKm ?? undefined,
+                estimatedMins: postData.estimatedMins ?? undefined,
             },
         });
         createdPosts.push(post);
@@ -774,6 +961,12 @@ async function main() {
     console.log('Starting database seeding...\n');
 
     try {
+        // Ensure waypoints column exists (safe to run if already present)
+        await prisma.$executeRawUnsafe(
+            'ALTER TABLE "Post" ADD COLUMN IF NOT EXISTS "waypoints" JSONB',
+        );
+        console.log('  → Verified waypoints column exists\n');
+
         await seedSiteConfig();
         const users = await seedUsers();
         await seedFollows(users);

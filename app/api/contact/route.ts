@@ -1,78 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { rateLimitByIP } from "@/lib/utils/rateLimiter";
-import {
-    sendContactConfirmationEmail,
-    sendContactNotificationEmail,
-} from "@/lib/services/emailService";
+import { prisma } from "@/app/lib/db/prisma";
+import { sendContactNotification } from "@/app/lib/services/emailService";
 
-const contactSchema = z.object({
-    name: z.string().min(2).max(80),
-    email: z.string().email(),
-    subject: z.string().min(3).max(120),
-    message: z.string().min(5).max(1500),
-});
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { name, email, message } = body;
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
-    try {
-        const ip =
-            request.headers.get("x-forwarded-for") ??
-            request.headers.get("x-real-ip") ??
-            "unknown";
-        const rateLimit = await rateLimitByIP(ip, {
-            maxRequests: 5,
-            windowSeconds: 600,
-        });
-
-        if (!rateLimit.success) {
-            return NextResponse.json(
-                { error: "Too many requests" },
-                { status: 429, headers: { "Retry-After": String(rateLimit.reset) } },
-            );
-        }
-
-        const body: unknown = await request.json();
-        const data = contactSchema.parse(body);
-
-        const [notifyResult, confirmResult] = await Promise.all([
-            sendContactNotificationEmail({
-                name: data.name,
-                email: data.email,
-                subject: data.subject,
-                message: data.message,
-            }),
-            sendContactConfirmationEmail({
-                email: data.email,
-                name: data.name,
-                subject: data.subject,
-                message: data.message,
-            }),
-        ]);
-
-        const failed = [notifyResult, confirmResult].some(
-            (result) => !result.ok && !result.skipped,
-        );
-
-        if (failed) {
-            return NextResponse.json(
-                { error: "Failed to send message" },
-                { status: 500 },
-            );
-        }
-
-        return NextResponse.json({ ok: true });
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return NextResponse.json(
-                { error: error.issues[0]?.message ?? "Invalid input" },
-                { status: 400 },
-            );
-        }
-
-        console.error("[contact]", error);
-        return NextResponse.json(
-            { error: "Failed to send message" },
-            { status: 500 },
-        );
+    if (!name || !email || !message) {
+      return NextResponse.json({ error: "name, email, and message are required" }, { status: 400 });
     }
+
+    if (typeof name !== "string" || typeof email !== "string" || typeof message !== "string") {
+      return NextResponse.json({ error: "Invalid field types" }, { status: 400 });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
+
+    if (name.length < 1 || name.length > 100) {
+      return NextResponse.json({ error: "Name must be between 1 and 100 characters" }, { status: 400 });
+    }
+
+    if (message.length < 1 || message.length > 5000) {
+      return NextResponse.json({ error: "Message must be between 1 and 5000 characters" }, { status: 400 });
+    }
+
+    await prisma.contactSubmission.create({
+      data: { name, email, message },
+    });
+
+    await sendContactNotification(name, email, message);
+
+    return NextResponse.json({ success: true }, { status: 201 });
+  } catch (error) {
+    console.error("Contact submission error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

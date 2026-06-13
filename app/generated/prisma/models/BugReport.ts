@@ -191,7 +191,7 @@ export type BugReportGroupByOutputType = {
   description: string
   category: $Enums.BugCategory
   status: $Enums.BugStatus
-  reporterId: string
+  reporterId: string | null
   reviewerId: string | null
   postId: string | null
   metadata: runtime.JsonValue | null
@@ -227,14 +227,14 @@ export type BugReportWhereInput = {
   description?: Prisma.StringFilter<"BugReport"> | string
   category?: Prisma.EnumBugCategoryFilter<"BugReport"> | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFilter<"BugReport"> | $Enums.BugStatus
-  reporterId?: Prisma.StringFilter<"BugReport"> | string
+  reporterId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   reviewerId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   postId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   metadata?: Prisma.JsonNullableFilter<"BugReport">
   createdAt?: Prisma.DateTimeFilter<"BugReport"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BugReport"> | Date | string
   resolvedAt?: Prisma.DateTimeNullableFilter<"BugReport"> | Date | string | null
-  reporter?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  reporter?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reviewer?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   post?: Prisma.XOR<Prisma.PostNullableScalarRelationFilter, Prisma.PostWhereInput> | null
 }
@@ -245,7 +245,7 @@ export type BugReportOrderByWithRelationInput = {
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  reporterId?: Prisma.SortOrder
+  reporterId?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
   postId?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -266,14 +266,14 @@ export type BugReportWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringFilter<"BugReport"> | string
   category?: Prisma.EnumBugCategoryFilter<"BugReport"> | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFilter<"BugReport"> | $Enums.BugStatus
-  reporterId?: Prisma.StringFilter<"BugReport"> | string
+  reporterId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   reviewerId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   postId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   metadata?: Prisma.JsonNullableFilter<"BugReport">
   createdAt?: Prisma.DateTimeFilter<"BugReport"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BugReport"> | Date | string
   resolvedAt?: Prisma.DateTimeNullableFilter<"BugReport"> | Date | string | null
-  reporter?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  reporter?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reviewer?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   post?: Prisma.XOR<Prisma.PostNullableScalarRelationFilter, Prisma.PostWhereInput> | null
 }, "id">
@@ -284,7 +284,7 @@ export type BugReportOrderByWithAggregationInput = {
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  reporterId?: Prisma.SortOrder
+  reporterId?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
   postId?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -305,7 +305,7 @@ export type BugReportScalarWhereWithAggregatesInput = {
   description?: Prisma.StringWithAggregatesFilter<"BugReport"> | string
   category?: Prisma.EnumBugCategoryWithAggregatesFilter<"BugReport"> | $Enums.BugCategory
   status?: Prisma.EnumBugStatusWithAggregatesFilter<"BugReport"> | $Enums.BugStatus
-  reporterId?: Prisma.StringWithAggregatesFilter<"BugReport"> | string
+  reporterId?: Prisma.StringNullableWithAggregatesFilter<"BugReport"> | string | null
   reviewerId?: Prisma.StringNullableWithAggregatesFilter<"BugReport"> | string | null
   postId?: Prisma.StringNullableWithAggregatesFilter<"BugReport"> | string | null
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"BugReport">
@@ -324,7 +324,7 @@ export type BugReportCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   resolvedAt?: Date | string | null
-  reporter: Prisma.UserCreateNestedOneWithoutBugReportsInput
+  reporter?: Prisma.UserCreateNestedOneWithoutBugReportsInput
   reviewer?: Prisma.UserCreateNestedOneWithoutReviewedBugReportsInput
   post?: Prisma.PostCreateNestedOneWithoutBugReportsInput
 }
@@ -335,7 +335,7 @@ export type BugReportUncheckedCreateInput = {
   description: string
   category: $Enums.BugCategory
   status?: $Enums.BugStatus
-  reporterId: string
+  reporterId?: string | null
   reviewerId?: string | null
   postId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -354,7 +354,7 @@ export type BugReportUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  reporter?: Prisma.UserUpdateOneRequiredWithoutBugReportsNestedInput
+  reporter?: Prisma.UserUpdateOneWithoutBugReportsNestedInput
   reviewer?: Prisma.UserUpdateOneWithoutReviewedBugReportsNestedInput
   post?: Prisma.PostUpdateOneWithoutBugReportsNestedInput
 }
@@ -365,7 +365,7 @@ export type BugReportUncheckedUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumBugCategoryFieldUpdateOperationsInput | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFieldUpdateOperationsInput | $Enums.BugStatus
-  reporterId?: Prisma.StringFieldUpdateOperationsInput | string
+  reporterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -380,7 +380,7 @@ export type BugReportCreateManyInput = {
   description: string
   category: $Enums.BugCategory
   status?: $Enums.BugStatus
-  reporterId: string
+  reporterId?: string | null
   reviewerId?: string | null
   postId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -407,7 +407,7 @@ export type BugReportUncheckedUpdateManyInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumBugCategoryFieldUpdateOperationsInput | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFieldUpdateOperationsInput | $Enums.BugStatus
-  reporterId?: Prisma.StringFieldUpdateOperationsInput | string
+  reporterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -655,7 +655,7 @@ export type BugReportCreateWithoutReviewerInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   resolvedAt?: Date | string | null
-  reporter: Prisma.UserCreateNestedOneWithoutBugReportsInput
+  reporter?: Prisma.UserCreateNestedOneWithoutBugReportsInput
   post?: Prisma.PostCreateNestedOneWithoutBugReportsInput
 }
 
@@ -665,7 +665,7 @@ export type BugReportUncheckedCreateWithoutReviewerInput = {
   description: string
   category: $Enums.BugCategory
   status?: $Enums.BugStatus
-  reporterId: string
+  reporterId?: string | null
   postId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -708,7 +708,7 @@ export type BugReportScalarWhereInput = {
   description?: Prisma.StringFilter<"BugReport"> | string
   category?: Prisma.EnumBugCategoryFilter<"BugReport"> | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFilter<"BugReport"> | $Enums.BugStatus
-  reporterId?: Prisma.StringFilter<"BugReport"> | string
+  reporterId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   reviewerId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   postId?: Prisma.StringNullableFilter<"BugReport"> | string | null
   metadata?: Prisma.JsonNullableFilter<"BugReport">
@@ -743,7 +743,7 @@ export type BugReportCreateWithoutPostInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   resolvedAt?: Date | string | null
-  reporter: Prisma.UserCreateNestedOneWithoutBugReportsInput
+  reporter?: Prisma.UserCreateNestedOneWithoutBugReportsInput
   reviewer?: Prisma.UserCreateNestedOneWithoutReviewedBugReportsInput
 }
 
@@ -753,7 +753,7 @@ export type BugReportUncheckedCreateWithoutPostInput = {
   description: string
   category: $Enums.BugCategory
   status?: $Enums.BugStatus
-  reporterId: string
+  reporterId?: string | null
   reviewerId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -807,7 +807,7 @@ export type BugReportCreateManyReviewerInput = {
   description: string
   category: $Enums.BugCategory
   status?: $Enums.BugStatus
-  reporterId: string
+  reporterId?: string | null
   postId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -867,7 +867,7 @@ export type BugReportUpdateWithoutReviewerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  reporter?: Prisma.UserUpdateOneRequiredWithoutBugReportsNestedInput
+  reporter?: Prisma.UserUpdateOneWithoutBugReportsNestedInput
   post?: Prisma.PostUpdateOneWithoutBugReportsNestedInput
 }
 
@@ -877,7 +877,7 @@ export type BugReportUncheckedUpdateWithoutReviewerInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumBugCategoryFieldUpdateOperationsInput | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFieldUpdateOperationsInput | $Enums.BugStatus
-  reporterId?: Prisma.StringFieldUpdateOperationsInput | string
+  reporterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -891,7 +891,7 @@ export type BugReportUncheckedUpdateManyWithoutReviewerInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumBugCategoryFieldUpdateOperationsInput | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFieldUpdateOperationsInput | $Enums.BugStatus
-  reporterId?: Prisma.StringFieldUpdateOperationsInput | string
+  reporterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -905,7 +905,7 @@ export type BugReportCreateManyPostInput = {
   description: string
   category: $Enums.BugCategory
   status?: $Enums.BugStatus
-  reporterId: string
+  reporterId?: string | null
   reviewerId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -923,7 +923,7 @@ export type BugReportUpdateWithoutPostInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  reporter?: Prisma.UserUpdateOneRequiredWithoutBugReportsNestedInput
+  reporter?: Prisma.UserUpdateOneWithoutBugReportsNestedInput
   reviewer?: Prisma.UserUpdateOneWithoutReviewedBugReportsNestedInput
 }
 
@@ -933,7 +933,7 @@ export type BugReportUncheckedUpdateWithoutPostInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumBugCategoryFieldUpdateOperationsInput | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFieldUpdateOperationsInput | $Enums.BugStatus
-  reporterId?: Prisma.StringFieldUpdateOperationsInput | string
+  reporterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -947,7 +947,7 @@ export type BugReportUncheckedUpdateManyWithoutPostInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumBugCategoryFieldUpdateOperationsInput | $Enums.BugCategory
   status?: Prisma.EnumBugStatusFieldUpdateOperationsInput | $Enums.BugStatus
-  reporterId?: Prisma.StringFieldUpdateOperationsInput | string
+  reporterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -970,7 +970,7 @@ export type BugReportSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   createdAt?: boolean
   updatedAt?: boolean
   resolvedAt?: boolean
-  reporter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  reporter?: boolean | Prisma.BugReport$reporterArgs<ExtArgs>
   reviewer?: boolean | Prisma.BugReport$reviewerArgs<ExtArgs>
   post?: boolean | Prisma.BugReport$postArgs<ExtArgs>
 }, ExtArgs["result"]["bugReport"]>
@@ -988,7 +988,7 @@ export type BugReportSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   createdAt?: boolean
   updatedAt?: boolean
   resolvedAt?: boolean
-  reporter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  reporter?: boolean | Prisma.BugReport$reporterArgs<ExtArgs>
   reviewer?: boolean | Prisma.BugReport$reviewerArgs<ExtArgs>
   post?: boolean | Prisma.BugReport$postArgs<ExtArgs>
 }, ExtArgs["result"]["bugReport"]>
@@ -1006,7 +1006,7 @@ export type BugReportSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   createdAt?: boolean
   updatedAt?: boolean
   resolvedAt?: boolean
-  reporter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  reporter?: boolean | Prisma.BugReport$reporterArgs<ExtArgs>
   reviewer?: boolean | Prisma.BugReport$reviewerArgs<ExtArgs>
   post?: boolean | Prisma.BugReport$postArgs<ExtArgs>
 }, ExtArgs["result"]["bugReport"]>
@@ -1028,17 +1028,17 @@ export type BugReportSelectScalar = {
 
 export type BugReportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "category" | "status" | "reporterId" | "reviewerId" | "postId" | "metadata" | "createdAt" | "updatedAt" | "resolvedAt", ExtArgs["result"]["bugReport"]>
 export type BugReportInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reporter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  reporter?: boolean | Prisma.BugReport$reporterArgs<ExtArgs>
   reviewer?: boolean | Prisma.BugReport$reviewerArgs<ExtArgs>
   post?: boolean | Prisma.BugReport$postArgs<ExtArgs>
 }
 export type BugReportIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reporter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  reporter?: boolean | Prisma.BugReport$reporterArgs<ExtArgs>
   reviewer?: boolean | Prisma.BugReport$reviewerArgs<ExtArgs>
   post?: boolean | Prisma.BugReport$postArgs<ExtArgs>
 }
 export type BugReportIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reporter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  reporter?: boolean | Prisma.BugReport$reporterArgs<ExtArgs>
   reviewer?: boolean | Prisma.BugReport$reviewerArgs<ExtArgs>
   post?: boolean | Prisma.BugReport$postArgs<ExtArgs>
 }
@@ -1046,7 +1046,7 @@ export type BugReportIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
 export type $BugReportPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BugReport"
   objects: {
-    reporter: Prisma.$UserPayload<ExtArgs>
+    reporter: Prisma.$UserPayload<ExtArgs> | null
     reviewer: Prisma.$UserPayload<ExtArgs> | null
     post: Prisma.$PostPayload<ExtArgs> | null
   }
@@ -1056,7 +1056,7 @@ export type $BugReportPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     description: string
     category: $Enums.BugCategory
     status: $Enums.BugStatus
-    reporterId: string
+    reporterId: string | null
     reviewerId: string | null
     postId: string | null
     metadata: runtime.JsonValue | null
@@ -1457,7 +1457,7 @@ readonly fields: BugReportFieldRefs;
  */
 export interface Prisma__BugReportClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  reporter<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  reporter<T extends Prisma.BugReport$reporterArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BugReport$reporterArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reviewer<T extends Prisma.BugReport$reviewerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BugReport$reviewerArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   post<T extends Prisma.BugReport$postArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BugReport$postArgs<ExtArgs>>): Prisma.Prisma__PostClient<runtime.Types.Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1894,6 +1894,25 @@ export type BugReportDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many BugReports to delete.
    */
   limit?: number
+}
+
+/**
+ * BugReport.reporter
+ */
+export type BugReport$reporterArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

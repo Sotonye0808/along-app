@@ -1,24 +1,23 @@
 # Test Results
 
-> **Overview:** Latest test run results for the Along App. Updated by agents after running the self-heal loop or test suite. Gives a quick snapshot of current project health.
+> **Overview:** Latest test run results for Along. Updated by agents after running the test suite or self-heal loop. Gives a quick snapshot of current project health. No tests have been run yet — the project is in pre-rebuild state.
 
 ---
 
 ## Last Run
 
-**Date:** 2026-04-20
-**Run by:** Initial setup — see session log
+**Date:** —
+**Run by:** —
 
 **Results:**
 | Suite | Passed | Failed | Skipped |
 |-------|--------|--------|---------|
 | Unit | — | — | — |
 | Integration | — | — | — |
+| Component | — | — | — |
 | E2E | — | — | — |
 
-**Overall Status:** Not yet run
-
-> Run `npm test` to populate this section.
+**Overall Status:** Not Yet Run
 
 ---
 
@@ -26,7 +25,7 @@
 
 | Test | Error | Status | Assigned To |
 |------|-------|--------|------------|
-| — | No test runs recorded yet | — | — |
+| — | — | — | — |
 
 ---
 
@@ -34,4 +33,4 @@
 
 | Date | Passed | Failed | Notes |
 |------|--------|--------|-------|
-| 2026-04-20 | — | — | Initial .ai-system setup, no tests run yet |
+| — | — | — | No tests run yet — project in pre-rebuild state |

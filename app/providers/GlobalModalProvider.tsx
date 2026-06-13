@@ -1,49 +1,49 @@
 "use client";
 
-import React from "react";
-import type { ModalState } from "@/lib/services/modalService";
-import { ModalService } from "@/lib/services/modalService";
+import { useEffect, useState, useCallback } from "react";
+import { GlobalConfirmModal } from "@/app/components/ui";
+import { modalService } from "@/app/lib/services/modalService";
+import type { ConfirmOptions } from "@/app/lib/services/modalService";
 
-interface GlobalModalContextValue {
-  modalState: ModalState;
-  resolver: ((value: boolean) => void) | null;
-}
+export function GlobalModalProvider({ children }: { children: React.ReactNode }) {
+  const [options, setOptions] = useState<ConfirmOptions | null>(null);
+  const [open, setOpen] = useState(false);
 
-const defaultState: ModalState = { open: false, title: "" };
-
-const GlobalModalContext = React.createContext<GlobalModalContextValue>({
-  modalState: defaultState,
-  resolver: null,
-});
-
-export function GlobalModalProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.ReactElement {
-  const [modalState, setModalState] = React.useState<ModalState>(defaultState);
-  const [resolver, setResolver] = React.useState<
-    ((value: boolean) => void) | null
-  >(null);
-
-  React.useEffect(() => {
-    ModalService.registerListener((nextState, nextResolver) => {
-      setModalState(nextState);
-      setResolver(() => nextResolver);
+  useEffect(() => {
+    modalService.register((opts) => {
+      if (opts) {
+        setOptions(opts);
+        setOpen(true);
+      } else {
+        setOpen(false);
+        setOptions(null);
+      }
     });
+    return () => modalService.unregister();
+  }, []);
 
-    return () => {
-      ModalService.unregisterListener();
-    };
+  const handleConfirm = useCallback(() => {
+    options?.onConfirm();
+    modalService.close();
+  }, [options]);
+
+  const handleClose = useCallback(() => {
+    modalService.close();
   }, []);
 
   return (
-    <GlobalModalContext.Provider value={{ modalState, resolver }}>
+    <>
       {children}
-    </GlobalModalContext.Provider>
+      {options && (
+        <GlobalConfirmModal
+          open={open}
+          title={options.title}
+          description={options.description}
+          variant={options.variant}
+          onConfirm={handleConfirm}
+          onClose={handleClose}
+        />
+      )}
+    </>
   );
-}
-
-export function useGlobalModal(): GlobalModalContextValue {
-  return React.useContext(GlobalModalContext);
 }

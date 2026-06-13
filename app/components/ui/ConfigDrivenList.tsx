@@ -1,73 +1,76 @@
 "use client";
 
-import React from "react";
-import { AppEmptyState } from "./AppEmptyState";
-import { AppPagination } from "./AppPagination";
+import type { ReactNode } from "react";
+import { AppEmptyState, AppPagination } from "./";
+import type { EmptyStateConfig } from "@/app/lib/types";
 
-export interface ConfigDrivenListProps<T> {
-  items: T[];
-  loading?: boolean;
-  renderItem: (item: T, index: number) => React.ReactNode;
-  skeleton?: React.ReactNode;
-  emptyState?: {
-    title: string;
-    description?: string;
-  };
-  pagination?: {
-    current: number;
-    pageSize: number;
-    total: number;
-    onChange: (page: number, pageSize: number) => void;
-  };
-  className?: string;
+interface PaginationConfig {
+  current: number;
+  total: number;
+  pageSize: number;
+  onChange: (page: number) => void;
 }
 
-export function ConfigDrivenList<T>({
+export interface ConfigDrivenListProps<T extends { id?: string }> {
+  items: T[];
+  renderItem: (item: T, index: number) => ReactNode;
+  keyExtractor: (item: T) => string;
+  isLoading?: boolean;
+  loadingSkeleton?: ReactNode;
+  emptyStateConfig?: EmptyStateConfig;
+  pagination?: PaginationConfig;
+}
+
+function DefaultSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="h-24 skeleton" />
+      ))}
+    </div>
+  );
+}
+
+export default function ConfigDrivenList<T extends { id?: string }>({
   items,
-  loading,
   renderItem,
-  skeleton,
-  emptyState,
+  keyExtractor,
+  isLoading = false,
+  loadingSkeleton,
+  emptyStateConfig,
   pagination,
-  className,
-}: ConfigDrivenListProps<T>): React.ReactElement {
-  if (loading) {
-    return (
-      <>
-        {skeleton ?? (
-          <div className="py-6 text-center text-sm text-[var(--color-text-secondary)]">
-            Loading...
-          </div>
-        )}
-      </>
-    );
+}: ConfigDrivenListProps<T>) {
+  if (isLoading) {
+    return loadingSkeleton ?? <DefaultSkeleton />;
   }
 
-  if (items.length === 0) {
+  if (items.length === 0 && emptyStateConfig) {
     return (
       <AppEmptyState
-        title={emptyState?.title ?? "Nothing to show"}
-        description={emptyState?.description}
-        className={className}
+        icon={emptyStateConfig.icon}
+        title={emptyStateConfig.title}
+        description={emptyStateConfig.description}
+        actionLabel={emptyStateConfig.actionLabel}
+        actionHref={emptyStateConfig.actionHref}
       />
     );
   }
 
   return (
-    <div className={className}>
-      <div className="space-y-3">
-        {items.map((item, index) => (
-          <React.Fragment key={index}>{renderItem(item, index)}</React.Fragment>
-        ))}
-      </div>
-      {pagination ? (
+    <div className="flex flex-col gap-3">
+      {items.map((item, index) => (
+        <div key={keyExtractor(item)}>
+          {renderItem(item, index)}
+        </div>
+      ))}
+      {pagination && (
         <AppPagination
           current={pagination.current}
-          pageSize={pagination.pageSize}
           total={pagination.total}
+          pageSize={pagination.pageSize}
           onChange={pagination.onChange}
         />
-      ) : null}
+      )}
     </div>
   );
 }

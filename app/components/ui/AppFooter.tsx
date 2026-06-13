@@ -1,32 +1,23 @@
-import React from "react";
 import Link from "next/link";
-import { FOOTER_CONFIG } from "@/lib/config";
+import { FOOTER_CONFIG } from "@/app/lib/config";
 
-export function AppFooter(): React.ReactElement {
+export default function AppFooter() {
   return (
-    <footer className="mt-10 border-t border-[var(--color-border)] bg-[var(--color-bg-elevated)]/70">
-      <div className="mx-auto w-full max-w-6xl px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-4">
-          <div>
-            <h3 className="text-xl font-bold text-[var(--color-primary)]">
-              {FOOTER_CONFIG.brand.name}
-            </h3>
-            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-              {FOOTER_CONFIG.brand.tagline}
-            </p>
-          </div>
-
-          {FOOTER_CONFIG.sections.map((section) => (
-            <div key={section.title}>
-              <h4 className="font-semibold text-[var(--color-text-primary)]">
-                {section.title}
-              </h4>
-              <ul className="mt-2 space-y-1.5 text-sm">
-                {section.links.map((link) => (
-                  <li key={link.href}>
+    <footer className="border-t border-border bg-bg-card">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        <div className="grid grid-cols-3 gap-8 mb-8">
+          {FOOTER_CONFIG.columns.map((column) => (
+            <div key={column.title}>
+              <h3 className="font-semibold text-sm mb-3 text-text-primary">
+                {column.title}
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {column.links.map((link) => (
+                  <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
+                      className="text-sm text-text-secondary hover:text-text-primary transition-colors duration-base"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -34,38 +25,41 @@ export function AppFooter(): React.ReactElement {
               </ul>
             </div>
           ))}
-
-          <div>
-            <h4 className="font-semibold text-[var(--color-text-primary)]">
-              Social
-            </h4>
-            <ul className="mt-2 space-y-1.5 text-sm">
-              {FOOTER_CONFIG.social.map((item) => (
-                <li key={item.href}>
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--color-text-muted)]">
-          <span>
-            © {new Date().getFullYear()} {FOOTER_CONFIG.brand.name}
-          </span>
-          <a
-            href={FOOTER_CONFIG.devCredit.href}
-            target="_blank"
-            rel="noreferrer"
-            className="opacity-60 hover:opacity-100">
-            {FOOTER_CONFIG.devCredit.label}
-          </a>
+        <div className="flex items-center justify-center gap-4 mb-6">
+          {FOOTER_CONFIG.socials.map((social) => {
+            const Icon = social.icon;
+            return (
+              <a
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                className="text-text-muted hover:text-text-primary transition-colors duration-base"
+              >
+                <Icon size={20} />
+              </a>
+            );
+          })}
+        </div>
+
+        <div className="text-center pt-4 border-t border-border">
+          <p className="text-xs text-text-muted">
+            &copy; {new Date().getFullYear()} Along. All rights reserved.
+          </p>
+          <p className="text-xs opacity-60 hover:opacity-100 transition-opacity duration-base mt-1">
+            Built by{" "}
+            <a
+              href="https://sotonye-dagogo.is-a.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              S.D
+            </a>
+          </p>
         </div>
       </div>
     </footer>

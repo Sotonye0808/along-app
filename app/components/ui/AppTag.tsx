@@ -1,93 +1,67 @@
-"use client";
+'use client'
 
-import React from "react";
-import { Tag } from "antd";
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from 'lucide-react'
+import { X } from 'lucide-react'
+import { cn } from '@/app/lib/utils/cn'
 
-export interface AppTagProps {
-  label: string;
-  variant?:
-    | "default"
-    | "primary"
-    | "success"
-    | "warning"
-    | "error"
-    | "info"
-    | "muted";
-  size?: "xs" | "sm" | "default";
-  icon?: LucideIcon;
-  iconPosition?: "left" | "right";
-  removable?: boolean;
-  onRemove?: () => void;
-  pill?: boolean;
-  dot?: boolean;
-  onClick?: () => void;
-  className?: string;
+type TagVariant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'muted'
+type TagSize = 'xs' | 'sm' | 'default'
+
+interface AppTagProps {
+  variant?: TagVariant
+  size?: TagSize
+  icon?: LucideIcon
+  removable?: boolean
+  onRemove?: () => void
+  children: React.ReactNode
+  className?: string
 }
 
-const variantClasses: Record<NonNullable<AppTagProps["variant"]>, string> = {
-  default:
-    "bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] border-[var(--color-border)]",
-  primary:
-    "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/30",
-  success:
-    "bg-[var(--color-success)] text-[var(--color-success-text)] border-[var(--color-success-text)]/30",
-  warning:
-    "bg-[var(--color-warning)]/30 text-[var(--color-warning-text)] border-[var(--color-warning-text)]/30",
-  error:
-    "bg-[var(--color-error)]/20 text-[var(--color-error-text)] border-[var(--color-error-text)]/30",
-  info: "bg-[var(--color-primary)]/10 text-[var(--color-text-primary)] border-[var(--color-primary)]/30",
-  muted:
-    "bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)] border-[var(--color-border)]",
-};
+const variantClasses: Record<TagVariant, string> = {
+  default: 'bg-bg-elevated text-text-secondary',
+  primary: 'bg-primary-muted text-primary',
+  success: 'bg-success text-success-text',
+  warning: 'bg-warning text-warning-text',
+  error: 'bg-error text-error-text',
+  muted: 'bg-bg-elevated text-text-muted',
+}
 
-const sizeClasses: Record<NonNullable<AppTagProps["size"]>, string> = {
-  xs: "text-[10px] px-1.5 py-0.5",
-  sm: "text-xs px-2 py-0.5",
-  default: "text-sm px-2.5 py-1",
-};
+const sizeClasses: Record<TagSize, string> = {
+  xs: 'px-2 py-0.5',
+  sm: 'px-2.5 py-1',
+  default: 'px-3 py-1',
+}
 
-export function AppTag({
-  label,
-  variant = "default",
-  size = "default",
+export default function AppTag({
+  variant = 'default',
+  size = 'default',
   icon: Icon,
-  iconPosition = "left",
-  removable,
+  removable = false,
   onRemove,
-  pill = true,
-  dot,
-  onClick,
+  children,
   className,
-}: AppTagProps): React.ReactElement {
+}: AppTagProps) {
   return (
-    <Tag
-      closable={removable}
-      onClose={onRemove}
-      onClick={onClick}
-      className={[
-        "!inline-flex !items-center gap-1 !border",
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 radius-pill font-medium text-xs leading-none whitespace-nowrap',
         variantClasses[variant],
         sizeClasses[size],
-        pill ? "!rounded-[var(--radius-pill)]" : "!rounded-md",
-        onClick ? "cursor-pointer" : "",
-        className ?? "",
-      ]
-        .join(" ")
-        .trim()}>
-      {dot ? (
-        <span
-          className="inline-block h-1.5 w-1.5 rounded-full bg-current"
-          aria-hidden="true"
-        />
-      ) : null}
-      {Icon && iconPosition === "left" ? (
-        <Icon size={14} aria-hidden="true" />
-      ) : null}
-      <span>{label}</span>
-      {Icon && iconPosition === "right" ? (
-        <Icon size={14} aria-hidden="true" />
-      ) : null}
-    </Tag>
-  );
+        className,
+      )}
+    >
+      {Icon && <Icon size={12} />}
+      <span>{children}</span>
+      {removable && (
+        <button
+          type="button"
+          onClick={onRemove}
+          className="ml-0.5 rounded-circle p-0.5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-base"
+          aria-label="Remove"
+        >
+          <X size={12} />
+        </button>
+      )}
+    </span>
+  )
 }

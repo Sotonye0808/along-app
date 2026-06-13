@@ -1,48 +1,49 @@
-export type ToastVariant = "success" | "error" | "info" | "warning" | "undo";
+type ToastType = "success" | "error" | "info" | "undo";
 
-export interface ToastPayload {
-    variant: ToastVariant;
-    message: string;
-    durationMs?: number;
-    onUndo?: () => void;
+export type ToastOptions = {
+  message: string;
+  type: ToastType;
+  duration?: number;
+  undoLabel?: string;
+  onUndo?: () => void;
+};
+
+type ToastListener = (options: ToastOptions | null) => void;
+
+class ToastService {
+  private listener: ToastListener | null = null;
+
+  register(listener: ToastListener) {
+    this.listener = listener;
+  }
+
+  unregister() {
+    this.listener = null;
+  }
+
+  show(options: ToastOptions) {
+    this.listener?.(options);
+  }
+
+  undo(options: Omit<ToastOptions, "type">) {
+    this.listener?.({ ...options, type: "undo" });
+  }
+
+  success(message: string) {
+    this.show({ message, type: "success", duration: 3000 });
+  }
+
+  error(message: string) {
+    this.show({ message, type: "error", duration: 5000 });
+  }
+
+  info(message: string) {
+    this.show({ message, type: "info", duration: 3000 });
+  }
+
+  close() {
+    this.listener?.(null);
+  }
 }
 
-type ToastListener = (payload: ToastPayload) => void;
-
-class ToastServiceClass {
-    private listener: ToastListener | null = null;
-
-    registerListener(listener: ToastListener): void {
-        this.listener = listener;
-    }
-
-    unregisterListener(): void {
-        this.listener = null;
-    }
-
-    push(payload: ToastPayload): void {
-        this.listener?.(payload);
-    }
-
-    success(message: string, durationMs = 3000): void {
-        this.push({ variant: "success", message, durationMs });
-    }
-
-    error(message: string, durationMs = 4000): void {
-        this.push({ variant: "error", message, durationMs });
-    }
-
-    info(message: string, durationMs = 3000): void {
-        this.push({ variant: "info", message, durationMs });
-    }
-
-    warning(message: string, durationMs = 3500): void {
-        this.push({ variant: "warning", message, durationMs });
-    }
-
-    undo(message: string, onUndo: () => void, durationMs = 5000): void {
-        this.push({ variant: "undo", message, durationMs, onUndo });
-    }
-}
-
-export const ToastService = new ToastServiceClass();
+export const toastService = new ToastService();

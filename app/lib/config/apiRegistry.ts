@@ -1,67 +1,41 @@
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
-export interface ApiEndpointMeta {
-    path: string;
-    method: HttpMethod;
-    requiresAuth: boolean;
-    cacheable?: boolean;
-    rateLimitKey?: string;
+interface ApiEndpoint {
+  path: string;
+  methods: ("GET" | "POST" | "PATCH" | "PUT" | "DELETE")[];
+  auth: boolean;
+  rateLimit?: string;
 }
 
-export interface ApiRegistry {
-    auth: {
-        login: ApiEndpointMeta;
-        register: ApiEndpointMeta;
-        logout: ApiEndpointMeta;
-        verifyOtp: ApiEndpointMeta;
-        refresh: ApiEndpointMeta;
-        verify: ApiEndpointMeta;
-    };
-    users: {
-        list: ApiEndpointMeta;
-        byId: ApiEndpointMeta;
-        follow: ApiEndpointMeta;
-    };
-    posts: {
-        list: ApiEndpointMeta;
-        byId: ApiEndpointMeta;
-        like: ApiEndpointMeta;
-        bookmark: ApiEndpointMeta;
-        comments: ApiEndpointMeta;
-    };
-    notifications: {
-        list: ApiEndpointMeta;
-        byId: ApiEndpointMeta;
-        subscribe: ApiEndpointMeta;
-        unsubscribe: ApiEndpointMeta;
-    };
-}
-
-export const API_REGISTRY: ApiRegistry = {
-    auth: {
-        login: { path: "/api/auth/login", method: "POST", requiresAuth: false, rateLimitKey: "auth.login" },
-        register: { path: "/api/auth/register", method: "POST", requiresAuth: false, rateLimitKey: "auth.register" },
-        logout: { path: "/api/auth/logout", method: "POST", requiresAuth: true },
-        verifyOtp: { path: "/api/auth/verify-otp", method: "POST", requiresAuth: false, rateLimitKey: "auth.verifyOtp" },
-        refresh: { path: "/api/auth/refresh", method: "POST", requiresAuth: false },
-        verify: { path: "/api/auth/verify", method: "GET", requiresAuth: true, cacheable: false },
-    },
-    users: {
-        list: { path: "/api/users", method: "GET", requiresAuth: true, cacheable: true, rateLimitKey: "search.query" },
-        byId: { path: "/api/users/:id", method: "GET", requiresAuth: true, cacheable: true },
-        follow: { path: "/api/users/:id/follow", method: "POST", requiresAuth: true, rateLimitKey: "interactions.follow" },
-    },
-    posts: {
-        list: { path: "/api/posts", method: "GET", requiresAuth: true, cacheable: true, rateLimitKey: "general.authenticated" },
-        byId: { path: "/api/posts/:id", method: "GET", requiresAuth: true, cacheable: true },
-        like: { path: "/api/posts/:id/like", method: "POST", requiresAuth: true, rateLimitKey: "interactions.like" },
-        bookmark: { path: "/api/posts/:id/bookmark", method: "POST", requiresAuth: true, rateLimitKey: "interactions.bookmark" },
-        comments: { path: "/api/posts/:id/comments", method: "POST", requiresAuth: true, rateLimitKey: "comments.create" },
-    },
-    notifications: {
-        list: { path: "/api/notifications", method: "GET", requiresAuth: true, cacheable: true },
-        byId: { path: "/api/notifications/:id", method: "PATCH", requiresAuth: true },
-        subscribe: { path: "/api/notifications/subscribe", method: "POST", requiresAuth: true },
-        unsubscribe: { path: "/api/notifications/unsubscribe", method: "POST", requiresAuth: true },
-    },
+export const API_REGISTRY: Record<string, ApiEndpoint> = {
+  authLogin: { path: "/api/auth/login", methods: ["POST"], auth: false, rateLimit: "auth" },
+  authRegister: { path: "/api/auth/register", methods: ["POST"], auth: false, rateLimit: "auth" },
+  authLogout: { path: "/api/auth/logout", methods: ["POST"], auth: true },
+  authRefresh: { path: "/api/auth/refresh", methods: ["POST"], auth: false },
+  authOtp: { path: "/api/auth/otp", methods: ["POST"], auth: false, rateLimit: "auth" },
+  authGoogle: { path: "/api/auth/google", methods: ["POST"], auth: false },
+  authGoogleCallback: { path: "/api/auth/google/callback", methods: ["GET"], auth: false },
+  postsList: { path: "/api/posts", methods: ["GET", "POST"], auth: false, rateLimit: "posts" },
+  postsFeed: { path: "/api/posts/feed", methods: ["GET"], auth: true, rateLimit: "posts" },
+  postsDetail: { path: "/api/posts/[id]", methods: ["GET", "PATCH", "DELETE"], auth: false },
+  postsLike: { path: "/api/posts/[id]/like", methods: ["POST"], auth: true, rateLimit: "likes" },
+  postsBookmark: { path: "/api/posts/[id]/bookmark", methods: ["POST"], auth: true },
+  postsComments: { path: "/api/posts/[id]/comments", methods: ["GET", "POST"], auth: false, rateLimit: "comments" },
+  routesTrace: { path: "/api/routes/trace", methods: ["POST"], auth: true, rateLimit: "trace" },
+  usersDetail: { path: "/api/users/[id]", methods: ["GET", "PATCH"], auth: false },
+  usersSearch: { path: "/api/users/search", methods: ["GET"], auth: false, rateLimit: "search" },
+  usersFollow: { path: "/api/users/[id]/follow", methods: ["POST", "DELETE"], auth: true },
+  usersAvatar: { path: "/api/users/[id]/avatar", methods: ["PATCH"], auth: true },
+  usersSuggestions: { path: "/api/users/suggestions", methods: ["GET"], auth: true },
+  notifications: { path: "/api/notifications", methods: ["GET", "PATCH"], auth: true },
+  analyticsUser: { path: "/api/analytics/user", methods: ["GET"], auth: true },
+  bugReports: { path: "/api/bug-reports", methods: ["POST"], auth: true, rateLimit: "posts" },
+  reviews: { path: "/api/reviews", methods: ["GET", "POST"], auth: false },
+  invite: { path: "/api/invite", methods: ["GET"], auth: true },
+  adminUsers: { path: "/api/admin/users/[id]", methods: ["PATCH", "DELETE"], auth: true },
+  adminPosts: { path: "/api/admin/posts/[id]", methods: ["PATCH", "DELETE"], auth: true },
+  adminConfig: { path: "/api/admin/config", methods: ["GET", "PATCH"], auth: true },
+  adminBugs: { path: "/api/admin/bug-reports/[id]", methods: ["PATCH"], auth: true },
+  integrationsTransact: { path: "/api/integrations/transact", methods: ["GET", "POST"], auth: true },
+  integrationsTega: { path: "/api/integrations/tega", methods: ["GET"], auth: true },
+  webhooksTransact: { path: "/api/webhooks/transact", methods: ["POST"], auth: false },
+  webhooksTega: { path: "/api/webhooks/tega", methods: ["POST"], auth: false },
 };

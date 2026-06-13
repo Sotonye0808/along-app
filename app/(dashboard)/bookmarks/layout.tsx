@@ -1,36 +1,11 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/app/lib/utils/metadata";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Bookmarks",
-  description:
-    "Access your bookmarked travel routes and destinations. Revisit and plan your adventures with your saved content on Along.",
-  keywords: [
-    "bookmarks",
-    "saved routes",
-    "favorites",
-    "Along",
-    "saved posts",
-    "my bookmarks",
-  ],
-  openGraph: {
-    title: "Bookmarks | Along",
-    description:
-      "Access your bookmarked travel routes and destinations. Revisit and plan your adventures with your saved content on Along.",
-    type: "website",
-    url: "/bookmarks",
-  },
-  twitter: {
-    card: "summary",
-    title: "Bookmarks | Along",
-    description:
-      "Access your bookmarked travel routes and destinations. Revisit and plan your adventures with your saved content on Along.",
-  },
-};
+  description: "Your saved routes for quick reference.",
+  path: "/bookmarks",
+});
 
-export default function BookmarksLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+export default function BookmarksLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

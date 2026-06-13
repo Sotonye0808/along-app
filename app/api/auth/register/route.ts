@@ -1,140 +1,106 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { cache } from '@/lib/cache/redis';
-import { rateLimitByIP } from '@/lib/utils/rateLimiter';
-import { validateRegisterData } from '@/lib/utils/validation';
-import { handlePrismaError } from '@/lib/utils/prismaErrors';
-import { sendOtpVerificationEmail } from '@/lib/services/emailService';
-import bcrypt from 'bcryptjs';
+import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
+import { prisma } from "@/app/lib/db/prisma";
+import { REGISTER_SCHEMA } from "@/app/lib/schemas/auth";
+import { hashPassword } from "@/app/lib/utils/security";
+import { qstashService } from "@/app/lib/services/qstashService";
+import { sendOtpEmail, sendWelcomeEmail } from "@/app/lib/services/emailService";
 
-// Generate 6-digit OTP
-function generateOTP(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+const otpStore = new Map<string, { hash: string; expiry: number }>();
+
+async function getRedis() {
+  try {
+    const { Redis } = await import("@upstash/redis");
+    return new Redis({ url: process.env.UPSTASH_REDIS_REST_URL!, token: process.env.UPSTASH_REDIS_REST_TOKEN! });
+  } catch {
+    return null;
+  }
 }
 
 export async function POST(request: NextRequest) {
-    try {
-        // Rate limit check (10 registrations per hour per IP)
-        const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const rateLimit = await rateLimitByIP(clientIP, { maxRequests: 10, windowSeconds: 3600 });
+  try {
+    const body = await request.json();
+    const parsed = REGISTER_SCHEMA.safeParse(body);
 
-        if (!rateLimit.success) {
-            return NextResponse.json(
-                { error: 'Too many registration attempts. Please try again later.' },
-                {
-                    status: 429,
-                    headers: { 'Retry-After': String(rateLimit.reset) }
-                }
-            );
-        }
-
-        const body: RegisterData = await request.json();
-
-        // Validate input data
-        const validation = validateRegisterData(body);
-        if (!validation.success) {
-            return NextResponse.json(
-                { error: validation.error.issues[0]?.message || 'Invalid input data' },
-                { status: 400 }
-            );
-        }
-
-        const { userName, firstName, lastName, email, password } = body;
-
-        // Check if email already exists
-        const existingEmail = await prisma.user.findUnique({
-            where: { email },
-            select: { id: true }
-        });
-
-        if (existingEmail) {
-            return NextResponse.json(
-                { error: 'Email already exists' },
-                { status: 400 }
-            );
-        }
-
-        // Check if username already exists
-        const existingUserName = await prisma.user.findUnique({
-            where: { userName },
-            select: { id: true }
-        });
-
-        if (existingUserName) {
-            return NextResponse.json(
-                { error: 'Username already exists' },
-                { status: 400 }
-            );
-        }
-
-        // Hash password with bcrypt (12 salt rounds)
-        const hashedPassword = await bcrypt.hash(password, 12);
-
-        // Create new user
-        const newUser = await prisma.user.create({
-            data: {
-                userName,
-                firstName,
-                lastName,
-                email,
-                password: hashedPassword,
-                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName}`,
-                bio: '',
-                verified: false // User must verify via OTP
-            },
-            select: {
-                id: true,
-                userName: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                avatar: true,
-                bio: true,
-                verified: true,
-                location: true,
-                createdAt: true
-            }
-        });
-
-        // Generate OTP
-        const otpCode = generateOTP();
-        const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-        // Store OTP in cache (10 minute TTL)
-        await cache.set(`otp:${email}`, JSON.stringify({ code: otpCode, expiresAt }), 600);
-
-        const emailResult = await sendOtpVerificationEmail({
-            email,
-            firstName,
-            code: otpCode,
-            expiresInMinutes: 10,
-        });
-
-        if (!emailResult.ok && !emailResult.skipped) {
-            return NextResponse.json(
-                { error: 'Failed to send verification email. Please try again.' },
-                { status: 500 }
-            );
-        }
-
-        return NextResponse.json({
-            message: 'User registered successfully. Verification code sent to your email.',
-            user: {
-                id: newUser.id,
-                userName: newUser.userName,
-                email: newUser.email,
-            },
-        });
-    } catch (error) {
-        const prismaError = handlePrismaError(error, 'User');
-        if (prismaError) {
-            return prismaError;
-        }
-
-        console.error('Registration error:', error);
-        return NextResponse.json(
-            { error: 'Registration failed. Please try again.' },
-            { status: 500 }
-        );
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
+
+    const { userName, firstName, lastName, email, password } = parsed.data;
+
+    const [existingEmail, existingUserName] = await Promise.all([
+      prisma.user.findUnique({ where: { email } }),
+      prisma.user.findUnique({ where: { userName } }),
+    ]);
+
+    if (existingEmail) {
+      return NextResponse.json({ error: "Email already exists" }, { status: 409 });
+    }
+
+    if (existingUserName) {
+      return NextResponse.json({ error: "Username already exists" }, { status: 409 });
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const { searchParams } = new URL(request.url);
+    const ref = searchParams.get("ref");
+    let invitedById: string | undefined;
+
+    if (ref) {
+      const inviter = await prisma.user.findUnique({ where: { inviteCode: ref } });
+      if (inviter) {
+        invitedById = inviter.id;
+      }
+    }
+
+    await prisma.user.create({
+      data: {
+        userName,
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        inviteCode: crypto.randomUUID(),
+        invitedById,
+      },
+    });
+
+    if (invitedById) {
+      qstashService.publishRewardsAward({ userId: invitedById, actionKey: "INVITE_ACCEPTED" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await hashPassword(otp);
+
+    const otpKey = `otp:${email}`;
+
+    const redis = await getRedis();
+
+    if (redis) {
+      await redis.set(otpKey, otpHash, { ex: 900 });
+    } else {
+      otpStore.set(otpKey, { hash: otpHash, expiry: Date.now() + 900000 });
+    }
+
+    const otpResult = await sendOtpEmail(email, otp);
+    if (otpResult.sent) {
+      await sendWelcomeEmail(email, firstName);
+    } else {
+      console.log(`[DEV] OTP for ${email}: ${otp}`);
+    }
+
+    return NextResponse.json({ message: "OTP sent to email" }, { status: 201 });
+  } catch (error) {
+    Sentry.captureException(error);
+    if (error instanceof Error) {
+      if (error.name === "PrismaClientKnownRequestError") {
+        return NextResponse.json({ error: "Database error. Please try again." }, { status: 500 });
+      }
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

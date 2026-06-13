@@ -1,46 +1,100 @@
-"use client";
+'use client'
 
-import React from "react";
-import { Dropdown } from "antd";
-import type { DropdownProps, MenuProps } from "antd";
+import { useState, useRef, useEffect } from 'react'
+import type { LucideIcon } from 'lucide-react'
+import { cn } from '@/app/lib/utils/cn'
 
-export interface AppDropdownItem {
-  key: string;
-  label: React.ReactNode;
-  icon?: React.ReactNode;
-  danger?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
+interface DropdownItem {
+  label: string
+  icon?: LucideIcon
+  onClick?: () => void
+  variant?: 'default' | 'destructive'
 }
 
-export interface AppDropdownProps {
-  items: AppDropdownItem[];
-  children: React.ReactElement;
-  trigger?: DropdownProps["trigger"];
-  placement?: DropdownProps["placement"];
+interface AppDropdownProps {
+  trigger: React.ReactNode
+  items: DropdownItem[]
+  align?: 'start' | 'end'
 }
 
-export function AppDropdown({
+export default function AppDropdown({
+  trigger,
   items,
-  children,
-  trigger = ["click"],
-  placement = "bottomRight",
-}: AppDropdownProps): React.ReactElement {
-  const menuItems: MenuProps["items"] = items.map((item) => ({
-    key: item.key,
-    label: item.label,
-    icon: item.icon,
-    danger: item.danger,
-    disabled: item.disabled,
-    onClick: item.onClick,
-  }));
+  align = 'start',
+}: AppDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen])
+
+  const handleItemClick = (item: DropdownItem) => {
+    item.onClick?.()
+    setIsOpen(false)
+  }
 
   return (
-    <Dropdown
-      menu={{ items: menuItems }}
-      trigger={trigger}
-      placement={placement}>
-      {children}
-    </Dropdown>
-  );
+    <div ref={menuRef} className="relative inline-flex">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setIsOpen((prev) => !prev)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            setIsOpen((prev) => !prev)
+          }
+        }}
+        className="inline-flex cursor-pointer"
+      >
+        {trigger}
+      </div>
+
+      {isOpen && (
+        <div
+          className={cn(
+            'absolute top-full mt-1 z-50 bg-bg-card border border-border radius-lg shadow-lg py-1 min-w-[160px]',
+            align === 'end' ? 'right-0' : 'left-0',
+          )}
+        >
+          {items.map((item, index) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handleItemClick(item)}
+                className={cn(
+                  'flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-bg-elevated cursor-pointer transition-colors duration-base',
+                  item.variant === 'destructive' && 'text-error-text',
+                )}
+              >
+                {Icon && <Icon size={16} />}
+                <span>{item.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
 }

@@ -1,37 +1,12 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/app/lib/utils/metadata";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Home",
-  description:
-    "Discover and share travel routes with the Along community. Connect with fellow travelers, bookmark your favorite routes, and plan your next adventure.",
-  keywords: [
-    "home",
-    "feed",
-    "travel routes",
-    "social travel",
-    "Along",
-    "share routes",
-    "discover destinations",
-  ],
-  openGraph: {
-    title: "Home | Along",
-    description:
-      "Discover and share travel routes with the Along community. Connect with fellow travelers, bookmark your favorite routes, and plan your next adventure.",
-    type: "website",
-    url: "/home",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Home | Along",
-    description:
-      "Discover and share travel routes with the Along community. Connect with fellow travelers, bookmark your favorite routes, and plan your next adventure.",
-  },
-};
+  description: "Your feed of trusted route information from the community.",
+  path: "/home",
+  noIndex: true,
+});
 
-export default function HomeLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

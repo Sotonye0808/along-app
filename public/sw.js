@@ -102,8 +102,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Only cache successful responses
-          if (response && response.status === 200) {
+          // Only cache successful GET responses
+          if (response && response.status === 200 && request.method === "GET") {
             const responseClone = response.clone();
             caches.open(API_CACHE_NAME).then((cache) => {
               cache.put(request, responseClone).catch((error) => {
@@ -150,8 +150,8 @@ self.addEventListener("fetch", (event) => {
         }
         return fetch(request)
           .then((response) => {
-            // Cache the fetched resource
-            if (response && response.status === 200) {
+            // Only cache successful GET responses
+            if (response && response.status === 200 && request.method === "GET") {
               const responseClone = response.clone();
               caches.open(STATIC_CACHE_NAME).then((cache) => {
                 cache.put(request, responseClone).catch((error) => {
@@ -188,8 +188,8 @@ self.addEventListener("fetch", (event) => {
     caches.match(request).then((cachedResponse) => {
       const fetchPromise = fetch(request)
         .then((response) => {
-          // Cache the new version
-          if (response && response.status === 200) {
+          // Only cache successful GET responses
+          if (response && response.status === 200 && request.method === "GET") {
             const responseClone = response.clone();
             caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
               cache.put(request, responseClone).catch((error) => {

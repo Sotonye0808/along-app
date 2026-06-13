@@ -1,6 +1,6 @@
 # Lessons Learned
 
-> **Overview:** Practical knowledge accumulated during Along App development — things that worked well, things that didn't, and patterns worth repeating. Different from `repair-system.md` (which tracks errors); this file tracks development process insights and architectural wisdom.
+> **Overview:** Practical knowledge accumulated during Along development — things that worked well, things that didn't, and patterns worth repeating. Different from repair-system.md (which tracks errors); this file tracks development process insights and architectural wisdom.
 
 ---
 
@@ -23,67 +23,52 @@
 
 ## Lessons
 
----
-
-## Next.js 15 Async APIs
+## Duplicate Hook Files Cause Confusion
 
 **Context:**
-During development, `cookies()`, `headers()`, `params`, and `searchParams` started throwing warnings and then errors because they became Promise-based in Next.js 15.
+`useRequireAuth` was created in both `app/hooks/useRequireAuth.ts` (router-based redirect) and `app/lib/hooks/useRequireAuth.ts` (permission-check variant). This creates ambiguity about which is the canonical version.
 
 **What We Learned:**
-All dynamic functions in Next.js 15 (`cookies()`, `headers()`, route `params`, page `searchParams`) must be `await`ed before accessing their values. This is a breaking change from Next.js 14.
+Hooks should live in a single location. The `app/hooks/` directory is the correct place for client-side app hooks; `app/lib/hooks/` should be reserved for server-compatible or library-level hooks.
 
 **Apply When:**
-Every Server Component, API route, or Server Action that accesses cookies, headers, or route parameters.
-
----
-
-## Ant Design SSR Requires AntdRegistry
-
-**Context:**
-Ant Design's CSS-in-JS solution causes flash of unstyled content and hydration errors when used with Next.js App Router without proper SSR setup.
-
-**What We Learned:**
-Always wrap the app with `AntdRegistry` from `@ant-design/nextjs-registry` and configure the Ant Design theme in a dedicated `AntdProvider`. The `AntdProvider` must be at the root layout level.
-
-**Apply When:**
-Any time Ant Design components are added or the provider setup is modified.
+Creating new hooks in the future — put client-only hooks in `app/hooks/`, shared hooks in `app/lib/hooks/`, and document the distinction.
 
 ---
 
-## Cursor-Based Pagination Over Offset
+## Config-Driven Architecture Reduces Code Duplication
 
 **Context:**
-The Prisma schema and data modeling phase revealed that offset-based pagination (`skip: page * size`) becomes very slow at scale with PostgreSQL.
+All hardcoded values (vehicle types, route statuses, form fields, notification types, SEO metadata, FAQ items, blog config) are centralized in `app/lib/config/` as typed registries. Components and pages import from these registries rather than defining inline constants.
 
 **What We Learned:**
-Always implement cursor-based pagination using Prisma's `cursor` + `take` + `skip: 1` pattern. This remains performant regardless of dataset size.
+This approach makes it trivial to add new options (e.g., a new vehicle type requires one file change) and keeps UI components pure. The config `index.ts` barrel file provides a clean single-import API.
 
 **Apply When:**
-Any new list endpoint or when refactoring existing paginated queries.
+Any time a new domain module is created — define a config registry first, then build the UI/service layer on top.
 
 ---
 
-## Validate Files Before Cloudinary Upload
+## Client-Side Service Workers Require Careful Registration Timing
 
 **Context:**
-Early image upload implementation sent all files to Cloudinary without validation, causing confusing server errors for invalid file types and oversized files.
+PushProvider attempts to subscribe to push notifications on mount. If the service worker hasn't been registered yet, `pushManager.subscribe()` fails silently. The `registerServiceWorker` in `pushClient` handles this by registering the worker before subscribing.
 
 **What We Learned:**
-Always validate file type and size client-side before base64 conversion and upload. Use `validateImageFile()` utility. Handle upload failures gracefully with user-friendly error messages.
+Always ensure `navigator.serviceWorker.register()` completes before calling `pushManager.subscribe()`. The promise chain in `subscribeToPush` handles this correctly.
 
 **Apply When:**
-Any component or route that handles image uploads.
+Any feature that depends on the service worker being active (push notifications, background sync, cache management).
 
 ---
 
-## `app/conflicting/` Is Read-Only Reference
+## Offline Queue + OnlineStatusProvider Pattern for Resilience
 
 **Context:**
-The `app/conflicting/` directory contains old code from a previous architecture that was kept for reference during migration. Modifying it causes confusion about what is canonical.
+When the user goes offline, mutations are queued in `localStorage` via `offlineQueue`. On reconnect, `OnlineStatusProvider` fires `online` event → `offlineQueue.flush()` replays all queued requests.
 
 **What We Learned:**
-This directory must never be modified or imported from. It exists purely as a reference for understanding the old implementation during refactoring.
+This simple pattern provides meaningful offline resilience without a complex sync engine. The queue is persisted across page refreshes (localStorage) and flushed FIFO on reconnect.
 
 **Apply When:**
-Always — if you see an import from `app/conflicting/`, flag it for removal.
+Any feature that needs to work offline and replay mutations when connectivity returns — use `offlineQueue.enqueue()` for writes and trust `OnlineStatusProvider` to auto-flush.

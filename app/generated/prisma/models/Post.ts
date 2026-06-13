@@ -123,6 +123,7 @@ export type PostCountAggregateOutputType = {
   startLng: number
   endLat: number
   endLng: number
+  waypoints: number
   region: number
   totalDistanceKm: number
   estimatedMins: number
@@ -232,6 +233,7 @@ export type PostCountAggregateInputType = {
   startLng?: true
   endLat?: true
   endLng?: true
+  waypoints?: true
   region?: true
   totalDistanceKm?: true
   estimatedMins?: true
@@ -346,6 +348,7 @@ export type PostGroupByOutputType = {
   startLng: number | null
   endLat: number | null
   endLng: number | null
+  waypoints: runtime.JsonValue | null
   region: string | null
   totalDistanceKm: number | null
   estimatedMins: number | null
@@ -396,6 +399,7 @@ export type PostWhereInput = {
   startLng?: Prisma.FloatNullableFilter<"Post"> | number | null
   endLat?: Prisma.FloatNullableFilter<"Post"> | number | null
   endLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  waypoints?: Prisma.JsonNullableFilter<"Post">
   region?: Prisma.StringNullableFilter<"Post"> | string | null
   totalDistanceKm?: Prisma.FloatNullableFilter<"Post"> | number | null
   estimatedMins?: Prisma.IntNullableFilter<"Post"> | number | null
@@ -431,6 +435,7 @@ export type PostOrderByWithRelationInput = {
   startLng?: Prisma.SortOrderInput | Prisma.SortOrder
   endLat?: Prisma.SortOrderInput | Prisma.SortOrder
   endLng?: Prisma.SortOrderInput | Prisma.SortOrder
+  waypoints?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   totalDistanceKm?: Prisma.SortOrderInput | Prisma.SortOrder
   estimatedMins?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -469,6 +474,7 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   startLng?: Prisma.FloatNullableFilter<"Post"> | number | null
   endLat?: Prisma.FloatNullableFilter<"Post"> | number | null
   endLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  waypoints?: Prisma.JsonNullableFilter<"Post">
   region?: Prisma.StringNullableFilter<"Post"> | string | null
   totalDistanceKm?: Prisma.FloatNullableFilter<"Post"> | number | null
   estimatedMins?: Prisma.IntNullableFilter<"Post"> | number | null
@@ -504,6 +510,7 @@ export type PostOrderByWithAggregationInput = {
   startLng?: Prisma.SortOrderInput | Prisma.SortOrder
   endLat?: Prisma.SortOrderInput | Prisma.SortOrder
   endLng?: Prisma.SortOrderInput | Prisma.SortOrder
+  waypoints?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   totalDistanceKm?: Prisma.SortOrderInput | Prisma.SortOrder
   estimatedMins?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -539,6 +546,7 @@ export type PostScalarWhereWithAggregatesInput = {
   startLng?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
   endLat?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
   endLng?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
+  waypoints?: Prisma.JsonNullableWithAggregatesFilter<"Post">
   region?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
   totalDistanceKm?: Prisma.FloatNullableWithAggregatesFilter<"Post"> | number | null
   estimatedMins?: Prisma.IntNullableWithAggregatesFilter<"Post"> | number | null
@@ -565,6 +573,7 @@ export type PostCreateInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -600,6 +609,7 @@ export type PostUncheckedCreateInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -633,6 +643,7 @@ export type PostUpdateInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -668,6 +679,7 @@ export type PostUncheckedUpdateInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -702,6 +714,7 @@ export type PostCreateManyInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -728,6 +741,7 @@ export type PostUpdateManyMutationInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -755,6 +769,7 @@ export type PostUncheckedUpdateManyInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -800,6 +815,7 @@ export type PostCountOrderByAggregateInput = {
   startLng?: Prisma.SortOrder
   endLat?: Prisma.SortOrder
   endLng?: Prisma.SortOrder
+  waypoints?: Prisma.SortOrder
   region?: Prisma.SortOrder
   totalDistanceKm?: Prisma.SortOrder
   estimatedMins?: Prisma.SortOrder
@@ -1090,6 +1106,7 @@ export type PostCreateWithoutUserInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1123,6 +1140,7 @@ export type PostUncheckedCreateWithoutUserInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1186,6 +1204,7 @@ export type PostScalarWhereInput = {
   startLng?: Prisma.FloatNullableFilter<"Post"> | number | null
   endLat?: Prisma.FloatNullableFilter<"Post"> | number | null
   endLng?: Prisma.FloatNullableFilter<"Post"> | number | null
+  waypoints?: Prisma.JsonNullableFilter<"Post">
   region?: Prisma.StringNullableFilter<"Post"> | string | null
   totalDistanceKm?: Prisma.FloatNullableFilter<"Post"> | number | null
   estimatedMins?: Prisma.IntNullableFilter<"Post"> | number | null
@@ -1212,6 +1231,7 @@ export type PostCreateWithoutPostCommentsInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1246,6 +1266,7 @@ export type PostUncheckedCreateWithoutPostCommentsInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1294,6 +1315,7 @@ export type PostUpdateWithoutPostCommentsInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1328,6 +1350,7 @@ export type PostUncheckedUpdateWithoutPostCommentsInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1360,6 +1383,7 @@ export type PostCreateWithoutPostLikesInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1394,6 +1418,7 @@ export type PostUncheckedCreateWithoutPostLikesInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1442,6 +1467,7 @@ export type PostUpdateWithoutPostLikesInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1476,6 +1502,7 @@ export type PostUncheckedUpdateWithoutPostLikesInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1508,6 +1535,7 @@ export type PostCreateWithoutPostBookmarksInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1542,6 +1570,7 @@ export type PostUncheckedCreateWithoutPostBookmarksInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1590,6 +1619,7 @@ export type PostUpdateWithoutPostBookmarksInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1624,6 +1654,7 @@ export type PostUncheckedUpdateWithoutPostBookmarksInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1656,6 +1687,7 @@ export type PostCreateWithoutNotificationsInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1690,6 +1722,7 @@ export type PostUncheckedCreateWithoutNotificationsInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1738,6 +1771,7 @@ export type PostUpdateWithoutNotificationsInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1772,6 +1806,7 @@ export type PostUncheckedUpdateWithoutNotificationsInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1804,6 +1839,7 @@ export type PostCreateWithoutUserActivitiesInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1838,6 +1874,7 @@ export type PostUncheckedCreateWithoutUserActivitiesInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1886,6 +1923,7 @@ export type PostUpdateWithoutUserActivitiesInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1920,6 +1958,7 @@ export type PostUncheckedUpdateWithoutUserActivitiesInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1952,6 +1991,7 @@ export type PostCreateWithoutBugReportsInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -1986,6 +2026,7 @@ export type PostUncheckedCreateWithoutBugReportsInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -2034,6 +2075,7 @@ export type PostUpdateWithoutBugReportsInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2068,6 +2110,7 @@ export type PostUncheckedUpdateWithoutBugReportsInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2100,6 +2143,7 @@ export type PostCreateWithoutAnalyticsEventsInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -2134,6 +2178,7 @@ export type PostUncheckedCreateWithoutAnalyticsEventsInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -2182,6 +2227,7 @@ export type PostUpdateWithoutAnalyticsEventsInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2216,6 +2262,7 @@ export type PostUncheckedUpdateWithoutAnalyticsEventsInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2248,6 +2295,7 @@ export type PostCreateManyUserInput = {
   startLng?: number | null
   endLat?: number | null
   endLng?: number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: string | null
   totalDistanceKm?: number | null
   estimatedMins?: number | null
@@ -2274,6 +2322,7 @@ export type PostUpdateWithoutUserInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2307,6 +2356,7 @@ export type PostUncheckedUpdateWithoutUserInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2340,6 +2390,7 @@ export type PostUncheckedUpdateManyWithoutUserInput = {
   startLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   endLng?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  waypoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   estimatedMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2452,6 +2503,7 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   startLng?: boolean
   endLat?: boolean
   endLng?: boolean
+  waypoints?: boolean
   region?: boolean
   totalDistanceKm?: boolean
   estimatedMins?: boolean
@@ -2488,6 +2540,7 @@ export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   startLng?: boolean
   endLat?: boolean
   endLng?: boolean
+  waypoints?: boolean
   region?: boolean
   totalDistanceKm?: boolean
   estimatedMins?: boolean
@@ -2516,6 +2569,7 @@ export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   startLng?: boolean
   endLat?: boolean
   endLng?: boolean
+  waypoints?: boolean
   region?: boolean
   totalDistanceKm?: boolean
   estimatedMins?: boolean
@@ -2544,6 +2598,7 @@ export type PostSelectScalar = {
   startLng?: boolean
   endLat?: boolean
   endLng?: boolean
+  waypoints?: boolean
   region?: boolean
   totalDistanceKm?: boolean
   estimatedMins?: boolean
@@ -2554,7 +2609,7 @@ export type PostSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "routes" | "images" | "tags" | "likes" | "dislikes" | "comments" | "bookmarks" | "validityScore" | "validityTier" | "startLat" | "startLng" | "endLat" | "endLng" | "region" | "totalDistanceKm" | "estimatedMins" | "isPlatformGen" | "views" | "shares" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "routes" | "images" | "tags" | "likes" | "dislikes" | "comments" | "bookmarks" | "validityScore" | "validityTier" | "startLat" | "startLng" | "endLat" | "endLng" | "waypoints" | "region" | "totalDistanceKm" | "estimatedMins" | "isPlatformGen" | "views" | "shares" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   postComments?: boolean | Prisma.Post$postCommentsArgs<ExtArgs>
@@ -2602,6 +2657,7 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     startLng: number | null
     endLat: number | null
     endLng: number | null
+    waypoints: runtime.JsonValue | null
     region: string | null
     totalDistanceKm: number | null
     estimatedMins: number | null
@@ -3057,6 +3113,7 @@ export interface PostFieldRefs {
   readonly startLng: Prisma.FieldRef<"Post", 'Float'>
   readonly endLat: Prisma.FieldRef<"Post", 'Float'>
   readonly endLng: Prisma.FieldRef<"Post", 'Float'>
+  readonly waypoints: Prisma.FieldRef<"Post", 'Json'>
   readonly region: Prisma.FieldRef<"Post", 'String'>
   readonly totalDistanceKm: Prisma.FieldRef<"Post", 'Float'>
   readonly estimatedMins: Prisma.FieldRef<"Post", 'Int'>

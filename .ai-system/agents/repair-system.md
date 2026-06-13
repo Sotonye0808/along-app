@@ -1,6 +1,6 @@
 # Repair System — Error Knowledge Base
 
-> **Overview:** A living knowledge base of errors encountered during Along App development, their root causes, and how they were fixed. Agents should consult this before diagnosing new errors. Every fixed bug should be logged here to prevent recurrence. The project uses Next.js 15+, TypeScript strict mode, Prisma, Redis, Cloudinary, and Ant Design.
+> **Overview:** A living knowledge base of errors encountered during development, their root causes, and how they were fixed. Agents should consult this before diagnosing new errors. Every fixed bug should be logged here to prevent recurrence. This file is pre-populated with known error patterns for the Along tech stack (Next.js 15 + React 19 + Ant Design 5 + Tailwind 4).
 
 ---
 
@@ -18,126 +18,7 @@
 
 ---
 
-## Known Error Patterns
-
-> **Section summary:** Recurring error categories seen in this tech stack. Agents should check this section when they match the pattern before investigating further.
-
-### Next.js App Router
-
-**Hydration Mismatch**
-
-- Symptom: `Hydration failed because the initial UI does not match what was rendered on the server`
-- Cause: Browser-only logic (`window`, `localStorage`, `Date.now()`) running during server render, or Ant Design SSR issue
-- Fix: Wrap in `useEffect` or use `dynamic(() => import(...), { ssr: false })`; use `AntdRegistry` from `@ant-design/nextjs-registry` for Ant Design SSR
-- Prevention: Never access browser APIs outside `useEffect` in components; always wrap Ant Design root with `AntdProvider`
-
-**`cookies()` / `headers()` must be awaited**
-
-- Symptom: `Error: cookies() should be awaited before using its value`
-- Cause: In Next.js 15, `cookies()` and `headers()` return Promises and must be `await`ed
-- Fix: `const cookieStore = await cookies(); const token = cookieStore.get('accessToken')`
-- Prevention: Always `await` dynamic functions (`cookies`, `headers`, `params`, `searchParams`) in Next.js 15+
-
-**`params` and `searchParams` must be awaited in page components**
-
-- Symptom: `params should be awaited before using its properties`
-- Cause: In Next.js 15, `params` and `searchParams` are now Promises
-- Fix: Add `await` before accessing params: `const { id } = await params`
-- Prevention: Always destructure params with `await` in page and layout components
-
-**`'use client'` with Server Component imports**
-
-- Symptom: Build error about importing server-only code into client components
-- Cause: Importing a server component (uses `cookies`, `headers`, etc.) into a client component
-- Fix: Move server logic to an API route or Server Action; pass data as props
-- Prevention: Client components can only import other client components or shared utilities
-
----
-
-### TypeScript Strict Mode
-
-**`any` Type Violations**
-
-- Symptom: TypeScript error `Unexpected any. Specify a different type`
-- Cause: Using `any` type explicitly or implicitly
-- Fix: Define proper interface/type in `app/lib/types/`; use generics where needed
-- Prevention: Never use `any`; use `unknown` with type narrowing if truly dynamic
-
-**Missing Type Imports**
-
-- Symptom: `Cannot find name 'SomeType'`
-- Cause: Type defined in `app/lib/types/` but not globally included
-- Fix: Check `tsconfig.json` path includes; ensure the type is exported from the types file
-- Prevention: All custom types must be in `app/lib/types/types.ts` or `interfaces.ts` — they are auto-imported
-
----
-
-### Prisma ORM
-
-**Prisma Client Not Generated**
-
-- Symptom: `Cannot find module '../app/generated/prisma'`
-- Cause: `prisma generate` not run after schema changes
-- Fix: Run `npx prisma generate`
-- Prevention: Always run `prisma generate` after schema changes; add to CI pipeline
-
-**Unique Constraint Violation**
-
-- Symptom: `Prisma error P2002: Unique constraint failed`
-- Cause: Attempting to create a record with a duplicate unique field (email, userName)
-- Fix: Check for existing record before insert; catch `P2002` and return 409 response
-- Prevention: Always catch `PrismaClientKnownRequestError` and handle specific error codes
-
-**N+1 Query Problem**
-
-- Symptom: Excessive DB queries, slow response times
-- Cause: Fetching related data in a loop instead of using Prisma `include`
-- Fix: Use `include: { user: true, comments: true }` in the main query
-- Prevention: Always use `include` for related data in list queries; avoid nested fetches
-
----
-
-### Redis / Caching
-
-**Redis Connection Error in Development**
-
-- Symptom: `Error: connect ECONNREFUSED` or Upstash auth error
-- Cause: Missing or incorrect `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` in `.env`
-- Fix: Add correct Upstash credentials to `.env.local`
-- Prevention: Validate required env vars on startup; use optional chaining in dev when Redis isn't critical
-
----
-
-### Cloudinary
-
-**Upload Preset Not Found**
-
-- Symptom: `Error 400: Upload preset not found`
-- Cause: Wrong upload preset name or preset not created in Cloudinary dashboard
-- Fix: Verify preset name matches exactly; create preset in Cloudinary if missing
-- Prevention: Use constants for preset names from `app/lib/config/cloudinary.ts`
-
-**Base64 String Too Large**
-
-- Symptom: `Request entity too large` when uploading
-- Cause: No file size validation before base64 conversion
-- Fix: Validate file size client-side before upload (max 10MB recommended)
-- Prevention: Always call `validateImageFile()` before uploading
-
----
-
-### Ant Design + Next.js
-
-**Ant Design Styles Not Loading in SSR**
-
-- Symptom: Flash of unstyled Ant Design components on first load
-- Cause: Ant Design CSS-in-JS not extracted during SSR
-- Fix: Wrap app root with `AntdRegistry` from `@ant-design/nextjs-registry` in root layout
-- Prevention: `AntdProvider.tsx` handles this — never remove `AntdRegistry` from the provider chain
-
----
-
-## Entry Template
+### [TEMPLATE — copy this for each new error]
 
 ```
 ## [Error Title / Short Description]
@@ -162,199 +43,251 @@
 
 ---
 
+## Known Error Patterns
+
+### React 19 / Next.js 15
+
+**Hydration Mismatch**
+- Symptom: `Hydration failed because the initial UI does not match what was rendered on the server`
+- Cause: Browser-only logic (window, localStorage, Date.now()) running during server render
+- Fix: Wrap in `useEffect` or use `dynamic(() => import(...), { ssr: false })`
+- Prevention: Never access browser APIs outside useEffect in components
+
+**Missing Key Prop**
+- Symptom: `Each child in a list should have a unique "key" prop`
+- Cause: `.map()` rendering without a stable unique key
+- Fix: Add `key={item.id}` — use a stable unique ID, not the array index
+
+**Server Component with Client Hook**
+- Symptom: `You're importing a component that needs useState/useEffect. It only works in a Client Component.`
+- Cause: Server component using client-side features
+- Fix: Add `"use client"` directive at the top of the file
+- Prevention: Default to server components; add "use client" only when needed
+
+**Async Server Component Error**
+- Symptom: `Error: Objects are not valid as a React child`
+- Cause: Returning a raw object/Response from an async server component instead of JSX
+- Fix: Ensure async components return JSX, not plain objects
+
+### Ant Design 5 + React 19
+
+**Ant Design Component SSR Issue**
+- Symptom: Style flicker or missing styles on first page load
+- Cause: Ant Design v5 CSS-in-JS not properly extracted during SSR
+- Fix: Use `@ant-design/nextjs-registry` to wrap the app root
+- Prevention: Always use AntdRegistry from `@ant-design/nextjs-registry` in the root layout
+
+**Ant Design Icon Missing**
+- Symptom: Blank square or missing icon
+- Cause: Tree-shaking removed the icon during build
+- Fix: Import icon directly from `@ant-design/icons` rather than dynamic import
+- Prevention: Always use named imports for Ant Design icons
+
+### Prisma 7 + PostgreSQL
+
+**Prisma Client Not Found**
+- Symptom: `Cannot find module '@prisma/client'`
+- Cause: Prisma client not generated after schema changes
+- Fix: Run `npx prisma generate`
+- Prevention: Run `prisma generate` after every schema change
+
+**Migration Conflict**
+- Symptom: `Migration `xxx` was applied to the database but is not in the migrations directory`
+- Cause: Migrations deleted or reset while database has applied migrations
+- Fix: `npx prisma migrate resolve --applied <migration_name>`
+- Prevention: Never delete migration files without resolving the database state
+
+**Connection Pool Exhaustion**
+- Symptom: `Error: Connection pool exhausted` or requests hang
+- Cause: Prisma connection pool too small for request volume
+- Fix: Increase pool size in `DATABASE_URL` query params (`?connection_limit=20`)
+- Prevention: Configure connection pooling based on serverless/container concurrency
+
+### Tailwind CSS 4
+
+**@tailwind Directive Not Working**
+- Symptom: `@tailwind base` / `@tailwind utilities` produces no output
+- Cause: Tailwind v4 uses `@import "tailwindcss"` instead of `@tailwind` directives
+- Fix: Replace `@tailwind base; @tailwind components; @tailwind utilities` with `@import "tailwindcss"`
+- Prevention: Use Tailwind v4 syntax with the new `@tailwindcss/postcss` plugin
+
+**Class Not Being Generated**
+- Symptom: A utility class like `grid-cols-12` is not working
+- Cause: Tailwind v4 uses CSS-first configuration; custom values need `@theme` directive
+- Fix: Add `grid-cols-12` to the `gridTemplateColumns` theme extension in the plugin
+- Prevention: Register all custom utility values in `tailwind.config.ts`
+
+### Configuration / Environment
+
+**Missing Environment Variable**
+- Symptom: `undefined` values in production, features silently broken
+- Cause: Variable defined in `.env` but not in production environment
+- Fix: Add to deployment environment variables and validate on startup
+- Prevention: Add a startup validation check that throws if required env vars are missing
+
+**Public Env Var Not Exposed to Client**
+- Symptom: `NEXT_PUBLIC_*` variable is `undefined` in the browser
+- Cause: Variable missing `NEXT_PUBLIC_` prefix, or build not restarted after change
+- Fix: Prefix with `NEXT_PUBLIC_` and rebuild
+- Prevention: Always prefix client-exposed env vars with `NEXT_PUBLIC_`
+
+### Jest / Testing
+
+**Jest Cannot Find Module**
+- Symptom: `Cannot find module '@/lib/something'`
+- Cause: Module alias not configured in Jest or tsconfig paths mismatch
+- Fix: Ensure `jest.config.js` has correct `moduleNameMapper` for `@/*` → `src/*`
+- Prevention: Keep Jest module aliases in sync with tsconfig paths
+
+**RTL Ant Design Component Test Fails**
+- Symptom: `Error: Could not find `locale` in context` or missing Ant Design styles
+- Cause: Ant Design ConfigProvider not wrapping the test component
+- Fix: Wrap test renders with `ConfigProvider` and `AntdRegistry`
+- Prevention: Create a custom render function that includes all necessary providers
+
+---
+
+### Feed Stream Crash on API Error Response
+
+**Symptom:**
+`TypeError: Cannot read properties of undefined (reading 'length')` at `feedStream.ts:72`. Also: "Rendered more hooks than during the previous render" because React's hook count desynchronizes when a render-time error interrupts execution.
+
+**Root Cause:**
+The `fetchFeed` method in `feedStream.ts` called `/api/posts/feed` which returns `{error: "Not authenticated"}` for unauthenticated users. The response was cast as `{posts: FeedPost[]; nextCursor: string | null}` but `data.posts` was actually `undefined` because the API returned an error object. Two crash points:
+1. `feedStream.ts:72` — `state.posts.length` on undefined in the polling subscription
+2. `feedStream.ts:96` — `data.posts` used directly without fallback in `fetchFeed`
+
+**Fix Applied:**
+- `fetchFeed` now defaults `data.posts ?? []` and `data.nextCursor ?? null`
+- Polling subscription uses optional chaining: `(state.posts?.length ?? 0) > 0`
+
+**Prevention:**
+Always default array fields from API responses: `data.field ?? []`. Never assume the API will return the expected shape — it could return `{error: "..."}` or `{message: "..."}`.
+
+**Files Affected:**
+- `app/lib/streams/feedStream.ts`
+
+**Date:** 2026-06-09
+
+---
+
+### Feed API Auth Blocking Guest Access
+
+**Symptom:**
+`GET /api/posts/feed` returned `{"error":"Not authenticated"}` for unauthenticated users, blocking guest browsing of the home feed.
+
+**Root Cause:**
+`app/api/posts/feed/route.ts` called `getUserFromRequest()` at the top and returned 401 if no user was found, with no fallback for guest access.
+
+**Fix Applied:**
+Restructured the GET handler to check auth first. If authenticated, use `feedService.getFeed()` for personalized feed. If guest, return public posts (most recent) directly from Prisma without user-specific filtering.
+
+**Prevention:**
+Public-facing GET endpoints should always have a guest fallback. Auth should gate personalization, not access.
+
+**Files Affected:**
+- `app/api/posts/feed/route.ts`
+
+**Date:** 2026-06-09
+
+---
+
+### PostCard Crash on Missing User Field
+
+**Symptom:**
+`TypeError: Cannot read properties of undefined (reading 'firstName')` when a post object lacks a `user` property.
+
+**Root Cause:**
+`PostCard.tsx` accessed `post.user.firstName`, `post.user.lastName`, etc. without guarding against a missing `user` object. This happened when the feed API returned malformed data.
+
+**Fix Applied:**
+Added a `user` local constant (`const user = post.user`) at the top of the component. All downstream usage changed from `post.user.X` to `user?.X ?? ""`.
+
+**Prevention:**
+Always use optional chaining on nested data from API responses. Create local constants with fallback at the top of the render function.
+
+**Files Affected:**
+- `app/components/features/posts/PostCard.tsx`
+
+**Date:** 2026-06-09
+
+---
+
+### Missing Tailwind Typography Plugin (No Prose Styling)
+
+**Symptom:**
+`prose` CSS classes on Terms, Privacy, and Blog post pages had no effect — content rendered unstyled.
+
+**Root Cause:**
+`@tailwindcss/typography` was not installed. Tailwind CSS v4 requires explicitly installing the typography plugin and importing it in `globals.css` via `@plugin "@tailwindcss/typography"`.
+
+**Fix Applied:**
+- Installed `@tailwindcss/typography@latest`
+- Added `@plugin "@tailwindcss/typography";` to `app/globals.css`
+
+**Prevention:**
+Always install `@tailwindcss/typography` when using `prose` classes in Tailwind v4. Check `@plugin` directive in CSS, not just the Tailwind config.
+
+**Files Affected:**
+- `app/globals.css`
+- `package.json`
+
+**Date:** 2026-06-09
+
+---
+
+### Prisma 7 Accelerate URL Used as datasourceUrl (P2022 / Timeout)
+
+**Symptom:**
+`POST /api/auth/login` returns 500 "Database error. Please try again." after ~30s timeout. No `PrismaClientKnownRequestError` details visible. Fresh DB keys don't help.
+
+**Root Cause:**
+`app/lib/db/prisma.ts` passed `datasourceUrl` to the PrismaClient constructor, but Prisma 7's generated client (Accelerate mode) only accepts `accelerateUrl` or `adapter` — there is no `datasourceUrl` option in `PrismaClientOptions`. This threw `PrismaClientConstructorValidationError: Unknown property datasourceUrl` at construction time.
+
+Additionally, `prisma.config.ts` used `LOCAL_DB` (the Accelerate `prisma+postgres://` URL) for CLI operations (migrate, seed), but CLI needs a direct `postgres://` connection — Accelerate URLs don't support DDL operations.
+
+**Fix Applied:**
+- `prisma.ts`: Always uses `accelerateUrl`, switches URL based on environment — dev uses `LOCAL_DB` (dev Accelerate), prod uses `DATABASE_URL` (prod Accelerate)
+- `prisma.config.ts`: Development uses `DIRECT_LOCAL_DB` for CLI, production uses `DIRECT_URL`
+- Login route error handling: Added `PrismaClientInitializationError` to the name check, and surfaces `detail` + `code` in dev mode
+
+**Prevention:**
+Never pass a `prisma+postgres://` Accelerate URL to `datasourceUrl`. Use `accelerateUrl` for Accelerate and `datasourceUrl` for direct connections. They are mutually exclusive in Prisma 7's `PrismaClientOptions`.
+
+**Files Affected:**
+- `app/lib/db/prisma.ts`
+- `prisma.config.ts`
+- `app/api/auth/login/route.ts`
+- `app/api/posts/feed/route.ts`
+
+**Date:** 2026-06-10
+
+---
+
 ## Resolved Errors Archive
 
 > **Section summary:** Errors that have been fully resolved and are unlikely to recur. Kept for reference.
 
-[Entries move here when the underlying cause has been permanently fixed]
-
----
-
-## Tailwind v4 PostCSS Plugin Split
+### PostCard Crash on Missing Tags/Images
 
 **Symptom:**
-Build fails with: `It looks like you're trying to use tailwindcss directly as a PostCSS plugin`.
+Uncaught TypeError: Cannot read properties of undefined (reading 'length') — occurs when navigating to pages that render PostCard components. Specifically on `post.tags.length` and `post.images.length` accesses.
 
 **Root Cause:**
-Tailwind v4 moved the PostCSS plugin from `tailwindcss` to `@tailwindcss/postcss`.
+API responses may omit `tags` or `images` fields, or return `null` instead of `[]`. TypeScript's type system (`string[]`) does not provide runtime protection, and the data flows through JSON.parse without Zod schema validation on the feed endpoint.
 
 **Fix Applied:**
-Installed `@tailwindcss/postcss` and updated both `postcss.config.js` and `postcss.config.mjs` to use `"@tailwindcss/postcss": {}`.
+Added local constants with `?? []` fallback:
+```tsx
+const tags = post.tags ?? []
+const images = post.images ?? []
+```
+All `.length` and `.map()` calls now reference the guarded constants.
 
 **Prevention:**
-When upgrading to Tailwind v4, always migrate PostCSS plugin configuration and keep `@import "tailwindcss"` in CSS entrypoint.
+Always access optional array fields with `?? []` fallback or optional chaining. Consider adding Zod validation to feed API responses.
 
 **Files Affected:**
-
-- `postcss.config.js`
-- `postcss.config.mjs`
-- `package.json`
-
-**Date:** 2026-04-23
-
----
-
-## Next.js 15 Dynamic Params Typing in Metadata Layouts
-
-**Symptom:**
-Type errors in `.next/types/*/layout.ts` indicating `params` must be a Promise-compatible type.
-
-**Root Cause:**
-Next.js 15 dynamic route metadata signatures require `params` to be awaited.
-
-**Fix Applied:**
-Updated layout `Props` type to `params: Promise<{...}>` and used `const { ... } = await params`.
-
-**Prevention:**
-Treat dynamic route `params`/`searchParams` as async in App Router metadata/page/layout functions.
-
-**Files Affected:**
-
-- `app/(dashboard)/posts/[id]/layout.tsx`
-- `app/(dashboard)/profile/[username]/layout.tsx`
-
-**Date:** 2026-04-23
-
----
-
-## Ant Design Patch-Level Typing/API Compatibility Drift
-
-**Symptom:**
-`npm run build`/`tsc` failures around `antd` declarations and incompatible props (`Card.variant`, `Dropdown.popupRender`).
-
-**Root Cause:**
-Installed patch-level `antd` package behavior in this workspace diverged from existing code assumptions and declaration entrypoint availability.
-
-**Fix Applied:**
-Pinned `antd` to `5.23.3` and updated incompatible usages (`Card.variant` removed, `popupRender` replaced by `dropdownRender`).
-
-**Prevention:**
-Pin UI library versions during foundational refactors and run full build immediately after dependency upgrades to catch API drift.
-
-**Files Affected:**
-
-- `package.json`
-- `app/components/features/dashboard/SuggestionsPanel.tsx`
-- `app/components/features/navigation/NotificationsDropdown.tsx`
 - `app/components/features/posts/PostCard.tsx`
 
-**Date:** 2026-04-23
-
----
-
-## Theme Token Drift From Hardcoded Colors
-
-**Symptom:**
-UI elements keep bright white/gray backgrounds or brand hex colors in dark mode, making the theme feel inconsistent and visually stale.
-
-**Root Cause:**
-Components and layouts still use hardcoded color utilities or hex values instead of CSS variables and semantic theme tokens.
-
-**Fix Applied:**
-Audit and replace hardcoded colors with var(--color-\*) tokens or semantic Tailwind classes, and keep Ant Design tokens mapped to CSS variables.
-
-**Prevention:**
-Do not introduce raw hex colors in feature/page code. Prefer App\* wrappers and tokenized class names only.
-
-**Files Affected:**
-
-- app/globals.css
-- app/providers/AntdProvider.tsx
-- app/components/\*
-
-**Date:** 2026-05-07
-
----
-
-## PWA Install Prompt Noise
-
-**Symptom:**
-The old install prompt continues appearing during navigation or reloads instead of behaving as a one-time, intentional prompt.
-
-**Root Cause:**
-The install prompt and service worker registration logic are too eager and rely on repeated client-side checks and reload behavior.
-
-**Fix Applied:**
-Stabilize the install flow with a single prompt gate and replace forced service worker unregister/re-register behavior with a non-blocking update path.
-
-**Prevention:**
-Keep PWA prompts behind explicit user intent or a durable dismissal gate, and avoid automatic unregister cycles during registration.
-
-**Files Affected:**
-
-- app/components/features/pwa/InstallPrompt.tsx
-- app/components/ServiceWorkerRegistration.tsx
-- app/lib/utils/sw-register.ts
-
-**Date:** 2026-05-07
-
----
-
-## Prisma 7 Migrate Dev Fails with Missing datasource.url
-
-**Symptom:**
-`npx prisma migrate dev --name <name>` fails with: `The datasource.url property is required in your Prisma config file when using prisma migrate dev`.
-
-**Root Cause:**
-`prisma/prisma.config.ts` resolves datasource URL from environment (`LOCAL_DB` in development). No database URL variable is set in the active workspace environment.
-
-**Fix Applied:**
-Confirmed config behavior, documented blocker in planning/checkpoint files, and validated non-blocked steps by running `npx prisma generate` and `npm run build` successfully.
-
-**Prevention:**
-Before running Prisma migration commands, verify that `LOCAL_DB` (dev) or `DIRECT_URL`/`DATABASE_URL` is set and points to a reachable PostgreSQL instance.
-
-**Files Affected:**
-
-- `prisma/prisma.config.ts`
-- `.ai-system/planning/task-queue.md`
-- `.ai-system/checkpoints/session-log.md`
-
-**Date:** 2026-04-25
-
----
-
-## Config-Driven Auth Form Test Expectations
-
-**Symptom:**
-Auth tests expect specific validation messages like `Please enter your email`, `Please enter your password`, and `Please enter a valid email`, plus a visible Ant Design password wrapper.
-
-**Root Cause:**
-Config-driven form refactors can subtly change the validation copy and the rendered control type unless the schema-driven form preserves the original Ant Design behavior.
-
-**Fix Applied:**
-Updated `ConfigDrivenForm` to emit matching email/password validation and render `Input.Password` for password fields, while keeping the form driven by config objects.
-
-**Prevention:**
-When refactoring shared forms, preserve existing test-facing validation strings and the same component type semantics unless the tests are updated in the same change.
-
-**Files Affected:**
-
-- `app/components/ui/ConfigDrivenForm.tsx`
-- `app/lib/config/forms.ts`
-
-**Date:** 2026-04-25
-
----
-
-## Mixed Mock/JWT Auth Verification Drift
-
-**Symptom:**
-`/api/auth/verify` can reject valid sessions or behave inconsistently because it parses a mock token format while login/refresh issue real JWTs.
-
-**Root Cause:**
-Auth routes evolved at different times: login/refresh used JWT + Prisma, but verify still used mock token parsing and in-memory-era assumptions.
-
-**Fix Applied:**
-Updated `app/api/auth/verify/route.ts` to verify JWT access token and load user via Prisma; added rate limiting. Removed in-memory OTP fallback from `app/api/auth/register/route.ts` and `app/api/auth/verify-otp/route.ts`, keeping Redis-backed OTP persistence only.
-
-**Prevention:**
-When migrating API routes, treat each route family (`auth`, `posts`, `users`, `notifications`) as an atomic unit and verify all routes in the family use the same token + persistence model.
-
-**Files Affected:**
-
-- `app/api/auth/verify/route.ts`
-- `app/api/auth/register/route.ts`
-- `app/api/auth/verify-otp/route.ts`
-
-**Date:** 2026-04-26
+**Date:** 2026-06-09

@@ -20,14 +20,35 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  // Turbopack configuration (Next.js 16+ default bundler)
-  turbopack: {
-    // Turbopack handles service workers and static files correctly by default
-    // No additional configuration needed for PWA support
+  // Turbopack fallback uses webpack for compatibility
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'maplibre-gl': 'maplibre-gl/dist/maplibre-gl.js',
+    };
+    return config;
   },
-  // Headers for PWA support
+  // Performance & PWA headers
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+        ],
+      },
+
       {
         source: "/sw.js",
         headers: [

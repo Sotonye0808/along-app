@@ -1,30 +1,50 @@
-"use client";
+'use client'
 
-import React from "react";
-import { Tooltip } from "antd";
-import type { TooltipProps } from "antd";
+import { useState } from 'react'
+import { cn } from '@/app/lib/utils/cn'
 
-export interface AppTooltipProps {
-  title: React.ReactNode;
-  children: React.ReactElement;
-  placement?: TooltipProps["placement"];
-  className?: string;
+type TooltipPosition = 'top' | 'bottom' | 'left' | 'right'
+
+interface AppTooltipProps {
+  content: React.ReactNode
+  children: React.ReactNode
+  position?: TooltipPosition
+  className?: string
 }
 
-export function AppTooltip({
-  title,
+const positionClasses: Record<TooltipPosition, string> = {
+  top: 'bottom-full mb-2 left-1/2 -translate-x-1/2',
+  bottom: 'top-full mt-2 left-1/2 -translate-x-1/2',
+  left: 'right-full mr-2 top-1/2 -translate-y-1/2',
+  right: 'left-full ml-2 top-1/2 -translate-y-1/2',
+}
+
+export default function AppTooltip({
+  content,
   children,
-  placement = "top",
+  position = 'top',
   className,
-}: AppTooltipProps): React.ReactElement {
+}: AppTooltipProps) {
+  const [isVisible, setIsVisible] = useState(false)
+
   return (
-    <Tooltip
-      title={title}
-      placement={placement}
-      mouseEnterDelay={0.15}
-      className={className}
-      color="var(--color-bg-card-dark)">
+    <div
+      className="relative inline-flex"
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
       {children}
-    </Tooltip>
-  );
+      {isVisible && (
+        <div
+          className={cn(
+            'absolute z-50 bg-bg-card border border-border radius-lg shadow-lg px-3 py-2 text-sm text-text-primary whitespace-nowrap animate-scale-in pointer-events-none',
+            positionClasses[position],
+            className,
+          )}
+        >
+          {content}
+        </div>
+      )}
+    </div>
+  )
 }

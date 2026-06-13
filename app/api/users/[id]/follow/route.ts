@@ -1,202 +1,93 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from '@/lib/db/prisma';
-import { requireAuth, authenticateRequest } from '@/lib/utils/auth-server';
-import { rateLimitByUser } from '@/lib/utils/rateLimiter';
-import { cache, CACHE_KEYS } from '@/lib/cache/redis';
-import { z } from 'zod';
-import { handlePrismaError } from '@/lib/utils/prismaErrors';
+import { prisma } from "@/app/lib/db/prisma";
+import { getUserFromRequest } from "@/app/lib/utils/auth";
 
-const followParamsSchema = z.object({
-    id: z.string().min(1, 'User id is required'),
-});
-
-/**
- * POST /api/users/[id]/follow
- * Follow or unfollow a user
- * Requires authentication
- */
 export async function POST(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const parsedParams = followParamsSchema.safeParse(await params);
-        if (!parsedParams.success) {
-            return NextResponse.json(
-                { error: parsedParams.error.issues[0]?.message || 'Invalid user id' },
-                { status: 400 }
-            );
-        }
+  try {
+    const { id } = await params;
+    const currentUser = await getUserFromRequest();
 
-        const targetUserId = parsedParams.data.id;
-        const authUser = await requireAuth(request);
-
-        // Rate limiting
-        const rateLimit = await rateLimitByUser(authUser, {
-            maxRequests: 100,
-            windowSeconds: 3600, // 100 follows per hour
-        });
-
-        if (!rateLimit.success) {
-            return NextResponse.json(
-                { error: 'Rate limit exceeded' },
-                { status: 429, headers: { 'Retry-After': String(rateLimit.reset) } }
-            );
-        }
-
-        // Cannot follow yourself
-        if (authUser === targetUserId) {
-            return NextResponse.json(
-                { error: "Cannot follow yourself" },
-                { status: 400 }
-            );
-        }
-
-        // Check if target user exists
-        const targetUser = await prisma.user.findUnique({
-            where: { id: targetUserId },
-            select: { id: true, firstName: true, lastName: true },
-        });
-
-        if (!targetUser) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-
-        // Check if already following
-        const existingFollow = await prisma.follow.findUnique({
-            where: {
-                followerId_followingId: {
-                    followerId: authUser,
-                    followingId: targetUserId,
-                },
-            },
-        });
-
-        if (existingFollow) {
-            // Unfollow: Delete the follow relationship
-            await prisma.follow.delete({
-                where: {
-                    followerId_followingId: {
-                        followerId: authUser,
-                        followingId: targetUserId,
-                    },
-                },
-            });
-
-            // Invalidate caches
-            await Promise.all([
-                cache.del(CACHE_KEYS.userProfile(authUser)),
-                cache.del(CACHE_KEYS.userProfile(targetUserId)),
-                cache.del(CACHE_KEYS.userSuggestions(authUser)),
-            ]);
-
-            return NextResponse.json({
-                message: "Unfollowed successfully",
-                isFollowing: false,
-            });
-        } else {
-            // Follow: Create the follow relationship
-            await prisma.$transaction(async (tx: any) => {
-                // Create follow relationship
-                await tx.follow.create({
-                    data: {
-                        followerId: authUser,
-                        followingId: targetUserId,
-                    },
-                });
-
-                // Create notification
-                const notification = await tx.notification.create({
-                    data: {
-                        type: 'FOLLOW',
-                        actorId: authUser,
-                        message: `started following you`,
-                    },
-                });
-
-                // Create notification recipient
-                await tx.notificationRecipient.create({
-                    data: {
-                        notificationId: notification.id,
-                        userId: targetUserId,
-                        read: false,
-                    },
-                });
-            });
-
-            // Invalidate caches
-            await Promise.all([
-                cache.del(CACHE_KEYS.userProfile(authUser)),
-                cache.del(CACHE_KEYS.userProfile(targetUserId)),
-                cache.del(CACHE_KEYS.userSuggestions(authUser)),
-            ]);
-
-            return NextResponse.json({
-                message: "Followed successfully",
-                isFollowing: true,
-            });
-        }
-    } catch (error) {
-        const prismaError = handlePrismaError(error, 'Follow');
-        if (prismaError) {
-            return prismaError;
-        }
-
-        console.error("Follow error:", error);
-        return NextResponse.json(
-            { error: "Failed to process follow request" },
-            { status: 500 }
-        );
+    if (!currentUser) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
+
+    if (currentUser.id === id) {
+      return NextResponse.json({ error: "Cannot follow yourself" }, { status: 400 });
+    }
+
+    const targetUser = await prisma.user.findUnique({ where: { id } });
+    if (!targetUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const existing = await prisma.follow.findUnique({
+      where: { followerId_followingId: { followerId: currentUser.id as string, followingId: id } },
+    });
+
+    if (existing) {
+      return NextResponse.json({ error: "Already following this user" }, { status: 409 });
+    }
+
+    await prisma.$transaction([
+      prisma.follow.create({
+        data: { followerId: currentUser.id as string, followingId: id },
+      }),
+      prisma.notification.create({
+        data: {
+          type: "FOLLOW",
+          actorId: currentUser.id as string,
+          message: `${currentUser.firstName} ${currentUser.lastName} followed you`,
+          recipients: { create: { userId: id } },
+        },
+      }),
+    ]);
+
+    return NextResponse.json({ followed: true }, { status: 201 });
+  } catch (error) {
+    console.error("Follow error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
-/**
- * GET /api/users/[id]/follow
- * Check if current user follows target user
- * Requires authentication
- */
-export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const parsedParams = followParamsSchema.safeParse(await params);
-        if (!parsedParams.success) {
-            return NextResponse.json(
-                { error: parsedParams.error.issues[0]?.message || 'Invalid user id' },
-                { status: 400 }
-            );
-        }
+  try {
+    const { id } = await params;
+    const currentUser = await getUserFromRequest();
 
-        const targetUserId = parsedParams.data.id;
-        const authUser = await authenticateRequest(request);
-
-        // If not authenticated, return false
-        if (!authUser) {
-            return NextResponse.json({ isFollowing: false });
-        }
-
-        // Check if follow relationship exists
-        const follow = await prisma.follow.findUnique({
-            where: {
-                followerId_followingId: {
-                    followerId: authUser,
-                    followingId: targetUserId,
-                },
-            },
-        });
-
-        return NextResponse.json({ isFollowing: !!follow });
-    } catch (error) {
-        const prismaError = handlePrismaError(error, 'Follow');
-        if (prismaError) {
-            return prismaError;
-        }
-
-        console.error("Check follow error:", error);
-        return NextResponse.json(
-            { error: "Failed to check follow status" },
-            { status: 500 }
-        );
+    if (!currentUser) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
+
+    const existing = await prisma.follow.findUnique({
+      where: { followerId_followingId: { followerId: currentUser.id as string, followingId: id } },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Not following this user" }, { status: 404 });
+    }
+
+    await prisma.$transaction([
+      prisma.follow.delete({
+        where: { followerId_followingId: { followerId: currentUser.id as string, followingId: id } },
+      }),
+      prisma.notification.deleteMany({
+        where: {
+          type: "FOLLOW",
+          actorId: currentUser.id as string,
+          postId: null,
+        },
+      }),
+    ]);
+
+    return NextResponse.json({ followed: false }, { status: 200 });
+  } catch (error) {
+    console.error("Unfollow error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

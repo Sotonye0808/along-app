@@ -1,73 +1,95 @@
-"use client";
+'use client'
 
-import React from "react";
-import Link from "next/link";
-import { Avatar } from "antd";
-import { CheckCircle } from "lucide-react";
-import { buildAvatarUrl, getFallbackAvatarUrl } from "@/lib/config/avatar";
-import type { AvatarConfig } from "@/lib/config/avatar";
+import React, { useState } from 'react'
+import Link from 'next/link'
+import { BadgeCheck } from 'lucide-react'
+import { buildAvatarUrl, getFallbackAvatarUrl } from '@/app/lib/config/avatar'
+import type { AvatarConfig } from '@/app/lib/types'
 
-export interface AvatarUser {
-  userName: string;
-  firstName: string;
-  avatar?: string;
-  avatarConfig?: AvatarConfig | null;
-  verified?: boolean;
+type AvatarSize = 24 | 32 | 40 | 56 | 80 | 120
+
+const sizeMap: Record<AvatarSize, { dim: number; font: number }> = {
+  24: { dim: 24, font: 10 },
+  32: { dim: 32, font: 12 },
+  40: { dim: 40, font: 14 },
+  56: { dim: 56, font: 20 },
+  80: { dim: 80, font: 28 },
+  120: { dim: 120, font: 42 },
 }
 
-export interface AppAvatarProps {
-  user: AvatarUser;
-  size?: 24 | 32 | 40 | 56 | 80 | 120;
-  linkToProfile?: boolean;
-  showVerifiedBadge?: boolean;
-  className?: string;
+interface AppAvatarProps {
+  src?: string
+  alt: string
+  size?: AvatarSize
+  config?: AvatarConfig
+  verified?: boolean
+  linkToProfile?: boolean
+  userName?: string
+  className?: string
 }
 
-function resolveAvatarSrc(user: AvatarUser): string {
-  if (user.avatarConfig) {
-    return buildAvatarUrl(user.avatarConfig);
-  }
-  if (user.avatar) {
-    return user.avatar;
-  }
-  return getFallbackAvatarUrl(user.userName || user.firstName || "along-user");
-}
-
-export function AppAvatar({
-  user,
+function AppAvatar({
+  src,
+  alt,
   size = 40,
+  config,
+  verified = false,
   linkToProfile = true,
-  showVerifiedBadge = true,
-  className,
-}: AppAvatarProps): React.ReactElement {
-  const src = resolveAvatarSrc(user);
+  userName,
+  className = '',
+}: AppAvatarProps) {
+  const [imgError, setImgError] = useState(false)
+  const { dim, font } = sizeMap[size]
+  const firstLetter = alt?.charAt(0)?.toUpperCase() ?? '?'
 
-  const avatarNode = (
-    <span
-      className={["relative inline-flex", className ?? ""].join(" ").trim()}>
-      <Avatar size={size} src={src}>
-        {user.firstName?.slice(0, 1).toUpperCase()}
-      </Avatar>
-      {showVerifiedBadge && user.verified ? (
+  const avatarUrl = src ?? (config ? buildAvatarUrl(config) : getFallbackAvatarUrl(firstLetter))
+
+  const avatarContent = (
+    <div
+      className={`relative inline-flex items-center justify-center overflow-hidden rounded-circle bg-primary-muted shrink-0 ${className}`}
+      style={{ width: dim, height: dim }}
+    >
+      {!imgError && avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={avatarUrl}
+          alt={alt}
+          width={dim}
+          height={dim}
+          className="object-cover w-full h-full"
+          onError={() => setImgError(true)}
+        />
+      ) : (
         <span
-          className="absolute -right-0.5 -bottom-0.5 rounded-full bg-white p-0.5 text-[var(--color-primary)]"
-          aria-label="Verified user">
-          <CheckCircle size={Math.max(10, Math.round(size * 0.28))} />
+          className="font-bold text-primary select-none leading-none"
+          style={{ fontSize: font }}
+        >
+          {firstLetter}
         </span>
-      ) : null}
-    </span>
-  );
+      )}
+      {verified && (
+        <span className="absolute bottom-[-1px] right-[-1px] text-primary">
+          <BadgeCheck size={14} />
+        </span>
+      )}
+    </div>
+  )
 
-  if (!linkToProfile) {
-    return avatarNode;
+  if (linkToProfile && userName) {
+    return (
+      <Link
+        href={`/profile/${userName}`}
+        onClick={(e) => e.stopPropagation()}
+        className="inline-flex"
+      >
+        {avatarContent}
+      </Link>
+    )
   }
 
-  return (
-    <Link
-      href={`/profile/${user.userName}`}
-      onClick={(event) => event.stopPropagation()}
-      aria-label={`View ${user.firstName} profile`}>
-      {avatarNode}
-    </Link>
-  );
+  return avatarContent
 }
+
+export { AppAvatar }
+export type { AppAvatarProps, AvatarSize }
+

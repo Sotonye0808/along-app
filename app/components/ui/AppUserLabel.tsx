@@ -1,69 +1,107 @@
-"use client";
+'use client'
 
-import React from "react";
-import Link from "next/link";
-import type { AvatarConfig } from "@/lib/config/avatar";
-import { AppAvatar } from "./AppAvatar";
+import React from 'react'
+import Link from 'next/link'
+import { BadgeCheck, Star, Award, Trophy } from 'lucide-react'
+import { REWARD_TIERS } from '@/app/lib/config/rewards'
+import { AppAvatar } from './AppAvatar'
 
-export interface UserLabelUser {
-  userName: string;
-  firstName: string;
-  lastName: string;
-  avatar?: string;
-  avatarConfig?: AvatarConfig | null;
-  verified?: boolean;
+const tierIconMap: Record<string, React.ElementType> = {
+  Star,
+  Award,
+  Trophy,
 }
 
-export interface AppUserLabelProps {
-  user: UserLabelUser;
-  avatarSize?: 24 | 32 | 40;
-  showHandle?: boolean;
-  showFullName?: boolean;
-  layout?: "horizontal" | "vertical";
-  linkToProfile?: boolean;
-  className?: string;
+const tierColorMap: Record<string, string> = {
+  BRONZE: '#CD7F32',
+  SILVER: '#C0C0C0',
+  GOLD: '#FFD700',
+  PLATINUM: '#E5E4E2',
 }
 
-export function AppUserLabel({
+interface UserLabelUser {
+  firstName: string
+  lastName: string
+  userName: string
+  avatarConfig?: { style: string; seed?: string; flip?: boolean; backgroundColor?: string }
+  avatar?: string
+  isVerified?: boolean
+  rewardTier?: string
+}
+
+interface AppUserLabelProps {
+  user: UserLabelUser
+  size?: 'sm' | 'md'
+  vertical?: boolean
+  showHandle?: boolean
+  linkToProfile?: boolean
+}
+
+function AppUserLabel({
   user,
-  avatarSize = 32,
+  size = 'md',
+  vertical = false,
   showHandle = true,
-  showFullName = true,
-  layout = "horizontal",
   linkToProfile = true,
-  className,
-}: AppUserLabelProps): React.ReactElement {
-  const fullName = `${user.firstName} ${user.lastName}`.trim();
+}: AppUserLabelProps) {
+  const avatarSize = size === 'sm' ? 24 : 32
+  const displayName = `${user.firstName} ${user.lastName}`
 
-  return (
+  const tier = user.rewardTier ? REWARD_TIERS[user.rewardTier] : null
+  const TierIcon = tier ? tierIconMap[tier.icon] ?? Star : null
+
+  const content = (
     <div
-      className={[
-        "inline-flex items-center gap-2",
-        layout === "vertical" ? "flex-col items-start" : "flex-row",
-        className ?? "",
-      ]
-        .join(" ")
-        .trim()}>
-      <AppAvatar user={user} size={avatarSize} linkToProfile={linkToProfile} />
-      <div className="min-w-0">
-        {showFullName ? (
-          linkToProfile ? (
-            <Link
-              href={`/profile/${user.userName}`}
-              className="font-medium hover:underline"
-              onClick={(event) => event.stopPropagation()}>
-              {fullName}
-            </Link>
-          ) : (
-            <span className="font-medium">{fullName}</span>
-          )
-        ) : null}
-        {showHandle ? (
-          <div className="text-xs text-[var(--color-text-secondary)]">
+      className={`inline-flex gap-2 ${vertical ? 'flex-col items-center text-center' : 'items-center'}`}
+    >
+      <AppAvatar
+        src={user.avatar}
+        alt={displayName}
+        size={avatarSize}
+        config={user.avatarConfig}
+        verified={user.isVerified}
+        linkToProfile={false}
+        userName={user.userName}
+      />
+      <div className={vertical ? '' : ''}>
+        <div className={`flex items-center gap-1 ${vertical ? 'justify-center' : ''}`}>
+          <span className="text-sm font-semibold text-text-primary leading-tight">
+            {displayName}
+          </span>
+          {user.isVerified && (
+            <BadgeCheck size={14} className="text-primary shrink-0" />
+          )}
+          {tier && TierIcon && (
+            <TierIcon
+              size={12}
+              className="shrink-0"
+              style={{ color: tierColorMap[user.rewardTier!] ?? tier.color }}
+            />
+          )}
+        </div>
+        {showHandle && (
+          <p className="text-xs text-text-secondary leading-tight">
             @{user.userName}
-          </div>
-        ) : null}
+          </p>
+        )}
       </div>
     </div>
-  );
+  )
+
+  if (linkToProfile) {
+    return (
+      <Link
+        href={`/profile/${user.userName}`}
+        onClick={(e) => e.stopPropagation()}
+        className="inline-flex"
+      >
+        {content}
+      </Link>
+    )
+  }
+
+  return content
 }
+
+export { AppUserLabel }
+export type { AppUserLabelProps, UserLabelUser }

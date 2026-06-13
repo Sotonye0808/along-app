@@ -1,100 +1,88 @@
-"use client";
+'use client'
 
-import React from "react";
-import Link from "next/link";
-import { Button } from "antd";
-import type { ButtonProps } from "antd";
-import type { LucideIcon } from "lucide-react";
+import React from 'react'
+import { Loader2 } from 'lucide-react'
 
-export interface AppButtonProps {
-  variant?: "primary" | "secondary" | "ghost" | "destructive" | "icon";
-  size?: "sm" | "default" | "lg";
-  loading?: boolean;
-  icon?: LucideIcon;
-  iconPosition?: "left" | "right";
-  fullWidth?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-  href?: string;
-  children?: React.ReactNode;
-  className?: string;
-  ariaLabel?: string;
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'icon'
+type ButtonSize = 'sm' | 'md' | 'lg'
+
+export interface AppButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant
+  size?: ButtonSize
+  loading?: boolean
+  icon?: React.ReactNode
+  fullWidth?: boolean
 }
 
-const sizeMap: Record<
-  NonNullable<AppButtonProps["size"]>,
-  ButtonProps["size"]
-> = {
-  sm: "small",
-  default: "middle",
-  lg: "large",
-};
-
-const variantClassMap: Record<
-  NonNullable<AppButtonProps["variant"]>,
-  string
-> = {
-  primary:
-    "bg-[var(--color-primary)] hover:!bg-[var(--color-primary-light)] !text-white !border-transparent",
-  secondary:
-    "bg-transparent !text-[var(--color-primary)] !border-[var(--color-primary)] hover:!bg-[var(--color-primary)]/10",
-  ghost:
-    "bg-transparent !text-[var(--color-text-secondary)] !border-transparent hover:!bg-[var(--color-bg-elevated)]",
-  destructive:
-    "!bg-[var(--color-error)] hover:brightness-90 !text-white !border-transparent",
-  icon: "!rounded-full !p-2 !min-w-0 !h-auto !border-transparent bg-transparent hover:!bg-[var(--color-bg-elevated)]",
-};
-
-export function AppButton({
-  variant = "primary",
-  size = "default",
-  loading,
-  icon: Icon,
-  iconPosition = "left",
-  fullWidth,
-  disabled,
-  onClick,
-  type = "button",
-  href,
-  children,
-  className,
-  ariaLabel,
-}: AppButtonProps): React.ReactElement {
-  const iconNode = Icon ? <Icon size={18} aria-hidden="true" /> : null;
-
-  const content = (
-    <Button
-      htmlType={type}
-      type="default"
-      size={sizeMap[size]}
-      loading={loading}
-      disabled={disabled}
-      onClick={onClick}
-      aria-label={ariaLabel}
-      className={[
-        "!inline-flex !items-center !justify-center gap-2 !font-semibold !rounded-[var(--radius-button)]",
-        fullWidth ? "!w-full" : "",
-        variantClassMap[variant],
-        className ?? "",
-      ]
-        .join(" ")
-        .trim()}>
-      {iconNode && iconPosition === "left" ? iconNode : null}
-      {children}
-      {iconNode && iconPosition === "right" ? iconNode : null}
-    </Button>
-  );
-
-  if (variant === "icon" && !ariaLabel) {
-    throw new Error(
-      "AppButton icon variant requires ariaLabel for accessibility.",
-    );
-  }
-
-  if (href) {
-    return <Link href={href}>{content}</Link>;
-  }
-
-  return content;
+const variantStyles: Record<ButtonVariant, string> = {
+  primary: 'bg-primary text-text-inverse hover:bg-primary-dark active:bg-primary-dark',
+  secondary: 'bg-transparent border-2 border-primary text-primary hover:bg-primary-muted active:bg-primary-muted',
+  ghost: 'bg-transparent text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated',
+  destructive: 'bg-error-text text-text-inverse hover:opacity-90 active:opacity-90',
+  icon: 'bg-transparent text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated rounded-circle',
 }
+
+const sizeStyles: Record<ButtonSize, string> = {
+  sm: 'h-[32px] px-3 text-sm gap-1.5',
+  md: 'h-[40px] px-4 text-sm gap-2',
+  lg: 'h-[48px] px-6 text-base gap-2.5',
+}
+
+const iconSizeStyles: Record<ButtonSize, string> = {
+  sm: 'h-[32px] w-[32px]',
+  md: 'h-[40px] w-[40px]',
+  lg: 'h-[48px] w-[48px]',
+}
+
+const loaderSizes: Record<ButtonSize, number> = {
+  sm: 14,
+  md: 16,
+  lg: 18,
+}
+
+const AppButton = React.forwardRef<HTMLButtonElement, AppButtonProps>(
+  (
+    {
+      variant = 'primary',
+      size = 'md',
+      loading = false,
+      disabled = false,
+      className = '',
+      children,
+      icon,
+      type = 'button',
+      fullWidth = false,
+      ...props
+    },
+    ref
+  ) => {
+    const isIconOnly = variant === 'icon'
+
+    return (
+      <button
+        ref={ref}
+        type={type}
+        disabled={disabled || loading}
+        className={`inline-flex items-center justify-center font-medium rounded-sm transition-all duration-fast cursor-pointer
+          ${variantStyles[variant]}
+          ${isIconOnly ? iconSizeStyles[size] : sizeStyles[size]}
+          ${disabled || loading ? 'opacity-50 cursor-not-allowed' : ''}
+          ${fullWidth ? 'w-full' : ''}
+          ${className}
+        `}
+        {...props}
+      >
+        {loading ? (
+          <Loader2 size={loaderSizes[size]} className="animate-spin-slow shrink-0" />
+        ) : icon ? (
+          <span className="shrink-0">{icon}</span>
+        ) : null}
+        {!isIconOnly && children}
+      </button>
+    )
+  }
+)
+
+AppButton.displayName = 'AppButton'
+
+export { AppButton }
