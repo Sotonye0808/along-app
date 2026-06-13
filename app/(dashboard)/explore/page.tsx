@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Search, LocateFixed, SlidersHorizontal, Link2, X, ChevronLeft, MapPin, Heart } from "lucide-react"
 
 const MapView = dynamic(() => import("react-map-gl/maplibre"), { ssr: false })
@@ -43,7 +43,6 @@ function getTimeAgo(date: string): string {
 }
 
 export default function ExplorePage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const [pins, setPins] = useState<PostPin[]>([])
   const [selectedPin, setSelectedPin] = useState<PostPin | null>(null)
@@ -104,9 +103,9 @@ export default function ExplorePage() {
       params.set("lng", lng.toFixed(4))
       params.set("zoom", String(Math.round(zoom)))
       if (searchQuery) params.set("q", searchQuery)
-      router.replace(`/explore?${params.toString()}`, { scroll: false })
+      window.history.replaceState(null, "", `/explore?${params.toString()}`)
     },
-    [router, searchQuery]
+    [searchQuery]
   )
 
   const handleViewportChange = useCallback(
@@ -182,7 +181,7 @@ export default function ExplorePage() {
   ]
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#E8F0E8]">
+    <div className="relative w-full h-screen overflow-hidden bg-bg-elevated">
       {/* Desktop Map View */}
       <div className="hidden lg:block w-full h-full">
         <MapView
@@ -233,7 +232,7 @@ export default function ExplorePage() {
       </div>
 
       {/* Glass Top Bar - Desktop */}
-      <div className="absolute top-0 left-0 right-0 z-15 hidden lg:flex items-center gap-3 px-5 py-3 bg-white/72 backdrop-blur-[16px] saturate-[180%] border-b border-white/48">
+      <div className="absolute top-0 left-0 right-0 z-15 hidden lg:flex items-center gap-3 px-5 py-3 bg-bg-base/70 backdrop-blur-[16px] saturate-[180%] border-b border-border/40">
         <div className="relative w-[360px] shrink-0">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <input
@@ -268,7 +267,7 @@ export default function ExplorePage() {
       </div>
 
       {/* Glass Top Bar - Mobile */}
-      <div className="absolute top-0 left-0 right-0 z-15 flex lg:hidden items-center gap-2 px-3 py-2 bg-white/72 backdrop-blur-[16px] saturate-[180%]">
+      <div className="absolute top-0 left-0 right-0 z-15 flex lg:hidden items-center gap-2 px-3 py-2 bg-bg-base/70 backdrop-blur-[16px] saturate-[180%]">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <input
@@ -286,7 +285,7 @@ export default function ExplorePage() {
 
       {/* Desktop Left Panel (320px, glass) */}
       <div
-        className={`absolute top-[68px] left-0 bottom-0 w-[320px] z-12 flex flex-col bg-white/88 backdrop-blur-[16px] saturate-[180%] border-r border-white/48 overflow-hidden transition-transform duration-moderate ${
+        className={`absolute top-[68px] left-0 bottom-0 w-[320px] z-12 flex flex-col bg-bg-card/85 backdrop-blur-[16px] saturate-[180%] border-r border-border/40 overflow-hidden transition-transform duration-moderate ${
           panelCollapsed ? "-translate-x-full" : ""
         }`}
       >
@@ -353,7 +352,7 @@ export default function ExplorePage() {
       {panelCollapsed && (
         <button
           onClick={() => setPanelCollapsed(false)}
-          className="absolute top-[76px] left-0 z-13 w-8 h-8 rounded-r-md bg-white/88 backdrop-blur border border-white/48 border-l-0 text-text-secondary flex items-center justify-center cursor-pointer hover:text-primary shadow-sm"
+          className="absolute top-[76px] left-0 z-13 w-8 h-8 rounded-r-md bg-bg-card/85 backdrop-blur border border-border/40 border-l-0 text-text-secondary flex items-center justify-center cursor-pointer hover:text-primary shadow-sm"
           aria-label="Show panel"
         >
           <ChevronLeft size={16} className="rotate-180" />
@@ -362,7 +361,7 @@ export default function ExplorePage() {
 
       {/* Pin Popup Card (280px, glass) */}
       {selectedPin && (
-        <div className="hidden lg:block absolute z-20 w-[280px] bg-white/88 backdrop-blur-[16px] saturate-[180%] border border-white/48 radius-xl p-4 shadow-lg animate-[scaleIn_200ms_ease-out]"
+        <div className="hidden lg:block absolute z-20 w-[280px] bg-bg-card/90 backdrop-blur-[16px] saturate-[180%] border border-border/40 radius-xl p-4 shadow-lg animate-[scaleIn_200ms_ease-out]"
           style={{ top: "200px", left: "420px" }}
         >
           <div className="flex items-center gap-2 mb-2">
@@ -411,7 +410,7 @@ export default function ExplorePage() {
       {/* Share this view - Desktop */}
       <button
         onClick={handleShareView}
-        className="absolute bottom-6 right-6 z-15 hidden lg:inline-flex items-center gap-1.5 px-3.5 py-2 radius-md border border-border bg-white/88 backdrop-blur-[12px] saturate-[180%] text-text-secondary text-xs font-medium cursor-pointer font-sans transition-colors duration-fast hover:bg-bg-card hover:text-primary shadow-sm"
+        className="absolute bottom-6 right-6 z-15 hidden lg:inline-flex items-center gap-1.5 px-3.5 py-2 radius-md border border-border bg-bg-card/85 backdrop-blur-[12px] saturate-[180%] text-text-secondary text-xs font-medium cursor-pointer font-sans transition-colors duration-fast hover:bg-bg-card hover:text-primary shadow-sm"
         aria-label="Share this view"
       >
         <Link2 size={16} />
@@ -421,7 +420,7 @@ export default function ExplorePage() {
       {/* Mobile Bottom Sheet */}
       <div
         ref={sheetRef}
-        className={`lg:hidden absolute left-0 right-0 bottom-0 z-15 bg-white/92 backdrop-blur-[16px] saturate-[180%] border-t border-white/48 rounded-[24px_24px_0_0] overflow-y-auto transition-[height] duration-moderate ${dragging ? "" : "ease-[cubic-bezier(0.34,1.56,0.64,1)]"}`}
+        className={`lg:hidden absolute left-0 right-0 bottom-0 z-15 bg-bg-card/90 backdrop-blur-[16px] saturate-[180%] border-t border-border/40 rounded-[24px_24px_0_0] overflow-y-auto transition-[height] duration-moderate ${dragging ? "" : "ease-[cubic-bezier(0.34,1.56,0.64,1)]"}`}
         style={{ height: bottomSheetHeight, maxHeight: "75vh" }}
       >
         <div
@@ -466,7 +465,7 @@ export default function ExplorePage() {
       {/* Share this view - Mobile */}
       <button
         onClick={handleShareView}
-        className="lg:hidden absolute bottom-[calc(40vh+16px)] right-4 z-15 inline-flex items-center gap-1.5 px-3 py-1.5 radius-md border border-border bg-white/88 backdrop-blur-[12px] text-text-secondary text-xs font-medium cursor-pointer font-sans hover:bg-bg-card hover:text-primary shadow-sm"
+        className="lg:hidden absolute bottom-[calc(40vh+16px)] right-4 z-15 inline-flex items-center gap-1.5 px-3 py-1.5 radius-md border border-border bg-bg-card/85 backdrop-blur-[12px] text-text-secondary text-xs font-medium cursor-pointer font-sans hover:bg-bg-card hover:text-primary shadow-sm"
         aria-label="Share this view"
       >
         <Link2 size={14} />

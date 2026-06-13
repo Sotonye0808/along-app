@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { RefreshCw } from "lucide-react"
 import dynamic from "next/dynamic"
+import { useSearchParams } from "next/navigation"
 import { PostCard } from "@/app/components/features/posts"
 
 const ShareRouteModal = dynamic(() => import("@/app/components/features/posts/ShareRouteModal"), { ssr: false })
@@ -50,6 +51,13 @@ export default function HomePage() {
   const [showShareModal, setShowShareModal] = useState(false)
   const loaderRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get("share") === "true") {
+      setShowShareModal(true)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const init = async () => {

@@ -16,7 +16,7 @@ import AppLogo from "./AppLogo"
 const MOBILE_TABS = [
   { label: "Home", href: "/home", icon: Home },
   { label: "Explore", href: "/explore", icon: Compass },
-  { label: "Share Route", href: "/home", icon: MapPin, isFab: true },
+  { label: "Share Route", href: "/home?share=true", icon: MapPin, isFab: true },
   { label: "Bookmarks", href: "/bookmarks", icon: Bookmark },
   { label: "Profile", href: "/profile", icon: User },
 ]
@@ -39,36 +39,6 @@ export default function DashboardNav() {
 
   return (
     <>
-      {/* Mobile Top Bar */}
-      <nav className="flex lg:hidden items-center justify-between h-14 px-4 bg-bg-card border-b border-border sticky top-0 z-20">
-        <AppLogo size="sm" variant="icon" linkTo="/home" />
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setMobileSidebarOpen(true)}
-            className="w-9 h-9 rounded-full grid place-items-center text-text-secondary hover:bg-bg-elevated transition-colors"
-            aria-label="Open menu"
-          >
-            <PanelLeft className="w-5 h-5" />
-          </button>
-          <Link
-            href="/explore"
-            className="w-9 h-9 rounded-full grid place-items-center text-text-secondary hover:bg-bg-elevated transition-colors"
-            aria-label="Search"
-          >
-            <Search className="w-5 h-5" />
-          </Link>
-          {!isGuest && (
-            <Link
-              href="/notifications"
-              className="w-9 h-9 rounded-full grid place-items-center text-text-secondary hover:bg-bg-elevated transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell className="w-5 h-5" />
-            </Link>
-          )}
-        </div>
-      </nav>
-
       {/* Mobile Bottom Tab Bar */}
       <nav className="fixed lg:hidden bottom-0 left-0 right-0 z-20 bg-bg-card/88 backdrop-blur-xl border-t border-border flex items-center justify-around h-16 px-2">
         {MOBILE_TABS.map((tab) => {
