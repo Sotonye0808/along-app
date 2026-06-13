@@ -6,8 +6,10 @@ const globalForPrisma = globalThis as unknown as {
 
 const isDev = process.env.NODE_ENV !== "production" || process.env.PROJECT_ENV === "development";
 
+const accelerateUrl = isDev ? process.env.LOCAL_DB : process.env.DATABASE_URL;
+
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  accelerateUrl: isDev ? process.env.LOCAL_DB : process.env.DATABASE_URL,
+  accelerateUrl: accelerateUrl ?? "",
 });
 
 if (process.env.NODE_ENV !== "production") {

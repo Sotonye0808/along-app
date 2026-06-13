@@ -121,3 +121,21 @@ Comprehensive production audit fixing 14 issues: runtime errors (PostCard `.leng
 
 **Next Sprint Focus:**
 Implement remaining unimplemented features: auth middleware, like/dislike system, full search, map integration, leaderboards, integration tests, component tests, Lighthouse audit.
+
+---
+
+## 2026-06-13 — Dashboard Navigation & Seed Fixes
+
+**Summary:**
+Added responsive dashboard navigation (mobile bottom tab bar + desktop collapsible sidebar) matching the design system. Fixed all broken Cloudinary image URLs in seed data by replacing them with valid Unsplash photo URLs. Fixed Prisma `accelerateUrl` TypeScript type error. All quality gates pass.
+
+**Completed:**
+- Created `DashboardNav` component (mobile bottom tabs + desktop sidebar) with auth-aware nav items, guest sign-in link, user section
+- Updated dashboard layout to integrate `DashboardNav` with responsive content area
+- Replaced 16 broken Cloudinary seed image URLs with valid Unsplash URLs
+- Fixed Prisma `accelerateUrl` type error (TS2345)
+
+**Key Changes:**
+- Dashboard layout now has proper navigation per the design system: bottom tabs on mobile, sidebar on desktop
+- Seed data images no longer return 404 (Cloudinary URLs replaced with Unsplash)
+- Prisma client construction now has safe fallback for missing env vars

@@ -351,6 +351,29 @@ Fixed footer grid to show 3 columns on mobile, made ShareRouteModal responsive f
 
 ---
 
+## Session 2026-06-13 — Dashboard Navigation, Seed Image Fixes, Prisma Type Fix
+
+### Summary
+Added responsive dashboard navigation (mobile bottom tab bar + desktop sidebar) that was present in designs but missing from the dashboard layout. Also fixed all broken Cloudinary image URLs in seed data, fixed Prisma `accelerateUrl` type error, and verified all quality gates pass.
+
+### Changes
+- **Created `app/components/ui/DashboardNav.tsx`** — Responsive navigation component:
+  - Mobile: Bottom tab bar (Home, Explore, FAB→Share Route, Bookmarks, Profile) with glass bg, active state, FAB button
+  - Mobile: Top bar with AppLogo, hamburger menu (opens sidebar as overlay), explore/search, notifications bell (auth only)
+  - Desktop: Sticky sidebar (240px) with AppLogo brand, nav items from `filterNavItems()`, admin section for admins, user section at bottom with avatar initials + role badge + settings link
+  - Guest-aware: Sidebar shows Sign In link for guests, user info for authenticated
+  - Mobile sidebar opens as overlay with backdrop, closes on nav click or backdrop tap
+- **Updated `app/(dashboard)/layout.tsx`** — Wired DashboardNav into the layout, added `pb-16` for mobile bottom tab spacing, responsive content area with `max-w-[640px]`
+- **Fixed `prisma/seed.ts`** — Replaced all 16 broken Cloudinary image URLs with valid Unsplash photo URLs (8 posts × 2 images each)
+- **Fixed `app/lib/db/prisma.ts`** — Added `?? ""` fallback for `accelerateUrl` to fix TS2345 (undefined not assignable to string)
+
+### Build Results
+- `npx tsc --noEmit` — zero errors
+- `npx next lint` — zero errors
+- `npm test` — 91/91 passing (9 test suites)
+
+---
+
 ## Session 2026-06-09 (cont.) — Sprint 5 Bug Fixes: Feed Crash, Guest Auth, Styling, Login
 
 ### Summary
