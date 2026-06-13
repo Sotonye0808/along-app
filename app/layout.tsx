@@ -11,6 +11,7 @@ import { PushProvider } from "@/app/providers/PushProvider";
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
 import { I18nProvider } from "@/app/providers/I18nProvider";
 import ThemeToggle from "@/app/components/ui/ThemeToggle";
+import BackToTop from "@/app/components/ui/BackToTop";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -82,6 +83,7 @@ export default function RootLayout({
                       <CookieConsentProvider>
                         {children}
                         <ThemeToggle />
+                        <BackToTop />
                       </CookieConsentProvider>
                     </GlobalToastProvider>
                   </GlobalModalProvider>
