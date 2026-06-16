@@ -28,15 +28,10 @@ interface RouteLink {
 }
 
 interface Route {
-    id: string;
-    text: string;
-    links: RouteLink[];
-    order: number;
-    vehicles: VehicleType[];
-    status: string;
-    fare: number;
-    lat?: number;
-    lng?: number;
+    location: string;
+    description?: string;
+    vehicle?: VehicleType;
+    fare?: number;
 }
 
 interface SeedUser {
@@ -258,33 +253,9 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Best Route from Ikeja to Victoria Island - Beat the Traffic!',
             tags: ['lagos', 'ikeja', 'vi', 'brt', 'traffic-hack', 'daily-commute'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Start at Ikeja Bus Stop. Take a BRT bus heading towards CMS. The dedicated lane saves you from go-slow! Fare: ₦300',
-                    links: [{ text: 'BRT Lagos Route Map', url: 'https://www.primerolagos.com' }],
-                    order: 0,
-                    vehicles: ['bus' as VehicleType],
-                    status: 'verified',
-                    fare: 300,
-                },
-                {
-                    id: '2',
-                    text: 'Stop at Obalende. From there, hop on a yellow danfo or keke to VI. Keke is faster but costs ₦200, danfo is ₦150.',
-                    links: [],
-                    order: 1,
-                    vehicles: ['bus' as VehicleType, 'keke' as VehicleType],
-                    status: 'unverified',
-                    fare: 200,
-                },
-                {
-                    id: '3',
-                    text: 'Get off at Adeola Odeku. If you\'re going to Lekki Phase 1, take another keke for ₦150. Total time: 45 mins (off-peak)',
-                    links: [{ text: 'Google Maps - VI', url: 'https://maps.google.com' }],
-                    order: 2,
-                    vehicles: ['keke' as VehicleType],
-                    status: 'verified',
-                    fare: 150,
-                },
+                { location: 'Ikeja Bus Stop', description: 'Take a BRT bus heading towards CMS. The dedicated lane saves you from go-slow!', vehicle: 'bus' as VehicleType, fare: 300 },
+                { location: 'Obalende', description: 'Hop on a yellow danfo or keke to VI. Keke is faster but costs ₦200, danfo is ₦150.', vehicle: 'keke' as VehicleType, fare: 200 },
+                { location: 'Adeola Odeku', description: 'If you\'re going to Lekki Phase 1, take another keke for ₦150.', vehicle: 'keke' as VehicleType, fare: 150 },
             ],
             images: [
                 'https://images.unsplash.com/photo-1590674899484-d5640d0f7b1f?w=600&h=400&fit=crop',
@@ -308,33 +279,9 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Weekend Trip: Lagos to Ibadan via Public Transport',
             tags: ['lagos', 'ibadan', 'interstate', 'weekend-trip', 'budget-travel'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Head to Ojota Motor Park early morning (before 7 AM to avoid crowd). Look for ABC Transport or GUO buses. Fare: ₦2,500 - ₦3,000',
-                    links: [{ text: 'ABC Transport Schedule', url: 'https://abctransport.com' }],
-                    order: 0,
-                    vehicles: ['bus' as VehicleType],
-                    status: 'verified',
-                    fare: 2500,
-                },
-                {
-                    id: '2',
-                    text: 'Journey takes 2-3 hours depending on traffic. Bus has AC and makes one stop at Sagamu. Bring snacks and water!',
-                    links: [],
-                    order: 1,
-                    vehicles: ['bus' as VehicleType],
-                    status: 'pending',
-                    fare: 0,
-                },
-                {
-                    id: '3',
-                    text: 'Arrive at Iwo Road Terminal in Ibadan. From there, take okada (₦200) or keke (₦150) to Dugbe Market or UI if visiting campus.',
-                    links: [{ text: 'Things to do in Ibadan', url: 'https://www.google.com/travel/things-to-do/see-all?dest_mid=%2Fm%2F0fnky' }],
-                    order: 2,
-                    vehicles: ['bike' as VehicleType, 'keke' as VehicleType],
-                    status: 'verified',
-                    fare: 150,
-                },
+                { location: 'Ojota Motor Park', description: 'Go early morning (before 7 AM to avoid crowd). Look for ABC Transport or GUO buses.', vehicle: 'bus' as VehicleType, fare: 2500 },
+                { location: 'Sagamu', description: 'Journey takes 2-3 hours depending on traffic. Bus has AC and makes one stop here. Bring snacks and water!', vehicle: 'bus' as VehicleType },
+                { location: 'Iwo Road Terminal, Ibadan', description: 'From here, take okada (₦200) or keke (₦150) to Dugbe Market or UI if visiting campus.', vehicle: 'keke' as VehicleType, fare: 150 },
             ],
             images: [
                 'https://images.unsplash.com/photo-1569517822092-81d3a7f90e9b?w=600&h=400&fit=crop',
@@ -358,33 +305,9 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Navigating Abuja: Kubwa to Wuse Market Route',
             tags: ['abuja', 'kubwa', 'wuse', 'market', 'daily-commute'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Start from Kubwa Phase 4. Take a keke to Kubwa main junction (₦100). Plenty of kekes available from 6 AM.',
-                    links: [],
-                    order: 0,
-                    vehicles: ['keke' as VehicleType],
-                    status: 'verified',
-                    fare: 100,
-                },
-                {
-                    id: '2',
-                    text: 'At the junction, board a taxi or bus going to Berger Roundabout. Fare: ₦300 (shared taxi) or ₦200 (bus)',
-                    links: [],
-                    order: 1,
-                    vehicles: ['taxi' as VehicleType, 'bus' as VehicleType],
-                    status: 'verified',
-                    fare: 300,
-                },
-                {
-                    id: '3',
-                    text: 'From Berger, take another bus directly to Wuse Market. Fare: ₦150. Total journey: 40-50 minutes depending on traffic.',
-                    links: [{ text: 'Wuse Market Guide', url: 'https://www.google.com/maps/place/Wuse+Market' }],
-                    order: 2,
-                    vehicles: ['bus' as VehicleType],
-                    status: 'verified',
-                    fare: 150,
-                },
+                { location: 'Kubwa Phase 4', description: 'Take a keke to Kubwa main junction. Plenty of kekes available from 6 AM.', vehicle: 'keke' as VehicleType, fare: 100 },
+                { location: 'Kubwa Main Junction', description: 'Board a taxi or bus going to Berger Roundabout.', vehicle: 'taxi' as VehicleType, fare: 300 },
+                { location: 'Berger Roundabout', description: 'Take another bus directly to Wuse Market. Total journey: 40-50 minutes depending on traffic.', vehicle: 'bus' as VehicleType, fare: 150 },
             ],
             images: [
                 'https://images.unsplash.com/photo-1590674899484-d5640d0f7b1f?w=600&h=400&fit=crop',
@@ -408,42 +331,10 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Lagos to Abuja: The Ultimate Road Trip Guide',
             tags: ['roadtrip', 'adventure', 'longdistance', 'lagos', 'abuja'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Start from Ikeja City Mall early morning. Get your coffee and snacks for the journey. Fuel up!',
-                    links: [{ text: 'Ikeja City Mall', url: 'https://maps.google.com' }],
-                    order: 0,
-                    vehicles: ['car' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
-                {
-                    id: '2',
-                    text: 'Take Lagos-Ibadan Expressway. Stop at Redemption Camp for restroom break. Road is good but watch for trailers.',
-                    links: [],
-                    order: 1,
-                    vehicles: ['car' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
-                {
-                    id: '3',
-                    text: 'Continue through Ibadan to Osogbo. Stop at a local restaurant for lunch. Try amala and ewedu!',
-                    links: [],
-                    order: 2,
-                    vehicles: ['car' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
-                {
-                    id: '4',
-                    text: 'Final stretch to Abuja via Lokoja. Amazing views of River Niger bridge! Total time: 8-10 hours with stops.',
-                    links: [{ text: 'Niger Bridge View', url: 'https://maps.google.com' }],
-                    order: 3,
-                    vehicles: ['car' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
+                { location: 'Ikeja City Mall', description: 'Start early morning. Get your coffee and snacks for the journey. Fuel up!', vehicle: 'car' as VehicleType },
+                { location: 'Redemption Camp', description: 'Stop for restroom break. Road is good but watch for trailers on the Lagos-Ibadan Expressway.', vehicle: 'car' as VehicleType },
+                { location: 'Osogbo', description: 'Continue through Ibadan to Osogbo. Stop at a local restaurant for lunch. Try amala and ewedu!', vehicle: 'car' as VehicleType },
+                { location: 'Abuja via Lokoja', description: 'Final stretch via Lokoja. Amazing views of River Niger bridge! Total time: 8-10 hours with stops.', vehicle: 'car' as VehicleType },
             ],
             images: [
                 'https://images.unsplash.com/photo-1469854523086-cc02fe5bbc80?w=600&h=400&fit=crop',
@@ -468,33 +359,9 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Enugu: Coal City Historical Walking Tour',
             tags: ['enugu', 'culture', 'history', 'walking', 'tourism'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Start at National Museum Enugu. Learn about coal mining history. Entry fee: ₦500',
-                    links: [{ text: 'National Museum Enugu', url: 'https://maps.google.com' }],
-                    order: 0,
-                    vehicles: ['trekking' as VehicleType],
-                    status: 'verified',
-                    fare: 500,
-                },
-                {
-                    id: '2',
-                    text: 'Walk to Okpara Square (15 mins). Great spot for photos and local snacks. Try the suya!',
-                    links: [],
-                    order: 1,
-                    vehicles: ['trekking' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
-                {
-                    id: '3',
-                    text: 'End at Polo Park Mall for lunch and shopping. Take keke back to your location (₦200).',
-                    links: [],
-                    order: 2,
-                    vehicles: ['trekking' as VehicleType, 'keke' as VehicleType],
-                    status: 'verified',
-                    fare: 200,
-                },
+                { location: 'National Museum Enugu', description: 'Learn about coal mining history. Entry fee: ₦500.', vehicle: 'trekking' as VehicleType, fare: 500 },
+                { location: 'Okpara Square', description: 'A 15-minute walk from the museum. Great spot for photos and local snacks. Try the suya!', vehicle: 'trekking' as VehicleType },
+                { location: 'Polo Park Mall', description: 'End here for lunch and shopping. Take keke back to your location.', vehicle: 'trekking' as VehicleType, fare: 200 },
             ],
             images: [
                 'https://images.unsplash.com/photo-1596179576071-c668e4a16a15?w=600&h=400&fit=crop',
@@ -517,33 +384,9 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Calabar Carnival Route: Best Viewing Spots',
             tags: ['calabar', 'carnival', 'festival', 'tourism', 'december'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Start at Eleven-Eleven Roundabout early (by 9 AM). This is the parade starting point. Come prepared with water!',
-                    links: [{ text: 'Calabar Carnival Info', url: 'https://calabarcarnival.com' }],
-                    order: 0,
-                    vehicles: ['trekking' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
-                {
-                    id: '2',
-                    text: 'Follow parade route to Marian Road. Great viewing spots with food vendors. Security is tight, stay alert.',
-                    links: [],
-                    order: 1,
-                    vehicles: ['trekking' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
-                {
-                    id: '3',
-                    text: 'End at U.J. Esuene Stadium for main performances. Entry is free but arrive early for good spots.',
-                    links: [],
-                    order: 2,
-                    vehicles: ['trekking' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
+                { location: 'Eleven-Eleven Roundabout', description: 'Start early (by 9 AM). This is the parade starting point. Come prepared with water!', vehicle: 'trekking' as VehicleType },
+                { location: 'Marian Road', description: 'Follow the parade route. Great viewing spots with food vendors. Security is tight, stay alert.', vehicle: 'trekking' as VehicleType },
+                { location: 'U.J. Esuene Stadium', description: 'End here for main performances. Entry is free but arrive early for good spots.', vehicle: 'trekking' as VehicleType },
             ],
             images: [
                 'https://images.unsplash.com/photo-1614030374535-2348fc420828?w=600&h=400&fit=crop',
@@ -566,33 +409,9 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Budget Trip: Owerri to Port Harcourt',
             tags: ['owerri', 'portharcourt', 'budget-travel', 'interstate', 'student'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Go to Owerri Main Park. Take a bus to Port Harcourt. Fare: ₦1,500. Ask for direct buses, not those stopping everywhere.',
-                    links: [],
-                    order: 0,
-                    vehicles: ['bus' as VehicleType],
-                    status: 'verified',
-                    fare: 1500,
-                },
-                {
-                    id: '2',
-                    text: 'Journey takes 1.5-2 hours. You\'ll arrive at Mile 1 or Mile 3 Park in Port Harcourt.',
-                    links: [],
-                    order: 1,
-                    vehicles: ['bus' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
-                {
-                    id: '3',
-                    text: 'From the park, take keke to your destination. Fare varies ₦100-₦300 depending on distance.',
-                    links: [],
-                    order: 2,
-                    vehicles: ['keke' as VehicleType],
-                    status: 'verified',
-                    fare: 200,
-                },
+                { location: 'Owerri Main Park', description: 'Take a bus to Port Harcourt. Ask for direct buses, not those stopping everywhere.', vehicle: 'bus' as VehicleType, fare: 1500 },
+                { location: 'Mile 1 / Mile 3 Park, Port Harcourt', description: 'Journey takes 1.5-2 hours. You\'ll arrive at one of these parks.', vehicle: 'bus' as VehicleType },
+                { location: 'Your destination in PH', description: 'From the park, take keke to your destination. Fare varies ₦100-₦300 depending on distance.', vehicle: 'keke' as VehicleType, fare: 200 },
             ],
             images: [
                 'https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=600&h=400&fit=crop',
@@ -616,33 +435,9 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Exploring Kano: From Dala Hill to Kurmi Market',
             tags: ['kano', 'culture', 'history', 'market', 'northern-nigeria'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Start at Dala Hill, one of Kano\'s oldest settlements. Climb for panoramic city views. Go early morning to avoid heat!',
-                    links: [{ text: 'Dala Hill History', url: 'https://en.wikipedia.org/wiki/Dala_Hill' }],
-                    order: 0,
-                    vehicles: ['trekking' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
-                {
-                    id: '2',
-                    text: 'Take okada or keke to Gidan Makama Museum (₦200). Learn about Kano\'s rich history and see traditional artifacts.',
-                    links: [],
-                    order: 1,
-                    vehicles: ['bike' as VehicleType, 'keke' as VehicleType],
-                    status: 'verified',
-                    fare: 200,
-                },
-                {
-                    id: '3',
-                    text: 'End at Kurmi Market, one of Africa\'s oldest markets. Perfect for buying traditional crafts. Bargain well!',
-                    links: [{ text: 'Kurmi Market Guide', url: 'https://maps.google.com' }],
-                    order: 2,
-                    vehicles: ['trekking' as VehicleType],
-                    status: 'verified',
-                    fare: 0,
-                },
+                { location: 'Dala Hill', description: 'One of Kano\'s oldest settlements. Climb for panoramic city views. Go early morning to avoid heat!', vehicle: 'trekking' as VehicleType },
+                { location: 'Gidan Makama Museum', description: 'Take okada or keke to get here. Learn about Kano\'s rich history and see traditional artifacts.', vehicle: 'keke' as VehicleType, fare: 200 },
+                { location: 'Kurmi Market', description: 'One of Africa\'s oldest markets. Perfect for buying traditional crafts. Bargain well!', vehicle: 'trekking' as VehicleType },
             ],
             images: [
                 'https://images.unsplash.com/photo-1553440569-bcc63803a83f?w=600&h=400&fit=crop',
@@ -665,33 +460,9 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'Kaduna to Jos: Mountain Adventure',
             tags: ['kaduna', 'jos', 'adventure', 'mountains', 'hiking'],
             routes: [
-                {
-                    id: '1',
-                    text: 'Depart from Rigasa Motor Park in Kaduna. Take a bus to Jos. Fare: ₦2,000. Journey takes 3-4 hours through scenic routes.',
-                    links: [],
-                    order: 0,
-                    vehicles: ['bus' as VehicleType],
-                    status: 'verified',
-                    fare: 2000,
-                },
-                {
-                    id: '2',
-                    text: 'Arrive at Bauchi Road Park in Jos. Take taxi to Shere Hills (₦1,500). Perfect spot for hiking and rock climbing.',
-                    links: [{ text: 'Shere Hills', url: 'https://maps.google.com' }],
-                    order: 1,
-                    vehicles: ['taxi' as VehicleType],
-                    status: 'verified',
-                    fare: 1500,
-                },
-                {
-                    id: '3',
-                    text: 'Visit Jos Wildlife Park nearby. Entry: ₦1,000. Don\'t miss the museum! Return to Kaduna same day or stay overnight.',
-                    links: [],
-                    order: 2,
-                    vehicles: ['taxi' as VehicleType],
-                    status: 'verified',
-                    fare: 1000,
-                },
+                { location: 'Rigasa Motor Park, Kaduna', description: 'Take a bus to Jos. Journey takes 3-4 hours through scenic routes.', vehicle: 'bus' as VehicleType, fare: 2000 },
+                { location: 'Bauchi Road Park, Jos', description: 'Take taxi to Shere Hills. Perfect spot for hiking and rock climbing.', vehicle: 'taxi' as VehicleType, fare: 1500 },
+                { location: 'Jos Wildlife Park', description: 'Don\'t miss the museum! Entry: ₦1,000. Return to Kaduna same day or stay overnight.', vehicle: 'taxi' as VehicleType, fare: 1000 },
             ],
             images: [
                 'https://images.unsplash.com/photo-1534430480872-3498386e6b44?w=600&h=400&fit=crop',
@@ -716,24 +487,8 @@ async function seedPosts(users: PrismaUser[]): Promise<any[]> {
             title: 'First Timer\'s Guide: Lekki Phase 1 to Ajah',
             tags: ['lagos', 'lekki', 'ajah', 'beginner', 'daily-commute'],
             routes: [
-                {
-                    id: '1',
-                    text: 'From Lekki Phase 1, walk to the main road. Flag down a yellow and black bus heading to Ajah. Fare: ₦200-₦300.',
-                    links: [],
-                    order: 0,
-                    vehicles: ['bus' as VehicleType],
-                    status: 'unverified',
-                    fare: 250,
-                },
-                {
-                    id: '2',
-                    text: 'Alternative: Take Uber/Bolt if it\'s your first time. Costs ₦1,500-₦2,000 but less confusing. Traffic can be heavy!',
-                    links: [],
-                    order: 1,
-                    vehicles: ['car' as VehicleType],
-                    status: 'verified',
-                    fare: 1500,
-                },
+                { location: 'Lekki Phase 1', description: 'Walk to the main road. Flag down a yellow and black bus heading to Ajah.', vehicle: 'bus' as VehicleType, fare: 250 },
+                { location: 'Ajah', description: 'Alternative: Take Uber/Bolt if it\'s your first time. Costs ₦1,500-₦2,000 but less confusing. Traffic can be heavy!', vehicle: 'car' as VehicleType, fare: 1500 },
             ],
             images: [
                 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=600&h=400&fit=crop',
@@ -961,12 +716,6 @@ async function main() {
     console.log('Starting database seeding...\n');
 
     try {
-        // Ensure waypoints column exists (safe to run if already present)
-        await prisma.$executeRawUnsafe(
-            'ALTER TABLE "Post" ADD COLUMN IF NOT EXISTS "waypoints" JSONB',
-        );
-        console.log('  → Verified waypoints column exists\n');
-
         await seedSiteConfig();
         const users = await seedUsers();
         await seedFollows(users);
