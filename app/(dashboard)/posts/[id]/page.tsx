@@ -288,9 +288,15 @@ export default function PostDetailPage() {
               {index + 1}
             </div>
             <div className="flex-1">
-              <div className="text-sm text-text-primary mb-1.5">
-                {step.description || step.location || ""}
-              </div>
+              {step.location && (
+                <div className="text-sm font-medium text-text-primary">{step.location}</div>
+              )}
+              {step.description && (
+                <div className="text-sm text-text-secondary mt-0.5 mb-1.5">{step.description}</div>
+              )}
+              {!step.location && !step.description && (
+                <div className="text-sm text-text-muted italic mb-1.5">Stop {index + 1}</div>
+              )}
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 {step.fare !== undefined && step.fare !== null && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 radius-pill text-xs font-medium bg-bg-elevated text-text-secondary">

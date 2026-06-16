@@ -216,9 +216,17 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
               <div className="w-5 h-5 rounded-circle bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">
                 {index + 1}
               </div>
-              <span className="text-sm text-text-primary flex-1">
-                {step.description || step.location || ""}
-              </span>
+              <div className="flex-1 min-w-0">
+                {step.location && (
+                  <div className="text-sm font-medium text-text-primary truncate">{step.location}</div>
+                )}
+                {step.description && (
+                  <div className="text-xs text-text-secondary mt-0.5">{step.description}</div>
+                )}
+                {!step.location && !step.description && (
+                  <span className="text-sm text-text-muted italic">Stop {index + 1}</span>
+                )}
+              </div>
               {step.fare !== undefined && step.fare !== null && (
                 <span className="text-sm font-semibold text-text-primary flex items-center gap-1 shrink-0">
                   <DollarSign size={14} className="text-text-muted" />

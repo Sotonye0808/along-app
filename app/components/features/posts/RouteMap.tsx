@@ -77,9 +77,24 @@ function RouteMap({
     return () => observer.disconnect()
   }, [])
 
-  const mapStyle = isDark
-    ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-    : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+  const mapStyle = {
+    version: 8 as const,
+    sources: {
+      basemap: {
+        type: 'raster' as const,
+        tiles: [
+          isDark
+            ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+            : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+        ] as string[],
+        tileSize: 256,
+        attribution: '&copy; CARTO',
+      },
+    },
+    layers: [
+      { id: 'basemap-layer', type: 'raster' as const, source: 'basemap', minzoom: 0, maxzoom: 20 },
+    ],
+  }
 
   const routeCoords = encodedPolyline
     ? decodeEncodedPolyline(encodedPolyline)
