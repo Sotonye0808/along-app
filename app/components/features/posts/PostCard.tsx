@@ -3,7 +3,7 @@
 import { useState, useContext } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
-import { Heart, ThumbsDown, MessageCircle, Bookmark, Share2, MoreHorizontal, DollarSign } from "lucide-react"
+import { Heart, ThumbsDown, MessageCircle, Bookmark, Share2, MoreHorizontal, BadgeDollarSign } from "lucide-react"
 import { AppCard, AppUserLabel, AppDropdown, TrustBadge, VehicleChip } from "@/app/components/ui"
 import { AuthContext } from "@/app/providers/AuthProvider"
 import type { VehicleType } from "@/app/lib/types"
@@ -229,7 +229,7 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
               </div>
               {step.fare !== undefined && step.fare !== null && (
                 <span className="text-sm font-semibold text-text-primary flex items-center gap-1 shrink-0">
-                  <DollarSign size={14} className="text-text-muted" />
+                  <BadgeDollarSign size={14} className="text-text-muted" />
                   ₦{step.fare}
                 </span>
               )}

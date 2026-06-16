@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { ArrowLeft, Heart, ThumbsDown, MessageCircle, Bookmark, Share2, DollarSign, Maximize2, MapPin } from "lucide-react"
+import { ArrowLeft, Heart, ThumbsDown, MessageCircle, Bookmark, Share2, BadgeDollarSign, Maximize2, MapPin } from "lucide-react"
 import { AppCard, TrustBadge, VehicleChip, AppEmptyState } from "@/app/components/ui"
 import { VEHICLE_REGISTRY, EMPTY_STATES } from "@/app/lib/config"
 import { CommentInput, CommentList } from "@/app/components/features/comments"
@@ -300,7 +300,7 @@ export default function PostDetailPage() {
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 {step.fare !== undefined && step.fare !== null && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 radius-pill text-xs font-medium bg-bg-elevated text-text-secondary">
-                    <DollarSign size={12} />₦{step.fare}
+                    <BadgeDollarSign size={12} />₦{step.fare}
                   </span>
                 )}
                 {step.vehicle && VEHICLE_REGISTRY[step.vehicle as VehicleType] && (

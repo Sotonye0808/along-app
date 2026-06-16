@@ -212,14 +212,6 @@ export default function DashboardNav() {
                   </div>
                 )}
               </Link>
-              <Link
-                href="/profile"
-                className="shrink-0 w-8 h-8 rounded-full grid place-items-center text-text-muted hover:text-text-secondary hover:bg-bg-elevated transition-colors"
-                aria-label="Settings"
-                title={sidebarCollapsed ? "Settings" : undefined}
-              >
-                <Settings className="w-4 h-4" />
-              </Link>
             </>
           )}
         </div>
