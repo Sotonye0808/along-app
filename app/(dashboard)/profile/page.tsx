@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
-import { Camera, ThumbsUp, MessageCircle } from "lucide-react"
+import { Camera, ThumbsUp, MessageCircle, Bell, BarChart3, UserPlus } from "lucide-react"
 import { AppAvatar, AppButton, AppEmptyState } from "@/app/components/ui"
 import { EMPTY_STATES } from "@/app/lib/config"
 import dynamic from "next/dynamic"
@@ -193,6 +193,34 @@ export default function OwnProfilePage() {
           points={profile.rewardPoints}
           history={rewardHistory}
         />
+
+        {/* Mobile-only quick links for sidebar items not on bottom tab bar */}
+        <div className="lg:hidden flex flex-col gap-0.5 mb-4 py-3 border-t border-border">
+          <div className="text-[11px] font-medium tracking-wider uppercase text-text-muted px-3 mb-1">
+            Quick Links
+          </div>
+          <Link
+            href="/notifications"
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors no-underline"
+          >
+            <Bell size={18} className="shrink-0" />
+            Notifications
+          </Link>
+          <Link
+            href="/analytics"
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors no-underline"
+          >
+            <BarChart3 size={18} className="shrink-0" />
+            Analytics
+          </Link>
+          <Link
+            href="/invite"
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors no-underline"
+          >
+            <UserPlus size={18} className="shrink-0" />
+            Invite Friends
+          </Link>
+        </div>
 
         <div className="flex border-b border-border mb-4">
           {["posts", "liked", "bookmarks", "routes"].map((tab) => (
