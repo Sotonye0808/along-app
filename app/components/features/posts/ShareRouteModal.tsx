@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
-import { X, MapPin, GripVertical, Plus, Upload } from "lucide-react"
+import { X, MapPin, GripVertical, Plus, Upload, Navigation } from "lucide-react"
 import { AppModal } from "@/app/components/ui"
 import { VEHICLE_REGISTRY } from "@/app/lib/config"
 import { draftingCoachService } from "@/app/lib/services/DraftingCoachService"
@@ -18,6 +18,14 @@ interface RouteStep {
   description: string
   vehicle: string
   fare: number
+  lat?: number
+  lng?: number
+}
+
+interface GeoResult {
+  display_name: string
+  lat: string
+  lon: string
 }
 
 interface ShareRouteModalProps {
@@ -29,6 +37,11 @@ interface ShareRouteModalProps {
     routes: RouteStep[]
     images: string[]
     tags: string[]
+    startLat?: number
+    startLng?: number
+    endLat?: number
+    endLng?: number
+    waypoints?: { lat: number; lng: number }[]
   }) => void
 }
 
@@ -37,22 +50,86 @@ const VEHICLE_OPTIONS = Object.keys(VEHICLE_REGISTRY) as VehicleType[]
 export default function ShareRouteModal({ isOpen, onClose, onSubmit }: ShareRouteModalProps) {
   const [title, setTitle] = useState("")
   const [description] = useState("")
-  const [steps, setSteps] = useState<RouteStep[]>([
-    { location: "", description: "", vehicle: "bus", fare: 0 },
-    { location: "", description: "", vehicle: "", fare: 0 },
+  const [steps, setSteps] = useState<(RouteStep & { _geoResults?: GeoResult[]; _geoLoading?: boolean })[]>([
+    { location: "", description: "", vehicle: "bus", fare: 0, _geoResults: [], _geoLoading: false },
+    { location: "", description: "", vehicle: "", fare: 0, _geoResults: [], _geoLoading: false },
   ])
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
+  const geoDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const doGeocode = useCallback(async (query: string, stepIndex: number) => {
+    if (!query || query.length < 3) {
+      setSteps((prev) => {
+        const next = [...prev]
+        next[stepIndex] = { ...next[stepIndex], _geoResults: [], _geoLoading: false }
+        return next
+      })
+      return
+    }
+    setSteps((prev) => {
+      const next = [...prev]
+      next[stepIndex] = { ...next[stepIndex], _geoLoading: true }
+      return next
+    })
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&accept-language=en`,
+        { headers: { "User-Agent": "AlongApp/1.0" } }
+      )
+      const results: GeoResult[] = await res.json()
+      setSteps((prev) => {
+        const next = [...prev]
+        next[stepIndex] = { ...next[stepIndex], _geoResults: results, _geoLoading: false }
+        return next
+      })
+    } catch {
+      setSteps((prev) => {
+        const next = [...prev]
+        next[stepIndex] = { ...next[stepIndex], _geoLoading: false }
+        return next
+      })
+    }
+  }, [])
+
+  const handleGeoInput = (index: number, value: string) => {
+    updateStep(index, "location", value)
+    if (geoDebounceRef.current) clearTimeout(geoDebounceRef.current)
+    geoDebounceRef.current = setTimeout(() => doGeocode(value, index), 400)
+  }
+
+  const selectGeoResult = (index: number, result: GeoResult) => {
+    setSteps((prev) => {
+      const next = [...prev]
+      next[index] = {
+        ...next[index],
+        location: result.display_name,
+        lat: parseFloat(result.lat),
+        lng: parseFloat(result.lon),
+        _geoResults: [],
+        _geoLoading: false,
+      }
+      return next
+    })
+  }
 
   const pins: RoutePin[] = useMemo(() => {
-    const validSteps = steps.filter((s) => s.location)
+    const validSteps = steps.filter((s) => s.location && s.lat && s.lng)
+    if (validSteps.length === 0) {
+      return steps.filter((s) => s.location).map((s, i) => ({
+        lat: 6.5244 + (i * 0.003),
+        lng: 3.3792 + (i * 0.005),
+        label: s.location,
+        type: (i === 0 ? "origin" : i === steps.filter(x => x.location).length - 1 ? "destination" : "waypoint") as "origin" | "destination" | "waypoint",
+      }))
+    }
     return validSteps.map((s, i) => ({
-      lat: 6.5244 + (i * 0.003),
-      lng: 3.3792 + (i * 0.005),
+      lat: s.lat!,
+      lng: s.lng!,
       label: s.location,
       type: i === 0 ? "origin" as const : i === validSteps.length - 1 ? "destination" as const : "waypoint" as const,
     }))
-  }, [steps.map((s) => s.location).join("|")])
+  }, [steps])
 
   const draftInput = {
     title,
@@ -103,7 +180,24 @@ export default function ShareRouteModal({ isOpen, onClose, onSubmit }: ShareRout
   }
 
   const handleSubmit = () => {
-    onSubmit?.({ title, description, routes: steps.filter((s) => s.location), images: [], tags })
+    const validSteps = steps.filter((s) => s.location)
+    const first = validSteps.find((s) => s.lat)
+    const last = [...validSteps].reverse().find((s) => s.lat)
+    const waypoints = validSteps
+      .filter((s) => s.lat && s.lng && s !== first && s !== last)
+      .map((s) => ({ lat: s.lat!, lng: s.lng! }))
+    onSubmit?.({
+      title,
+      description,
+      routes: validSteps.map(({ _geoResults, _geoLoading, ...rest }) => rest),
+      images: [],
+      tags,
+      startLat: first?.lat,
+      startLng: first?.lng,
+      endLat: last?.lat && last !== first ? last.lat : undefined,
+      endLng: last?.lng && last !== first ? last.lng : undefined,
+      waypoints: waypoints.length > 0 ? waypoints : undefined,
+    })
     onClose()
   }
 
@@ -115,9 +209,6 @@ export default function ShareRouteModal({ isOpen, onClose, onSubmit }: ShareRout
             <h2 className="text-lg font-semibold tracking-tight">Share a Route</h2>
             <p className="text-sm text-text-secondary mt-0.5">Help the community with a new route</p>
           </div>
-          <button onClick={onClose} className="w-9 h-9 rounded-circle flex items-center justify-center text-text-secondary hover:bg-bg-elevated transition-colors duration-fast border-none bg-transparent cursor-pointer" aria-label="Close">
-            <X size={18} />
-          </button>
         </div>
 
         <div className="flex flex-col lg:flex-row overflow-y-auto flex-1">
@@ -164,10 +255,29 @@ export default function ShareRouteModal({ isOpen, onClose, onSubmit }: ShareRout
                         <input
                           type="text"
                           value={step.location}
-                          onChange={(e) => updateStep(index, "location", e.target.value)}
+                          onChange={(e) => handleGeoInput(index, e.target.value)}
                           placeholder="Search location..."
                           className="w-full h-10 pl-[34px] pr-3 py-2.5 border border-border radius-sm text-sm font-sans outline-none transition-colors duration-fast bg-bg-base text-text-primary focus:border-primary focus:shadow-[0_0_0_3px_rgba(0,98,59,0.12)] placeholder:text-text-muted"
                         />
+                        {step._geoLoading && (
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"><Navigation size={14} className="animate-spin" /></span>
+                        )}
+                        {(step._geoResults ?? []).length > 0 && (
+                          <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-bg-card border border-border radius-md shadow-lg max-h-[200px] overflow-y-auto">
+                            {(step._geoResults ?? []).map((r, ri) => (
+                              <button
+                                key={ri}
+                                onClick={() => selectGeoResult(index, r)}
+                                className="w-full text-left px-3 py-2 text-xs text-text-primary border-none bg-transparent cursor-pointer hover:bg-bg-elevated font-sans"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <MapPin size={12} className="shrink-0 text-text-muted" />
+                                  {r.display_name}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <textarea
                         value={step.description}

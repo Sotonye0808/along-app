@@ -48,6 +48,9 @@ interface PostCardPost {
   region?: string | null
   startLat?: number | null
   startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  waypoints?: { lat: number; lng: number }[] | null
 }
 
 interface PostCardProps {
@@ -269,26 +272,28 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
         </div>
       )}
 
-      {(routes.length >= 2 || post.startLat) && (
+      {(post.startLat || routes.length >= 2) && (
         <div className="px-4 pb-2">
           <MiniRouteMap
-            pins={
-              post.startLat
-                ? [
-                    {
-                      lat: post.startLat,
-                      lng: post.startLng ?? 0,
-                      label: routes[0]?.location ?? "",
-                      type: "origin" as const,
-                    },
-                  ]
-                : routes.map((r, i) => ({
-                    lat: 0,
-                    lng: 0,
-                    label: r.location ?? "",
-                    type: i === 0 ? ("origin" as const) : i === routes.length - 1 ? ("destination" as const) : ("waypoint" as const),
-                  }))
-            }
+            pins={(() => {
+              const pins: { lat: number; lng: number; label: string; type: "origin" | "destination" | "waypoint" }[] = []
+              if (post.startLat) {
+                pins.push({ lat: post.startLat, lng: post.startLng ?? 0, label: routes[0]?.location ?? "Start", type: "origin" })
+                if (post.waypoints) {
+                  post.waypoints.forEach((wp, i) => {
+                    pins.push({ lat: wp.lat, lng: wp.lng, label: routes[i + 1]?.location ?? "", type: "waypoint" })
+                  })
+                }
+                if (post.endLat) {
+                  pins.push({ lat: post.endLat, lng: post.endLng ?? 0, label: routes[routes.length - 1]?.location ?? "End", type: "destination" })
+                }
+              } else {
+                routes.forEach((r, i) => {
+                  pins.push({ lat: 0, lng: 0, label: r.location ?? "", type: i === 0 ? "origin" : i === routes.length - 1 ? "destination" : "waypoint" })
+                })
+              }
+              return pins
+            })()}
             height={100}
             showOverlay={false}
           />

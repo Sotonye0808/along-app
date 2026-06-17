@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { Suspense, useState, useEffect, useRef } from "react"
 import { RefreshCw } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useSearchParams } from "next/navigation"
@@ -41,9 +41,14 @@ interface FeedPost {
   totalDistanceKm?: number | null
   estimatedMins?: number | null
   region?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  waypoints?: { lat: number; lng: number }[] | null
 }
 
-export default function HomePage() {
+function HomeContent() {
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [loading, setLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
@@ -219,5 +224,13 @@ export default function HomePage() {
         }}
       />
     </>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="max-w-[640px] mx-auto px-4 py-4"><PostCardSkeleton /><PostCardSkeleton /><PostCardSkeleton /></div>}>
+      <HomeContent />
+    </Suspense>
   )
 }

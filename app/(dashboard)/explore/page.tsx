@@ -52,6 +52,7 @@ export default function ExplorePage() {
   const [bottomSheetHeight, setBottomSheetHeight] = useState("40vh")
   const [dragging, setDragging] = useState(false)
   const [isDark, setIsDark] = useState(false)
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [filters, setFilters] = useState([
     { label: "Bus", active: false },
     { label: "Keke", active: false },
@@ -323,7 +324,7 @@ export default function ExplorePage() {
             className="w-full h-10 pl-9 pr-3 border border-border radius-sm text-sm font-sans outline-none bg-bg-base text-text-primary focus:border-primary focus:shadow-[0_0_0_3px_rgba(0,98,59,0.12)] placeholder:text-text-muted"
           />
         </div>
-        <button className="w-10 h-10 rounded-md border border-border bg-bg-card text-text-secondary flex items-center justify-center shrink-0 cursor-pointer" aria-label="Filters">
+        <button onClick={() => setMobileFilterOpen(!mobileFilterOpen)} className="w-10 h-10 rounded-md border border-border bg-bg-card text-text-secondary flex items-center justify-center shrink-0 cursor-pointer" aria-label="Filters">
           <SlidersHorizontal size={18} />
         </button>
       </div>
@@ -517,10 +518,44 @@ export default function ExplorePage() {
         Share
       </button>
 
+      {/* Mobile Filter Drawer */}
+      {mobileFilterOpen && (
+        <div className="lg:hidden fixed inset-0 z-30 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setMobileFilterOpen(false)} />
+          <div className="relative z-31 bg-bg-card rounded-[16px_16px_0_0] px-4 py-4 shadow-lg animate-[slideUp_200ms_ease-out]">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold">Filter options</span>
+              <button onClick={() => setMobileFilterOpen(false)} className="w-7 h-7 rounded-circle flex items-center justify-center border-none bg-bg-elevated text-text-secondary cursor-pointer"><X size={14} /></button>
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap mb-2">
+              {filters.map((f) => (
+                <button
+                  key={f.label}
+                  onClick={() => setFilters((prev) => prev.map((x) => (x.label === f.label ? { ...x, active: !x.active } : x)))}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 radius-pill text-xs font-medium border font-sans cursor-pointer whitespace-nowrap transition-all duration-fast ${
+                    f.active ? "bg-primary text-white border-primary" : "bg-bg-card text-text-secondary border-border hover:border-primary-muted hover:bg-primary-muted hover:text-primary"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <button onClick={handleNearMe} className="w-full h-9 flex items-center justify-center gap-2 radius-md border border-border bg-bg-card text-text-secondary text-xs font-medium cursor-pointer hover:bg-bg-elevated mt-1">
+              <LocateFixed size={14} />
+              Use my location
+            </button>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes scaleIn {
           from { transform: scale(0.92); opacity: 0; }
           to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
         }
       `}</style>
     </div>

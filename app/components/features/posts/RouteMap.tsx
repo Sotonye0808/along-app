@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect, useRef } from 'react'
 import { Navigation, Clock, DollarSign, Crosshair } from 'lucide-react'
 import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre'
+import type { MapRef } from 'react-map-gl/maplibre'
 import polyline from '@mapbox/polyline'
 
 interface RoutePin {
@@ -63,6 +64,7 @@ function RouteMap({
   const [isDark, setIsDark] = useState(false)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapError, setMapError] = useState(false)
+  const mapRef = useRef<MapRef>(null)
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'))
@@ -158,11 +160,15 @@ function RouteMap({
     onPinsChange(next)
   }
 
-  const initialViewState = {
-    latitude: centerLat,
-    longitude: centerLng,
-    zoom: 12,
-  }
+  const handleMapLoad = useCallback(() => {
+    setMapLoaded(true)
+    if (mapRef.current && bounds) {
+      mapRef.current.fitBounds(
+        [[bounds.minLng, bounds.minLat], [bounds.maxLng, bounds.maxLat]] as [[number, number], [number, number]],
+        { padding: 40, duration: 0 }
+      )
+    }
+  }, [bounds])
 
   if (mapError) {
     return (
@@ -175,11 +181,12 @@ function RouteMap({
   return (
     <div className={`relative overflow-hidden rounded-md ${className}`} style={{ height }}>
       <Map
+        ref={mapRef}
         mapLib={import('maplibre-gl') as never}
-        initialViewState={initialViewState}
+        initialViewState={{ latitude: centerLat, longitude: centerLng, zoom: 12 }}
         mapStyle={mapStyle}
         style={{ width: '100%', height: '100%' }}
-        onLoad={() => setMapLoaded(true)}
+        onLoad={handleMapLoad}
         onError={() => setMapError(true)}
         attributionControl={false}
         reuseMaps
