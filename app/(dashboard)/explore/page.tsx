@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
+import type { MapRef } from "react-map-gl/maplibre"
 import { Search, LocateFixed, SlidersHorizontal, Link2, X, ChevronLeft, MapPin, Heart } from "lucide-react"
 
 const MapView = dynamic(() => import("react-map-gl/maplibre"), { ssr: false })
@@ -51,6 +52,20 @@ export default function ExplorePage() {
   const [bottomSheetHeight, setBottomSheetHeight] = useState("40vh")
   const [dragging, setDragging] = useState(false)
   const [isDark, setIsDark] = useState(false)
+  const [filters, setFilters] = useState([
+    { label: "Bus", active: false },
+    { label: "Keke", active: false },
+    { label: "Trekking", active: false },
+    { label: "Taxi", active: false },
+    { label: "Verified", active: false },
+    { label: "Trusted", active: false },
+  ])
+  const [viewState, setViewState] = useState({
+    latitude: Number(searchParams.get("lat")) || 6.5244,
+    longitude: Number(searchParams.get("lng")) || 3.3792,
+    zoom: Number(searchParams.get("zoom")) || 11,
+  })
+  const mapRef = useRef<MapRef>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const dragStartY = useRef(0)
   const sheetStartHeight = useRef("40vh")
@@ -110,21 +125,42 @@ export default function ExplorePage() {
 
   const handleViewportChange = useCallback(
     (v: { latitude: number; longitude: number; zoom: number }) => {
+      setViewState({ latitude: v.latitude, longitude: v.longitude, zoom: v.zoom })
       updateUrl(v.latitude, v.longitude, v.zoom)
     },
     [updateUrl]
   )
 
+  const activeVehicleFilters = filters.filter((f) =>
+    ["Bus", "Keke", "Trekking", "Taxi"].includes(f.label) && f.active
+  ).map((f) => f.label)
+  const showVerified = filters.find((f) => f.label === "Verified")?.active ?? false
+  const showTrusted = filters.find((f) => f.label === "Trusted")?.active ?? false
+
   const filteredPins = useMemo(() => {
-    if (!searchQuery) return pins
-    const q = searchQuery.toLowerCase()
-    return pins.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.toLowerCase().includes(q)) ||
-        p.region?.toLowerCase().includes(q)
-    )
-  }, [pins, searchQuery])
+    let result = pins
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.tags.some((t) => t.toLowerCase().includes(q)) ||
+          p.region?.toLowerCase().includes(q)
+      )
+    }
+    if (activeVehicleFilters.length > 0) {
+      result = result.filter((p) =>
+        p.tags.some((t) => activeVehicleFilters.includes(t))
+      )
+    }
+    if (showVerified) {
+      result = result.filter((p) => p.validityTier === "verified")
+    }
+    if (showTrusted) {
+      result = result.filter((p) => p.validityTier === "trusted")
+    }
+    return result
+  }, [pins, searchQuery, activeVehicleFilters, showVerified, showTrusted])
 
   const handleSheetPointerDown = (e: React.PointerEvent) => {
     setDragging(true)
@@ -149,11 +185,11 @@ export default function ExplorePage() {
   const handleNearMe = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) => {
-        handleViewportChange({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          zoom: 14,
-        })
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setViewState({ latitude: lat, longitude: lng, zoom: 14 })
+        updateUrl(lat, lng, 14)
+        mapRef.current?.flyTo({ center: [lng, lat], zoom: 14, duration: 1500 })
       })
     }
   }
@@ -162,10 +198,6 @@ export default function ExplorePage() {
     const url = window.location.href
     navigator.clipboard.writeText(url)
   }
-
-  const initialLat = Number(searchParams.get("lat")) || 6.5244
-  const initialLng = Number(searchParams.get("lng")) || 3.3792
-  const initialZoom = Number(searchParams.get("zoom")) || 11
 
   const mapStyle = {
     version: 8 as const,
@@ -186,22 +218,14 @@ export default function ExplorePage() {
     ],
   }
 
-  const FILTER_OPTIONS = [
-    { label: "Bus", active: false },
-    { label: "Keke", active: false },
-    { label: "Trekking", active: false },
-    { label: "Taxi", active: false },
-    { label: "Verified", active: true },
-    { label: "Trusted", active: false },
-  ]
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-bg-elevated">
       {/* Desktop Map View */}
       <div className="hidden lg:block w-full h-full">
         <MapView
+          ref={mapRef}
           mapLib={import("maplibre-gl")}
-          initialViewState={{ latitude: initialLat, longitude: initialLng, zoom: initialZoom }}
+          {...viewState}
           mapStyle={mapStyle}
           style={{ width: "100%", height: "100%" }}
           attributionControl={false}
@@ -226,8 +250,9 @@ export default function ExplorePage() {
       {/* Mobile Map View */}
       <div className="lg:hidden w-full h-full">
         <MapView
+          ref={mapRef}
           mapLib={import("maplibre-gl")}
-          initialViewState={{ latitude: initialLat, longitude: initialLng, zoom: initialZoom }}
+          {...viewState}
           mapStyle={mapStyle}
           style={{ width: "100%", height: "100%" }}
           attributionControl={false}
@@ -259,9 +284,14 @@ export default function ExplorePage() {
           />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
-          {FILTER_OPTIONS.map((f) => (
+          {filters.map((f) => (
             <button
               key={f.label}
+              onClick={() =>
+                setFilters((prev) =>
+                  prev.map((x) => (x.label === f.label ? { ...x, active: !x.active } : x))
+                )
+              }
               className={`inline-flex items-center gap-1 px-3 py-1.25 radius-pill text-xs font-medium border font-sans cursor-pointer whitespace-nowrap transition-all duration-fast ${
                 f.active
                   ? "bg-primary text-white border-primary"

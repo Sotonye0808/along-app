@@ -36,6 +36,10 @@ interface PostDetail {
   region: string | null
   totalDistanceKm: number | null
   estimatedMins: number | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
   createdAt: string
   user: {
     id: string
@@ -83,7 +87,7 @@ function formatCount(n: number): string {
 
 export default function PostDetailPage() {
   const params = useParams()
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, requireAuth } = useAuth()
   const [post, setPost] = useState<PostDetail | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
@@ -147,6 +151,7 @@ export default function PostDetailPage() {
   }
 
   const handleComment = async (text: string) => {
+    if (!requireAuth("comment on routes")) return
     try {
       const res = await fetch(`/api/posts/${postId}/comments`, {
         method: "POST",
@@ -178,15 +183,23 @@ export default function PostDetailPage() {
   const trustLevel = (post?.validityTier as "low" | "developing" | "verified" | "trusted") ?? "developing"
   const initials = post ? `${post.user.firstName[0]}${post.user.lastName[0]}`.toUpperCase() : ""
 
-  const routePins: RoutePin[] = useMemo(() =>
-    routes.map((r, i) => ({
+  const routePins: RoutePin[] = useMemo(() => {
+    if (post?.startLat && post?.startLng) {
+      const pins: RoutePin[] = [
+        { lat: post.startLat, lng: post.startLng, label: routes[0]?.location ?? "Start", type: "origin" as const },
+      ]
+      if (post.endLat && post.endLng && routes.length > 1) {
+        pins.push({ lat: post.endLat, lng: post.endLng, label: routes[routes.length - 1]?.location ?? "End", type: "destination" as const })
+      }
+      return pins
+    }
+    return routes.map((r, i) => ({
       lat: 0,
       lng: 0,
       label: r.location ?? "",
       type: i === 0 ? "origin" as const : i === routes.length - 1 ? "destination" as const : "waypoint" as const,
-    })),
-    [routes]
-  )
+    }))
+  }, [routes, post?.startLat, post?.startLng, post?.endLat, post?.endLng])
 
   if (loading) {
     return (

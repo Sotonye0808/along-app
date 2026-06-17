@@ -47,12 +47,12 @@ export default function ShareRouteModal({ isOpen, onClose, onSubmit }: ShareRout
   const pins: RoutePin[] = useMemo(() => {
     const validSteps = steps.filter((s) => s.location)
     return validSteps.map((s, i) => ({
-      lat: 6.5244 + (Math.random() - 0.5) * 0.02,
-      lng: 3.3792 + (Math.random() - 0.5) * 0.02,
+      lat: 6.5244 + (i * 0.003),
+      lng: 3.3792 + (i * 0.005),
       label: s.location,
       type: i === 0 ? "origin" as const : i === validSteps.length - 1 ? "destination" as const : "waypoint" as const,
     }))
-  }, [steps])
+  }, [steps.map((s) => s.location).join("|")])
 
   const draftInput = {
     title,

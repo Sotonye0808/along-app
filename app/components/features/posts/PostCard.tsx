@@ -46,6 +46,8 @@ interface PostCardPost {
   totalDistanceKm?: number | null
   estimatedMins?: number | null
   region?: string | null
+  startLat?: number | null
+  startLng?: number | null
 }
 
 interface PostCardProps {
@@ -139,6 +141,7 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
   }
 
   const handleCommentClick = () => {
+    if (!auth?.requireAuth("comment on routes")) return
     onComment?.(post.id)
   }
 
@@ -266,15 +269,26 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
         </div>
       )}
 
-      {routes.length >= 2 && (
+      {(routes.length >= 2 || post.startLat) && (
         <div className="px-4 pb-2">
           <MiniRouteMap
-            pins={routes.map((r, i) => ({
-              lat: 0,
-              lng: 0,
-              label: r.location ?? "",
-              type: i === 0 ? "origin" as const : i === routes.length - 1 ? "destination" as const : "waypoint" as const,
-            }))}
+            pins={
+              post.startLat
+                ? [
+                    {
+                      lat: post.startLat,
+                      lng: post.startLng ?? 0,
+                      label: routes[0]?.location ?? "",
+                      type: "origin" as const,
+                    },
+                  ]
+                : routes.map((r, i) => ({
+                    lat: 0,
+                    lng: 0,
+                    label: r.location ?? "",
+                    type: i === 0 ? ("origin" as const) : i === routes.length - 1 ? ("destination" as const) : ("waypoint" as const),
+                  }))
+            }
             height={100}
             showOverlay={false}
           />
