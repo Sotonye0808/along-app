@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
+import type { MapRef } from "react-map-gl/maplibre"
 import { Search, LocateFixed, SlidersHorizontal, Link2, X, ChevronLeft, MapPin, Heart } from "lucide-react"
 
 const MapView = dynamic(() => import("react-map-gl/maplibre"), { ssr: false })
@@ -17,6 +18,7 @@ interface PostPin {
   likes: number
   comments: number
   tags: string[]
+  vehicles: string[]
   validityScore: number
   validityTier: string | null
   region: string | null
@@ -51,6 +53,23 @@ export default function ExplorePage() {
   const [bottomSheetHeight, setBottomSheetHeight] = useState("40vh")
   const [dragging, setDragging] = useState(false)
   const [isDark, setIsDark] = useState(false)
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  const [sortBy, setSortBy] = useState("validity")
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [filters, setFilters] = useState([
+    { label: "Bus", active: false },
+    { label: "Keke", active: false },
+    { label: "Trekking", active: false },
+    { label: "Taxi", active: false },
+    { label: "Verified", active: false },
+    { label: "Trusted", active: false },
+  ])
+  const [viewState, setViewState] = useState({
+    latitude: Number(searchParams.get("lat")) || 6.5244,
+    longitude: Number(searchParams.get("lng")) || 3.3792,
+    zoom: Number(searchParams.get("zoom")) || 11,
+  })
+  const mapRef = useRef<MapRef>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const dragStartY = useRef(0)
   const sheetStartHeight = useRef("40vh")
@@ -76,20 +95,25 @@ export default function ExplorePage() {
         const posts = data.posts ?? []
         const mapped: PostPin[] = posts
           .filter((p: { startLat?: number | null; startLng?: number | null }) => p.startLat && p.startLng)
-          .map((p: { id: string; title: string; startLat: number; startLng: number; likes: number; comments: number; tags: string[]; validityScore: number; validityTier: string | null; region: string | null; createdAt: string; user: { userName: string; firstName: string; lastName: string } }) => ({
-            id: p.id,
-            title: p.title,
-            lat: p.startLat,
-            lng: p.startLng,
-            likes: p.likes,
-            comments: p.comments,
-            tags: p.tags,
-            validityScore: p.validityScore,
-            validityTier: p.validityTier,
-            region: p.region,
-            createdAt: p.createdAt,
-            user: p.user,
-          }))
+          .map((p: { id: string; title: string; startLat: number; startLng: number; likes: number; comments: number; tags: string[]; validityScore: number; validityTier: string | null; region: string | null; routes?: unknown; createdAt: string; user: { userName: string; firstName: string; lastName: string } }) => {
+            const routes = Array.isArray(p.routes) ? p.routes as { vehicle?: string }[] : []
+            const vehicles = [...new Set(routes.map((r) => r.vehicle).filter(Boolean))] as string[]
+            return {
+              id: p.id,
+              title: p.title,
+              lat: p.startLat,
+              lng: p.startLng,
+              likes: p.likes,
+              comments: p.comments,
+              tags: p.tags,
+              vehicles,
+              validityScore: p.validityScore,
+              validityTier: p.validityTier,
+              region: p.region,
+              createdAt: p.createdAt,
+              user: p.user,
+            }
+          })
         setPins(mapped)
       } catch { /* ignore */ }
     }
@@ -110,21 +134,47 @@ export default function ExplorePage() {
 
   const handleViewportChange = useCallback(
     (v: { latitude: number; longitude: number; zoom: number }) => {
+      setViewState({ latitude: v.latitude, longitude: v.longitude, zoom: v.zoom })
       updateUrl(v.latitude, v.longitude, v.zoom)
     },
     [updateUrl]
   )
 
+  const activeVehicleFilters = filters.filter((f) =>
+    ["Bus", "Keke", "Trekking", "Taxi"].includes(f.label) && f.active
+  ).map((f) => f.label)
+  const showVerified = filters.find((f) => f.label === "Verified")?.active ?? false
+  const showTrusted = filters.find((f) => f.label === "Trusted")?.active ?? false
+
   const filteredPins = useMemo(() => {
-    if (!searchQuery) return pins
-    const q = searchQuery.toLowerCase()
-    return pins.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.toLowerCase().includes(q)) ||
-        p.region?.toLowerCase().includes(q)
-    )
-  }, [pins, searchQuery])
+    let result = pins
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.tags.some((t) => t.toLowerCase().includes(q)) ||
+          p.region?.toLowerCase().includes(q)
+      )
+    }
+    if (activeVehicleFilters.length > 0) {
+      result = result.filter((p) =>
+        p.vehicles.some((v) => activeVehicleFilters.includes(v))
+      )
+    }
+    if (showVerified) {
+      result = result.filter((p) => p.validityTier === "verified")
+    }
+    if (showTrusted) {
+      result = result.filter((p) => p.validityTier === "trusted")
+    }
+    if (sortBy === "validity") {
+      result = [...result].sort((a, b) => b.validityScore - a.validityScore)
+    } else if (sortBy === "recency") {
+      result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    }
+    return result
+  }, [pins, searchQuery, activeVehicleFilters, showVerified, showTrusted, sortBy])
 
   const handleSheetPointerDown = (e: React.PointerEvent) => {
     setDragging(true)
@@ -149,11 +199,12 @@ export default function ExplorePage() {
   const handleNearMe = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) => {
-        handleViewportChange({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          zoom: 14,
-        })
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setUserLocation({ lat, lng })
+        setViewState({ latitude: lat, longitude: lng, zoom: 14 })
+        updateUrl(lat, lng, 14)
+        mapRef.current?.flyTo({ center: [lng, lat], zoom: 14, duration: 1500 })
       })
     }
   }
@@ -162,10 +213,6 @@ export default function ExplorePage() {
     const url = window.location.href
     navigator.clipboard.writeText(url)
   }
-
-  const initialLat = Number(searchParams.get("lat")) || 6.5244
-  const initialLng = Number(searchParams.get("lng")) || 3.3792
-  const initialZoom = Number(searchParams.get("zoom")) || 11
 
   const mapStyle = {
     version: 8 as const,
@@ -186,22 +233,14 @@ export default function ExplorePage() {
     ],
   }
 
-  const FILTER_OPTIONS = [
-    { label: "Bus", active: false },
-    { label: "Keke", active: false },
-    { label: "Trekking", active: false },
-    { label: "Taxi", active: false },
-    { label: "Verified", active: true },
-    { label: "Trusted", active: false },
-  ]
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-bg-elevated">
       {/* Desktop Map View */}
-      <div className="hidden lg:block w-full h-full">
+      <div className={`hidden lg:block w-full h-full ${isDark ? "dark-map" : ""}`}>
         <MapView
+          ref={mapRef}
           mapLib={import("maplibre-gl")}
-          initialViewState={{ latitude: initialLat, longitude: initialLng, zoom: initialZoom }}
+          {...viewState}
           mapStyle={mapStyle}
           style={{ width: "100%", height: "100%" }}
           attributionControl={false}
@@ -210,6 +249,11 @@ export default function ExplorePage() {
           }
           reuseMaps
         >
+          {userLocation && (
+            <Marker latitude={userLocation.lat} longitude={userLocation.lng}>
+              <div className="w-4 h-4 rounded-circle bg-primary border-2 border-white shadow-md" />
+            </Marker>
+          )}
           {filteredPins.map((pin) => (
             <Marker key={pin.id} latitude={pin.lat} longitude={pin.lng} onClick={() => setSelectedPin(pin)}>
               <div
@@ -224,10 +268,11 @@ export default function ExplorePage() {
       </div>
 
       {/* Mobile Map View */}
-      <div className="lg:hidden w-full h-full">
+      <div className={`lg:hidden w-full h-full ${isDark ? "dark-map" : ""}`}>
         <MapView
+          ref={mapRef}
           mapLib={import("maplibre-gl")}
-          initialViewState={{ latitude: initialLat, longitude: initialLng, zoom: initialZoom }}
+          {...viewState}
           mapStyle={mapStyle}
           style={{ width: "100%", height: "100%" }}
           attributionControl={false}
@@ -236,6 +281,11 @@ export default function ExplorePage() {
           }
           reuseMaps
         >
+          {userLocation && (
+            <Marker latitude={userLocation.lat} longitude={userLocation.lng}>
+              <div className="w-4 h-4 rounded-circle bg-primary border-2 border-white shadow-md" />
+            </Marker>
+          )}
           {filteredPins.map((pin) => (
             <Marker key={pin.id} latitude={pin.lat} longitude={pin.lng} onClick={() => setSelectedPin(pin)}>
               <div className="w-[24px] h-[24px] rounded-circle bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-sm border-2 border-white cursor-pointer hover:scale-110 transition-transform">
@@ -259,9 +309,14 @@ export default function ExplorePage() {
           />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
-          {FILTER_OPTIONS.map((f) => (
+          {filters.map((f) => (
             <button
               key={f.label}
+              onClick={() =>
+                setFilters((prev) =>
+                  prev.map((x) => (x.label === f.label ? { ...x, active: !x.active } : x))
+                )
+              }
               className={`inline-flex items-center gap-1 px-3 py-1.25 radius-pill text-xs font-medium border font-sans cursor-pointer whitespace-nowrap transition-all duration-fast ${
                 f.active
                   ? "bg-primary text-white border-primary"
@@ -293,7 +348,7 @@ export default function ExplorePage() {
             className="w-full h-10 pl-9 pr-3 border border-border radius-sm text-sm font-sans outline-none bg-bg-base text-text-primary focus:border-primary focus:shadow-[0_0_0_3px_rgba(0,98,59,0.12)] placeholder:text-text-muted"
           />
         </div>
-        <button className="w-10 h-10 rounded-md border border-border bg-bg-card text-text-secondary flex items-center justify-center shrink-0 cursor-pointer" aria-label="Filters">
+        <button onClick={() => setMobileFilterOpen(!mobileFilterOpen)} className="w-10 h-10 rounded-md border border-border bg-bg-card text-text-secondary flex items-center justify-center shrink-0 cursor-pointer" aria-label="Filters">
           <SlidersHorizontal size={18} />
         </button>
       </div>
@@ -320,10 +375,9 @@ export default function ExplorePage() {
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2.5">
           <div className="flex items-center gap-1.5 mb-1">
             <label className="text-xs text-text-secondary">Sort by</label>
-            <select className="h-8 px-2 border border-border radius-sm text-xs font-sans text-text-primary bg-bg-base outline-none">
-              <option>Validity score</option>
-              <option>Recency</option>
-              <option>Distance</option>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="h-8 px-2 border border-border radius-sm text-xs font-sans text-text-primary bg-bg-base outline-none">
+              <option value="validity">Validity score</option>
+              <option value="recency">Recency</option>
             </select>
           </div>
           {filteredPins.map((pin) => (
@@ -487,10 +541,47 @@ export default function ExplorePage() {
         Share
       </button>
 
+      {/* Mobile Filter Drawer */}
+      {mobileFilterOpen && (
+        <div className="lg:hidden fixed inset-0 z-30 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setMobileFilterOpen(false)} />
+          <div className="relative z-31 bg-bg-card rounded-[16px_16px_0_0] px-4 py-4 shadow-lg animate-[slideUp_200ms_ease-out]">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold">Filter options</span>
+              <button onClick={() => setMobileFilterOpen(false)} className="w-7 h-7 rounded-circle flex items-center justify-center border-none bg-bg-elevated text-text-secondary cursor-pointer"><X size={14} /></button>
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap mb-2">
+              {filters.map((f) => (
+                <button
+                  key={f.label}
+                  onClick={() => setFilters((prev) => prev.map((x) => (x.label === f.label ? { ...x, active: !x.active } : x)))}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 radius-pill text-xs font-medium border font-sans cursor-pointer whitespace-nowrap transition-all duration-fast ${
+                    f.active ? "bg-primary text-white border-primary" : "bg-bg-card text-text-secondary border-border hover:border-primary-muted hover:bg-primary-muted hover:text-primary"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <button onClick={handleNearMe} className="w-full h-9 flex items-center justify-center gap-2 radius-md border border-border bg-bg-card text-text-secondary text-xs font-medium cursor-pointer hover:bg-bg-elevated mt-1">
+              <LocateFixed size={14} />
+              Use my location
+            </button>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes scaleIn {
           from { transform: scale(0.92); opacity: 0; }
           to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+        .dark-map :global(.maplibregl-canvas) {
+          filter: brightness(1.35) contrast(1.1);
         }
       `}</style>
     </div>

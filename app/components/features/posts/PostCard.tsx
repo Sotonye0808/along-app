@@ -3,7 +3,7 @@
 import { useState, useContext } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
-import { Heart, ThumbsDown, MessageCircle, Bookmark, Share2, MoreHorizontal, BadgeDollarSign } from "lucide-react"
+import { Heart, ThumbsDown, MessageCircle, Bookmark, Share2, MoreHorizontal, BadgeDollarSign, X } from "lucide-react"
 import { AppCard, AppUserLabel, AppDropdown, TrustBadge, VehicleChip } from "@/app/components/ui"
 import { AuthContext } from "@/app/providers/AuthProvider"
 import type { VehicleType } from "@/app/lib/types"
@@ -46,6 +46,11 @@ interface PostCardPost {
   totalDistanceKm?: number | null
   estimatedMins?: number | null
   region?: string | null
+  startLat?: number | null
+  startLng?: number | null
+  endLat?: number | null
+  endLng?: number | null
+  waypoints?: { lat: number; lng: number }[] | null
 }
 
 interface PostCardProps {
@@ -94,6 +99,7 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
   const [disliked, setDisliked] = useState(false)
   const [dislikesCount, setDislikesCount] = useState(post.dislikes)
   const [bookmarked, setBookmarked] = useState(post._isBookmarked ?? false)
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const auth = useContext(AuthContext)
 
   const routes = Array.isArray(post.routes) ? (post.routes as RouteStep[]) : []
@@ -139,6 +145,7 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
   }
 
   const handleCommentClick = () => {
+    if (!auth?.requireAuth("comment on routes")) return
     onComment?.(post.id)
   }
 
@@ -266,15 +273,28 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
         </div>
       )}
 
-      {routes.length >= 2 && (
+      {(post.startLat || routes.length >= 2) && (
         <div className="px-4 pb-2">
           <MiniRouteMap
-            pins={routes.map((r, i) => ({
-              lat: 0,
-              lng: 0,
-              label: r.location ?? "",
-              type: i === 0 ? "origin" as const : i === routes.length - 1 ? "destination" as const : "waypoint" as const,
-            }))}
+            pins={(() => {
+              const pins: { lat: number; lng: number; label: string; type: "origin" | "destination" | "waypoint" }[] = []
+              if (post.startLat) {
+                pins.push({ lat: post.startLat, lng: post.startLng ?? 0, label: routes[0]?.location ?? "Start", type: "origin" })
+                if (post.waypoints) {
+                  post.waypoints.forEach((wp, i) => {
+                    pins.push({ lat: wp.lat, lng: wp.lng, label: routes[i + 1]?.location ?? "", type: "waypoint" })
+                  })
+                }
+                if (post.endLat) {
+                  pins.push({ lat: post.endLat, lng: post.endLng ?? 0, label: routes[routes.length - 1]?.location ?? "End", type: "destination" })
+                }
+              } else {
+                routes.forEach((r, i) => {
+                  pins.push({ lat: 0, lng: 0, label: r.location ?? "", type: i === 0 ? "origin" : i === routes.length - 1 ? "destination" : "waypoint" })
+                })
+              }
+              return pins
+            })()}
             height={100}
             showOverlay={false}
           />
@@ -285,26 +305,35 @@ export default function PostCard({ post, onLike, onDislike, onBookmark, onShare,
         <div className="px-4 pb-2.5">
           {images.length === 1 && (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={images[0]} alt="Route" className="w-full h-[200px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+            <img src={images[0]} alt="Route" className="w-full h-[200px] object-cover radius-sm bg-bg-elevated cursor-pointer" loading="lazy" onClick={() => setExpandedImage(images[0])} />
           )}
           {images.length === 2 && (
             <div className="grid grid-cols-2 gap-1">
               {images.map((img, i) => (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img key={i} src={img} alt={`Route photo ${i + 1}`} className="w-full h-[140px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+                <img key={i} src={img} alt={`Route photo ${i + 1}`} className="w-full h-[140px] object-cover radius-sm bg-bg-elevated cursor-pointer" loading="lazy" onClick={() => setExpandedImage(img)} />
               ))}
             </div>
           )}
           {images.length >= 3 && (
             <div className="grid grid-cols-2 gap-1" style={{ gridTemplateRows: "auto auto" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={images[0]} alt="Route photo 1" className="row-span-2 w-full h-full object-cover radius-sm bg-bg-elevated" loading="lazy" style={{ minHeight: "148px" }} />
+              <img src={images[0]} alt="Route photo 1" className="row-span-2 w-full h-full object-cover radius-sm bg-bg-elevated cursor-pointer" loading="lazy" style={{ minHeight: "148px" }} onClick={() => setExpandedImage(images[0])} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={images[1]} alt="Route photo 2" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+              <img src={images[1]} alt="Route photo 2" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated cursor-pointer" loading="lazy" onClick={() => setExpandedImage(images[1])} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={images[2]} alt="Route photo 3" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated" loading="lazy" />
+              <img src={images[2]} alt="Route photo 3" className="w-full h-[72px] object-cover radius-sm bg-bg-elevated cursor-pointer" loading="lazy" onClick={() => setExpandedImage(images[2])} />
             </div>
           )}
+        </div>
+      )}
+
+      {/* Image Lightbox */}
+      {expandedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm" onClick={() => setExpandedImage(null)}>
+          <button onClick={() => setExpandedImage(null)} className="absolute top-4 right-4 z-10 w-10 h-10 rounded-circle bg-black/50 text-white flex items-center justify-center border-none cursor-pointer" aria-label="Close"><X size={20} /></button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={expandedImage} alt="Expanded route photo" className="max-w-[90vw] max-h-[90vh] object-contain radius-sm" onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 

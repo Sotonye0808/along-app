@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FOOTER_CONFIG } from "@/app/lib/config";
+import LocaleSwitcher from "./LocaleSwitcher";
 
 export default function AppFooter() {
   return (
@@ -43,6 +44,10 @@ export default function AppFooter() {
               </a>
             );
           })}
+        </div>
+
+        <div className="flex justify-center mt-2 mb-4">
+          <LocaleSwitcher />
         </div>
 
         <div className="text-center pt-4 border-t border-border">

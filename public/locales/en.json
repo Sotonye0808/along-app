@@ -15,6 +15,8 @@
   "nav.shareRoute": "Share Route",
   "nav.settings": "Settings",
   "nav.admin": "Admin",
+  "nav.dashboard": "Dashboard",
+  "nav.moderation": "Moderation",
 
   "auth.welcomeBack": "Welcome back",
   "auth.signInToContinue": "Sign in to continue to Along",
@@ -50,7 +52,7 @@
   "landing.cta.title": "Start navigating smarter",
   "landing.cta.createAccount": "Create Free Account →",
 
-  "feed.shareRoute": "Share a route...",
+  "feed.shareRoute": "How far? Where we wan go?",
   "feed.newPosts": "{count} new post",
   "feed.newPosts_plural": "{count} new posts",
   "feed.empty": "No posts yet. Be the first to share a route!",

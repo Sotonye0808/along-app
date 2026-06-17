@@ -5,7 +5,6 @@ import {
 import type { NavItem } from "@/app/lib/types";
 
 export const NAV_REGISTRY: NavItem[] = [
-  { label: "Share Route", href: "/home", icon: MapPin, section: "main" },
   { label: "Home", href: "/home", icon: Home, section: "main" },
   { label: "Explore", href: "/explore", icon: Compass, section: "main" },
   { label: "Bookmarks", href: "/bookmarks", icon: Bookmark, section: "main" },

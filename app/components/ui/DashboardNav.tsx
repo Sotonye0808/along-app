@@ -11,6 +11,7 @@ import {
   Settings, Navigation,
 } from "lucide-react"
 import { useAuth } from "@/app/hooks/useAuth"
+import { useTranslation } from "@/app/providers/I18nProvider"
 import { filterNavItems } from "@/app/lib/config/navigation"
 import AppLogo from "./AppLogo"
 
@@ -30,6 +31,7 @@ const MOBILE_TABS = [
 export default function DashboardNav() {
   const pathname = usePathname()
   const { user, isGuest } = useAuth()
+  const { t } = useTranslation()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
 
@@ -116,7 +118,7 @@ export default function DashboardNav() {
               title={sidebarCollapsed ? "Share Route" : undefined}
             >
               <Navigation className="w-5 h-5 shrink-0" />
-              {!sidebarCollapsed && <span className="truncate">Share Route</span>}
+              {!sidebarCollapsed && <span className="truncate">{t("nav.shareRoute")}</span>}
             </button>
           )}
 
@@ -147,7 +149,7 @@ export default function DashboardNav() {
               <div className="h-px bg-border my-2 mx-3" />
               {!sidebarCollapsed && (
                 <div className="text-[11px] font-medium tracking-wider uppercase text-text-muted px-3 mb-1">
-                  Admin
+                  {t("nav.admin")}
                 </div>
               )}
               <Link
@@ -157,10 +159,10 @@ export default function DashboardNav() {
                     ? "bg-primary-muted text-primary"
                     : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 } ${sidebarCollapsed ? "justify-center px-0" : ""}`}
-                title={sidebarCollapsed ? "Dashboard" : undefined}
+                title={sidebarCollapsed ? t("nav.dashboard") : undefined}
               >
                 <Shield className="w-5 h-5 shrink-0" />
-                {!sidebarCollapsed && <span>Dashboard</span>}
+                {!sidebarCollapsed && <span>{t("nav.dashboard")}</span>}
               </Link>
               <Link
                 href="/admin/posts"
@@ -169,10 +171,10 @@ export default function DashboardNav() {
                     ? "bg-primary-muted text-primary"
                     : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 } ${sidebarCollapsed ? "justify-center px-0" : ""}`}
-                title={sidebarCollapsed ? "Moderation" : undefined}
+                title={sidebarCollapsed ? t("nav.moderation") : undefined}
               >
                 <ShieldCheck className="w-5 h-5 shrink-0" />
-                {!sidebarCollapsed && <span>Moderation</span>}
+                {!sidebarCollapsed && <span>{t("nav.moderation")}</span>}
               </Link>
             </>
           )}
@@ -184,10 +186,10 @@ export default function DashboardNav() {
             <Link
               href="/login"
               className={`flex items-center gap-2 text-sm font-medium text-primary hover:underline ${sidebarCollapsed ? "flex-col gap-1" : ""}`}
-              title={sidebarCollapsed ? "Sign In" : undefined}
+              title={sidebarCollapsed ? t("nav.signIn") : undefined}
             >
               <User className="w-5 h-5 shrink-0" />
-              {!sidebarCollapsed && <span>Sign In</span>}
+              {!sidebarCollapsed && <span>{t("nav.signIn")}</span>}
             </Link>
           ) : (
             <>
