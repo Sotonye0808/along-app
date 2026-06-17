@@ -18,6 +18,7 @@ interface PostPin {
   likes: number
   comments: number
   tags: string[]
+  vehicles: string[]
   validityScore: number
   validityTier: string | null
   region: string | null
@@ -53,6 +54,8 @@ export default function ExplorePage() {
   const [dragging, setDragging] = useState(false)
   const [isDark, setIsDark] = useState(false)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  const [sortBy, setSortBy] = useState("validity")
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [filters, setFilters] = useState([
     { label: "Bus", active: false },
     { label: "Keke", active: false },
@@ -92,20 +95,25 @@ export default function ExplorePage() {
         const posts = data.posts ?? []
         const mapped: PostPin[] = posts
           .filter((p: { startLat?: number | null; startLng?: number | null }) => p.startLat && p.startLng)
-          .map((p: { id: string; title: string; startLat: number; startLng: number; likes: number; comments: number; tags: string[]; validityScore: number; validityTier: string | null; region: string | null; createdAt: string; user: { userName: string; firstName: string; lastName: string } }) => ({
-            id: p.id,
-            title: p.title,
-            lat: p.startLat,
-            lng: p.startLng,
-            likes: p.likes,
-            comments: p.comments,
-            tags: p.tags,
-            validityScore: p.validityScore,
-            validityTier: p.validityTier,
-            region: p.region,
-            createdAt: p.createdAt,
-            user: p.user,
-          }))
+          .map((p: { id: string; title: string; startLat: number; startLng: number; likes: number; comments: number; tags: string[]; validityScore: number; validityTier: string | null; region: string | null; routes?: unknown; createdAt: string; user: { userName: string; firstName: string; lastName: string } }) => {
+            const routes = Array.isArray(p.routes) ? p.routes as { vehicle?: string }[] : []
+            const vehicles = [...new Set(routes.map((r) => r.vehicle).filter(Boolean))] as string[]
+            return {
+              id: p.id,
+              title: p.title,
+              lat: p.startLat,
+              lng: p.startLng,
+              likes: p.likes,
+              comments: p.comments,
+              tags: p.tags,
+              vehicles,
+              validityScore: p.validityScore,
+              validityTier: p.validityTier,
+              region: p.region,
+              createdAt: p.createdAt,
+              user: p.user,
+            }
+          })
         setPins(mapped)
       } catch { /* ignore */ }
     }
@@ -151,7 +159,7 @@ export default function ExplorePage() {
     }
     if (activeVehicleFilters.length > 0) {
       result = result.filter((p) =>
-        p.tags.some((t) => activeVehicleFilters.includes(t))
+        p.vehicles.some((v) => activeVehicleFilters.includes(v))
       )
     }
     if (showVerified) {
@@ -160,8 +168,13 @@ export default function ExplorePage() {
     if (showTrusted) {
       result = result.filter((p) => p.validityTier === "trusted")
     }
+    if (sortBy === "validity") {
+      result = [...result].sort((a, b) => b.validityScore - a.validityScore)
+    } else if (sortBy === "recency") {
+      result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    }
     return result
-  }, [pins, searchQuery, activeVehicleFilters, showVerified, showTrusted])
+  }, [pins, searchQuery, activeVehicleFilters, showVerified, showTrusted, sortBy])
 
   const handleSheetPointerDown = (e: React.PointerEvent) => {
     setDragging(true)
@@ -188,6 +201,7 @@ export default function ExplorePage() {
       navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude
         const lng = pos.coords.longitude
+        setUserLocation({ lat, lng })
         setViewState({ latitude: lat, longitude: lng, zoom: 14 })
         updateUrl(lat, lng, 14)
         mapRef.current?.flyTo({ center: [lng, lat], zoom: 14, duration: 1500 })
@@ -222,7 +236,7 @@ export default function ExplorePage() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-bg-elevated">
       {/* Desktop Map View */}
-      <div className="hidden lg:block w-full h-full">
+      <div className={`hidden lg:block w-full h-full ${isDark ? "dark-map" : ""}`}>
         <MapView
           ref={mapRef}
           mapLib={import("maplibre-gl")}
@@ -235,6 +249,11 @@ export default function ExplorePage() {
           }
           reuseMaps
         >
+          {userLocation && (
+            <Marker latitude={userLocation.lat} longitude={userLocation.lng}>
+              <div className="w-4 h-4 rounded-circle bg-primary border-2 border-white shadow-md" />
+            </Marker>
+          )}
           {filteredPins.map((pin) => (
             <Marker key={pin.id} latitude={pin.lat} longitude={pin.lng} onClick={() => setSelectedPin(pin)}>
               <div
@@ -249,7 +268,7 @@ export default function ExplorePage() {
       </div>
 
       {/* Mobile Map View */}
-      <div className="lg:hidden w-full h-full">
+      <div className={`lg:hidden w-full h-full ${isDark ? "dark-map" : ""}`}>
         <MapView
           ref={mapRef}
           mapLib={import("maplibre-gl")}
@@ -262,6 +281,11 @@ export default function ExplorePage() {
           }
           reuseMaps
         >
+          {userLocation && (
+            <Marker latitude={userLocation.lat} longitude={userLocation.lng}>
+              <div className="w-4 h-4 rounded-circle bg-primary border-2 border-white shadow-md" />
+            </Marker>
+          )}
           {filteredPins.map((pin) => (
             <Marker key={pin.id} latitude={pin.lat} longitude={pin.lng} onClick={() => setSelectedPin(pin)}>
               <div className="w-[24px] h-[24px] rounded-circle bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-sm border-2 border-white cursor-pointer hover:scale-110 transition-transform">
@@ -351,10 +375,9 @@ export default function ExplorePage() {
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2.5">
           <div className="flex items-center gap-1.5 mb-1">
             <label className="text-xs text-text-secondary">Sort by</label>
-            <select className="h-8 px-2 border border-border radius-sm text-xs font-sans text-text-primary bg-bg-base outline-none">
-              <option>Validity score</option>
-              <option>Recency</option>
-              <option>Distance</option>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="h-8 px-2 border border-border radius-sm text-xs font-sans text-text-primary bg-bg-base outline-none">
+              <option value="validity">Validity score</option>
+              <option value="recency">Recency</option>
             </select>
           </div>
           {filteredPins.map((pin) => (
@@ -556,6 +579,9 @@ export default function ExplorePage() {
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+        .dark-map :global(.maplibregl-canvas) {
+          filter: brightness(1.35) contrast(1.1);
         }
       `}</style>
     </div>

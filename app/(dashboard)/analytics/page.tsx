@@ -121,7 +121,7 @@ export default function AnalyticsPage() {
       const x = padL + i * stepX
       const y = padT + plotH - (d.count / maxEngagement) * plotH * 0.8 - plotH * 0.1
       const isLast = i === dailyData.length - 1
-      return `<circle cx="${x}" cy="${Math.round(y)}" r="${isLast ? 3.5 : 3}" fill="${isLast ? color : "#fff"}" stroke="${color}" stroke-width="2.5" />`
+      return `<circle cx="${x}" cy="${Math.round(y)}" r="${isLast ? 3.5 : 3}" fill="${isLast ? color : "#fff"}" stroke="${color}" stroke-width="2.5}" style="cursor:pointer"><title>${d.count} on ${new Date(d.date).toLocaleDateString()}</title></circle>`
     }).join("")
     return { polyline: `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}" />`, dots }
   }
@@ -144,7 +144,9 @@ export default function AnalyticsPage() {
   const renderXLabels = (dailyData: DailyCount[]) => {
     if (dailyData.length === 0) return ""
     const stepX = plotW / Math.max(dailyData.length - 1, 1)
+    const skip = Math.max(1, Math.floor(dailyData.length / 8))
     return dailyData.map((d, i) => {
+      if (i % skip !== 0 && i !== dailyData.length - 1) return ""
       const x = padL + i * stepX
       const label = new Date(d.date).toLocaleDateString("en-US", { weekday: "short" })
       return `<text x="${Math.round(x)}" y="${svgH - 4}" class="an-chart-label" text-anchor="middle">${label}</text>`

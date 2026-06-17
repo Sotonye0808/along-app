@@ -2,12 +2,13 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
-import { Mail, Lock, User } from "lucide-react"
+import { Mail, Lock, User, Eye, EyeOff, AlertCircle } from "lucide-react"
 import { AppButton, AppInput, AppCard, AppDivider, AppAlert } from "@/app/components/ui"
 import { toastService } from "@/app/lib/services/toastService"
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ firstName: "", lastName: "", userName: "", email: "", password: "" })
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
@@ -103,15 +104,36 @@ export default function RegisterPage() {
           onChange={(e) => updateField("email", e.target.value)}
           error={fieldErrors.email}
         />
-        <AppInput
-          label="Password"
-          type="password"
-          placeholder="Create a password"
-          icon={<Lock size={16} />}
-          value={form.password}
-          onChange={(e) => updateField("password", e.target.value)}
-          error={fieldErrors.password}
-        />
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="password" className="text-sm font-medium text-text-primary">Password</label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none shrink-0"><Lock size={16} /></span>
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Create a password"
+              value={form.password}
+              onChange={(e) => updateField("password", e.target.value)}
+              className={`h-[40px] w-full border-[1.5px] rounded-sm bg-bg-base px-[12px] text-sm text-text-primary pl-10 pr-10 placeholder:text-text-muted transition-all duration-fast focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(0,98,59,0.12)] ${fieldErrors.password ? 'border-error-border focus:border-error-border focus:shadow-[0_0_0_3px_rgba(127,29,29,0.12)]' : 'border-border'}`}
+              aria-invalid={fieldErrors.password ? "true" : undefined}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary border-none bg-transparent cursor-pointer p-0"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+          {fieldErrors.password && (
+            <span className="flex items-center gap-1 text-xs text-error-text" role="alert">
+              <AlertCircle size={12} />
+              {fieldErrors.password}
+            </span>
+          )}
+        </div>
 
         <AppButton type="submit" variant="primary" size="lg" fullWidth loading={loading}>
           Create Account

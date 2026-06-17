@@ -179,7 +179,8 @@ function RouteMap({
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-md ${className}`} style={{ height }}>
+    <div className={`relative overflow-hidden rounded-md ${className} ${isDark ? "dark-map" : ""}`} style={{ height }}>
+      <style>{isDark ? `.dark-map .maplibregl-canvas { filter: brightness(1.35) contrast(1.1); }` : ""}</style>
       <Map
         ref={mapRef}
         mapLib={import('maplibre-gl') as never}

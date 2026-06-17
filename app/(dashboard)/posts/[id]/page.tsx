@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { ArrowLeft, Heart, ThumbsDown, MessageCircle, Bookmark, Share2, BadgeDollarSign, Maximize2, MapPin } from "lucide-react"
+import { ArrowLeft, Heart, ThumbsDown, MessageCircle, Bookmark, Share2, BadgeDollarSign, Maximize2, MapPin, X } from "lucide-react"
 import { AppCard, TrustBadge, VehicleChip, AppEmptyState } from "@/app/components/ui"
 import { VEHICLE_REGISTRY, EMPTY_STATES } from "@/app/lib/config"
 import { CommentInput, CommentList } from "@/app/components/features/comments"
@@ -94,6 +94,7 @@ export default function PostDetailPage() {
   const [liked, setLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(0)
   const [bookmarked, setBookmarked] = useState(false)
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
 
   const postId = params.id as string
 
@@ -328,7 +329,7 @@ export default function PostDetailPage() {
       {post.images.length > 0 && (
         <div className="grid grid-cols-2 gap-1 radius-md overflow-hidden mb-5" style={post.images.length >= 3 ? { gridTemplateRows: "auto auto" } : {}}>
           {post.images.slice(0, 3).map((img, i) => (
-            <div key={i} className={`relative cursor-pointer overflow-hidden group ${i === 0 && post.images.length >= 3 ? "row-span-2" : ""}`}>
+            <div key={i} className={`relative cursor-pointer overflow-hidden group ${i === 0 && post.images.length >= 3 ? "row-span-2" : ""}`} onClick={() => setExpandedImage(img)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img} alt={`Route photo ${i + 1}`} className={`w-full object-cover ${i === 0 && post.images.length >= 3 ? "h-full min-h-[220px]" : post.images.length === 1 ? "h-[280px]" : "h-[110px]"}`} loading="lazy" />
               <div className="absolute inset-0 bg-black/4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
@@ -336,6 +337,14 @@ export default function PostDetailPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Image Lightbox */}
+      {expandedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm" onClick={() => setExpandedImage(null)}>
+          <button onClick={() => setExpandedImage(null)} className="absolute top-4 right-4 z-10 w-10 h-10 rounded-circle bg-black/50 text-white flex items-center justify-center border-none cursor-pointer" aria-label="Close"><X size={20} /></button>
+          <img src={expandedImage} alt="Expanded route photo" className="max-w-[90vw] max-h-[90vh] object-contain radius-sm" onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 

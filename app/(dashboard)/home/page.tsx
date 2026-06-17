@@ -171,7 +171,7 @@ function HomeContent() {
             {initials}
           </div>
           <div className="flex-1 text-sm text-text-muted px-3 py-2 radius-md bg-bg-elevated">
-            Share a route...
+            How far? Where we wan go?
           </div>
         </div>
 
