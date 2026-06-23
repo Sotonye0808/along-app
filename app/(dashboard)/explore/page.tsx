@@ -355,7 +355,7 @@ export default function ExplorePage() {
 
       {/* Desktop Left Panel (320px, glass) */}
       <div
-        className={`absolute top-[68px] left-0 bottom-0 w-[320px] z-12 flex flex-col bg-bg-card/85 backdrop-blur-[16px] saturate-[180%] border-r border-border/40 overflow-hidden transition-transform duration-moderate ${
+        className={`absolute top-[68px] left-0 bottom-0 w-[320px] z-12 hidden md:flex flex-col bg-bg-card/85 backdrop-blur-[16px] saturate-[180%] border-r border-border/40 overflow-hidden transition-transform duration-moderate ${
           panelCollapsed ? "-translate-x-full" : ""
         }`}
       >
@@ -489,7 +489,7 @@ export default function ExplorePage() {
       {/* Mobile Bottom Sheet */}
       <div
         ref={sheetRef}
-        className={`lg:hidden absolute left-0 right-0 bottom-0 z-15 bg-bg-card/90 backdrop-blur-[16px] saturate-[180%] border-t border-border/40 rounded-[24px_24px_0_0] overflow-y-auto transition-[height] duration-moderate ${dragging ? "" : "ease-[cubic-bezier(0.34,1.56,0.64,1)]"}`}
+        className={`md:hidden absolute left-0 right-0 bottom-0 z-15 bg-bg-card/90 backdrop-blur-[16px] saturate-[180%] border-t border-border/40 rounded-[24px_24px_0_0] overflow-y-auto transition-[height] duration-moderate ${dragging ? "" : "ease-[cubic-bezier(0.34,1.56,0.64,1)]"}`}
         style={{ height: bottomSheetHeight, maxHeight: "75vh" }}
       >
         <div
