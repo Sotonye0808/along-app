@@ -1,5 +1,10 @@
 # Development History
 
+> **Metadata**
+> - last-updated-by: bootstrap-project
+> - last-verified-against-code: 2026-07-01
+> - staleness-policy: historical entries do not go stale
+
 > **Overview:** Chronological log of completed development work for Along. Each sprint ends with a summary entry. Agents add entries after completing tasks. Useful for understanding what has been built and when decisions were made.
 
 ---
@@ -10,7 +15,7 @@
 ## [Date] — [Sprint or Session Title]
 
 **Summary:**
-[2–4 sentence overview of what was accomplished]
+[2-4 sentence overview of what was accomplished]
 
 **Completed:**
 - [task 1]
@@ -102,25 +107,22 @@ Comprehensive production audit fixing 14 issues: runtime errors (PostCard `.leng
 
 **Completed:**
 - Fixed JS Runtime Error: `post.tags.length` and `post.images.length` crash when undefined (PostCard.tsx)
-- Fixed OAuth Google buttons: added `onClick` → `/api/auth/google` (login + register pages)
-- Fixed double navbar: removed inline `<nav>` from landing page (public layout header already provides nav)
-- Fixed dead links: `/dashboard`→`/home` redirect, `/forgot-password` page created, `/share`→`/home`, `/settings`→`/profile`
-- Implemented dark mode theme toggle: ThemeProvider (localStorage + prefers-color-scheme), ThemeToggle (floating button)
+- Fixed OAuth Google buttons: added `onClick` -> `/api/auth/google` (login + register pages)
+- Fixed double navbar: removed inline `<nav>` from landing page
+- Fixed dead links: `/dashboard`->`/home` redirect, `/forgot-password` page created
+- Implemented dark mode theme toggle: ThemeProvider + ThemeToggle
 - Added "Continue as Guest" links to landing page, login, and register pages
-- Updated logo branding: LOGO_CONFIG now references actual `logo.svg`, `logo-icon.svg`; AppLogo supports `<Image>` rendering
-- Replaced inline SVGs in auth layout and AdminShell with AppLogo component
-- Created Sentry `global-error.tsx` with error boundary
-- Added `Sentry.captureException()` and specific error type detection to auth API routes
-- Wired full OG image, Twitter card, and apple-touch-icon in root layout metadata
-- Verified all push notification endpoints (4 routes) and instrumentation.ts
+- Updated logo branding with actual brand assets
+- Created Sentry `global-error.tsx`
+- Added `Sentry.captureException()` to auth API routes
+- Wired full OG image, Twitter card, and apple-touch-icon
 
 **Key Changes:**
-- New architecture: ThemeProvider + ThemeToggle adds dark mode toggle capability to entire app
-- Brand consistency: All logo references now use centralized AppLogo component with actual brand assets
-- Error resilience: PostCard no longer crashes on missing tags/images; auth APIs have specific error messages + Sentry logging
+- New architecture: ThemeProvider + ThemeToggle adds dark mode toggle
+- Brand consistency: All logo references now use AppLogo with actual brand assets
 
 **Next Sprint Focus:**
-Implement remaining unimplemented features: auth middleware, like/dislike system, full search, map integration, leaderboards, integration tests, component tests, Lighthouse audit.
+Implement remaining features: auth middleware, like/dislike system, full search, map integration, leaderboards, tests, Lighthouse audit.
 
 ---
 
@@ -130,12 +132,36 @@ Implement remaining unimplemented features: auth middleware, like/dislike system
 Added responsive dashboard navigation (mobile bottom tab bar + desktop collapsible sidebar) matching the design system. Fixed all broken Cloudinary image URLs in seed data by replacing them with valid Unsplash photo URLs. Fixed Prisma `accelerateUrl` TypeScript type error. All quality gates pass.
 
 **Completed:**
-- Created `DashboardNav` component (mobile bottom tabs + desktop sidebar) with auth-aware nav items, guest sign-in link, user section
-- Updated dashboard layout to integrate `DashboardNav` with responsive content area
+- Created `DashboardNav` component (mobile bottom tabs + desktop sidebar)
+- Updated dashboard layout to integrate DashboardNav
 - Replaced 16 broken Cloudinary seed image URLs with valid Unsplash URLs
-- Fixed Prisma `accelerateUrl` type error (TS2345)
+- Fixed Prisma accelerateUrl type error (TS2345)
 
 **Key Changes:**
-- Dashboard layout now has proper navigation per the design system: bottom tabs on mobile, sidebar on desktop
-- Seed data images no longer return 404 (Cloudinary URLs replaced with Unsplash)
+- Dashboard layout now has proper navigation per the design system
+- Seed data images no longer return 404
 - Prisma client construction now has safe fallback for missing env vars
+
+---
+
+## 2026-07-01 — AI System v1 to v2 Migration
+
+**Summary:**
+Upgraded the `.ai-system/` from v1 to v2 per MIGRATION.md. All project-specific content migrated: system architecture, project context, design system, repair system (with status fields added), planning files (with complexity tags), repo map and dependency graph (marked auto-regenerable), memory files (with supersedes links), session log (all v1 sessions appended), and dev history. Entry point changed from `agents/general-instructions.md` to `protocols/entry-protocol.md`. README updated accordingly.
+
+**Completed:**
+- `.ai-context.md` rewritten to v2 template with actual project data
+- Root content files (system-architecture, project-context, design-system, repair-system) migrated with metadata headers
+- Planning files migrated with complexity tags and updated build stats (65 pages)
+- Index files marked as auto-regenerable with current repo structure
+- Memory files updated with supersedes/superseded-by fields
+- Session log and dev history preserved and extended
+- Testing files updated with 91-test status
+- README references updated to v2 entry protocol
+- All freshness metadata set to 2026-07-01
+
+**Key Changes:**
+- `.ai-system/` now uses v2 structure with protocols/, agents/ (role-based), commands/ (12 commands), standards/, checkpoints/
+- Zero vendor references — tool-agnostic
+- Mandatory quality gate (9 criteria) and entry protocol
+- Interruption recovery via checkpoints/in-progress.md + resume-session.md

@@ -1,22 +1,23 @@
 # Repair System — Error Knowledge Base
 
+> **Metadata**
+> - last-updated-by: bootstrap-project
+> - last-verified-against-code: 2026-07-01
+> - staleness-policy: individual entries may be stale if the code has changed around them — verify fix still applies before reusing
+
 > **Overview:** A living knowledge base of errors encountered during development, their root causes, and how they were fixed. Agents should consult this before diagnosing new errors. Every fixed bug should be logged here to prevent recurrence. This file is pre-populated with known error patterns for the Along tech stack (Next.js 15 + React 19 + Ant Design 5 + Tailwind 4).
 
 ---
 
-## How to Use This File
+## How to Use
 
-- **Before debugging:** Search this file for patterns matching your current error
-- **After fixing a bug:** Add an entry using the template at the bottom
-- **Agents:** Reference this during the fix-build and self-heal cycles
+- **Before debugging:** Search this file for patterns matching the current error
+- **After fixing a bug:** Add an entry using the template below
+- **If a fix no longer applies:** Mark the entry as `[SUPERSEDED]` and link to the new entry
 
 ---
 
 ## Error Log
-
-> **Section summary:** Each error entry includes the symptom, cause, fix, and prevention strategy. Entries are added chronologically.
-
----
 
 ### [TEMPLATE — copy this for each new error]
 
@@ -39,6 +40,7 @@
 [List of files that were changed]
 
 **Date:** [YYYY-MM-DD]
+**Status:** [Active / Superseded]
 ```
 
 ---
@@ -168,6 +170,7 @@ Always default array fields from API responses: `data.field ?? []`. Never assume
 - `app/lib/streams/feedStream.ts`
 
 **Date:** 2026-06-09
+**Status:** Active
 
 ---
 
@@ -189,6 +192,7 @@ Public-facing GET endpoints should always have a guest fallback. Auth should gat
 - `app/api/posts/feed/route.ts`
 
 **Date:** 2026-06-09
+**Status:** Active
 
 ---
 
@@ -210,6 +214,7 @@ Always use optional chaining on nested data from API responses. Create local con
 - `app/components/features/posts/PostCard.tsx`
 
 **Date:** 2026-06-09
+**Status:** Active
 
 ---
 
@@ -233,6 +238,7 @@ Always install `@tailwindcss/typography` when using `prose` classes in Tailwind 
 - `package.json`
 
 **Date:** 2026-06-09
+**Status:** Active
 
 ---
 
@@ -261,6 +267,7 @@ Never pass a `prisma+postgres://` Accelerate URL to `datasourceUrl`. Use `accele
 - `app/api/posts/feed/route.ts`
 
 **Date:** 2026-06-10
+**Status:** Active
 
 ---
 
@@ -291,3 +298,4 @@ Always access optional array fields with `?? []` fallback or optional chaining. 
 - `app/components/features/posts/PostCard.tsx`
 
 **Date:** 2026-06-09
+**Status:** Superseded — same pattern covered by "Feed Stream Crash on API Error Response" entry

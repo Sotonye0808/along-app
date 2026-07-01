@@ -1,6 +1,11 @@
 # Repository Map
 
-> **Overview:** Complete folder structure of the Along monorepo with purpose descriptions for each directory. Agents read this first when navigating the codebase.
+> **Metadata**
+> - last-updated-by: bootstrap-project
+> - last-verified-against-code: 2026-07-01
+> - staleness-policy: auto-regenerable — can be derived from `Get-ChildItem -Recurse` or `tree` command. Manual content only where intent cannot be derived from structure.
+
+> **Overview:** Complete folder structure of the Along monorepo with purpose descriptions for each directory. This file is **auto-regenerable** — use tool-based discovery (filesystem MCP, git ls-tree) for ground truth, and treat manual entries here as supplementary context, not primary navigation.
 
 ---
 
@@ -10,8 +15,8 @@
 along-app/
 │
 ├── .ai-system/              → AI development orchestration system
-│   ├── agents/              → Agent instruction files
-│   ├── checkpoints/         → Session log and checkpoints
+│   ├── agents/              → Role-based agent instruction files
+│   ├── checkpoints/         → Session log and in-progress marker
 │   ├── commands/            → Executable AI commands
 │   ├── designs/             → HTML design files (17 pages)
 │   ├── docs/                → PRD, design brief, prompts, roadmap
@@ -19,6 +24,8 @@ along-app/
 │   ├── memory/              → Decisions, lessons, architecture history
 │   ├── operations/          → Operations guide
 │   ├── planning/            → Project plan and task queue
+│   ├── protocols/           → Entry, tiering, quality gate, escalation, verification
+│   ├── standards/           → Engineering principles
 │   ├── summaries/           → Development history
 │   └── testing/             → Test plan and results
 │
@@ -99,7 +106,7 @@ along-app/
 
 | Directory | Purpose | Key Files |
 |-----------|---------|-----------|
-| `.ai-system/` | AI development orchestration — agent instructions, plans, designs | `agents/general-instructions.md`, `docs/ROADMAP.md`, `designs/*.html` |
+| `.ai-system/` | AI development orchestration — agent instructions, plans, protocols, designs | `protocols/entry-protocol.md`, `planning/task-queue.md`, `designs/*.html` |
 | `.github/` | GitHub CI and project documentation | `workflows/ci.yml`, `plan.md`, `project-context.md` |
 | `prisma/` | Database schema, migrations, and seed data | `schema.prisma` (14 models), `seed.ts`, `migrations/` |
 | `public/` | Static assets served at root path | `sw.js` (service worker), `manifest.json`, `offline.html` |
@@ -119,4 +126,4 @@ along-app/
 | Server instrumentation | `instrumentation.ts` |
 | Environment validation | `.env` / `.env.example` |
 | CI pipeline | `.github/workflows/ci.yml` |
-| AI agent instructions | `.ai-system/agents/general-instructions.md` |
+| AI agent instructions | `.ai-system/protocols/entry-protocol.md` |

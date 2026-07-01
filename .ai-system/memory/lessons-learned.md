@@ -1,6 +1,11 @@
 # Lessons Learned
 
-> **Overview:** Practical knowledge accumulated during Along development — things that worked well, things that didn't, and patterns worth repeating. Different from repair-system.md (which tracks errors); this file tracks development process insights and architectural wisdom.
+> **Metadata**
+> - last-updated-by: bootstrap-project
+> - last-verified-against-code: 2026-07-01
+> - staleness-policy: each entry has its own staleness — check supersedes links
+
+> **Overview:** Practical knowledge accumulated during Along development — things that worked well, things that didn't, and patterns worth repeating. Different from repair-system.md (which tracks errors); this file tracks development process insights and architectural wisdom. Uses supersedes/superseded-by links for evolving practices.
 
 ---
 
@@ -17,6 +22,9 @@
 
 **Apply When:**
 [When future agents/developers should use this knowledge]
+
+**Supersedes:** [link to any prior lesson this replaces, or None]
+**Superseded by:** [link to any newer lesson that replaces this, or None]
 ```
 
 ---
@@ -34,6 +42,9 @@ Hooks should live in a single location. The `app/hooks/` directory is the correc
 **Apply When:**
 Creating new hooks in the future — put client-only hooks in `app/hooks/`, shared hooks in `app/lib/hooks/`, and document the distinction.
 
+**Supersedes:** None
+**Superseded by:** None
+
 ---
 
 ## Config-Driven Architecture Reduces Code Duplication
@@ -46,6 +57,9 @@ This approach makes it trivial to add new options (e.g., a new vehicle type requ
 
 **Apply When:**
 Any time a new domain module is created — define a config registry first, then build the UI/service layer on top.
+
+**Supersedes:** None
+**Superseded by:** None
 
 ---
 
@@ -60,6 +74,9 @@ Always ensure `navigator.serviceWorker.register()` completes before calling `pus
 **Apply When:**
 Any feature that depends on the service worker being active (push notifications, background sync, cache management).
 
+**Supersedes:** None
+**Superseded by:** None
+
 ---
 
 ## Offline Queue + OnlineStatusProvider Pattern for Resilience
@@ -72,3 +89,6 @@ This simple pattern provides meaningful offline resilience without a complex syn
 
 **Apply When:**
 Any feature that needs to work offline and replay mutations when connectivity returns — use `offlineQueue.enqueue()` for writes and trust `OnlineStatusProvider` to auto-flush.
+
+**Supersedes:** None
+**Superseded by:** None

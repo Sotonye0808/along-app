@@ -1,5 +1,10 @@
 # Project Plan
 
+> **Metadata**
+> - last-updated-by: bootstrap-project
+> - last-verified-against-code: 2026-07-01
+> - staleness-policy: re-verify if project scope or phase changes
+
 > **Overview:** High-level feature checklist for Along — a social travel-intelligence platform for West African urban commuters. Phases follow the Roadmap (docs/ROADMAP.md). Agents update checkboxes as work is completed.
 
 ---
@@ -21,7 +26,7 @@
 
 ---
 
-## Phase 1 — Config Registry & Universal Components ✅
+## Phase 1 — Config Registry & Universal Components
 
 > **Section summary:** Foundation layer that all other code depends on. Generate first.
 

@@ -1,5 +1,10 @@
 # Project Context
 
+> **Metadata**
+> - last-updated-by: bootstrap-project
+> - last-verified-against-code: 2026-07-01
+> - staleness-policy: re-verify if >10 sessions old or after major scope changes
+
 > **Overview:** Along is a social travel-intelligence platform built for urban commuters in Nigeria and West Africa. It solves the problem of unreliable public transit information by letting users share, verify, and discover transport routes in real time — combining the social dynamics of Twitter with the utility of Google Maps. The platform targets the 80%+ of urban commuters who rely on informal transit (buses, danfos, keke, okada) with no reliable real-time information.
 
 ---
@@ -36,11 +41,11 @@ Along empowers urban commuters to share and verify transport route information i
 
 ## Current Project Phase
 
-Phase: Pre-rebuild (Infrastructure Complete, Application Pending)
+Phase: Active Development (Application Complete)
 
-The project has completed infrastructure setup (Prisma schema with 14 models, Sentry, Redis, PWA, CI pipeline, design system, all configurations) and an extensive design system (17 HTML design files). The previous application codebase (Phases 1-7 built against a mock backend) was removed for a clean rebuild with database integration. The next step is to generate the complete `app/` directory via AI-driven prompts.
+The full application codebase has been generated through Phases 0-6: 25 config registries, 34+ universal UI components (App* wrappers), 6 context providers, 12 OOP services, 40 API route files, and complete page structure for auth, dashboard, admin, and public sections. Push notification system with QStash background workers, blog with MDX content, FAQ page, RxJS reactive feed, i18n (English + Pidgin), dark mode, PWA offline support, and 91 Jest tests across 9 suites are all in place. Build produces 65 static pages with zero TypeScript and zero lint errors.
 
-Active sprint focus: Generate the application codebase (`app/` directory) starting with the config registry, followed by the universal component library, API services, and page components.
+Active sprint focus: Production readiness — remaining integration tests, component tests, and backlog items (marketplace integration, events integration).
 
 ---
 

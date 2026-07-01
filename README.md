@@ -171,7 +171,7 @@ Comprehensive documentation is available:
 - **[Project Context](.ai-system/docs/PROJECT_CONTEXT.md)** - Product and architecture context
 - **[Engineering Roadmap](.ai-system/docs/Along_PRD_Engineering_Roadmap_v2.md)** - PRD and engineering plan
 - **[Design Brief](.ai-system/docs/Along_Stitch_Design_Brief.md)** - Design system source of truth
-- **[Plan v2](.ai-system/planning/along_copilot_plan_v2.md)** - Execution plan and standards
+- **[Entry Protocol](.ai-system/protocols/entry-protocol.md)** - AI agent session start procedure
 - **[Repo Map](.ai-system/index/repo-map.md)** - Codebase navigation map
 - **[PWA Features](app/components/features/pwa/README.md)** - Progressive Web App guide
 

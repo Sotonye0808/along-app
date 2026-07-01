@@ -1,5 +1,10 @@
 # System Architecture
 
+> **Metadata**
+> - last-updated-by: bootstrap-project
+> - last-verified-against-code: 2026-07-01
+> - staleness-policy: re-verify before trusting if any architecture-affecting commits have been made since last-verified-against-code
+
 > **Overview:** Along is a single Next.js 15 application serving both frontend and API routes. The architecture follows a layered pattern: Next.js App Router (pages + layouts) on top of API routes, which delegate to an OOP service layer using the repository pattern, backed by PostgreSQL via Prisma and Redis for caching. The frontend uses a universal component library (App* wrappers around Ant Design) with context-driven state management. The application is PWA-enabled with offline support and push notifications.
 
 ---
@@ -142,6 +147,8 @@ Write operation → API route
 | RATE_LIMIT_MAX | Max requests per window | `app/lib/config/rateLimits` | 100 |
 | CACHE_TTL | Default Redis TTL (s) | `app/lib/config/cache` | 300 |
 
+All config points listed here should follow the fallback discipline from `standards/engineering-principles.md` §1 and §3 — every config-driven value must have a documented, safe fallback so the system degrades gracefully if the value is missing or malformed.
+
 ---
 
 ## Tech Stack
@@ -185,10 +192,4 @@ Write operation → API route
 
 ## Architecture History
 
-| Date | Change | Reason |
-|------|--------|--------|
-| 2026-06-02 | Initial architecture documentation | Project bootstrap — infrastructure in place, application code pending generation |
-| 2026-06-03 | OnlineStatusProvider + OfflineIndicator | PWA offline support with auto-flush on reconnect |
-| 2026-06-03 | QStash worker endpoints (3 workers) | Async jobs via Upstash QStash with signature verification |
-| 2026-06-03 | Jest test suite (91 tests, 9 suites) | Unit + component tests for services, configs, utils, UI components |
-| 2026-06-03 | Application code generation complete — all app/ modules | Full Next.js app with 6 providers, 25 config registries, 11 services, 34 UI components, push notification system, QStash workers, blog with MDX, FAQ page |
+See `memory/architecture-history.md` for full chronology.
